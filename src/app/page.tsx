@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { WelcomeCard, FeaturedCard, StatsCard, ListingCard } from "@/components/cards";
+import { WelcomeCard, FeaturedCard, ListingCard } from "@/components/cards";
 import { Pagination } from "@/components/Pagination";
 import { SortDropdown } from "@/components/SortDropdown";
 import { AdBanner } from "@/components/AdBanner";
@@ -124,14 +124,13 @@ export default function Home() {
 
         {/* Results Grid - 4 columns, 210px each, 20px gap */}
         <div className="grid grid-cols-4 gap-5 mb-8" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
-          {/* First Row: Welcome + Featured + Stats + First Listing */}
+          {/* First Row: Welcome + Featured + Listing Cards */}
           <WelcomeCard />
           <FeaturedCard
             image="/images/featured-bg.png"
             title="FEATURED ARTICLE TITLE"
             address="Jl. Imam Bonjol No.198/249, Pemecutan Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80119"
           />
-          <StatsCard />
 
           {/* Listing Cards */}
           {mockListings.map((listing) => (
