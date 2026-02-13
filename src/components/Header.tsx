@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { AuthModal } from "./AuthModal";
 
 const mainCategories = [
   { id: "construction", label: "01. Construction" },
@@ -120,6 +121,8 @@ export function Header() {
   const [projectSize, setProjectSize] = useState("");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("register");
 
   const clearFilters = () => {
     setKeywords("");
@@ -163,10 +166,16 @@ export function Header() {
             <button className="text-[#f8f8f8] hover:opacity-80 transition-opacity">
               <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
             </button>
-            <button className="text-[#f8f8f8] hover:opacity-80 transition-opacity">
+            <button
+              onClick={() => { setAuthMode("login"); setAuthModalOpen(true); }}
+              className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
+            >
               <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
             </button>
-            <button className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors">
+            <button
+              onClick={() => { setAuthMode("register"); setAuthModalOpen(true); }}
+              className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors"
+            >
               List your business
             </button>
           </div>
@@ -256,6 +265,13 @@ export function Header() {
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode={authMode}
+      />
     </header>
   );
 }
