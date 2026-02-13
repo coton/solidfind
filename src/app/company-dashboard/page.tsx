@@ -86,6 +86,8 @@ function ReviewCard({ userName, rating, content, date }: {
 }
 
 export default function CompanyDashboardPage() {
+  const [showAdModal, setShowAdModal] = useState(false);
+  const [showProModal, setShowProModal] = useState(false);
   const data = mockCompanyData;
   const maxViews = Math.max(...data.monthlyViews.map(m => m.views));
 
@@ -117,12 +119,18 @@ export default function CompanyDashboardPage() {
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
-          <button className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors">
+          <button
+            onClick={() => setShowAdModal(true)}
+            className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"
+          >
             Get AD space
           </button>
-          <button className="h-10 px-6 rounded-full bg-[#333] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#444] transition-colors">
+          <Link
+            href="/company-dashboard/edit"
+            className="h-10 px-6 rounded-full bg-[#333] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#444] transition-colors flex items-center"
+          >
             Edit profile
-          </button>
+          </Link>
         </div>
 
         {/* Stats Grid */}
@@ -213,7 +221,10 @@ export default function CompanyDashboardPage() {
                 </div>
               ))}
             </div>
-            <button className="mt-4 w-full h-8 rounded-full bg-[#333] text-white text-[10px] font-medium tracking-[0.2px] hover:bg-[#444] transition-colors">
+            <button
+              onClick={() => setShowProModal(true)}
+              className="mt-4 w-full h-8 rounded-full bg-[#333] text-white text-[10px] font-medium tracking-[0.2px] hover:bg-[#444] transition-colors"
+            >
               See all
             </button>
           </div>
@@ -275,6 +286,134 @@ export default function CompanyDashboardPage() {
       </main>
 
       <Footer />
+
+      {/* AD Space Modal */}
+      {showAdModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowAdModal(false)} />
+          <div className="relative bg-white w-[500px] rounded-[6px] p-8">
+            <button
+              onClick={() => setShowAdModal(false)}
+              className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+
+            <h3 className="text-[18px] font-bold text-[#333] mb-2">AD SPACE</h3>
+            <p className="text-[11px] text-[#333]/70 mb-6">
+              Promote your business with premium ad placement
+              <br />
+              Promosikan bisnis Anda dengan penempatan iklan premium
+            </p>
+
+            <div className="space-y-4 mb-6">
+              <div className="p-4 border border-[#e4e4e4] rounded-[6px]">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-[14px] font-semibold text-[#333]">Banner Ad</h4>
+                  <span className="text-[14px] font-bold text-[#f14110]">IDR 500K/month</span>
+                </div>
+                <p className="text-[10px] text-[#333]/70">
+                  Display your banner on the homepage and search results
+                </p>
+              </div>
+
+              <div className="p-4 border border-[#e4e4e4] rounded-[6px]">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-[14px] font-semibold text-[#333]">Featured Listing</h4>
+                  <span className="text-[14px] font-bold text-[#f14110]">IDR 300K/month</span>
+                </div>
+                <p className="text-[10px] text-[#333]/70">
+                  Get highlighted in search results with featured badge
+                </p>
+              </div>
+
+              <div className="p-4 border border-[#e4e4e4] rounded-[6px]">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-[14px] font-semibold text-[#333]">Sponsored Post</h4>
+                  <span className="text-[14px] font-bold text-[#f14110]">IDR 200K/post</span>
+                </div>
+                <p className="text-[10px] text-[#333]/70">
+                  Share your projects on our social media channels
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowAdModal(false)}
+              className="w-full h-10 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#e03000] transition-colors"
+            >
+              Contact us for booking
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* PRO Features Modal */}
+      {showProModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowProModal(false)} />
+          <div className="relative bg-white w-[500px] rounded-[6px] p-8">
+            <button
+              onClick={() => setShowProModal(false)}
+              className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+
+            <h3 className="text-[18px] font-bold text-[#333] mb-4">PRO Account Features</h3>
+            <p className="text-[11px] text-[#333]/70 mb-6">
+              Services included with PRO account / Layanan dengan akun PRO
+            </p>
+
+            <div className="space-y-4">
+              {proFeatures.map((feature, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 bg-[#f8f8f8] rounded-[6px]">
+                  <div className="w-6 h-6 flex items-center justify-center text-[#f14110]">
+                    {feature.icon === "star" && <Star className="w-5 h-5" />}
+                    {feature.icon === "ai" && (
+                      <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
+                      </svg>
+                    )}
+                    {feature.icon === "stats" && (
+                      <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                        <rect x="1" y="8" width="3" height="7"/>
+                        <rect x="6" y="4" width="3" height="11"/>
+                        <rect x="11" y="1" width="3" height="14"/>
+                      </svg>
+                    )}
+                    {feature.icon === "photos" && (
+                      <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                        <rect x="1" y="3" width="14" height="10" rx="1"/>
+                      </svg>
+                    )}
+                    {feature.icon === "ad" && (
+                      <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="1" y="1" width="14" height="14" rx="1"/>
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-[12px] font-medium text-[#333]">{feature.title}</p>
+                    <p className="text-[10px] text-[#333]/50">{feature.subtitle}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowProModal(false)}
+              className="mt-6 w-full h-10 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#e03000] transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
