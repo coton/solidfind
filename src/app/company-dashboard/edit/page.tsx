@@ -496,9 +496,9 @@ export default function EditProfilePage() {
         {/* Bottom Save */}
         <div className="flex items-center justify-center gap-4 py-8 border-t border-[#e4e4e4]">
           <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
-            *Select 'LOCATION' for 'RENOVATION' before submitting /
+            *Select &apos;LOCATION&apos; for &apos;RENOVATION&apos; before submitting /
             <br />
-            *Pilih 'LOKASI' untuk 'RENOVASI' sebelum mengirimkan
+            *Pilih &apos;LOKASI&apos; untuk &apos;RENOVASI&apos; sebelum mengirimkan
           </p>
           <button
             onClick={handleSave}

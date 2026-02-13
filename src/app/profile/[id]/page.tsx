@@ -52,7 +52,7 @@ These diverse experiences shaped his design philosophy, which remains grounded i
   isPro: true,
 };
 
-function ReviewCard({ name, rating, text, date }: { name: string; rating: number; text: string; date: string }) {
+function ReviewCard({ name, text, date }: { name: string; rating?: number; text: string; date: string }) {
   return (
     <div className="w-[210px]">
       <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-2">{name}</p>

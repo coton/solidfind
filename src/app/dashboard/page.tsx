@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/cards";
-import { ArrowLeft } from "lucide-react";
 
 // Mock saved listings data
 const mockSavedConstruction = [

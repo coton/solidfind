@@ -130,22 +130,34 @@ export function Header({ isLoggedIn: isLoggedInProp, userType: userTypeProp }: H
   const [location, setLocation] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("register");
-  const [isLoggedIn, setIsLoggedIn] = useState(isLoggedInProp || false);
-  const [userType, setUserType] = useState<"company" | "individual" | null>(userTypeProp || null);
-
-  // Check localStorage for auth state on mount
-  useEffect(() => {
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    if (isLoggedInProp !== undefined) return isLoggedInProp;
     if (typeof window !== "undefined") {
-      const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-      const storedUserType = localStorage.getItem("userType") as "company" | "individual" | null;
-      if (!isLoggedInProp) {
-        setIsLoggedIn(loggedIn);
-      }
-      if (!userTypeProp && storedUserType) {
-        setUserType(storedUserType);
-      }
+      return localStorage.getItem("isLoggedIn") === "true";
     }
-  }, [isLoggedInProp, userTypeProp]);
+    return false;
+  });
+  const [userType, setUserType] = useState<"company" | "individual" | null>(() => {
+    if (userTypeProp !== undefined) return userTypeProp;
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("userType") as "company" | "individual" | null;
+    }
+    return null;
+  });
+
+  // Sync state with localStorage on client-side hydration
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const storedUserType = localStorage.getItem("userType") as "company" | "individual" | null;
+    if (isLoggedInProp === undefined && loggedIn !== isLoggedIn) {
+      setIsLoggedIn(loggedIn);
+    }
+    if (userTypeProp === undefined && storedUserType !== userType) {
+      setUserType(storedUserType);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
