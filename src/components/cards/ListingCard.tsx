@@ -21,8 +21,8 @@ export function ListingCard({
   isSaved = false,
 }: ListingCardProps) {
   return (
-    <Link href={`/profile/${id}`}>
-      <div className={`relative w-[210px] h-[230px] bg-[#f8f8f8] rounded-[6px] overflow-hidden ${isFeatured ? 'ring-2 ring-[#f14110]' : ''}`}>
+    <Link href={`/profile/${id}`} className="block">
+      <div className={`relative w-[210px] h-[230px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] ${isFeatured ? 'ring-2 ring-[#f14110]' : ''}`}>
         {/* Top Row */}
         <div className="absolute top-[10px] left-[10px] right-[10px] flex items-start justify-between">
           {/* Left: Logo */}
@@ -44,7 +44,11 @@ export function ListingCard({
             </div>
             <button
               className="hover:opacity-70 transition-opacity"
-              onClick={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Toggle save logic here
+              }}
             >
               <Image
                 src="/images/icon-bookmark.svg"
