@@ -287,11 +287,11 @@ export default function CompanyDashboardPage() {
 
       <Footer />
 
-      {/* AD Space Modal */}
+      {/* AD Space Modal - POPUP-04-BuyAd */}
       {showAdModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowAdModal(false)} />
-          <div className="relative bg-white w-[500px] rounded-[6px] p-8">
+          <div className="relative bg-white w-[500px] rounded-[6px] p-10">
             <button
               onClick={() => setShowAdModal(false)}
               className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"
@@ -301,60 +301,85 @@ export default function CompanyDashboardPage() {
               </svg>
             </button>
 
-            <h3 className="text-[18px] font-bold text-[#333] mb-2">AD SPACE</h3>
-            <p className="text-[11px] text-[#333]/70 mb-6">
-              Promote your business with premium ad placement
+            <h3 className="text-[28px] font-bold text-[#333] text-center mb-2">AD SPACE</h3>
+            <p className="text-[12px] text-[#333]/50 text-center mb-8">
+              Make sure your brand stands out!
               <br />
-              Promosikan bisnis Anda dengan penempatan iklan premium
+              Pastikan merek Anda menonjol!
             </p>
 
-            <div className="space-y-4 mb-6">
-              <div className="p-4 border border-[#e4e4e4] rounded-[6px]">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-[14px] font-semibold text-[#333]">Banner Ad</h4>
-                  <span className="text-[14px] font-bold text-[#f14110]">IDR 500K/month</span>
+            <div className="space-y-5 mb-8">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full border-2 border-[#f14110] flex items-center justify-center flex-shrink-0 mt-1">
+                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                    <path d="M1 5L4.5 8.5L11 1" stroke="#f14110" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
-                <p className="text-[10px] text-[#333]/70">
-                  Display your banner on the homepage and search results
-                </p>
+                <div>
+                  <p className="text-[13px] font-semibold text-[#333]">Reach a highly targeted audience</p>
+                  <p className="text-[12px] text-[#333]/70">Jangkau audiens yang sangat tertarget</p>
+                </div>
               </div>
 
-              <div className="p-4 border border-[#e4e4e4] rounded-[6px]">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-[14px] font-semibold text-[#333]">Featured Listing</h4>
-                  <span className="text-[14px] font-bold text-[#f14110]">IDR 300K/month</span>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full border-2 border-[#f14110] flex items-center justify-center flex-shrink-0 mt-1">
+                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                    <path d="M1 5L4.5 8.5L11 1" stroke="#f14110" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
-                <p className="text-[10px] text-[#333]/70">
-                  Get highlighted in search results with featured badge
-                </p>
+                <div>
+                  <p className="text-[13px] font-semibold text-[#333]">Increased visibility at key decision moments</p>
+                  <p className="text-[12px] text-[#333]/70">Peningkatan visibilitas pada momen-momen penting pengambilan keputusan</p>
+                </div>
               </div>
 
-              <div className="p-4 border border-[#e4e4e4] rounded-[6px]">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-[14px] font-semibold text-[#333]">Sponsored Post</h4>
-                  <span className="text-[14px] font-bold text-[#f14110]">IDR 200K/post</span>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full border-2 border-[#f14110] flex items-center justify-center flex-shrink-0 mt-1">
+                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                    <path d="M1 5L4.5 8.5L11 1" stroke="#f14110" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
-                <p className="text-[10px] text-[#333]/70">
-                  Share your projects on our social media channels
-                </p>
+                <div>
+                  <p className="text-[13px] font-semibold text-[#333]">Simple and cost-effective exposure</p>
+                  <p className="text-[12px] text-[#333]/70">Paparan yang sederhana dan hemat biaya</p>
+                </div>
               </div>
             </div>
 
+            <p className="text-[11px] text-[#333]/70 text-center mb-6 leading-[18px]">
+              Your Ads will be visible throughout the website, in essential pages offering instant visibility across the entirety of Struct.id / Iklan Anda akan terlihat di seluruh situs web, di halaman-halaman penting yang menawarkan visibilitas instan di seluruh Struct.id.
+            </p>
+
+            <p className="text-[12px] text-[#f14110] text-center mb-4">
+              Contact us to know more about the pricing options.
+              <br />
+              Hubungi kami untuk mengetahui pilihan harga.
+            </p>
+
             <button
               onClick={() => setShowAdModal(false)}
-              className="w-full h-10 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#e03000] transition-colors"
+              className="mx-auto block h-10 px-10 rounded-full border-2 border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors"
             >
-              Contact us for booking
+              Get in touch
             </button>
           </div>
         </div>
       )}
 
-      {/* PRO Features Modal */}
+      {/* PRO Features Modal - POPUP-03-BuyPro */}
       {showProModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowProModal(false)} />
-          <div className="relative bg-white w-[500px] rounded-[6px] p-8">
+          <div className="relative bg-white w-[520px] rounded-[6px] p-10 overflow-hidden">
+            {/* Launch Discount Ribbon */}
+            <div className="absolute top-0 left-0 w-[150px] h-[150px] overflow-hidden">
+              <div
+                className="absolute top-[35px] left-[-35px] w-[180px] bg-[#f14110] text-white text-[10px] font-bold tracking-[0.2px] py-1 text-center transform -rotate-45"
+              >
+                LAUNCH DISCOUNT
+              </div>
+            </div>
+
             <button
               onClick={() => setShowProModal(false)}
               className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"
@@ -364,52 +389,99 @@ export default function CompanyDashboardPage() {
               </svg>
             </button>
 
-            <h3 className="text-[18px] font-bold text-[#333] mb-4">PRO Account Features</h3>
-            <p className="text-[11px] text-[#333]/70 mb-6">
-              Services included with PRO account / Layanan dengan akun PRO
+            <h3 className="text-[28px] font-bold text-[#333] text-center mb-2 mt-4">PRO ACCOUNT</h3>
+            <p className="text-[12px] text-[#333]/50 text-center mb-8">
+              Services included with PRO account:
+              <br />
+              Layanan dengan akun PRO:
             </p>
 
-            <div className="space-y-4">
-              {proFeatures.map((feature, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-[#f8f8f8] rounded-[6px]">
-                  <div className="w-6 h-6 flex items-center justify-center text-[#f14110]">
-                    {feature.icon === "star" && <Star className="w-5 h-5" />}
-                    {feature.icon === "ai" && (
-                      <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
-                      </svg>
-                    )}
-                    {feature.icon === "stats" && (
-                      <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                        <rect x="1" y="8" width="3" height="7"/>
-                        <rect x="6" y="4" width="3" height="11"/>
-                        <rect x="11" y="1" width="3" height="14"/>
-                      </svg>
-                    )}
-                    {feature.icon === "photos" && (
-                      <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                        <rect x="1" y="3" width="14" height="10" rx="1"/>
-                      </svg>
-                    )}
-                    {feature.icon === "ad" && (
-                      <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <rect x="1" y="1" width="14" height="14" rx="1"/>
-                      </svg>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-[12px] font-medium text-[#333]">{feature.title}</p>
-                    <p className="text-[10px] text-[#333]/50">{feature.subtitle}</p>
-                  </div>
+            {/* Features Grid */}
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-8">
+              <div className="flex items-center gap-3">
+                <Star className="w-5 h-5 text-[#f14110]" />
+                <div>
+                  <p className="text-[12px] font-semibold text-[#333]">Top search ranking</p>
+                  <p className="text-[10px] text-[#333]/50">Peringkat pencarian teratas</p>
                 </div>
-              ))}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="#f14110">
+                  <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
+                </svg>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#333]">AI search optimisation</p>
+                  <p className="text-[10px] text-[#333]/50">Optimasi pencarian AI</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="#f14110">
+                  <rect x="1" y="8" width="3" height="7"/>
+                  <rect x="6" y="4" width="3" height="11"/>
+                  <rect x="11" y="1" width="3" height="14"/>
+                </svg>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#333]">Statistics</p>
+                  <p className="text-[10px] text-[#333]/50">Statistik</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="#f14110">
+                  <rect x="1" y="3" width="14" height="10" rx="1"/>
+                </svg>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#333]">12 project pictures</p>
+                  <p className="text-[10px] text-[#333]/50">12 gambar proyek</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 col-span-2">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#f14110" strokeWidth="1.5">
+                  <rect x="1" y="1" width="14" height="14" rx="1"/>
+                  <path d="M5 10L8 6L11 10" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#333]">Possibility to buy ad space</p>
+                  <p className="text-[10px] text-[#333]/50">Boleh untuk membeli iklan</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pricing Toggle */}
+            <div className="flex items-center justify-center gap-8 mb-6">
+              <div className="flex items-center gap-3">
+                <div>
+                  <p className="text-[28px] font-bold text-[#333]">650.000<span className="text-[14px]">rp</span></p>
+                  <p className="text-[11px] text-[#333]/50">Month / Bulan</p>
+                </div>
+                <div className="w-10 h-5 rounded-full bg-gradient-to-l from-[#f14110] to-[#e9a28e]">
+                  <div className="w-4 h-4 bg-white rounded-full mt-0.5 ml-5" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div>
+                  <p className="text-[28px] font-bold text-[#333]/30">7<span className="text-[14px]">jt</span></p>
+                  <p className="text-[11px] text-[#333]/30">Year / Tahun</p>
+                </div>
+                <div className="w-10 h-5 rounded-full bg-[#333]/20">
+                  <div className="w-4 h-4 bg-white rounded-full mt-0.5 ml-0.5" />
+                </div>
+              </div>
             </div>
 
             <button
               onClick={() => setShowProModal(false)}
-              className="mt-6 w-full h-10 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#e03000] transition-colors"
+              className="mx-auto flex items-center gap-2 h-10 px-10 rounded-full border-2 border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors"
             >
-              Got it
+              BUY NOW
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"/>
+                <path d="M9 4H7v5h5V7H9V4z"/>
+              </svg>
             </button>
           </div>
         </div>
