@@ -1,0 +1,261 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+
+const mainCategories = [
+  { id: "construction", label: "01. Construction" },
+  { id: "renovation", label: "02. Renovation" },
+  { id: "architecture", label: "03. Architecture" },
+  { id: "interior", label: "04. Interior" },
+  { id: "real-estate", label: "05. Real Estate" },
+];
+
+const projectSizeOptions = [
+  { id: "any", label: "ANY SIZE" },
+  { id: "solo", label: "SOLO / COUPLE (1-2)" },
+  { id: "family", label: "FAMILY / CO-HOSTING (3-6)" },
+  { id: "shared", label: "SHARED / COMMUNITY (7+)" },
+];
+
+const constructionCategories = [
+  { id: "all", label: "ALL TYPES" },
+  { id: "residential", label: "RESIDENTIAL" },
+  { id: "commercial", label: "COMMERCIAL" },
+  { id: "hospitality", label: "HOSPITALITY" },
+];
+
+const renovationCategories = [
+  { id: "all", label: "EVERY RENOVATIONS" },
+  { id: "complete", label: "COMPLETE HOUSE" },
+  { id: "living", label: "LIVING ROOM" },
+  { id: "kitchen", label: "KITCHEN" },
+  { id: "bathroom", label: "BATHROOM" },
+  { id: "bedroom", label: "BEDROOM" },
+  { id: "electricity", label: "ELECTRICITY" },
+  { id: "plumbing", label: "PLUMBING" },
+  { id: "roofing", label: "ROOFING" },
+  { id: "waterproofing", label: "WATERPROOFING" },
+  { id: "pool", label: "POOL" },
+  { id: "mold", label: "MOLD TREATMENT" },
+  { id: "tiling", label: "TILING" },
+  { id: "painting", label: "PAINTING" },
+  { id: "fencing", label: "FENCING" },
+];
+
+const locationOptions = [
+  { id: "bali", label: "BALI" },
+  { id: "badung", label: "BADUNG" },
+  { id: "denpasar", label: "DENPASAR" },
+  { id: "tabanan", label: "TABANAN" },
+  { id: "gianyar", label: "GIANYAR" },
+  { id: "klungkung", label: "KLUNGKUNG" },
+  { id: "karangasem", label: "KARANGASEM" },
+  { id: "bangli", label: "BANGLI" },
+  { id: "buleleng", label: "BULELENG" },
+  { id: "jembrana", label: "JEMBRANA" },
+];
+
+interface DropdownProps {
+  label: string;
+  options: { id: string; label: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  width?: string;
+}
+
+function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: DropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedOption = options.find(opt => opt.id === value);
+
+  return (
+    <div className={`relative ${width}`}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="h-10 bg-[#f8f8f8] rounded-[6px] flex items-center justify-between px-3 w-full"
+      >
+        <span className={`text-[11px] font-semibold tracking-[0.22px] ${value ? 'text-[#f14110]' : 'text-[#333]'}`}>
+          {selectedOption ? selectedOption.label : label}
+        </span>
+        <Image src="/images/btn-down.svg" alt="" width={8} height={5} className="rotate-90" />
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute top-[calc(100%+4px)] left-0 bg-white rounded-[6px] shadow-lg z-50 min-w-full max-h-[300px] overflow-y-auto">
+            <div className="p-2">
+              <p className="text-[9px] text-[#333]/50 mb-2 px-2">
+                Services Provided /<br />Layanan yang Disediakan
+              </p>
+              {options.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => {
+                    onChange(option.id);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full text-left px-2 py-2 text-[11px] tracking-[0.22px] border-b border-[#e4e4e4] last:border-0 flex items-center justify-between ${
+                    value === option.id ? 'text-[#f14110] font-medium' : 'text-[#333]'
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  <div className={`w-6 h-3 rounded-full ${value === option.id ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}>
+                    <div className={`w-2 h-2 bg-white rounded-full mt-0.5 transition-all ${value === option.id ? 'ml-3.5' : 'ml-0.5'}`} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export function Header() {
+  const [activeCategory, setActiveCategory] = useState("construction");
+  const [keywords, setKeywords] = useState("");
+  const [projectSize, setProjectSize] = useState("");
+  const [category, setCategory] = useState("");
+  const [location, setLocation] = useState("");
+
+  const clearFilters = () => {
+    setKeywords("");
+    setProjectSize("");
+    setCategory("");
+    setLocation("");
+  };
+
+  // Get categories based on active main category
+  const getCategoryOptions = () => {
+    if (activeCategory === "renovation") {
+      return renovationCategories;
+    }
+    return constructionCategories;
+  };
+
+  return (
+    <header className="relative">
+      {/* Gradient Background - matches Figma: #E4E4E4 to #F14110 */}
+      <div
+        className="absolute inset-0 rounded-b-[6px]"
+        style={{
+          background: "linear-gradient(to right, #E4E4E4, #F14110)"
+        }}
+      />
+
+      <div className="relative z-10 px-6 pt-6 pb-8">
+        {/* Top Bar */}
+        <div className="max-w-[900px] mx-auto flex items-center justify-between mb-6">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <div className="flex items-baseline">
+              <Image src="/images/logo-solid.svg" alt="SOLID" width={85} height={19} className="h-[19px] w-auto" />
+              <Image src="/images/logo-find.svg" alt="FIND" width={72} height={19} className="h-[19px] w-auto" />
+              <Image src="/images/logo-id.svg" alt=".id" width={40} height={19} className="h-[16px] w-auto" />
+            </div>
+          </Link>
+
+          {/* Right Side Buttons */}
+          <div className="flex items-center gap-5">
+            <button className="text-[#f8f8f8] hover:opacity-80 transition-opacity">
+              <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
+            </button>
+            <button className="text-[#f8f8f8] hover:opacity-80 transition-opacity">
+              <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
+            </button>
+            <button className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors">
+              List your business
+            </button>
+          </div>
+        </div>
+
+        {/* Category Tabs */}
+        <div className="max-w-[900px] mx-auto mb-4">
+          <div className="flex gap-2">
+            {mainCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`h-10 px-5 rounded-full text-[12px] font-medium transition-all ${
+                  activeCategory === cat.id
+                    ? "bg-[#f8f8f8] text-[#f14110]"
+                    : "text-[#f8f8f8] hover:bg-white/10"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-[#f8f8f8] text-[9px] mt-4 font-medium leading-[12px]">
+            Browse construction professionals for residential, commercial and hospitality projects in Indonesia.
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="max-w-[900px] mx-auto">
+          <div className="flex items-center">
+            {/* Keywords Input */}
+            <div className="flex-1 h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
+              <input
+                type="text"
+                placeholder="Search by keywords"
+                value={keywords}
+                onChange={(e) => setKeywords(e.target.value)}
+                className="w-full bg-transparent text-[11px] text-[#333] placeholder:text-[#333]/55 outline-none font-medium"
+              />
+            </div>
+
+            {/* Project Size Dropdown */}
+            <div className="ml-2">
+              <Dropdown
+                label="PROJECT SIZE"
+                options={projectSizeOptions}
+                value={projectSize}
+                onChange={setProjectSize}
+                width="w-[140px]"
+              />
+            </div>
+
+            {/* Categories Dropdown */}
+            <div className="ml-2">
+              <Dropdown
+                label="CATEGORIES"
+                options={getCategoryOptions()}
+                value={category}
+                onChange={setCategory}
+                width="w-[140px]"
+              />
+            </div>
+
+            {/* Location Dropdown */}
+            <div className="ml-2">
+              <Dropdown
+                label="LOCATION"
+                options={locationOptions}
+                value={location}
+                onChange={setLocation}
+                width="w-[120px]"
+              />
+            </div>
+
+            {/* Search Button - 40x40 to match input height */}
+            <button className="ml-2 w-10 h-10 flex-shrink-0">
+              <Image src="/images/btn-search.svg" alt="Search" width={40} height={40} className="w-10 h-10" />
+            </button>
+
+            {/* Clear Filters */}
+            <button
+              onClick={clearFilters}
+              className="text-[#f8f8f8] text-[11px] font-medium underline ml-4 tracking-[0.22px] whitespace-nowrap"
+            >
+              Clear Filters
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
