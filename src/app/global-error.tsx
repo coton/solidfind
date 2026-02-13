@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 export default function GlobalError({
   error,
   reset,
@@ -7,15 +9,40 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
     <html lang="en">
-      <body>
-        <div className="min-h-screen flex items-center justify-center bg-[#f8f8f8]">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-[#333] mb-4">Something went wrong!</h2>
+      <head>
+        <title>Error - SolidFind</title>
+      </head>
+      <body style={{ margin: 0, fontFamily: "system-ui, sans-serif" }}>
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#f8f8f8",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#333", marginBottom: "16px" }}>
+              Something went wrong!
+            </h2>
             <button
               onClick={() => reset()}
-              className="px-4 py-2 bg-[#f14110] text-white rounded-md hover:bg-[#d83a0e] transition-colors"
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "#f14110",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "14px",
+              }}
             >
               Try again
             </button>
