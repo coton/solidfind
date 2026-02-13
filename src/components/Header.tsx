@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { AuthModal } from "./AuthModal";
 
 const mainCategories = [
@@ -115,7 +116,13 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: Drop
   );
 }
 
-export function Header() {
+interface HeaderProps {
+  isLoggedIn?: boolean;
+  userType?: "company" | "individual";
+}
+
+export function Header({ isLoggedIn: isLoggedInProp, userType: userTypeProp }: HeaderProps = {}) {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState("construction");
   const [keywords, setKeywords] = useState("");
   const [projectSize, setProjectSize] = useState("");
@@ -123,6 +130,31 @@ export function Header() {
   const [location, setLocation] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("register");
+  const [isLoggedIn, setIsLoggedIn] = useState(isLoggedInProp || false);
+  const [userType, setUserType] = useState<"company" | "individual" | null>(userTypeProp || null);
+
+  // Check localStorage for auth state on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const storedUserType = localStorage.getItem("userType") as "company" | "individual" | null;
+      if (!isLoggedInProp) {
+        setIsLoggedIn(loggedIn);
+      }
+      if (!userTypeProp && storedUserType) {
+        setUserType(storedUserType);
+      }
+    }
+  }, [isLoggedInProp, userTypeProp]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userType");
+    localStorage.removeItem("userEmail");
+    setIsLoggedIn(false);
+    setUserType(null);
+    router.push("/");
+  };
 
   const clearFilters = () => {
     setKeywords("");
@@ -166,18 +198,37 @@ export function Header() {
             <button className="text-[#f8f8f8] hover:opacity-80 transition-opacity">
               <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
             </button>
-            <button
-              onClick={() => { setAuthMode("login"); setAuthModalOpen(true); }}
-              className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
-            >
-              <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
-            </button>
-            <button
-              onClick={() => { setAuthMode("register"); setAuthModalOpen(true); }}
-              className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors"
-            >
-              List your business
-            </button>
+            {isLoggedIn ? (
+              <>
+                <Link
+                  href={userType === "company" ? "/company-dashboard" : "/dashboard"}
+                  className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
+                >
+                  <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="h-10 px-6 rounded-full bg-[#f8f8f8] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-white transition-colors"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => { setAuthMode("login"); setAuthModalOpen(true); }}
+                  className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
+                >
+                  <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
+                </button>
+                <button
+                  onClick={() => { setAuthMode("register"); setAuthModalOpen(true); }}
+                  className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors"
+                >
+                  List your business
+                </button>
+              </>
+            )}
           </div>
         </div>
 

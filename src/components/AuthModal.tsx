@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 type AuthMode = "login" | "register";
 type AccountType = "company" | "individual";
@@ -10,9 +10,11 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: AuthMode;
+  onAuthSuccess?: (accountType: AccountType) => void;
 }
 
-export function AuthModal({ isOpen, onClose, initialMode = "register" }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, initialMode = "register", onAuthSuccess }: AuthModalProps) {
+  const router = useRouter();
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [accountType, setAccountType] = useState<AccountType>("company");
   const [email, setEmail] = useState("");
@@ -20,13 +22,38 @@ export function AuthModal({ isOpen, onClose, initialMode = "register" }: AuthMod
   const [companyName, setCompanyName] = useState("");
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
 
+  // Reset mode when initialMode changes
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle authentication logic here
+
+    // Mock authentication - in real app, this would call an API
     console.log({ mode, accountType, email, password, companyName, subscribeNewsletter });
+
+    // Store user type in localStorage for demo purposes
+    localStorage.setItem("userType", accountType);
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userEmail", email);
+
+    // Call success callback if provided
+    if (onAuthSuccess) {
+      onAuthSuccess(accountType);
+    }
+
+    // Close modal
     onClose();
+
+    // Redirect based on account type
+    if (accountType === "company") {
+      router.push("/company-dashboard");
+    } else {
+      router.push("/dashboard");
+    }
   };
 
   return (
