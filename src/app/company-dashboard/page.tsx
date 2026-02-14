@@ -2,54 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Star } from "lucide-react";
-
-// Mock data for company stats
-const mockCompanyData = {
-  name: "Company Name",
-  accountType: "PRO",
-  stats: {
-    bookmarked: 75,
-    viewsLastMonth: 725,
-    mostSearchedLocation: "KARANGASEM",
-  },
-  monthlyViews: [
-    { month: "January", views: 32 },
-    { month: "February", views: 36 },
-    { month: "March", views: 48 },
-    { month: "April", views: 32 },
-  ],
-  rating: 4.5,
-  reviewCount: 75,
-  reviews: [
-    {
-      userName: "User Name",
-      rating: 3,
-      content: "fdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;w",
-      date: "2026/01/13",
-    },
-    {
-      userName: "User Name",
-      rating: 5,
-      content: "fdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;w",
-      date: "2026/01/13",
-    },
-    {
-      userName: "User Name",
-      rating: 3,
-      content: "fdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;w",
-      date: "2026/01/13",
-    },
-    {
-      userName: "User Name",
-      rating: 5,
-      content: "fdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;wfdkgbfgb;w",
-      date: "2026/01/13",
-    },
-  ],
-};
 
 const proFeatures = [
   { icon: "star", title: "Top search ranking", subtitle: "Peringkat pencarian teratas" },
@@ -87,7 +45,49 @@ function ReviewCard({ userName, rating, content, date }: {
 export default function CompanyDashboardPage() {
   const [showAdModal, setShowAdModal] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
-  const data = mockCompanyData;
+  const { user: clerkUser } = useUser();
+
+  const currentUser = useQuery(
+    api.users.getCurrentUser,
+    clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
+  );
+
+  const company = useQuery(
+    api.companies.getByOwner,
+    currentUser?._id ? { ownerId: currentUser._id } : "skip"
+  );
+
+  const reviews = useQuery(
+    api.reviews.listByCompany,
+    company?._id ? { companyId: company._id } : "skip"
+  );
+
+  const monthlyViews = [
+    { month: "January", views: 32 },
+    { month: "February", views: 36 },
+    { month: "March", views: 48 },
+    { month: "April", views: 32 },
+  ];
+
+  const data = {
+    name: company?.name ?? "Company Name",
+    accountType: company?.isPro ? "PRO" : "FREE",
+    stats: {
+      bookmarked: company?.bookmarkCount ?? 0,
+      viewsLastMonth: company?.viewsLastMonth ?? 0,
+      mostSearchedLocation: "KARANGASEM",
+    },
+    monthlyViews,
+    rating: company?.rating ?? 0,
+    reviewCount: company?.reviewCount ?? 0,
+    reviews: (reviews ?? []).map((r) => ({
+      userName: r.userName,
+      rating: r.rating,
+      content: r.content,
+      date: new Date(r.createdAt).toLocaleDateString("en-CA").replace(/-/g, "/"),
+    })),
+  };
+
   const maxViews = Math.max(...data.monthlyViews.map(m => m.views));
 
   return (

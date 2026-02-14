@@ -2,76 +2,11 @@
 
 import { useState } from "react";
 import { useUser, SignOutButton } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/cards";
-
-// Mock saved listings data
-const mockSavedConstruction = [
-  {
-    id: "1",
-    name: "ATELIER GENERATIONS ASUDEVA DESIGN EXTRA TEXT TEST",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore consectetur do nsectetur[...]",
-    rating: 4.5,
-    isPro: true,
-    isSaved: true,
-  },
-  {
-    id: "2",
-    name: "ATELIER GENERATIONS ASUDEVA DESIGN EXTRA TEXT TEST",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore consectetur do nsectetur[...]",
-    rating: 4.5,
-    isPro: true,
-    isSaved: true,
-  },
-  {
-    id: "3",
-    name: "ATELIER GENERATIONS ASUDEVA DESIGN EXTRA TEXT TEST",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore consectetur do nsectetur[...]",
-    rating: 4.5,
-    isSaved: true,
-  },
-  {
-    id: "4",
-    name: "ATELIER GENERATIONS ASUDEVA DESIGN EXTRA TEXT TEST",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore consectetur do nsectetur[...]",
-    rating: 4.5,
-    isSaved: true,
-  },
-];
-
-const mockSavedRenovation = [
-  {
-    id: "5",
-    name: "ATELIER GENERATIONS ASUDEVA DESIGN EXTRA TEXT TEST",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore consectetur do nsectetur[...]",
-    rating: 4.5,
-    isPro: true,
-    isSaved: true,
-  },
-  {
-    id: "6",
-    name: "ATELIER GENERATIONS ASUDEVA DESIGN EXTRA TEXT TEST",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore consectetur do nsectetur[...]",
-    rating: 4.5,
-    isSaved: true,
-  },
-  {
-    id: "7",
-    name: "ATELIER GENERATIONS ASUDEVA DESIGN EXTRA TEXT TEST",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore consectetur do nsectetur[...]",
-    rating: 4.5,
-    isSaved: true,
-  },
-  {
-    id: "8",
-    name: "ATELIER GENERATIONS ASUDEVA DESIGN EXTRA TEXT TEST",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore consectetur do nsectetur[...]",
-    rating: 4.5,
-    isPro: true,
-    isSaved: true,
-  },
-];
 
 export default function DashboardPage() {
   const [sortByConstruction, setSortByConstruction] = useState("latest");
@@ -80,11 +15,43 @@ export default function DashboardPage() {
 
   const { user: clerkUser } = useUser();
 
-  // Use Clerk user data with fallback to mock
+  const currentUser = useQuery(
+    api.users.getCurrentUser,
+    clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
+  );
+
+  const savedListings = useQuery(
+    api.savedListings.listByUser,
+    currentUser?._id ? { userId: currentUser._id } : "skip"
+  );
+
   const user = {
     name: clerkUser?.fullName || clerkUser?.firstName || "User name",
     email: clerkUser?.primaryEmailAddress?.emailAddress || "user@gmail.com",
   };
+
+  // Split saved listings by category
+  const constructionListings = (savedListings ?? [])
+    .filter((s) => s.category === "construction" && s.company)
+    .map((s) => ({
+      id: s.company!._id,
+      name: s.company!.name,
+      description: s.company!.description ?? "",
+      rating: s.company!.rating ?? 4.5,
+      isPro: s.company!.isPro,
+      isSaved: true,
+    }));
+
+  const renovationListings = (savedListings ?? [])
+    .filter((s) => s.category === "renovation" && s.company)
+    .map((s) => ({
+      id: s.company!._id,
+      name: s.company!.name,
+      description: s.company!.description ?? "",
+      rating: s.company!.rating ?? 4.5,
+      isPro: s.company!.isPro,
+      isSaved: true,
+    }));
 
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
@@ -93,7 +60,6 @@ export default function DashboardPage() {
       <main className="max-w-[900px] mx-auto px-6 py-8">
         {/* User Info Section */}
         <div className="flex items-start justify-between mb-8">
-          {/* Left: User greeting */}
           <div>
             <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
             <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">{user.name}</h1>
@@ -104,7 +70,6 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Right: Account actions */}
           <div className="text-right">
             <p className="text-[11px] text-[#333] tracking-[0.22px] mb-1">{user.email}</p>
             <div className="flex items-center gap-2 justify-end mb-3">
@@ -129,10 +94,9 @@ export default function DashboardPage() {
             <div className="flex items-baseline gap-4">
               <h2 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">CONSTRUCTION</h2>
               <span className="text-[11px] text-[#333]/50 tracking-[0.22px]">
-                {mockSavedConstruction.length.toString().padStart(2, '0')} Listings Saved
+                {constructionListings.length.toString().padStart(2, '0')} Listings Saved
               </span>
             </div>
-            {/* Sort Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setSortDropdownOpen(sortDropdownOpen === 'construction' ? null : 'construction')}
@@ -165,14 +129,16 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Cards Grid */}
           <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
-            {mockSavedConstruction.map((listing) => (
-              <ListingCard key={listing.id} {...listing} />
-            ))}
+            {constructionListings.length > 0 ? (
+              constructionListings.map((listing) => (
+                <ListingCard key={listing.id} {...listing} />
+              ))
+            ) : (
+              <p className="text-[11px] text-[#333]/50 col-span-4">No saved construction listings yet.</p>
+            )}
           </div>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-6">
               <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
@@ -194,10 +160,9 @@ export default function DashboardPage() {
             <div className="flex items-baseline gap-4">
               <h2 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">RENOVATION</h2>
               <span className="text-[11px] text-[#333]/50 tracking-[0.22px]">
-                {mockSavedRenovation.length.toString().padStart(2, '0')} Listings Saved
+                {renovationListings.length.toString().padStart(2, '0')} Listings Saved
               </span>
             </div>
-            {/* Sort Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setSortDropdownOpen(sortDropdownOpen === 'renovation' ? null : 'renovation')}
@@ -230,14 +195,16 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Cards Grid */}
           <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
-            {mockSavedRenovation.map((listing) => (
-              <ListingCard key={listing.id} {...listing} />
-            ))}
+            {renovationListings.length > 0 ? (
+              renovationListings.map((listing) => (
+                <ListingCard key={listing.id} {...listing} />
+              ))
+            ) : (
+              <p className="text-[11px] text-[#333]/50 col-span-4">No saved renovation listings yet.</p>
+            )}
           </div>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-6">
               <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">

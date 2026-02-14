@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Star } from "lucide-react";
@@ -66,7 +69,20 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: b
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const { user: clerkUser } = useUser();
   const [showProModal, setShowProModal] = useState(false);
+
+  const currentUser = useQuery(
+    api.users.getCurrentUser,
+    clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
+  );
+
+  const company = useQuery(
+    api.companies.getByOwner,
+    currentUser?._id ? { ownerId: currentUser._id } : "skip"
+  );
+
+  const updateCompany = useMutation(api.companies.update);
 
   // Form state
   const [companyName, setCompanyName] = useState("");
@@ -80,6 +96,17 @@ export default function EditProfilePage() {
   const [description, setDescription] = useState("");
   const [projectsNumber, setProjectsNumber] = useState("");
   const [teamSize, setTeamSize] = useState("");
+
+  // Populate form when company data loads
+  useEffect(() => {
+    if (company) {
+      setCompanyName(company.name ?? "");
+      setAddress(company.address ?? "");
+      setDescription(company.description ?? "");
+      setProjectsNumber(company.projects?.toString() ?? "");
+      setTeamSize(company.teamSize?.toString() ?? "");
+    }
+  }, [company]);
 
   // Service selections
   const [selectedConstruction, setSelectedConstruction] = useState<string[]>(["residential"]);
@@ -95,12 +122,15 @@ export default function EditProfilePage() {
     }
   };
 
-  const handleSave = () => {
-    console.log("Saving profile...", {
-      companyName, address, phone, email, website, whatsapp, facebook, linkedin,
-      description, projectsNumber, teamSize,
-      selectedConstruction, selectedRenovation,
-      selectedConstructionLocations, selectedRenovationLocations
+  const handleSave = async () => {
+    if (!company) return;
+    await updateCompany({
+      id: company._id,
+      name: companyName || undefined,
+      description: description || undefined,
+      address: address || undefined,
+      projects: projectsNumber ? parseInt(projectsNumber) : undefined,
+      teamSize: teamSize ? parseInt(teamSize) : undefined,
     });
     router.push("/company-dashboard");
   };
