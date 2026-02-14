@@ -16,6 +16,7 @@ const companies = [
     teamSize: 35,
     bookmarkCount: 58,
     viewsLastMonth: 1350,
+    imageUrl: "/images/companies/balitecture.jpg",
   },
   {
     name: "Bali Construction",
@@ -31,6 +32,7 @@ const companies = [
     teamSize: 45,
     bookmarkCount: 45,
     viewsLastMonth: 1100,
+    imageUrl: "/images/companies/bali-construction.png",
   },
   {
     name: "888 Design & Build",
@@ -46,6 +48,7 @@ const companies = [
     teamSize: 20,
     bookmarkCount: 28,
     viewsLastMonth: 680,
+    imageUrl: "/images/companies/888-design-build.jpg",
   },
   {
     name: "Karyanusa Asia",
@@ -61,6 +64,7 @@ const companies = [
     teamSize: 60,
     bookmarkCount: 72,
     viewsLastMonth: 1800,
+    imageUrl: "/images/companies/karyanusa.jpg",
   },
   {
     name: "POPULAIRE",
@@ -76,6 +80,7 @@ const companies = [
     teamSize: 40,
     bookmarkCount: 65,
     viewsLastMonth: 1600,
+    imageUrl: "/images/companies/populaire.png",
   },
   // ARCHITECTURE
   {
@@ -92,6 +97,7 @@ const companies = [
     teamSize: 15,
     bookmarkCount: 22,
     viewsLastMonth: 520,
+    imageUrl: "/images/companies/earth-lines.jpg",
   },
   {
     name: "IBUKU",
@@ -107,6 +113,7 @@ const companies = [
     teamSize: 55,
     bookmarkCount: 95,
     viewsLastMonth: 2200,
+    imageUrl: "/images/companies/ibuku.png",
   },
   {
     name: "Studio Jencquel",
@@ -122,6 +129,7 @@ const companies = [
     teamSize: 12,
     bookmarkCount: 35,
     viewsLastMonth: 780,
+    imageUrl: "/images/companies/studio-jencquel.jpg",
   },
   {
     name: "Cipta Bali Architect",
@@ -137,6 +145,7 @@ const companies = [
     teamSize: 18,
     bookmarkCount: 15,
     viewsLastMonth: 390,
+    imageUrl: "/images/companies/cipta-bali.png",
   },
   {
     name: "Lumbung Architect",
@@ -152,6 +161,7 @@ const companies = [
     teamSize: 67,
     bookmarkCount: 48,
     viewsLastMonth: 950,
+    imageUrl: "/images/companies/lumbung.png",
   },
   // INTERIOR DESIGN
   {
@@ -168,6 +178,7 @@ const companies = [
     teamSize: 22,
     bookmarkCount: 38,
     viewsLastMonth: 870,
+    imageUrl: "/images/companies/bali-design-solutions.png",
   },
   {
     name: "Design Assembly",
@@ -183,6 +194,7 @@ const companies = [
     teamSize: 10,
     bookmarkCount: 20,
     viewsLastMonth: 460,
+    imageUrl: "/images/companies/design-assembly.jpg",
   },
   {
     name: "Mahallati Interior",
@@ -198,6 +210,7 @@ const companies = [
     teamSize: 50,
     bookmarkCount: 42,
     viewsLastMonth: 1050,
+    imageUrl: "/images/companies/mahallati.jpg",
   },
   {
     name: "Azula Designs",
@@ -213,6 +226,7 @@ const companies = [
     teamSize: 6,
     bookmarkCount: 12,
     viewsLastMonth: 310,
+    imageUrl: "/images/companies/azula-designs.jpg",
   },
   {
     name: "Canggu & Co",
@@ -228,6 +242,7 @@ const companies = [
     teamSize: 8,
     bookmarkCount: 14,
     viewsLastMonth: 350,
+    imageUrl: "/images/companies/canggu-co.jpg",
   },
   // RENOVATION
   {
@@ -244,6 +259,7 @@ const companies = [
     teamSize: 9,
     bookmarkCount: 10,
     viewsLastMonth: 280,
+    imageUrl: "/images/companies/nc-eco-design.png",
   },
   // REAL ESTATE
   {
@@ -260,6 +276,7 @@ const companies = [
     teamSize: 55,
     bookmarkCount: 80,
     viewsLastMonth: 1900,
+    imageUrl: "/images/companies/mirah.jpg",
   },
   {
     name: "COCO Development Group",
@@ -275,6 +292,7 @@ const companies = [
     teamSize: 15,
     bookmarkCount: 18,
     viewsLastMonth: 520,
+    imageUrl: "/images/companies/coco-development.jpg",
   },
   {
     name: "Lyvin Properties",
@@ -290,6 +308,7 @@ const companies = [
     teamSize: 18,
     bookmarkCount: 25,
     viewsLastMonth: 640,
+    imageUrl: "/images/companies/lyvin.jpg",
   },
   {
     name: "Ciputra Group",
@@ -305,6 +324,7 @@ const companies = [
     teamSize: 70,
     bookmarkCount: 90,
     viewsLastMonth: 2100,
+    imageUrl: "/images/companies/ciputra.png",
   },
 ];
 
@@ -459,6 +479,7 @@ export const seed = mutation({
         reviewCount: company.reviewCount,
         projects: company.projects,
         teamSize: company.teamSize,
+        imageUrl: company.imageUrl,
         bookmarkCount: company.bookmarkCount,
         viewsLastMonth: company.viewsLastMonth,
         createdAt: Date.now(),

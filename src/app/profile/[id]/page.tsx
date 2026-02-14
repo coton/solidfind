@@ -143,13 +143,25 @@ export default function ProfilePage() {
         <div className="grid grid-cols-[210px_210px_1fr_70px] gap-5 mb-8">
           {/* Column 1: Logo */}
           <div>
-            <div
-              className="w-[210px] h-[210px] rounded-[6px] bg-[#d8d8d8]"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3C/svg%3E")`,
-                backgroundSize: '20px 20px'
-              }}
-            />
+            <div className="w-[210px] h-[210px] rounded-[6px] bg-[#d8d8d8] overflow-hidden">
+              {company.imageUrl ? (
+                <Image
+                  src={company.imageUrl}
+                  alt={company.name}
+                  width={210}
+                  height={210}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <div
+                  className="w-full h-full"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3C/svg%3E")`,
+                    backgroundSize: '20px 20px'
+                  }}
+                />
+              )}
+            </div>
           </div>
 
           {/* Column 2: Contact Info */}

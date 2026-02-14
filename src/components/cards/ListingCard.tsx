@@ -16,6 +16,7 @@ interface ListingCardProps {
   isPro?: boolean;
   isFeatured?: boolean;
   isSaved?: boolean;
+  imageUrl?: string;
 }
 
 export function ListingCard({
@@ -30,6 +31,7 @@ export function ListingCard({
   isPro = false,
   isFeatured = false,
   isSaved = false,
+  imageUrl,
 }: ListingCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -49,7 +51,7 @@ export function ListingCard({
             {/* Left: Logo */}
             <div className="w-[50px] h-[50px] bg-[#d8d8d8] rounded-[6px] overflow-hidden">
               <Image
-                src="/images/card-sample.png"
+                src={imageUrl || "/images/card-sample.png"}
                 alt=""
                 width={50}
                 height={50}

@@ -29,6 +29,7 @@ export default function Home() {
     isPro: c.isPro,
     isFeatured: false,
     isSaved: false,
+    imageUrl: c.imageUrl,
   }));
 
   return (
