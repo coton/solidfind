@@ -11,6 +11,8 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
+import { WriteReviewModal } from "@/components/WriteReviewModal";
+import { ThankYouModal } from "@/components/ThankYouModal";
 import { Star } from "lucide-react";
 
 function ReviewCard({ name, rating = 5, text, date }: { name: string; rating?: number; text: string; date: string }) {
@@ -33,6 +35,8 @@ export default function ProfilePage() {
   const companyId = params.id as string;
   const { user: clerkUser } = useUser();
   const [isSaved, setIsSaved] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
 
   // Try to parse as Convex ID; if invalid format just pass it
   let validId: Id<"companies"> | undefined;
@@ -323,9 +327,19 @@ export default function ProfilePage() {
                 <span className="text-[10px] text-[#f14110]/70 tracking-[0.2px]">({company.reviewCount ?? 0})</span>
               </div>
             </div>
-            <button className="h-[40px] px-6 rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors">
-              See all
-            </button>
+            <div className="flex items-center gap-3">
+              {clerkUser && currentUser && (
+                <button
+                  onClick={() => setShowReviewModal(true)}
+                  className="h-[40px] px-6 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
+                >
+                  Write a Review
+                </button>
+              )}
+              <button className="h-[40px] px-6 rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors">
+                See all
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-4 gap-5">
@@ -352,6 +366,25 @@ export default function ProfilePage() {
       </main>
 
       <Footer />
+
+      {/* Review Modals */}
+      {validId && currentUser && (
+        <WriteReviewModal
+          isOpen={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          onSuccess={() => {
+            setShowReviewModal(false);
+            setShowThankYou(true);
+          }}
+          companyId={validId}
+          userId={currentUser._id}
+          userName={clerkUser?.fullName ?? clerkUser?.firstName ?? "Anonymous"}
+        />
+      )}
+      <ThankYouModal
+        isOpen={showThankYou}
+        onClose={() => setShowThankYou(false)}
+      />
     </div>
   );
 }

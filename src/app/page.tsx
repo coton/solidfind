@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Header } from "@/components/Header";
@@ -11,10 +12,27 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { AdBanner } from "@/components/AdBanner";
 
 export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f8f8f8]" />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
+  const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("latest");
 
-  const companies = useQuery(api.companies.list, {});
+  const categoryParam = searchParams.get("category") || undefined;
+  const locationParam = searchParams.get("location") || undefined;
+  const searchParam = searchParams.get("search") || undefined;
+
+  const companies = useQuery(api.companies.list, {
+    category: categoryParam,
+    location: locationParam,
+    search: searchParam,
+  });
 
   // Map Convex companies to the format ListingCard expects
   const listings = (companies ?? []).map((c) => ({

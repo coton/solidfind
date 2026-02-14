@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 
 const mainCategories = [
@@ -116,21 +117,61 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: Drop
 }
 
 export function Header() {
+  return (
+    <Suspense fallback={<header className="relative"><div className="h-[200px]" /></header>}>
+      <HeaderInner />
+    </Suspense>
+  );
+}
+
+function HeaderInner() {
   const { user } = useUser();
-  const [activeCategory, setActiveCategory] = useState("construction");
-  const [keywords, setKeywords] = useState("");
-  const [projectSize, setProjectSize] = useState("");
-  const [category, setCategory] = useState("");
-  const [location, setLocation] = useState("");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [keywords, setKeywords] = useState(searchParams.get("search") ?? "");
+  const [projectSize, setProjectSize] = useState(searchParams.get("projectSize") ?? "");
+  const [category, setCategory] = useState(searchParams.get("subcategory") ?? "");
+  const [location, setLocation] = useState(searchParams.get("location") ?? "");
+
+  const activeCategory = searchParams.get("category") ?? "construction";
 
   // Determine user type from Clerk metadata (default to "individual")
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
+
+  const updateParams = useCallback((updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(updates)) {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    }
+    const target = pathname === "/" ? "/" : "/";
+    router.push(`${target}?${params.toString()}`);
+  }, [searchParams, pathname, router]);
+
+  const handleCategoryTab = (catId: string) => {
+    updateParams({ category: catId, subcategory: null });
+    setCategory("");
+  };
+
+  const handleSearch = () => {
+    updateParams({ search: keywords || null });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSearch();
+  };
 
   const clearFilters = () => {
     setKeywords("");
     setProjectSize("");
     setCategory("");
     setLocation("");
+    router.push("/");
   };
 
   // Get categories based on active main category
@@ -208,7 +249,7 @@ export function Header() {
             {mainCategories.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
+                onClick={() => handleCategoryTab(cat.id)}
                 className={`h-10 px-5 rounded-full text-[12px] font-medium transition-all ${
                   activeCategory === cat.id
                     ? "bg-[#f8f8f8] text-[#f14110]"
@@ -234,6 +275,7 @@ export function Header() {
                 placeholder="Search by keywords"
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="w-full bg-transparent text-[11px] text-[#333] placeholder:text-[#333]/55 outline-none font-medium"
               />
             </div>
@@ -244,7 +286,7 @@ export function Header() {
                 label="PROJECT SIZE"
                 options={projectSizeOptions}
                 value={projectSize}
-                onChange={setProjectSize}
+                onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
                 width="w-[140px]"
               />
             </div>
@@ -255,7 +297,7 @@ export function Header() {
                 label="CATEGORIES"
                 options={getCategoryOptions()}
                 value={category}
-                onChange={setCategory}
+                onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
                 width="w-[140px]"
               />
             </div>
@@ -266,13 +308,13 @@ export function Header() {
                 label="LOCATION"
                 options={locationOptions}
                 value={location}
-                onChange={setLocation}
+                onChange={(val) => { setLocation(val); updateParams({ location: val || null }); }}
                 width="w-[120px]"
               />
             </div>
 
             {/* Search Button - 40x40 to match input height */}
-            <button className="ml-2 w-10 h-10 flex-shrink-0">
+            <button onClick={handleSearch} className="ml-2 w-10 h-10 flex-shrink-0">
               <Image src="/images/btn-search.svg" alt="Search" width={40} height={40} className="w-10 h-10" />
             </button>
 
