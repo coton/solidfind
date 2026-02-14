@@ -136,27 +136,46 @@ export default function EditProfilePage() {
     }
   };
 
+  const createCompany = useMutation(api.companies.create);
+
   const handleSave = async () => {
-    if (!company) return;
-    await updateCompany({
-      id: company._id,
-      name: companyName || undefined,
-      description: description || undefined,
-      address: address || undefined,
-      projects: projectsNumber ? parseInt(projectsNumber) : undefined,
-      teamSize: teamSize ? parseInt(teamSize) : undefined,
-      phone: phone || undefined,
-      email: email || undefined,
-      website: website || undefined,
-      whatsapp: whatsapp || undefined,
-      facebook: facebook || undefined,
-      linkedin: linkedin || undefined,
-      projectSizes: selectedProjectSizes,
-      constructionTypes: selectedConstruction,
-      constructionLocations: selectedConstructionLocations,
-      renovationTypes: selectedRenovation,
-      renovationLocations: selectedRenovationLocations,
-    });
+    if (!currentUser) return;
+
+    if (company) {
+      // Update existing
+      await updateCompany({
+        id: company._id,
+        name: companyName || undefined,
+        description: description || undefined,
+        address: address || undefined,
+        projects: projectsNumber ? parseInt(projectsNumber) : undefined,
+        teamSize: teamSize ? parseInt(teamSize) : undefined,
+        phone: phone || undefined,
+        email: email || undefined,
+        website: website || undefined,
+        whatsapp: whatsapp || undefined,
+        facebook: facebook || undefined,
+        linkedin: linkedin || undefined,
+        projectSizes: selectedProjectSizes,
+        constructionTypes: selectedConstruction,
+        constructionLocations: selectedConstructionLocations,
+        renovationTypes: selectedRenovation,
+        renovationLocations: selectedRenovationLocations,
+      });
+    } else {
+      // Create new company
+      await createCompany({
+        ownerId: currentUser._id,
+        name: companyName || currentUser.companyName || "My Company",
+        description: description || undefined,
+        category: selectedConstruction.length > 0 ? "construction" : "renovation",
+        location: selectedConstructionLocations[0] || selectedRenovationLocations[0] || "bali",
+        address: address || undefined,
+        isPro: false,
+        projects: projectsNumber ? parseInt(projectsNumber) : undefined,
+        teamSize: teamSize ? parseInt(teamSize) : undefined,
+      });
+    }
     router.push("/company-dashboard");
   };
 

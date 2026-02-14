@@ -41,7 +41,7 @@ export function Footer() {
 
           {/* Bottom Links */}
           <div className="flex items-center gap-5 text-[#f8f8f8]">
-            <Link href="#" className="text-[8px] font-bold tracking-[0.4px] underline hover:opacity-80">
+            <Link href="/terms" className="text-[8px] font-bold tracking-[0.4px] underline hover:opacity-80">
               Terms & Conditions.
             </Link>
             <span className="text-[10px] font-bold tracking-[2.5px] uppercase">

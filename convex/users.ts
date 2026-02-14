@@ -41,3 +41,65 @@ export const getCurrentUser = query({
       .unique();
   },
 });
+
+export const deleteAccount = mutation({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+
+    if (!user) return;
+
+    // Delete user's companies
+    const companies = await ctx.db
+      .query("companies")
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
+      .collect();
+
+    for (const company of companies) {
+      // Delete reviews for this company
+      const companyReviews = await ctx.db
+        .query("reviews")
+        .withIndex("by_companyId", (q) => q.eq("companyId", company._id))
+        .collect();
+      for (const review of companyReviews) {
+        await ctx.db.delete(review._id);
+      }
+
+      // Delete saved listings referencing this company
+      const savedForCompany = await ctx.db
+        .query("savedListings")
+        .collect();
+      for (const saved of savedForCompany) {
+        if (saved.companyId === company._id) {
+          await ctx.db.delete(saved._id);
+        }
+      }
+
+      await ctx.db.delete(company._id);
+    }
+
+    // Delete user's reviews
+    const userReviews = await ctx.db
+      .query("reviews")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .collect();
+    for (const review of userReviews) {
+      await ctx.db.delete(review._id);
+    }
+
+    // Delete user's saved listings
+    const userSaved = await ctx.db
+      .query("savedListings")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .collect();
+    for (const saved of userSaved) {
+      await ctx.db.delete(saved._id);
+    }
+
+    // Delete user
+    await ctx.db.delete(user._id);
+  },
+});

@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
+import { useUser, useClerk } from "@clerk/nextjs";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -45,7 +46,18 @@ function ReviewCard({ userName, rating, content, date }: {
 export default function CompanyDashboardPage() {
   const [showAdModal, setShowAdModal] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const router = useRouter();
   const { user: clerkUser } = useUser();
+  const { signOut } = useClerk();
+  const deleteAccount = useMutation(api.users.deleteAccount);
+
+  const handleDeleteAccount = async () => {
+    if (!clerkUser?.id) return;
+    await deleteAccount({ clerkId: clerkUser.id });
+    await signOut();
+    router.push("/");
+  };
 
   const currentUser = useQuery(
     api.users.getCurrentUser,
@@ -70,6 +82,32 @@ export default function CompanyDashboardPage() {
   ];
 
   const isPro = company?.isPro ?? false;
+
+  // If company user has no company yet, show onboarding prompt
+  if (currentUser && currentUser.accountType === "company" && company === null) {
+    return (
+      <div className="min-h-screen bg-[#f8f8f8]">
+        <Header />
+        <main className="max-w-[900px] mx-auto px-6 py-8">
+          <div className="text-center py-20">
+            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-4">
+              Welcome!
+            </h1>
+            <p className="text-[14px] text-[#333]/70 mb-8 max-w-[400px] mx-auto">
+              Set up your company profile to get listed on SolidFind.
+            </p>
+            <Link
+              href="/company-dashboard/edit"
+              className="inline-flex items-center h-10 px-8 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
+            >
+              Create Company Profile
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   const data = {
     name: company?.name ?? "Company Name",
@@ -113,7 +151,7 @@ export default function CompanyDashboardPage() {
               {isPro ? "PRO ACCOUNT" : "FREE ACCOUNT"}
             </p>
             {isPro ? (
-              <button className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+              <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
                 DELETE PROFILE
               </button>
             ) : (
@@ -385,6 +423,33 @@ export default function CompanyDashboardPage() {
             >
               Get in touch
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowDeleteModal(false)} />
+          <div className="relative bg-white w-[440px] rounded-[6px] p-8 text-center">
+            <h3 className="text-[20px] font-bold text-[#333] mb-4">Delete Profile</h3>
+            <p className="text-[12px] text-[#333]/70 mb-6">
+              Are you sure you want to delete your profile? This action cannot be undone.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                className="h-10 px-6 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

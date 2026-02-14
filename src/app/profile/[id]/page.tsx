@@ -15,6 +15,59 @@ import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
 import { Star } from "lucide-react";
 
+function formatWhatsApp(num: string): string {
+  return num.replace(/^[+0]+/, "");
+}
+
+function ReportModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [text, setText] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={() => { onClose(); setSubmitted(false); setText(""); }} />
+      <div className="relative bg-white w-[440px] rounded-[6px] p-8">
+        <button
+          onClick={() => { onClose(); setSubmitted(false); setText(""); }}
+          className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
+
+        {submitted ? (
+          <div className="text-center py-6">
+            <h3 className="text-[20px] font-bold text-[#333] mb-2">Thank you!</h3>
+            <p className="text-[12px] text-[#333]/70">Your report has been submitted. We will review it shortly.</p>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-[20px] font-bold text-[#333] mb-4">Report this company</h3>
+            <p className="text-[11px] text-[#333]/70 mb-4">Please describe the issue you&apos;d like to report.</p>
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={4}
+              placeholder="Describe the issue..."
+              className="w-full px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors resize-none mb-4"
+            />
+            <button
+              onClick={() => setSubmitted(true)}
+              disabled={!text.trim()}
+              className="w-full h-10 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Submit Report
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ReviewCard({ name, rating = 5, text, date }: { name: string; rating?: number; text: string; date: string }) {
   return (
     <div className="w-[210px]">
@@ -37,6 +90,20 @@ export default function ProfilePage() {
   const [isSaved, setIsSaved] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showCopiedToast, setShowCopiedToast] = useState(false);
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: company?.name ?? "SolidFind", url: window.location.href });
+      } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+      setShowCopiedToast(true);
+      setTimeout(() => setShowCopiedToast(false), 2000);
+    }
+  };
 
   // Try to parse as Convex ID; if invalid format just pass it
   let validId: Id<"companies"> | undefined;
@@ -176,43 +243,57 @@ export default function ProfilePage() {
 
           {/* Column 2: Contact Info */}
           <div>
-            <div className="border-b border-[#333]/20 pb-2 mb-3">
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
-                Tel. +62 812 463 4536
-              </p>
-            </div>
+            {company.phone && (
+              <div className="border-b border-[#333]/20 pb-2 mb-3">
+                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
+                  Tel. {company.phone}
+                </p>
+              </div>
+            )}
 
-            <div className="border-b border-[#333]/20 pb-2 mb-4">
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
-                WEBSITE
-              </p>
-            </div>
+            {company.website && (
+              <div className="border-b border-[#333]/20 pb-2 mb-4">
+                <a
+                  href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] font-medium text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
+                >
+                  WEBSITE
+                </a>
+              </div>
+            )}
 
             {/* Social Icons */}
             <div className="flex items-center gap-5 mb-6">
-              <button className="text-[#333] hover:text-[#f14110] transition-colors">
-                <svg width="24" height="19" viewBox="0 0 24 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 0H2C0.9 0 0 0.9 0 2V16C0 17.1 0.9 18 2 18H22C23.1 18 24 17.1 24 16V2C24 0.9 23.1 0 22 0ZM22 4L12 10L2 4V2L12 8L22 2V4Z" fill="currentColor"/>
-                </svg>
-              </button>
-              <button className="text-[#333] hover:text-[#f14110] transition-colors">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M17.05 3.05C15.15 1.15 12.65 0 10 0C4.5 0 0 4.5 0 10C0 11.75 0.5 13.45 1.35 14.9L0 20L5.25 18.7C6.65 19.45 8.3 19.9 10 19.9C15.5 19.9 20 15.4 20 9.9C20 7.35 18.95 4.95 17.05 3.05ZM10 18.25C8.45 18.25 6.95 17.85 5.65 17.1L5.35 16.9L2.3 17.7L3.15 14.75L2.9 14.4C2.05 13.05 1.6 11.5 1.6 9.95C1.6 5.35 5.35 1.6 9.95 1.6C12.15 1.6 14.25 2.45 15.8 4.05C17.4 5.6 18.3 7.75 18.25 9.95C18.35 14.6 14.6 18.25 10 18.25Z" fill="currentColor"/>
-                </svg>
-              </button>
-              <button className="text-[#333] hover:text-[#f14110] transition-colors">
-                <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} className="invert" />
-              </button>
-              <button className="text-[#333] hover:text-[#f14110] transition-colors">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M11 11H14L15 7H11V5C11 3.97 11 3 13 3H15V0.14C14.69 0.1 13.39 0 12.01 0C9.12 0 7 1.66 7 4.7V7H4V11H7V20H11V11Z" fill="currentColor"/>
-                </svg>
-              </button>
-              <button className="text-[#333] hover:text-[#f14110] transition-colors">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 0H2C0.9 0 0 0.9 0 2V18C0 19.1 0.9 20 2 20H18C19.1 20 20 19.1 20 18V2C20 0.9 19.1 0 18 0ZM6 17H3V8H6V17ZM4.5 6.3C3.5 6.3 2.7 5.5 2.7 4.5C2.7 3.5 3.5 2.7 4.5 2.7C5.5 2.7 6.3 3.5 6.3 4.5C6.3 5.5 5.5 6.3 4.5 6.3ZM17 17H14V12.5C14 11.4 13.1 10.5 12 10.5C10.9 10.5 10 11.4 10 12.5V17H7V8H10V9.2C10.5 8.4 11.6 7.8 12.8 7.8C15.1 7.8 17 9.7 17 12V17Z" fill="currentColor"/>
-                </svg>
-              </button>
+              {company.email && (
+                <a href={`mailto:${company.email}`} className="text-[#333] hover:text-[#f14110] transition-colors">
+                  <svg width="24" height="19" viewBox="0 0 24 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 0H2C0.9 0 0 0.9 0 2V16C0 17.1 0.9 18 2 18H22C23.1 18 24 17.1 24 16V2C24 0.9 23.1 0 22 0ZM22 4L12 10L2 4V2L12 8L22 2V4Z" fill="currentColor"/>
+                  </svg>
+                </a>
+              )}
+              {company.whatsapp && (
+                <a href={`https://wa.me/${formatWhatsApp(company.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.05 3.05C15.15 1.15 12.65 0 10 0C4.5 0 0 4.5 0 10C0 11.75 0.5 13.45 1.35 14.9L0 20L5.25 18.7C6.65 19.45 8.3 19.9 10 19.9C15.5 19.9 20 15.4 20 9.9C20 7.35 18.95 4.95 17.05 3.05ZM10 18.25C8.45 18.25 6.95 17.85 5.65 17.1L5.35 16.9L2.3 17.7L3.15 14.75L2.9 14.4C2.05 13.05 1.6 11.5 1.6 9.95C1.6 5.35 5.35 1.6 9.95 1.6C12.15 1.6 14.25 2.45 15.8 4.05C17.4 5.6 18.3 7.75 18.25 9.95C18.35 14.6 14.6 18.25 10 18.25Z" fill="currentColor"/>
+                  </svg>
+                </a>
+              )}
+              {company.facebook && (
+                <a href={company.facebook.startsWith("http") ? company.facebook : `https://${company.facebook}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 11H14L15 7H11V5C11 3.97 11 3 13 3H15V0.14C14.69 0.1 13.39 0 12.01 0C9.12 0 7 1.66 7 4.7V7H4V11H7V20H11V11Z" fill="currentColor"/>
+                  </svg>
+                </a>
+              )}
+              {company.linkedin && (
+                <a href={company.linkedin.startsWith("http") ? company.linkedin : `https://${company.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 0H2C0.9 0 0 0.9 0 2V18C0 19.1 0.9 20 2 20H18C19.1 20 20 19.1 20 18V2C20 0.9 19.1 0 18 0ZM6 17H3V8H6V17ZM4.5 6.3C3.5 6.3 2.7 5.5 2.7 4.5C2.7 3.5 3.5 2.7 4.5 2.7C5.5 2.7 6.3 3.5 6.3 4.5C6.3 5.5 5.5 6.3 4.5 6.3ZM17 17H14V12.5C14 11.4 13.1 10.5 12 10.5C10.9 10.5 10 11.4 10 12.5V17H7V8H10V9.2C10.5 8.4 11.6 7.8 12.8 7.8C15.1 7.8 17 9.7 17 12V17Z" fill="currentColor"/>
+                  </svg>
+                </a>
+              )}
             </div>
 
             {/* Address */}
@@ -264,15 +345,20 @@ export default function ProfilePage() {
               />
             </button>
 
-            <button className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
+            <button onClick={handleShare} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors relative">
               <span className="text-[9px] font-mono">Share</span>
               <svg width="15" height="20" viewBox="0 0 15 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7.5 0V12M7.5 0L3 4.5M7.5 0L12 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M1 9V17C1 17.5523 1.44772 18 2 18H13C13.5523 18 14 17.5523 14 17V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
+              {showCopiedToast && (
+                <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">
+                  Link copied!
+                </span>
+              )}
             </button>
 
-            <button className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
+            <button onClick={() => setShowReportModal(true)} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
               <span className="text-[9px] font-mono">Report</span>
               <svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 1V17M1 1H11L15 5V13L11 17H1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -406,6 +492,10 @@ export default function ProfilePage() {
       <ThankYouModal
         isOpen={showThankYou}
         onClose={() => setShowThankYou(false)}
+      />
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
       />
     </div>
   );
