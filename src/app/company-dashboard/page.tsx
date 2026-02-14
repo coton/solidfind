@@ -92,7 +92,7 @@ export default function CompanyDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
-      <Header isLoggedIn={true} userType="company" />
+      <Header />
 
       <main className="max-w-[900px] mx-auto px-6 py-8">
         {/* Header Row */}

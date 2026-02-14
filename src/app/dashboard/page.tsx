@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useUser, SignOutButton } from "@clerk/nextjs";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/cards";
@@ -77,10 +78,12 @@ export default function DashboardPage() {
   const [sortByRenovation, setSortByRenovation] = useState("latest");
   const [sortDropdownOpen, setSortDropdownOpen] = useState<string | null>(null);
 
-  // Mock user data
+  const { user: clerkUser } = useUser();
+
+  // Use Clerk user data with fallback to mock
   const user = {
-    name: "User name",
-    email: "user@gmail.com",
+    name: clerkUser?.fullName || clerkUser?.firstName || "User name",
+    email: clerkUser?.primaryEmailAddress?.emailAddress || "user@gmail.com",
   };
 
   return (
@@ -108,9 +111,11 @@ export default function DashboardPage() {
               <button className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
                 DELETE PROFILE
               </button>
-              <button className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                LOG OUT
-              </button>
+              <SignOutButton>
+                <button className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+                  LOG OUT
+                </button>
+              </SignOutButton>
             </div>
             <button className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors">
               Your reviews

@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { AuthModal } from "./AuthModal";
+import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 
 const mainCategories = [
   { id: "construction", label: "01. Construction" },
@@ -116,57 +115,16 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: Drop
   );
 }
 
-interface HeaderProps {
-  isLoggedIn?: boolean;
-  userType?: "company" | "individual";
-}
-
-export function Header({ isLoggedIn: isLoggedInProp, userType: userTypeProp }: HeaderProps = {}) {
-  const router = useRouter();
+export function Header() {
+  const { user } = useUser();
   const [activeCategory, setActiveCategory] = useState("construction");
   const [keywords, setKeywords] = useState("");
   const [projectSize, setProjectSize] = useState("");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "register">("register");
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    if (isLoggedInProp !== undefined) return isLoggedInProp;
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("isLoggedIn") === "true";
-    }
-    return false;
-  });
-  const [userType, setUserType] = useState<"company" | "individual" | null>(() => {
-    if (userTypeProp !== undefined) return userTypeProp;
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("userType") as "company" | "individual" | null;
-    }
-    return null;
-  });
 
-  // Sync state with localStorage on client-side hydration
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    const storedUserType = localStorage.getItem("userType") as "company" | "individual" | null;
-    if (isLoggedInProp === undefined && loggedIn !== isLoggedIn) {
-      setIsLoggedIn(loggedIn);
-    }
-    if (userTypeProp === undefined && storedUserType !== userType) {
-      setUserType(storedUserType);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userType");
-    localStorage.removeItem("userEmail");
-    setIsLoggedIn(false);
-    setUserType(null);
-    router.push("/");
-  };
+  // Determine user type from Clerk metadata (default to "individual")
+  const userType = (user?.publicMetadata?.accountType as string) || "individual";
 
   const clearFilters = () => {
     setKeywords("");
@@ -210,37 +168,37 @@ export function Header({ isLoggedIn: isLoggedInProp, userType: userTypeProp }: H
             <button className="text-[#f8f8f8] hover:opacity-80 transition-opacity">
               <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
             </button>
-            {isLoggedIn ? (
-              <>
-                <Link
-                  href={userType === "company" ? "/company-dashboard" : "/dashboard"}
-                  className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
-                >
-                  <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="h-10 px-6 rounded-full bg-[#f8f8f8] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-white transition-colors"
-                >
-                  Log out
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => { setAuthMode("login"); setAuthModalOpen(true); }}
-                  className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
-                >
-                  <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
-                </button>
-                <button
-                  onClick={() => { setAuthMode("register"); setAuthModalOpen(true); }}
-                  className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors"
-                >
-                  List your business
-                </button>
-              </>
-            )}
+
+            <SignedIn>
+              <Link
+                href={userType === "company" ? "/company-dashboard" : "/dashboard"}
+                className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
+              >
+                <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
+              </Link>
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: "w-10 h-10",
+                  },
+                }}
+              />
+            </SignedIn>
+
+            <SignedOut>
+              <Link
+                href="/sign-in"
+                className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
+              >
+                <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
+              </Link>
+              <Link
+                href="/sign-up"
+                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
+              >
+                List your business
+              </Link>
+            </SignedOut>
           </div>
         </div>
 
@@ -328,13 +286,6 @@ export function Header({ isLoggedIn: isLoggedInProp, userType: userTypeProp }: H
           </div>
         </div>
       </div>
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialMode={authMode}
-      />
     </header>
   );
 }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
+import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import "./globals.css";
 
 const sora = Sora({
@@ -19,13 +21,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${sora.variable} font-sans antialiased`}
-        style={{ fontFamily: "var(--font-sora), sans-serif" }}
-      >
-        {children}
-      </body>
-    </html>
+    <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      dynamic
+    >
+      <html lang="en">
+        <body
+          className={`${sora.variable} font-sans antialiased`}
+          style={{ fontFamily: "var(--font-sora), sans-serif" }}
+        >
+          <ConvexClientProvider>
+            {children}
+          </ConvexClientProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
