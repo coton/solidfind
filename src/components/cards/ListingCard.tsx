@@ -9,6 +9,7 @@ interface ListingCardProps {
   id: string;
   name: string;
   description: string;
+  category?: string;
   rating?: number;
   reviewCount?: number;
   projects?: number;
@@ -18,6 +19,7 @@ interface ListingCardProps {
   isFeatured?: boolean;
   isSaved?: boolean;
   imageUrl?: string;
+  onBookmark?: () => void;
 }
 
 export function ListingCard({
@@ -33,6 +35,7 @@ export function ListingCard({
   isFeatured = false,
   isSaved = false,
   imageUrl,
+  onBookmark,
 }: ListingCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -71,6 +74,7 @@ export function ListingCard({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  onBookmark?.();
                 }}
               >
                 <Bookmark
@@ -135,6 +139,7 @@ export function ListingCard({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                onBookmark?.();
               }}
               className="hover:opacity-80 transition-opacity"
             >

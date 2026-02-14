@@ -21,6 +21,17 @@ export const listByUser = query({
   },
 });
 
+export const listSavedIds = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const saved = await ctx.db
+      .query("savedListings")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .collect();
+    return saved.map((s) => s.companyId);
+  },
+});
+
 export const toggle = mutation({
   args: {
     userId: v.id("users"),

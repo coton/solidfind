@@ -28,6 +28,17 @@ export default defineSchema({
     imageUrl: v.optional(v.string()),
     bookmarkCount: v.optional(v.number()),
     viewsLastMonth: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    email: v.optional(v.string()),
+    website: v.optional(v.string()),
+    whatsapp: v.optional(v.string()),
+    facebook: v.optional(v.string()),
+    linkedin: v.optional(v.string()),
+    projectSizes: v.optional(v.array(v.string())),
+    constructionTypes: v.optional(v.array(v.string())),
+    constructionLocations: v.optional(v.array(v.string())),
+    renovationTypes: v.optional(v.array(v.string())),
+    renovationLocations: v.optional(v.array(v.string())),
     createdAt: v.number(),
   })
     .index("by_ownerId", ["ownerId"])

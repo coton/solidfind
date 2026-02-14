@@ -38,6 +38,14 @@ export const list = query({
   },
 });
 
+export const latest = query({
+  args: {},
+  handler: async (ctx) => {
+    const companies = await ctx.db.query("companies").order("desc").take(4);
+    return companies;
+  },
+});
+
 export const getById = query({
   args: { id: v.id("companies") },
   handler: async (ctx, args) => {
@@ -92,6 +100,17 @@ export const update = mutation({
     isPro: v.optional(v.boolean()),
     projects: v.optional(v.number()),
     teamSize: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    email: v.optional(v.string()),
+    website: v.optional(v.string()),
+    whatsapp: v.optional(v.string()),
+    facebook: v.optional(v.string()),
+    linkedin: v.optional(v.string()),
+    projectSizes: v.optional(v.array(v.string())),
+    constructionTypes: v.optional(v.array(v.string())),
+    constructionLocations: v.optional(v.array(v.string())),
+    renovationTypes: v.optional(v.array(v.string())),
+    renovationLocations: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;

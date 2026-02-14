@@ -97,14 +97,28 @@ export default function EditProfilePage() {
   const [projectsNumber, setProjectsNumber] = useState("");
   const [teamSize, setTeamSize] = useState("");
 
+  // Project size options
+  const [selectedProjectSizes, setSelectedProjectSizes] = useState<string[]>([]);
+
   // Populate form when company data loads
   useEffect(() => {
     if (company) {
       setCompanyName(company.name ?? "");
       setAddress(company.address ?? "");
+      setPhone(company.phone ?? "");
+      setEmail(company.email ?? "");
+      setWebsite(company.website ?? "");
+      setWhatsapp(company.whatsapp ?? "");
+      setFacebook(company.facebook ?? "");
+      setLinkedin(company.linkedin ?? "");
       setDescription(company.description ?? "");
       setProjectsNumber(company.projects?.toString() ?? "");
       setTeamSize(company.teamSize?.toString() ?? "");
+      setSelectedProjectSizes(company.projectSizes ?? []);
+      setSelectedConstruction(company.constructionTypes ?? ["residential"]);
+      setSelectedConstructionLocations(company.constructionLocations ?? ["bali"]);
+      setSelectedRenovation(company.renovationTypes ?? []);
+      setSelectedRenovationLocations(company.renovationLocations ?? ["bali"]);
     }
   }, [company]);
 
@@ -131,6 +145,17 @@ export default function EditProfilePage() {
       address: address || undefined,
       projects: projectsNumber ? parseInt(projectsNumber) : undefined,
       teamSize: teamSize ? parseInt(teamSize) : undefined,
+      phone: phone || undefined,
+      email: email || undefined,
+      website: website || undefined,
+      whatsapp: whatsapp || undefined,
+      facebook: facebook || undefined,
+      linkedin: linkedin || undefined,
+      projectSizes: selectedProjectSizes,
+      constructionTypes: selectedConstruction,
+      constructionLocations: selectedConstructionLocations,
+      renovationTypes: selectedRenovation,
+      renovationLocations: selectedRenovationLocations,
     });
     router.push("/company-dashboard");
   };
@@ -396,6 +421,34 @@ export default function EditProfilePage() {
                   onChange={(e) => setTeamSize(e.target.value)}
                   className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
                 />
+              </div>
+            </div>
+
+            {/* Project Size */}
+            <div>
+              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
+                Project Size / Ukuran Proyek
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: "any", label: "Any Size" },
+                  { id: "solo", label: "Solo/Couple" },
+                  { id: "family", label: "Family/Co-Hosting" },
+                  { id: "shared", label: "Shared/Community" },
+                ].map((size) => (
+                  <button
+                    key={size.id}
+                    type="button"
+                    onClick={() => toggleService(selectedProjectSizes, setSelectedProjectSizes, size.id)}
+                    className={`px-3 py-1.5 rounded-full text-[10px] font-medium tracking-[0.2px] border transition-colors ${
+                      selectedProjectSizes.includes(size.id)
+                        ? 'bg-[#f14110] text-white border-[#f14110]'
+                        : 'bg-white text-[#333] border-[#e4e4e4] hover:border-[#f14110]'
+                    }`}
+                  >
+                    {size.label}
+                  </button>
+                ))}
               </div>
             </div>
 
