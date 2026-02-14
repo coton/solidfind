@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Bookmark } from "lucide-react";
 
 interface ListingCardProps {
   id: string;
@@ -72,12 +73,8 @@ export function ListingCard({
                   e.stopPropagation();
                 }}
               >
-                <Image
-                  src="/images/icon-bookmark.svg"
-                  alt="Save"
-                  width={16}
-                  height={22}
-                  className={isSaved ? 'opacity-100' : 'opacity-40'}
+                <Bookmark
+                  className={`w-[16px] h-[22px] ${isSaved ? 'fill-[#f14110] text-[#f14110]' : 'fill-none text-[#d8d8d8]'}`}
                 />
               </button>
             </div>
@@ -93,14 +90,12 @@ export function ListingCard({
             </div>
           )}
 
-          {/* Colored dots (shown when featured) */}
-          {isFeatured && (
-            <div className="absolute top-[40px] left-[70px] flex gap-1">
-              <div className="w-4 h-4 rounded-full bg-[#f14110]" />
-              <div className="w-4 h-4 rounded-full bg-[#e9a28e]" />
-              <div className="w-4 h-4 rounded-full bg-[#f4c542]" />
-            </div>
-          )}
+          {/* Colored dots */}
+          <div className="absolute top-[40px] left-[70px] flex gap-1">
+            <div className="w-4 h-4 rounded-full bg-[#f14110]" />
+            <div className="w-4 h-4 rounded-full bg-[#e9a28e]" />
+            <div className="w-4 h-4 rounded-full bg-[#f4c542]" />
+          </div>
 
           {/* Company Name */}
           <div className="absolute top-[70px] left-[10px] right-[10px]">
@@ -141,14 +136,10 @@ export function ListingCard({
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className="text-[#d8d8d8] hover:text-white transition-colors"
+              className="hover:opacity-80 transition-opacity"
             >
-              <Image
-                src="/images/icon-bookmark.svg"
-                alt="Save"
-                width={16}
-                height={22}
-                className={isSaved ? 'opacity-100' : 'opacity-60'}
+              <Bookmark
+                className={`w-[16px] h-[22px] ${isSaved ? 'fill-[#f14110] text-[#f14110]' : 'fill-none text-[#d8d8d8]'}`}
               />
             </button>
           </div>

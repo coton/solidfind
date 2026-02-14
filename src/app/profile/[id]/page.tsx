@@ -11,14 +11,15 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
+import { Star } from "lucide-react";
 
-function ReviewCard({ name, text, date }: { name: string; rating?: number; text: string; date: string }) {
+function ReviewCard({ name, rating = 5, text, date }: { name: string; rating?: number; text: string; date: string }) {
   return (
     <div className="w-[210px]">
       <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-2">{name}</p>
       <div className="flex items-center gap-1.5 mb-2">
-        {Array(5).fill(null).map((_, i) => (
-          <Image key={i} src="/images/icon-star.svg" alt="" width={14} height={14} />
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Star key={i} className={`w-[14px] h-[14px] ${i <= rating ? 'fill-[#f14110] text-[#f14110]' : 'fill-[#e4e4e4] text-[#e4e4e4]'}`} />
         ))}
       </div>
       <p className="text-[10px] text-[#333] leading-[18px] tracking-[0.2px] mb-2 line-clamp-4">{text}</p>
