@@ -46,22 +46,27 @@ export function ListingCard({
       >
         {/* Normal State */}
         <div className={`absolute inset-0 transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
-          {/* Hero Image - top portion */}
-          <div className="relative h-[110px] w-full">
-            <Image
-              src={imageUrl || "/images/card-sample.png"}
-              alt={name}
-              fill
-              className="object-cover"
-            />
-            {/* Rating & Bookmark overlay on image */}
-            <div className="absolute top-[8px] right-[8px] flex items-center gap-1.5">
-              <div className="flex items-center gap-1 bg-black/40 rounded-[4px] px-1.5 py-0.5">
-                <Image src="/images/icon-star.svg" alt="" width={14} height={14} />
-                <span className="text-[11px] font-semibold text-white">{rating}</span>
+          {/* Top Row */}
+          <div className="absolute top-[10px] left-[10px] right-[10px] flex items-start justify-between">
+            {/* Left: Logo */}
+            <div className="w-[50px] h-[50px] bg-[#d8d8d8] rounded-[6px] overflow-hidden">
+              <Image
+                src={imageUrl || "/images/card-sample.png"}
+                alt=""
+                width={50}
+                height={50}
+                className="object-cover w-full h-full"
+              />
+            </div>
+
+            {/* Right: Rating and Bookmark */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <Image src="/images/icon-star.svg" alt="" width={18} height={18} />
+                <span className="text-[13px] font-semibold text-[#d8d8d8]">{rating}</span>
               </div>
               <button
-                className="hover:opacity-70 transition-opacity bg-black/40 rounded-[4px] p-1"
+                className="hover:opacity-70 transition-opacity"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -70,44 +75,45 @@ export function ListingCard({
                 <Image
                   src="/images/icon-bookmark.svg"
                   alt="Save"
-                  width={12}
-                  height={16}
-                  className={isSaved ? 'opacity-100' : 'opacity-60'}
+                  width={16}
+                  height={22}
+                  className={isSaved ? 'opacity-100' : 'opacity-40'}
                 />
               </button>
             </div>
-
-            {/* Pro Badge overlay */}
-            {isPro && (
-              <div className="absolute bottom-[6px] right-[8px] flex items-center gap-1">
-                <Image src="/images/icon-sponsored.svg" alt="" width={16} height={16} />
-                <div className="bg-white/80 rounded-[10px] px-1.5 py-0.5">
-                  <span className="text-[8px] text-[#333]/60 font-medium">Pro</span>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Content - bottom portion */}
-          <div className="px-[10px] pt-[8px] pb-[10px] flex flex-col h-[120px]">
-            {/* Company Name */}
-            <h3 className="font-semibold text-[14px] leading-[16px] tracking-[0.28px] text-[#333] uppercase line-clamp-2 mb-1">
+          {/* Pro Account Badge */}
+          {isPro && (
+            <div className="absolute top-[40px] right-[8px] flex items-center gap-1">
+              <Image src="/images/icon-sponsored.svg" alt="" width={20} height={20} />
+              <div className="bg-[#e4e4e4] rounded-[10px] px-2 py-0.5">
+                <span className="text-[9px] text-[#333]/35 font-medium">Pro Account</span>
+              </div>
+            </div>
+          )}
+
+          {/* Colored dots (shown when featured) */}
+          {isFeatured && (
+            <div className="absolute top-[40px] left-[70px] flex gap-1">
+              <div className="w-4 h-4 rounded-full bg-[#f14110]" />
+              <div className="w-4 h-4 rounded-full bg-[#e9a28e]" />
+              <div className="w-4 h-4 rounded-full bg-[#f4c542]" />
+            </div>
+          )}
+
+          {/* Company Name */}
+          <div className="absolute top-[70px] left-[10px] right-[10px]">
+            <h3 className="font-semibold text-[16px] leading-[16px] tracking-[0.32px] text-[#333] uppercase line-clamp-3">
               {name}
             </h3>
+          </div>
 
-            {/* Description */}
-            <p className="text-[9px] leading-[13px] tracking-[0.18px] text-[#333]/50 line-clamp-3 flex-1">
+          {/* Description */}
+          <div className="absolute bottom-[10px] left-[10px] right-[10px]">
+            <p className="text-[10px] leading-[14px] tracking-[0.2px] text-[#333]/50 line-clamp-3">
               {description}
             </p>
-
-            {/* Colored dots (shown when featured) */}
-            {isFeatured && (
-              <div className="flex gap-1 mt-1">
-                <div className="w-3 h-3 rounded-full bg-[#f14110]" />
-                <div className="w-3 h-3 rounded-full bg-[#e9a28e]" />
-                <div className="w-3 h-3 rounded-full bg-[#f4c542]" />
-              </div>
-            )}
           </div>
         </div>
 
