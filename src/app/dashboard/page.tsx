@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -82,9 +83,12 @@ export default function DashboardPage() {
                 </button>
               </SignOutButton>
             </div>
-            <button className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors">
+            <Link
+              href="/reviews"
+              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center"
+            >
               Your reviews
-            </button>
+            </Link>
           </div>
         </div>
 

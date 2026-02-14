@@ -11,6 +11,27 @@ export const listByCompany = query({
   },
 });
 
+export const listByUser = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const reviews = await ctx.db
+      .query("reviews")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .collect();
+
+    // Enrich with company name
+    const enriched = await Promise.all(
+      reviews.map(async (r) => {
+        const company = await ctx.db.get(r.companyId);
+        return { ...r, companyName: company?.name ?? "Unknown Company" };
+      })
+    );
+
+    return enriched;
+  },
+});
+
 export const create = mutation({
   args: {
     companyId: v.id("companies"),

@@ -63,6 +63,19 @@ export const getByOwner = query({
   },
 });
 
+export const getAdjacentIds = query({
+  args: { id: v.id("companies") },
+  handler: async (ctx, args) => {
+    const all = await ctx.db.query("companies").order("asc").collect();
+    const idx = all.findIndex((c) => c._id === args.id);
+    if (idx === -1) return { prevId: null, nextId: null };
+    return {
+      prevId: idx > 0 ? all[idx - 1]._id : null,
+      nextId: idx < all.length - 1 ? all[idx + 1]._id : null,
+    };
+  },
+});
+
 export const create = mutation({
   args: {
     ownerId: v.id("users"),

@@ -68,6 +68,11 @@ export default function ProfilePage() {
       : "skip"
   );
 
+  const adjacentIds = useQuery(
+    api.companies.getAdjacentIds,
+    validId ? { id: validId } : "skip"
+  );
+
   const toggleSave = useMutation(api.savedListings.toggle);
   const createReview = useMutation(api.reviews.create);
 
@@ -336,9 +341,12 @@ export default function ProfilePage() {
                   Write a Review
                 </button>
               )}
-              <button className="h-[40px] px-6 rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors">
+              <Link
+                href={`/profile/${companyId}/reviews`}
+                className="h-[40px] px-6 rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center"
+              >
                 See all
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -351,12 +359,26 @@ export default function ProfilePage() {
 
         {/* Navigation */}
         <div className="flex items-center justify-between mb-8">
-          <button className="text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors">
-            ← PREVIOUS
-          </button>
-          <button className="text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors">
-            NEXT →
-          </button>
+          {adjacentIds?.prevId ? (
+            <Link
+              href={`/profile/${adjacentIds.prevId}`}
+              className="text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
+            >
+              ← PREVIOUS
+            </Link>
+          ) : (
+            <span className="text-[11px] font-semibold text-[#333]/30 tracking-[0.22px]">← PREVIOUS</span>
+          )}
+          {adjacentIds?.nextId ? (
+            <Link
+              href={`/profile/${adjacentIds.nextId}`}
+              className="text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
+            >
+              NEXT →
+            </Link>
+          ) : (
+            <span className="text-[11px] font-semibold text-[#333]/30 tracking-[0.22px]">NEXT →</span>
+          )}
         </div>
 
         {/* Ad Banner */}

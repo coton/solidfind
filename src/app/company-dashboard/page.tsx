@@ -69,9 +69,11 @@ export default function CompanyDashboardPage() {
     { month: "April", views: 32 },
   ];
 
+  const isPro = company?.isPro ?? false;
+
   const data = {
     name: company?.name ?? "Company Name",
-    accountType: company?.isPro ? "PRO" : "FREE",
+    accountType: isPro ? "PRO" : "FREE",
     stats: {
       bookmarked: company?.bookmarkCount ?? 0,
       viewsLastMonth: company?.viewsLastMonth ?? 0,
@@ -108,22 +110,40 @@ export default function CompanyDashboardPage() {
 
           <div className="text-right">
             <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">
-              PRO ACCOUNT
+              {isPro ? "PRO ACCOUNT" : "FREE ACCOUNT"}
             </p>
-            <button className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-              DELETE PROFILE
-            </button>
+            {isPro ? (
+              <button className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+                DELETE PROFILE
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowProModal(true)}
+                className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]"
+              >
+                UPGRADE FOR MORE
+              </button>
+            )}
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
-          <button
-            onClick={() => setShowAdModal(true)}
-            className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"
-          >
-            Get AD space
-          </button>
+          {isPro ? (
+            <button
+              onClick={() => setShowAdModal(true)}
+              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"
+            >
+              Get AD space
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowProModal(true)}
+              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"
+            >
+              Get PRO
+            </button>
+          )}
           <Link
             href="/company-dashboard/edit"
             className="h-10 px-6 rounded-full bg-[#333] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#444] transition-colors flex items-center"
@@ -133,47 +153,51 @@ export default function CompanyDashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
-          {/* Bookmarked */}
-          <div>
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-              Company bookmarked /
-            </p>
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-              Perusahaan favorit sebanyak
-            </p>
-            <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px]">
-              {data.stats.bookmarked}
-              <span className="text-[14px] font-normal ml-1">Times</span>
-            </p>
-          </div>
+        <div className={`grid ${isPro ? 'grid-cols-4' : 'grid-cols-1 justify-items-end'} gap-6 mb-8`}>
+          {isPro && (
+            <>
+              {/* Bookmarked */}
+              <div>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                  Company bookmarked /
+                </p>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
+                  Perusahaan favorit sebanyak
+                </p>
+                <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px]">
+                  {data.stats.bookmarked}
+                  <span className="text-[14px] font-normal ml-1">Times</span>
+                </p>
+              </div>
 
-          {/* Views Last Month */}
-          <div>
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-              View within the last month /
-            </p>
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-              Lihat dalam sebulan terakhir
-            </p>
-            <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px]">
-              {data.stats.viewsLastMonth}
-              <span className="text-[14px] font-normal ml-1">Views</span>
-            </p>
-          </div>
+              {/* Views Last Month */}
+              <div>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                  View within the last month /
+                </p>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
+                  Lihat dalam sebulan terakhir
+                </p>
+                <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px]">
+                  {data.stats.viewsLastMonth}
+                  <span className="text-[14px] font-normal ml-1">Views</span>
+                </p>
+              </div>
 
-          {/* Most Searched Location */}
-          <div>
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-              Most frequent location searched/
-            </p>
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-              Lokasi yang paling sering lokasi
-            </p>
-            <p className="text-[24px] font-bold text-[#f14110] tracking-[0.48px]">
-              {data.stats.mostSearchedLocation}
-            </p>
-          </div>
+              {/* Most Searched Location */}
+              <div>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                  Most frequent location searched/
+                </p>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
+                  Lokasi yang paling sering lokasi
+                </p>
+                <p className="text-[24px] font-bold text-[#f14110] tracking-[0.48px]">
+                  {data.stats.mostSearchedLocation}
+                </p>
+              </div>
+            </>
+          )}
 
           {/* PRO Features */}
           <div className="bg-white rounded-[6px] p-4">
@@ -230,7 +254,7 @@ export default function CompanyDashboardPage() {
         </div>
 
         {/* Monthly Views Chart */}
-        <div className="mb-8">
+        {isPro && <div className="mb-8">
           <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">
             This Month views /
           </p>
@@ -256,7 +280,7 @@ export default function CompanyDashboardPage() {
               ))}
             </div>
           </div>
-        </div>
+        </div>}
 
         {/* Reviews Section */}
         <div className="mb-8">
