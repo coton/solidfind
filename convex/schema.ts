@@ -39,6 +39,8 @@ export default defineSchema({
     constructionLocations: v.optional(v.array(v.string())),
     renovationTypes: v.optional(v.array(v.string())),
     renovationLocations: v.optional(v.array(v.string())),
+    logoId: v.optional(v.id("_storage")),
+    projectImageIds: v.optional(v.array(v.id("_storage"))),
     createdAt: v.number(),
   })
     .index("by_ownerId", ["ownerId"])

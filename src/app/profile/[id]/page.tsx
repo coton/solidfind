@@ -15,6 +15,16 @@ import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
 import { Star } from "lucide-react";
 
+function useStorageUrl(storageId: Id<"_storage"> | undefined) {
+  return useQuery(api.files.getUrl, storageId ? { storageId } : "skip");
+}
+
+function StorageImage({ storageId, alt, className, width, height, fill }: { storageId: Id<"_storage">; alt: string; className?: string; width?: number; height?: number; fill?: boolean }) {
+  const url = useStorageUrl(storageId);
+  if (!url) return <div className={className} style={{ width, height, background: '#d8d8d8' }} />;
+  return fill ? <Image src={url} alt={alt} fill className={className} /> : <Image src={url} alt={alt} width={width ?? 210} height={height ?? 210} className={className} />;
+}
+
 function formatWhatsApp(num: string): string {
   return num.replace(/^[+0]+/, "");
 }
@@ -220,8 +230,10 @@ export default function ProfilePage() {
         <div className="grid grid-cols-[210px_210px_1fr_70px] gap-5 mb-8">
           {/* Column 1: Logo */}
           <div>
-            <div className="w-[210px] h-[210px] rounded-[6px] bg-[#d8d8d8] overflow-hidden">
-              {company.imageUrl ? (
+            <div className="w-[210px] h-[210px] rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
+              {company.logoId ? (
+                <StorageImage storageId={company.logoId} alt={company.name} fill className="object-cover w-full h-full" />
+              ) : company.imageUrl ? (
                 <Image
                   src={company.imageUrl}
                   alt={company.name}
@@ -371,32 +383,49 @@ export default function ProfilePage() {
         {/* Photos Grid + Services */}
         <div className="grid grid-cols-[440px_1fr] gap-5 mb-8">
           <div className="grid grid-cols-4 gap-5">
-            {Array(12).fill(null).map((_, index) => (
-              <div
-                key={index}
-                className="w-[95px] h-[95px] rounded-[6px] bg-[#d8d8d8]"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3C/svg%3E")`,
-                  backgroundSize: '10px 10px'
-                }}
-              />
-            ))}
+            {Array(12).fill(null).map((_, index) => {
+              const imgId = company.projectImageIds?.[index];
+              return (
+                <div
+                  key={index}
+                  className="w-[95px] h-[95px] rounded-[6px] bg-[#d8d8d8] overflow-hidden relative"
+                  style={!imgId ? {
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3C/svg%3E")`,
+                    backgroundSize: '10px 10px'
+                  } : undefined}
+                >
+                  {imgId && <StorageImage storageId={imgId} alt={`Project ${index + 1}`} fill className="object-cover" />}
+                </div>
+              );
+            })}
           </div>
 
           <div className="space-y-4">
             <p className="text-[9px] text-[#333] font-mono">Services provided:</p>
-            <div>
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">PROJECT SIZE</p>
-              <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">Solo / Couple, Family / Co-Hosting, Shared / Community</p>
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">CONSTRUCTION</p>
-              <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">Residential, Commercial, Hospitality</p>
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">RENOVATION</p>
-              <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">Whole House, Bathroom, Bedroom, Living room, Electricity, Roof, Pool, Mold, Tiling, Painting, Fencing</p>
-            </div>
+            {(company.projectSizes?.length ?? 0) > 0 && (
+              <div>
+                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">PROJECT SIZE</p>
+                <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.projectSizes!.join(", ")}</p>
+              </div>
+            )}
+            {(company.constructionTypes?.length ?? 0) > 0 && (
+              <div>
+                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">CONSTRUCTION</p>
+                <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.constructionTypes!.join(", ")}</p>
+                {(company.constructionLocations?.length ?? 0) > 0 && (
+                  <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.constructionLocations!.join(", ")}</p>
+                )}
+              </div>
+            )}
+            {(company.renovationTypes?.length ?? 0) > 0 && (
+              <div>
+                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">RENOVATION</p>
+                <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.renovationTypes!.join(", ")}</p>
+                {(company.renovationLocations?.length ?? 0) > 0 && (
+                  <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.renovationLocations!.join(", ")}</p>
+                )}
+              </div>
+            )}
             <div>
               <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">LOCATION</p>
               <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.location ?? "Bali"}</p>

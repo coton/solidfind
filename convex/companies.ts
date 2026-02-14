@@ -124,6 +124,8 @@ export const update = mutation({
     constructionLocations: v.optional(v.array(v.string())),
     renovationTypes: v.optional(v.array(v.string())),
     renovationLocations: v.optional(v.array(v.string())),
+    logoId: v.optional(v.id("_storage")),
+    projectImageIds: v.optional(v.array(v.id("_storage"))),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;

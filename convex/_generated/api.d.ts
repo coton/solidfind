@@ -9,6 +9,7 @@
  */
 
 import type * as companies from "../companies.js";
+import type * as files from "../files.js";
 import type * as reviews from "../reviews.js";
 import type * as savedListings from "../savedListings.js";
 import type * as seed from "../seed.js";
@@ -22,6 +23,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   companies: typeof companies;
+  files: typeof files;
   reviews: typeof reviews;
   savedListings: typeof savedListings;
   seed: typeof seed;
