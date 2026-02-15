@@ -42,6 +42,7 @@ export default defineSchema({
     renovationLocations: v.optional(v.array(v.string())),
     logoId: v.optional(v.id("_storage")),
     projectImageIds: v.optional(v.array(v.id("_storage"))),
+    projectImageUrls: v.optional(v.array(v.string())), // External image URLs as fallback
     createdAt: v.number(),
   })
     .index("by_ownerId", ["ownerId"])

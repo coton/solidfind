@@ -1,5 +1,29 @@
 import { mutation } from "./_generated/server";
 
+// Bali-themed project images from Unsplash
+const projectImagePool = [
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600607687644-c7171b42498f?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600585154363-67eb9e2e2099?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600607687929-b8a3f50b53b2?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600585154084-4e5fe7c39198?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1584738766473-61c083514bf4?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1559767949-0faa5c7e9992?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop&q=80",
+];
+
 const companies = [
   // CONSTRUCTION
   {
@@ -18,6 +42,7 @@ const companies = [
     bookmarkCount: 58,
     viewsLastMonth: 1350,
     imageUrl: "https://ui-avatars.com/api/?name=Balitecture&size=200&background=f14110&color=fff&bold=true",
+    projectImageUrls: projectImagePool.slice(0, 12),
   },
   {
     name: "Bali Construction",
@@ -35,6 +60,7 @@ const companies = [
     bookmarkCount: 45,
     viewsLastMonth: 1100,
     imageUrl: "https://ui-avatars.com/api/?name=Bali+Construction&size=200&background=e9a28e&color=fff&bold=true",
+    projectImageUrls: projectImagePool.slice(1, 13),
   },
   {
     name: "888 Design & Build",
@@ -52,6 +78,7 @@ const companies = [
     bookmarkCount: 28,
     viewsLastMonth: 680,
     imageUrl: "https://ui-avatars.com/api/?name=888&size=200&background=f4c542&color=333&bold=true",
+  projectImageUrls: projectImagePool.slice(5, 17),
   },
   {
     name: "Karyanusa Asia",
@@ -69,6 +96,7 @@ const companies = [
     bookmarkCount: 72,
     viewsLastMonth: 1800,
     imageUrl: "https://ui-avatars.com/api/?name=Karyanusa&size=200&background=f14110&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(8, 20),
   },
   {
     name: "POPULAIRE",
@@ -86,6 +114,7 @@ const companies = [
     bookmarkCount: 65,
     viewsLastMonth: 1600,
     imageUrl: "https://ui-avatars.com/api/?name=POPULAIRE&size=200&background=e9a28e&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(7, 19),
   },
   // ARCHITECTURE
   {
@@ -104,6 +133,7 @@ const companies = [
     bookmarkCount: 22,
     viewsLastMonth: 520,
     imageUrl: "https://ui-avatars.com/api/?name=Earth+Lines&size=200&background=4a9d5f&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(6, 18),
   },
   {
     name: "IBUKU",
@@ -121,6 +151,7 @@ const companies = [
     bookmarkCount: 95,
     viewsLastMonth: 2200,
     imageUrl: "https://ui-avatars.com/api/?name=IBUKU&size=200&background=8b6f47&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(3, 15),
   },
   {
     name: "Studio Jencquel",
@@ -138,6 +169,7 @@ const companies = [
     bookmarkCount: 35,
     viewsLastMonth: 780,
     imageUrl: "https://ui-avatars.com/api/?name=Jencquel&size=200&background=333&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(3, 15),
   },
   {
     name: "Cipta Bali Architect",
@@ -155,6 +187,7 @@ const companies = [
     bookmarkCount: 15,
     viewsLastMonth: 390,
     imageUrl: "https://ui-avatars.com/api/?name=Cipta&size=200&background=f14110&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(2, 14),
   },
   {
     name: "Lumbung Architect",
@@ -172,6 +205,7 @@ const companies = [
     bookmarkCount: 48,
     viewsLastMonth: 950,
     imageUrl: "https://ui-avatars.com/api/?name=Lumbung&size=200&background=8b6f47&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(8, 20),
   },
   // INTERIOR DESIGN
   {
@@ -190,6 +224,7 @@ const companies = [
     bookmarkCount: 38,
     viewsLastMonth: 870,
     imageUrl: "https://ui-avatars.com/api/?name=BDS&size=200&background=3a6ea5&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(2, 14),
   },
   {
     name: "Design Assembly",
@@ -207,6 +242,7 @@ const companies = [
     bookmarkCount: 20,
     viewsLastMonth: 460,
     imageUrl: "https://ui-avatars.com/api/?name=DA&size=200&background=e9a28e&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(7, 19),
   },
   {
     name: "Mahallati Interior",
@@ -224,6 +260,7 @@ const companies = [
     bookmarkCount: 42,
     viewsLastMonth: 1050,
     imageUrl: "https://ui-avatars.com/api/?name=Mahallati&size=200&background=8b4513&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(7, 19),
   },
   {
     name: "Azula Designs",
@@ -241,6 +278,7 @@ const companies = [
     bookmarkCount: 12,
     viewsLastMonth: 310,
     imageUrl: "https://ui-avatars.com/api/?name=Azula&size=200&background=4a90e2&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(1, 13),
   },
   {
     name: "Canggu & Co",
@@ -258,6 +296,7 @@ const companies = [
     bookmarkCount: 14,
     viewsLastMonth: 350,
     imageUrl: "https://ui-avatars.com/api/?name=Canggu+Co&size=200&background=f4c542&color=333&bold=true",
+  projectImageUrls: projectImagePool.slice(4, 16),
   },
   // RENOVATION
   {
@@ -276,6 +315,7 @@ const companies = [
     bookmarkCount: 10,
     viewsLastMonth: 280,
     imageUrl: "https://ui-avatars.com/api/?name=NC+Eco&size=200&background=4a9d5f&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(0, 12),
   },
   {
     name: "Bali Renovation Pro",
@@ -293,6 +333,7 @@ const companies = [
     bookmarkCount: 42,
     viewsLastMonth: 890,
     imageUrl: "https://ui-avatars.com/api/?name=Reno+Pro&size=200&background=f14110&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(5, 17),
   },
   {
     name: "Tropical Home Renovations",
@@ -310,6 +351,7 @@ const companies = [
     bookmarkCount: 28,
     viewsLastMonth: 520,
     imageUrl: "https://ui-avatars.com/api/?name=Tropical&size=200&background=2ecc71&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(3, 15),
   },
   {
     name: "Villa Refresh Bali",
@@ -327,6 +369,7 @@ const companies = [
     bookmarkCount: 22,
     viewsLastMonth: 410,
     imageUrl: "https://ui-avatars.com/api/?name=Villa+Refresh&size=200&background=3498db&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(4, 16),
   },
   // REAL ESTATE
   {
@@ -345,6 +388,7 @@ const companies = [
     bookmarkCount: 80,
     viewsLastMonth: 1900,
     imageUrl: "https://ui-avatars.com/api/?name=Mirah&size=200&background=9b59b6&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(3, 15),
   },
   {
     name: "COCO Development Group",
@@ -362,6 +406,7 @@ const companies = [
     bookmarkCount: 18,
     viewsLastMonth: 520,
     imageUrl: "https://ui-avatars.com/api/?name=COCO&size=200&background=8b4513&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(6, 18),
   },
   {
     name: "Lyvin Properties",
@@ -379,6 +424,7 @@ const companies = [
     bookmarkCount: 25,
     viewsLastMonth: 640,
     imageUrl: "https://ui-avatars.com/api/?name=Lyvin&size=200&background=16a085&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(8, 20),
   },
   {
     name: "Ciputra Group",
@@ -396,6 +442,7 @@ const companies = [
     bookmarkCount: 90,
     viewsLastMonth: 2100,
     imageUrl: "https://ui-avatars.com/api/?name=Ciputra&size=200&background=e67e22&color=fff&bold=true",
+  projectImageUrls: projectImagePool.slice(1, 13),
   },
 ];
 
