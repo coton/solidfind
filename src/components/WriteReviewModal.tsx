@@ -56,7 +56,7 @@ export function WriteReviewModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-[12px] w-[440px] p-8">
+      <div className="relative bg-white rounded-[12px] w-full max-w-[440px] p-8">
         {/* Close button */}
         <button
           onClick={onClose}

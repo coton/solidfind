@@ -352,7 +352,7 @@ export default function CompanyDashboardPage() {
       {showAdModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowAdModal(false)} />
-          <div className="relative bg-white w-[500px] rounded-[6px] p-10">
+          <div className="relative bg-white w-full max-w-[500px] rounded-[6px] p-10">
             <button
               onClick={() => setShowAdModal(false)}
               className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"
@@ -431,7 +431,7 @@ export default function CompanyDashboardPage() {
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowDeleteModal(false)} />
-          <div className="relative bg-white w-[440px] rounded-[6px] p-8 text-center">
+          <div className="relative bg-white w-full max-w-[440px] rounded-[6px] p-8 text-center">
             <h3 className="text-[20px] font-bold text-[#333] mb-4">Delete Profile</h3>
             <p className="text-[12px] text-[#333]/70 mb-6">
               Are you sure you want to delete your profile? This action cannot be undone.
@@ -458,7 +458,7 @@ export default function CompanyDashboardPage() {
       {showProModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowProModal(false)} />
-          <div className="relative bg-white w-[520px] rounded-[6px] p-10 overflow-hidden">
+          <div className="relative bg-white w-full max-w-[520px] rounded-[6px] p-10 overflow-hidden">
             {/* Launch Discount Ribbon */}
             <div className="absolute top-0 left-0 w-[150px] h-[150px] overflow-hidden">
               <div

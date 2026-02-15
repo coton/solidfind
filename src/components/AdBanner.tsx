@@ -10,7 +10,7 @@ export function AdBanner({
   alt = "Advertisement"
 }: AdBannerProps) {
   return (
-    <div className="relative w-[730px] h-[158px] mx-auto rounded-[10px] overflow-hidden bg-[#d8d8d8]">
+    <div className="relative w-full max-w-[730px] h-[120px] sm:h-[158px] mx-auto rounded-[10px] overflow-hidden bg-[#d8d8d8]">
       {imageSrc ? (
         <Image
           src={imageSrc}

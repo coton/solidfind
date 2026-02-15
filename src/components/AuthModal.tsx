@@ -65,7 +65,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "register", onAuthSuc
       />
 
       {/* Modal */}
-      <div className="relative bg-[#f8f8f8] w-[400px] rounded-[6px] shadow-2xl">
+      <div className="relative bg-[#f8f8f8] w-full max-w-[400px] rounded-[6px] shadow-2xl">
         {/* Close Button */}
         <button
           onClick={onClose}

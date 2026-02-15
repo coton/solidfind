@@ -748,7 +748,7 @@ export default function EditProfilePage() {
       {showProModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowProModal(false)} />
-          <div className="relative bg-white w-[500px] rounded-[6px] p-8">
+          <div className="relative bg-white w-full max-w-[500px] rounded-[6px] p-8">
             <button
               onClick={() => setShowProModal(false)}
               className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"

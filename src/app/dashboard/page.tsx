@@ -76,7 +76,7 @@ export default function DashboardPage() {
           <div>
             <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
             <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">{user.name}</h1>
-            <p className="text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 max-w-[440px]">
+            <p className="text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 max-w-full max-w-[440px]">
               Find your list of saved profiles here. Add-remove profiles by clicking bookmark icon.
               <br />
               Temukan daftar profil yang Anda simpan di sini. Tambah-hapus profil dengan mengklik ikon bookmark.
@@ -243,7 +243,7 @@ export default function DashboardPage() {
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowDeleteModal(false)} />
-          <div className="relative bg-white w-[440px] rounded-[6px] p-8 text-center">
+          <div className="relative bg-white w-full max-w-[440px] rounded-[6px] p-8 text-center">
             <h3 className="text-[20px] font-bold text-[#333] mb-4">Delete Profile</h3>
             <p className="text-[12px] text-[#333]/70 mb-6">
               Are you sure you want to delete your profile? This action cannot be undone.

@@ -38,7 +38,7 @@ function ReportModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={() => { onClose(); setSubmitted(false); setText(""); }} />
-      <div className="relative bg-white w-[440px] rounded-[6px] p-8">
+      <div className="relative bg-white w-full max-w-[440px] rounded-[6px] p-8">
         <button
           onClick={() => { onClose(); setSubmitted(false); setText(""); }}
           className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"

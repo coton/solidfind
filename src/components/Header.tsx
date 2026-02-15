@@ -246,7 +246,7 @@ function HeaderInner() {
         {/* Category Tabs - Horizontal scroll on mobile */}
         <div className="max-w-[900px] mx-auto mb-4">
           <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
-            <div className="flex gap-2 min-w-max sm:min-w-0">
+            <div className="flex gap-2 min-w-max">
               {mainCategories.map((cat) => (
                 <button
                   key={cat.id}
