@@ -118,7 +118,7 @@ function HomeContent() {
       <main className="max-w-[900px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Results Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[18px] sm:text-[24px] font-bold text-[#333]">{listings.length} Solid Finds</h2>
+          <h2 className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]">{listings.length} Solid Finds</h2>
           <SortDropdown value={sortBy} onChange={setSortBy} />
         </div>
 

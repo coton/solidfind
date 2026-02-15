@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
 const sortOptions = [
   { value: "latest", label: "Sort by: Latest" },
@@ -24,25 +18,54 @@ interface SortDropdownProps {
 }
 
 export function SortDropdown({ value, onChange }: SortDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   const selectedOption = sortOptions.find((opt) => opt.value === value) || sortOptions[0];
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+    <div ref={ref} className="relative">
+      {/* Trigger */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-[6px] text-[11px] font-medium text-[#333] tracking-[0.22px] leading-[14px] text-right hover:opacity-70 transition-opacity"
+      >
         {selectedOption.label}
-        <ChevronDown className="w-4 h-4 text-orange-500" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        {sortOptions.map((option) => (
-          <DropdownMenuItem
-            key={option.value}
-            onClick={() => onChange(option.value)}
-            className={value === option.value ? "bg-orange-50 text-orange-600" : ""}
-          >
-            {option.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        {/* Down arrow from Figma — 6x4 */}
+        <svg width="6" height="4" viewBox="0 0 6 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 4L0 0h6L3 4z" fill="#f14110"/>
+        </svg>
+      </button>
+
+      {/* Dropdown */}
+      {isOpen && (
+        <div className="absolute top-[20px] right-0 w-[170px] bg-white rounded-[6px] shadow-md z-50 py-[10px] px-[9px]">
+          <div className="flex flex-col gap-[10px]">
+            {sortOptions.map((option, idx) => (
+              <div key={option.value}>
+                <button
+                  onClick={() => { onChange(option.value); setIsOpen(false); }}
+                  className={`w-full text-right text-[11px] font-medium tracking-[0.22px] leading-[14px] transition-colors ${
+                    value === option.value ? 'text-[#f14110]' : 'text-[#333]'
+                  } hover:text-[#f14110]`}
+                >
+                  {option.label}
+                </button>
+                {idx < sortOptions.length - 1 && (
+                  <div className="w-full h-[1px] bg-[#e4e4e4] mt-[10px]" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
