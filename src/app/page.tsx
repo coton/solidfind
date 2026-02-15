@@ -30,13 +30,15 @@ function HomeContent() {
   const categoryParam = searchParams.get("category") || undefined;
   const locationParam = searchParams.get("location") || undefined;
   const searchParam = searchParams.get("search") || undefined;
+  const projectSizeParam = searchParams.get("projectSize") || undefined;
 
-  const hasFilters = !!(categoryParam || locationParam || searchParam);
+  const hasFilters = !!(categoryParam || locationParam || searchParam || projectSizeParam);
 
   const companies = useQuery(api.companies.list, {
     category: categoryParam,
     location: locationParam,
     search: searchParam,
+    projectSize: projectSizeParam,
   });
 
   const latestCompanies = useQuery(api.companies.latest);

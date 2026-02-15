@@ -14,9 +14,10 @@ const companies = [
     reviewCount: 42,
     projects: 85,
     teamSize: 35,
+    projectSize: "shared", // 35 team members
     bookmarkCount: 58,
     viewsLastMonth: 1350,
-    imageUrl: "/images/companies/balitecture.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=Balitecture&size=200&background=f14110&color=fff&bold=true",
   },
   {
     name: "Bali Construction",

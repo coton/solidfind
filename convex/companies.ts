@@ -6,6 +6,7 @@ export const list = query({
     category: v.optional(v.string()),
     location: v.optional(v.string()),
     search: v.optional(v.string()),
+    projectSize: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     let companies;
@@ -31,6 +32,12 @@ export const list = query({
         (c) =>
           c.name.toLowerCase().includes(s) ||
           c.description?.toLowerCase().includes(s)
+      );
+    }
+
+    if (args.projectSize && args.projectSize !== "any") {
+      companies = companies.filter(
+        (c) => c.projectSize === args.projectSize
       );
     }
 

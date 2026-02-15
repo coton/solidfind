@@ -94,13 +94,6 @@ export function ListingCard({
             </div>
           )}
 
-          {/* Colored dots */}
-          <div className="absolute top-[40px] left-[70px] flex gap-1">
-            <div className="w-4 h-4 rounded-full bg-[#f14110]" />
-            <div className="w-4 h-4 rounded-full bg-[#e9a28e]" />
-            <div className="w-4 h-4 rounded-full bg-[#f4c542]" />
-          </div>
-
           {/* Company Name */}
           <div className="absolute top-[70px] left-[10px] right-[10px]">
             <h3 className="font-semibold text-[16px] leading-[16px] tracking-[0.32px] text-[#333] uppercase line-clamp-3">

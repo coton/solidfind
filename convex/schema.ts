@@ -25,6 +25,7 @@ export default defineSchema({
     reviewCount: v.optional(v.number()),
     projects: v.optional(v.number()),
     teamSize: v.optional(v.number()),
+    projectSize: v.optional(v.string()), // solo, family, shared
     imageUrl: v.optional(v.string()),
     bookmarkCount: v.optional(v.number()),
     viewsLastMonth: v.optional(v.number()),
