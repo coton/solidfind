@@ -341,9 +341,10 @@ const companies = [
     reviewCount: 45,
     projects: 200,
     teamSize: 55,
+    projectSize: "shared", // 55 team members
     bookmarkCount: 80,
     viewsLastMonth: 1900,
-    imageUrl: "/images/companies/mirah.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=Mirah&size=200&background=9b59b6&color=fff&bold=true",
   },
   {
     name: "COCO Development Group",
@@ -357,9 +358,10 @@ const companies = [
     reviewCount: 14,
     projects: 60,
     teamSize: 15,
+    projectSize: "shared", // 15 team members
     bookmarkCount: 18,
     viewsLastMonth: 520,
-    imageUrl: "/images/companies/coco-development.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=COCO&size=200&background=8b4513&color=fff&bold=true",
   },
   {
     name: "Lyvin Properties",
@@ -373,9 +375,10 @@ const companies = [
     reviewCount: 20,
     projects: 40,
     teamSize: 18,
+    projectSize: "shared", // 18 team members
     bookmarkCount: 25,
     viewsLastMonth: 640,
-    imageUrl: "/images/companies/lyvin.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=Lyvin&size=200&background=16a085&color=fff&bold=true",
   },
   {
     name: "Ciputra Group",
@@ -389,9 +392,10 @@ const companies = [
     reviewCount: 52,
     projects: 180,
     teamSize: 70,
+    projectSize: "shared", // 70 team members
     bookmarkCount: 90,
     viewsLastMonth: 2100,
-    imageUrl: "/images/companies/ciputra.png",
+    imageUrl: "https://ui-avatars.com/api/?name=Ciputra&size=200&background=e67e22&color=fff&bold=true",
   },
 ];
 
@@ -559,6 +563,7 @@ export const seed = mutation({
         reviewCount: company.reviewCount,
         projects: company.projects,
         teamSize: company.teamSize,
+        projectSize: company.projectSize,
         imageUrl: company.imageUrl,
         bookmarkCount: company.bookmarkCount,
         viewsLastMonth: company.viewsLastMonth,

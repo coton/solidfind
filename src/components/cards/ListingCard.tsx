@@ -38,6 +38,18 @@ export function ListingCard({
   onBookmark,
 }: ListingCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  // Get company initials for fallback
+  const getInitials = (companyName: string) => {
+    return companyName
+      .split(/\s+/)
+      .map(word => word[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  };
 
   return (
     <Link href={`/profile/${id}`} className="block">
@@ -53,14 +65,21 @@ export function ListingCard({
           {/* Top Row */}
           <div className="absolute top-[10px] left-[10px] right-[10px] flex items-start justify-between">
             {/* Left: Logo */}
-            <div className="w-[50px] h-[50px] bg-[#d8d8d8] rounded-[6px] overflow-hidden">
-              <Image
-                src={imageUrl || "/images/card-sample.png"}
-                alt=""
-                width={50}
-                height={50}
-                className="object-cover w-full h-full"
-              />
+            <div className="w-[50px] h-[50px] bg-[#d8d8d8] rounded-[6px] overflow-hidden flex items-center justify-center">
+              {imageUrl && !imageError ? (
+                <Image
+                  src={imageUrl}
+                  alt={name}
+                  width={50}
+                  height={50}
+                  className="object-cover w-full h-full"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[#f14110] to-[#e9a28e] flex items-center justify-center">
+                  <span className="text-white text-[16px] font-bold">{getInitials(name)}</span>
+                </div>
+              )}
             </div>
 
             {/* Right: Rating and Bookmark */}
