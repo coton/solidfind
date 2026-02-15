@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useQuery, useMutation } from "convex/react";
@@ -95,6 +95,7 @@ function ReviewCard({ name, rating = 5, text, date }: { name: string; rating?: n
 
 export default function ProfilePage() {
   const params = useParams();
+  const router = useRouter();
   const companyId = params.id as string;
   const { user: clerkUser } = useUser();
   const [isSaved, setIsSaved] = useState(false);
@@ -157,7 +158,13 @@ export default function ProfilePage() {
   const isBookmarked = savedStatus ?? isSaved;
 
   const handleToggleSave = async () => {
-    if (!currentUser || !validId || !company) return;
+    if (!currentUser || !validId || !company) {
+      if (!currentUser) {
+        // Redirect to sign-in if not logged in
+        router.push("/sign-in");
+      }
+      return;
+    }
     setIsSaved(!isBookmarked);
     await toggleSave({
       userId: currentUser._id,

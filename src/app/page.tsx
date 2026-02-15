@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -23,6 +23,7 @@ export default function Home() {
 
 function HomeContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("latest");
   const { user: clerkUser } = useUser();
@@ -59,8 +60,8 @@ function HomeContent() {
   const handleBookmark = useCallback(
     async (companyId: string, category: string) => {
       if (!currentUser?._id) {
-        // Redirect to sign-in
-        window.location.href = "/sign-in";
+        // Redirect to sign-in if not logged in
+        router.push("/sign-in");
         return;
       }
       await toggleSave({
@@ -69,7 +70,7 @@ function HomeContent() {
         category,
       });
     },
-    [currentUser, toggleSave]
+    [currentUser, toggleSave, router]
   );
 
   const savedIdSet = new Set(savedIds ?? []);
