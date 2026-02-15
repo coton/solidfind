@@ -36,6 +36,7 @@ export function ListingCard({
   isFeatured = false,
   isSaved = false,
   imageUrl,
+  projectImageIds = [],
   onBookmark,
 }: ListingCardProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -51,6 +52,9 @@ export function ListingCard({
       .toUpperCase();
   };
 
+  // Whether to show the thumbnail + pro row
+  const hasProRow = isPro || (projectImageIds && projectImageIds.length > 0);
+
   return (
     <Link href={`/profile/${id}`} className="block">
       <div
@@ -61,35 +65,38 @@ export function ListingCard({
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* ===== Normal State ===== */}
-        <div className={`absolute inset-0 transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
-          {/* Logo — top-left 10,10 — 50x50 */}
-          <div className="absolute top-[10px] left-[10px] w-[50px] h-[50px] bg-[#d8d8d8] rounded-[6px] overflow-hidden">
-            {imageUrl && !imageError ? (
-              <Image
-                src={imageUrl}
-                alt={name}
-                width={50}
-                height={50}
-                className="object-cover w-full h-full"
-                onError={() => setImageError(true)}
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#f14110] to-[#e9a28e] flex items-center justify-center">
-                <span className="text-white text-[16px] font-bold">{getInitials(name)}</span>
+        <div className={`absolute inset-0 p-[10px] flex flex-col transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
+          {/* Row 1: Logo + Rating + Bookmark */}
+          <div className="flex items-start">
+            {/* Logo */}
+            <div className="w-[50px] h-[50px] bg-[#d8d8d8] rounded-[6px] overflow-hidden flex-shrink-0">
+              {imageUrl && !imageError ? (
+                <Image
+                  src={imageUrl}
+                  alt={name}
+                  width={50}
+                  height={50}
+                  className="object-cover w-full h-full"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[#f14110] to-[#e9a28e] flex items-center justify-center">
+                  <span className="text-white text-[16px] font-bold">{getInitials(name)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Rating — centered in gap */}
+            <div className="flex-1 flex items-center justify-center pt-[4px]">
+              <div className="flex items-center gap-[4px]">
+                <Image src="/images/icon-star.svg" alt="" width={18} height={18} />
+                <span className="text-[13px] font-semibold text-[#d8d8d8] leading-[17px]">{rating}</span>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Rating — left:70px top:12px */}
-          <div className="absolute top-[12px] left-[70px] flex items-center gap-[4px]">
-            <Image src="/images/icon-star.svg" alt="" width={18} height={18} />
-            <span className="text-[13px] font-semibold text-[#d8d8d8] leading-[17px]">{rating}</span>
-          </div>
-
-          {/* Bookmark — top-right corner */}
-          <div className="absolute top-[10px] right-[10px]">
+            {/* Bookmark — far right */}
             <button
-              className="hover:opacity-70 transition-opacity"
+              className="hover:opacity-70 transition-opacity flex-shrink-0 pt-[2px]"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -97,30 +104,40 @@ export function ListingCard({
               }}
             >
               <Bookmark
-                className={`w-[16px] h-[22px] ${isSaved ? 'fill-[#f14110] text-[#f14110]' : 'fill-none text-[#d8d8d8]'}`}
+                className={`w-[18px] h-[24px] ${isSaved ? 'fill-[#f14110] text-[#f14110]' : 'fill-none text-[#d8d8d8]'}`}
               />
             </button>
           </div>
 
-          {/* Pro Account Badge — below logo area */}
-          {isPro && (
-            <div className="absolute top-[40px] right-[8px] flex items-center gap-1">
-              <Image src="/images/icon-sponsored.svg" alt="" width={20} height={20} />
-              <div className="bg-[#e4e4e4] rounded-[10px] px-2 py-0.5">
-                <span className="text-[9px] text-[#333]/35 font-medium leading-[12px]" style={{ fontFamily: "'Basically A Mono', monospace" }}>Pro Account</span>
-              </div>
+          {/* Row 2: Thumbnails + Pro Account (only if isPro or has images) */}
+          {hasProRow && (
+            <div className="flex items-center gap-[4px] mt-[6px]">
+              {/* Thumbnail images */}
+              {projectImageIds && projectImageIds.slice(0, 4).map((_, idx) => (
+                <div key={idx} className="w-[22px] h-[22px] rounded-[4px] bg-[#d8d8d8] overflow-hidden flex-shrink-0">
+                  <div className="w-full h-full bg-gradient-to-br from-[#c0c0c0] to-[#a0a0a0]" />
+                </div>
+              ))}
+
+              {/* Pro Account badge */}
+              {isPro && (
+                <div className="flex items-center gap-[4px] ml-auto">
+                  <span className="text-[9px] text-[#333]/35 font-medium leading-[12px]">Pro Account</span>
+                  <Image src="/images/icon-sponsored.svg" alt="" width={18} height={18} />
+                </div>
+              )}
             </div>
           )}
 
-          {/* Company Name — top:70px */}
-          <div className="absolute top-[70px] left-[10px] right-[10px] bottom-[80px]">
+          {/* Company Name */}
+          <div className={`${hasProRow ? 'mt-[8px]' : 'mt-[10px]'} flex-1`}>
             <h3 className="font-semibold text-[16px] leading-[16px] tracking-[0.32px] text-[#333] uppercase line-clamp-4">
               {name}
             </h3>
           </div>
 
-          {/* Description — bottom area starting ~63.9% from top */}
-          <div className="absolute top-[147px] left-[11px] right-[10px] bottom-0">
+          {/* Description — pinned to bottom */}
+          <div className="mt-auto">
             <p className="text-[10px] leading-[14px] tracking-[0.2px] text-[#333]/50 line-clamp-4">
               {description}
             </p>
@@ -128,9 +145,9 @@ export function ListingCard({
         </div>
 
         {/* ===== Hover State ===== */}
-        <div className={`absolute inset-0 transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-          {/* Share — top-left */}
-          <div className="absolute top-[10px] left-[10px]">
+        <div className={`absolute inset-0 p-[10px] flex flex-col transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+          {/* Top Icons: Share + Bookmark */}
+          <div className="flex items-start justify-between">
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
               className="text-[#d8d8d8] hover:text-white transition-colors"
@@ -140,10 +157,6 @@ export function ListingCard({
                 <path d="M1 11V19C1 19.5523 1.44772 20 2 20H15C15.5523 20 16 19.5523 16 19V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </button>
-          </div>
-
-          {/* Bookmark — top-right (same position as normal state) */}
-          <div className="absolute top-[10px] right-[10px]">
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onBookmark?.(); }}
               className="hover:opacity-80 transition-opacity"
@@ -154,33 +167,31 @@ export function ListingCard({
             </button>
           </div>
 
-          {/* Facts: Projects + Team — starting at ~21% from top */}
-          <div className="absolute top-[49px] left-[10px] right-[10px] flex flex-col gap-[10px]">
-            {/* Projects */}
+          {/* Facts: Projects + Team */}
+          <div className="flex flex-col gap-[10px] mt-[16px]">
             <div className="flex items-center justify-between border-b border-[#d8d8d8]/20 pb-[4px]">
               <span className="text-[10px] text-[#d8d8d8] tracking-[0.2px] leading-[18px]">Projects</span>
               <span className="text-[16px] font-semibold text-[#d8d8d8] tracking-[0.32px] leading-[18px]">+{projects}</span>
             </div>
-            {/* Team */}
             <div className="flex items-center justify-between border-b border-[#d8d8d8]/20 pb-[4px]">
               <span className="text-[10px] text-[#d8d8d8] tracking-[0.2px] leading-[18px]">Team</span>
               <span className="text-[16px] font-semibold text-[#d8d8d8] tracking-[0.32px] leading-[18px]">+{team}</span>
             </div>
           </div>
 
-          {/* Address — middle area */}
-          <div className="absolute top-[104px] left-[10px] w-[190px] h-[75px] flex items-center">
+          {/* Address */}
+          <div className="mt-[8px] flex-1">
             <p className="text-[10px] text-[#d8d8d8]/75 leading-[18px] tracking-[0.2px]">
               {address}
             </p>
           </div>
 
           {/* Bottom Row: Rating + Arrow */}
-          <div className="absolute bottom-[10px] left-[10px] right-[10px] flex items-center justify-between">
+          <div className="flex items-center justify-between mt-auto">
             <div className="flex items-center gap-[7px]">
               <Image src="/images/icon-star.svg" alt="" width={18} height={18} />
               <span className="text-[13px] font-semibold text-[#d8d8d8] leading-[17px]">{rating}</span>
-              <span className="text-[14px] text-[#d8d8d8]/50 tracking-[-0.7px] leading-[12px]" style={{ fontFamily: "'Basically A Mono', monospace" }}>({reviewCount})</span>
+              <span className="text-[14px] text-[#d8d8d8]/50 tracking-[-0.7px] leading-[12px]">({reviewCount})</span>
             </div>
             <div className="w-[36px] h-[36px] border-2 border-[#e4e4e4] rounded-[6px] flex items-center justify-center">
               <span className="text-[#d8d8d8] text-[24px] leading-none">→</span>
