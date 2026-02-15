@@ -221,6 +221,13 @@ function HeaderInner() {
             </button>
 
             <SignedIn>
+              <Link
+                href={userType === "company" ? "/company-dashboard" : "/dashboard"}
+                className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
+                title="Dashboard"
+              >
+                <Image src="/images/icon-account.svg" alt="Dashboard" width={19} height={20} />
+              </Link>
               <UserButton
                 appearance={{
                   elements: {
