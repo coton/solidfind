@@ -126,12 +126,12 @@ function HomeContent() {
         {showEmptyState ? (
           /* Empty State */
           <div className="mb-8">
-            <div className="text-center py-8 sm:py-12">
-              <p className="text-[14px] sm:text-[16px] text-[#333] mb-2">No results</p>
-              <h3 className="text-[16px] sm:text-[20px] font-bold text-[#f14110] max-w-[500px] mx-auto mb-4 px-4">
-                We are still finding some solid profiles for your search. Come back soon ;)
+            <div className="py-8 sm:py-12">
+              <p className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px] mb-4">No results</p>
+              <h3 className="text-[26px] font-semibold text-[#f14110] leading-[30px] mb-6">
+                We are still finding some solid profiles for your search. Come back soon ; )
               </h3>
-              <p className="text-[12px] sm:text-[14px] text-[#333]/70 mb-6 sm:mb-8">
+              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] leading-[14px] mb-6">
                 In the meantime, here are the latest added profiles:
               </p>
             </div>
