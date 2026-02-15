@@ -192,9 +192,9 @@ function HeaderInner() {
         }}
       />
 
-      <div className="relative z-10 px-6 pt-6 pb-8">
+      <div className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6 pb-6 sm:pb-8">
         {/* Top Bar */}
-        <div className="max-w-[900px] mx-auto flex items-center justify-between mb-6">
+        <div className="max-w-[900px] mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 justify-between mb-4 sm:mb-6">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <div className="flex items-baseline">
@@ -205,7 +205,7 @@ function HeaderInner() {
           </Link>
 
           {/* Right Side Buttons */}
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3 sm:gap-5">
             <button className="text-[#f8f8f8] hover:opacity-80 transition-opacity">
               <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
             </button>
@@ -220,7 +220,7 @@ function HeaderInner() {
               <UserButton
                 appearance={{
                   elements: {
-                    avatarBox: "w-10 h-10",
+                    avatarBox: "w-8 h-8 sm:w-10 sm:h-10",
                   },
                 }}
               />
@@ -235,7 +235,7 @@ function HeaderInner() {
               </Link>
               <Link
                 href="/sign-up"
-                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
+                className="hidden sm:flex h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors items-center"
               >
                 List your business
               </Link>
@@ -243,22 +243,24 @@ function HeaderInner() {
           </div>
         </div>
 
-        {/* Category Tabs */}
+        {/* Category Tabs - Horizontal scroll on mobile */}
         <div className="max-w-[900px] mx-auto mb-4">
-          <div className="flex gap-2">
-            {mainCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryTab(cat.id)}
-                className={`h-10 px-5 rounded-full text-[12px] font-medium transition-all ${
-                  activeCategory === cat.id
-                    ? "bg-[#f8f8f8] text-[#f14110]"
-                    : "text-[#f8f8f8] hover:bg-white/10"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+          <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
+            <div className="flex gap-2 min-w-max sm:min-w-0">
+              {mainCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => handleCategoryTab(cat.id)}
+                  className={`h-10 px-4 sm:px-5 rounded-full text-[11px] sm:text-[12px] font-medium transition-all whitespace-nowrap ${
+                    activeCategory === cat.id
+                      ? "bg-[#f8f8f8] text-[#f14110]"
+                      : "text-[#f8f8f8] hover:bg-white/10"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
           <p className="text-[#f8f8f8] text-[9px] mt-4 font-medium leading-[12px]">
             Browse construction professionals for residential, commercial and hospitality projects in Indonesia.
@@ -267,8 +269,9 @@ function HeaderInner() {
 
         {/* Search Bar */}
         <div className="max-w-[900px] mx-auto">
-          <div className="flex items-center">
-            {/* Keywords Input */}
+          {/* Mobile: Stack vertically */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            {/* Keywords Input - Full width on mobile */}
             <div className="flex-1 h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
               <input
                 type="text"
@@ -280,51 +283,54 @@ function HeaderInner() {
               />
             </div>
 
-            {/* Project Size Dropdown */}
-            <div className="ml-2">
-              <Dropdown
-                label="PROJECT SIZE"
-                options={projectSizeOptions}
-                value={projectSize}
-                onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
-                width="w-[140px]"
-              />
+            {/* Filters Row - Horizontal on mobile */}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              {/* Project Size Dropdown */}
+              <div className="flex-shrink-0">
+                <Dropdown
+                  label="PROJECT SIZE"
+                  options={projectSizeOptions}
+                  value={projectSize}
+                  onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
+                  width="w-[120px] sm:w-[140px]"
+                />
+              </div>
+
+              {/* Categories Dropdown */}
+              <div className="flex-shrink-0">
+                <Dropdown
+                  label="CATEGORIES"
+                  options={getCategoryOptions()}
+                  value={category}
+                  onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
+                  width="w-[120px] sm:w-[140px]"
+                />
+              </div>
+
+              {/* Location Dropdown */}
+              <div className="flex-shrink-0">
+                <Dropdown
+                  label="LOCATION"
+                  options={locationOptions}
+                  value={location}
+                  onChange={(val) => { setLocation(val); updateParams({ location: val || null }); }}
+                  width="w-[100px] sm:w-[120px]"
+                />
+              </div>
+
+              {/* Search Button - 40x40 to match input height */}
+              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0">
+                <Image src="/images/btn-search.svg" alt="Search" width={40} height={40} className="w-10 h-10" />
+              </button>
+
+              {/* Clear Filters */}
+              <button
+                onClick={clearFilters}
+                className="text-[#f8f8f8] text-[10px] sm:text-[11px] font-medium underline tracking-[0.22px] whitespace-nowrap flex-shrink-0"
+              >
+                Clear
+              </button>
             </div>
-
-            {/* Categories Dropdown */}
-            <div className="ml-2">
-              <Dropdown
-                label="CATEGORIES"
-                options={getCategoryOptions()}
-                value={category}
-                onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
-                width="w-[140px]"
-              />
-            </div>
-
-            {/* Location Dropdown */}
-            <div className="ml-2">
-              <Dropdown
-                label="LOCATION"
-                options={locationOptions}
-                value={location}
-                onChange={(val) => { setLocation(val); updateParams({ location: val || null }); }}
-                width="w-[120px]"
-              />
-            </div>
-
-            {/* Search Button - 40x40 to match input height */}
-            <button onClick={handleSearch} className="ml-2 w-10 h-10 flex-shrink-0">
-              <Image src="/images/btn-search.svg" alt="Search" width={40} height={40} className="w-10 h-10" />
-            </button>
-
-            {/* Clear Filters */}
-            <button
-              onClick={clearFilters}
-              className="text-[#f8f8f8] text-[11px] font-medium underline ml-4 tracking-[0.22px] whitespace-nowrap"
-            >
-              Clear Filters
-            </button>
           </div>
         </div>
       </div>

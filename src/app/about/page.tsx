@@ -12,9 +12,9 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[#f8f8f8]">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-6 py-8">
+      <main className="max-w-[900px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Back Button */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-[11px] text-[#333]/50 hover:text-[#333] transition-colors tracking-[0.22px]"
@@ -25,8 +25,8 @@ export default function AboutPage() {
         </div>
 
         {/* Title Row */}
-        <div className="flex items-start justify-between mb-8">
-          <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">SOLIDFIND.ID</h1>
+        <div className="flex items-start justify-between mb-6 sm:mb-8">
+          <h1 className="text-[24px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px]">SOLIDFIND.ID</h1>
           {/* Share Button */}
           <button className="hover:opacity-70 transition-opacity">
             <svg width="17" height="22" viewBox="0 0 17 22" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -36,12 +36,12 @@ export default function AboutPage() {
           </button>
         </div>
 
-        {/* About Content */}
-        <div className="grid grid-cols-[200px_1fr] gap-12 mb-12">
+        {/* About Content - Mobile: stack, Desktop: side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8 lg:gap-12 mb-8 sm:mb-12">
           {/* Left Column */}
-          <div>
+          <div className="flex flex-col items-center lg:items-start">
             {/* Logo */}
-            <div className="w-[200px] h-[200px] rounded-[6px] mb-4 bg-[#f8f8f8] flex items-center justify-center p-8">
+            <div className="w-[180px] sm:w-[200px] h-[180px] sm:h-[200px] rounded-[6px] mb-4 bg-[#f8f8f8] flex items-center justify-center p-6 sm:p-8">
               <Image 
                 src="/images/logo-solid.svg" 
                 alt="SOLIDFIND.ID Logo" 

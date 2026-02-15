@@ -201,9 +201,9 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[#e4e4e4]">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-6 py-8">
+      <main className="max-w-[900px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Back Button Row */}
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#333]/10">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 pb-4 border-b border-[#333]/10">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
@@ -222,15 +222,15 @@ export default function ProfilePage() {
         </div>
 
         {/* Company Name */}
-        <h1 className="text-[26px] font-semibold text-[#333] leading-[30px] mb-6 max-w-[440px]">
+        <h1 className="text-[20px] sm:text-[26px] font-semibold text-[#333] leading-tight sm:leading-[30px] mb-4 sm:mb-6">
           {company.name}
         </h1>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-[210px_210px_1fr_70px] gap-5 mb-8">
+        {/* Main Content Grid - Mobile: stack, Desktop: 4 columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-[210px_210px_1fr_70px] gap-5 mb-8">
           {/* Column 1: Logo */}
-          <div>
-            <div className="w-[210px] h-[210px] rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
+          <div className="w-full max-w-[210px] mx-auto lg:mx-0">
+            <div className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
               {company.logoId ? (
                 <StorageImage storageId={company.logoId} alt={company.name} fill className="object-cover w-full h-full" />
               ) : company.imageUrl ? (
@@ -254,7 +254,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Column 2: Contact Info */}
-          <div>
+          <div className="w-full max-w-[210px] mx-auto lg:mx-0">
             {company.phone && (
               <div className="border-b border-[#333]/20 pb-2 mb-3">
                 <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
@@ -341,8 +341,8 @@ export default function ProfilePage() {
             </p>
           </div>
 
-          {/* Column 4: Save/Share/Report */}
-          <div className="flex flex-col items-end gap-4">
+          {/* Column 4: Save/Share/Report - Mobile: horizontal row, Desktop: vertical */}
+          <div className="flex lg:flex-col items-center lg:items-end gap-4 justify-center lg:justify-start">
             <button
               onClick={handleToggleSave}
               className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors"
@@ -380,15 +380,15 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Photos Grid + Services */}
-        <div className="grid grid-cols-[440px_1fr] gap-5 mb-8">
-          <div className="grid grid-cols-4 gap-5">
+        {/* Photos Grid + Services - Mobile: stack, Desktop: side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-[440px_1fr] gap-6 lg:gap-5 mb-8">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5">
             {Array(12).fill(null).map((_, index) => {
               const imgId = company.projectImageIds?.[index];
               return (
                 <div
                   key={index}
-                  className="w-[95px] h-[95px] rounded-[6px] bg-[#d8d8d8] overflow-hidden relative"
+                  className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative"
                   style={!imgId ? {
                     backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3C/svg%3E")`,
                     backgroundSize: '10px 10px'
@@ -435,37 +435,37 @@ export default function ProfilePage() {
 
         {/* Reviews Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div>
                 <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Latest reviews /</p>
                 <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Ulasan terbaru</p>
               </div>
               <div className="flex items-center gap-1">
                 <Image src="/images/icon-star.svg" alt="" width={18} height={18} />
-                <span className="text-[26px] font-semibold text-[#f14110] tracking-[0.52px]">{company.rating ?? 0}</span>
+                <span className="text-[22px] sm:text-[26px] font-semibold text-[#f14110] tracking-[0.52px]">{company.rating ?? 0}</span>
                 <span className="text-[10px] text-[#f14110]/70 tracking-[0.2px]">({company.reviewCount ?? 0})</span>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               {clerkUser && currentUser && (
                 <button
                   onClick={() => setShowReviewModal(true)}
-                  className="h-[40px] px-6 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
+                  className="flex-1 sm:flex-none h-[40px] px-4 sm:px-6 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
                 >
                   Write a Review
                 </button>
               )}
               <Link
                 href={`/profile/${companyId}/reviews`}
-                className="h-[40px] px-6 rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center"
+                className="flex-1 sm:flex-none h-[40px] px-4 sm:px-6 rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
               >
                 See all
               </Link>
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 justify-items-center lg:justify-items-start">
             {reviewsList.slice(0, 4).map((review, index) => (
               <ReviewCard key={index} {...review} />
             ))}

@@ -111,26 +111,26 @@ function HomeContent() {
     <div className="min-h-screen bg-[#f8f8f8]">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-6 py-8">
+      <main className="max-w-[900px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Results Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[24px] font-bold text-[#333]">{listings.length} Solid Finds</h2>
+          <h2 className="text-[18px] sm:text-[24px] font-bold text-[#333]">{listings.length} Solid Finds</h2>
           <SortDropdown value={sortBy} onChange={setSortBy} />
         </div>
 
         {showEmptyState ? (
           /* Empty State */
           <div className="mb-8">
-            <div className="text-center py-12">
-              <p className="text-[16px] text-[#333] mb-2">No results</p>
-              <h3 className="text-[20px] font-bold text-[#f14110] max-w-[500px] mx-auto mb-4">
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-[14px] sm:text-[16px] text-[#333] mb-2">No results</p>
+              <h3 className="text-[16px] sm:text-[20px] font-bold text-[#f14110] max-w-[500px] mx-auto mb-4 px-4">
                 We are still finding some solid profiles for your search. Come back soon ;)
               </h3>
-              <p className="text-[14px] text-[#333]/70 mb-8">
+              <p className="text-[12px] sm:text-[14px] text-[#333]/70 mb-6 sm:mb-8">
                 In the meantime, here are the latest added profiles:
               </p>
             </div>
-            <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 justify-items-center lg:justify-items-start">
               {latestListings.map((listing) => (
                 <ListingCard
                   key={listing.id}
@@ -142,8 +142,8 @@ function HomeContent() {
           </div>
         ) : (
           <>
-            {/* Results Grid - 4 columns, 210px each, 20px gap */}
-            <div className="grid grid-cols-4 gap-5 mb-8" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
+            {/* Results Grid - Mobile: 1 col, Tablet: 2 cols, Desktop: 4 cols */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8 justify-items-center lg:justify-items-start">
               {/* First Row: Welcome + Featured + Listing Cards */}
               <WelcomeCard />
               <FeaturedCard
@@ -163,7 +163,7 @@ function HomeContent() {
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-start mb-8">
+            <div className="flex justify-center lg:justify-start mb-8">
               <Pagination
                 currentPage={currentPage}
                 totalPages={Math.max(1, Math.ceil(listings.length / 9))}
