@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Star } from "lucide-react";
 
 export default function UserReviewsPage() {
-  const { user: clerkUser } = useUser();
+  const { user: clerkUser, isLoaded } = useUser();
 
   const currentUser = useQuery(
     api.users.getCurrentUser,
@@ -28,7 +28,7 @@ export default function UserReviewsPage() {
       <main className="max-w-[900px] mx-auto px-6 py-8">
         <div className="mb-6">
           <Link
-            href="/dashboard"
+            href={clerkUser ? "/dashboard" : "/"}
             className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors mb-4"
           >
             <span>←</span> BACK
@@ -41,7 +41,19 @@ export default function UserReviewsPage() {
           </p>
         </div>
 
-        {reviews === undefined ? (
+        {!isLoaded ? (
+          <p className="text-[#333]/50 text-[12px]">Loading...</p>
+        ) : !clerkUser ? (
+          <div className="text-center py-12">
+            <p className="text-[16px] text-[#333] mb-4">You need to be signed in to view your reviews.</p>
+            <Link
+              href="/sign-in"
+              className="inline-block h-10 px-6 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
+            >
+              Sign In
+            </Link>
+          </div>
+        ) : reviews === undefined ? (
           <p className="text-[#333]/50 text-[12px]">Loading...</p>
         ) : reviews.length === 0 ? (
           <p className="text-[#333]/50 text-[12px]">You haven&apos;t written any reviews yet.</p>

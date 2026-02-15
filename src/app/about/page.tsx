@@ -40,14 +40,16 @@ export default function AboutPage() {
         <div className="grid grid-cols-[200px_1fr] gap-12 mb-12">
           {/* Left Column */}
           <div>
-            {/* Logo Placeholder */}
-            <div
-              className="w-[200px] h-[200px] rounded-[6px] mb-4"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23e4e4e4'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23e4e4e4'/%3E%3C/svg%3E")`,
-                backgroundSize: '20px 20px'
-              }}
-            />
+            {/* Logo */}
+            <div className="w-[200px] h-[200px] rounded-[6px] mb-4 bg-[#f8f8f8] flex items-center justify-center p-8">
+              <Image 
+                src="/images/logo-solid.svg" 
+                alt="SOLIDFIND.ID Logo" 
+                width={150} 
+                height={150}
+                className="w-full h-auto"
+              />
+            </div>
 
             {/* Social Links */}
             <div className="flex items-center gap-4">
@@ -76,11 +78,11 @@ export default function AboutPage() {
                 Building, renovating, or choosing a home is one of the most important
                 decisions people make — yet reliable information and trustworthy contacts are often hard to find.{" "}
                 <span className="font-semibold text-[#333]">
-                  Living.id exists to bring clarity, structure, and confidence to that process.
+                  SOLIDFIND.ID exists to bring clarity, structure, and confidence to that process.
                 </span>
               </p>
 
-              <p>Living.id is built for people who are:</p>
+              <p>SOLIDFIND.ID is built for people who are:</p>
               <ul className="space-y-1 ml-4">
                 <li className="flex items-start gap-2">
                   <span className="text-[#333]">•</span>
