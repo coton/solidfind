@@ -15,7 +15,7 @@ import { AdBanner } from "@/components/AdBanner";
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f8f8f8]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#ececec]" />}>
       <HomeContent />
     </Suspense>
   );
@@ -110,7 +110,7 @@ function HomeContent() {
   const showEmptyState = hasFilters && companies !== undefined && companies.length === 0;
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8]">
+    <div className="min-h-screen bg-[#ececec]">
       <Header />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-6 py-6 sm:py-8">

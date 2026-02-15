@@ -31,9 +31,10 @@ const companies = [
     reviewCount: 38,
     projects: 120,
     teamSize: 45,
+    projectSize: "shared", // 45 team members
     bookmarkCount: 45,
     viewsLastMonth: 1100,
-    imageUrl: "/images/companies/bali-construction.png",
+    imageUrl: "https://ui-avatars.com/api/?name=Bali+Construction&size=200&background=e9a28e&color=fff&bold=true",
   },
   {
     name: "888 Design & Build",
@@ -47,9 +48,10 @@ const companies = [
     reviewCount: 22,
     projects: 45,
     teamSize: 20,
+    projectSize: "shared", // 20 team members
     bookmarkCount: 28,
     viewsLastMonth: 680,
-    imageUrl: "/images/companies/888-design-build.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=888&size=200&background=f4c542&color=333&bold=true",
   },
   {
     name: "Karyanusa Asia",
@@ -63,9 +65,10 @@ const companies = [
     reviewCount: 55,
     projects: 150,
     teamSize: 60,
+    projectSize: "shared", // 60 team members
     bookmarkCount: 72,
     viewsLastMonth: 1800,
-    imageUrl: "/images/companies/karyanusa.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=Karyanusa&size=200&background=f14110&color=fff&bold=true",
   },
   {
     name: "POPULAIRE",
@@ -79,9 +82,10 @@ const companies = [
     reviewCount: 48,
     projects: 95,
     teamSize: 40,
+    projectSize: "shared", // 40 team members
     bookmarkCount: 65,
     viewsLastMonth: 1600,
-    imageUrl: "/images/companies/populaire.png",
+    imageUrl: "https://ui-avatars.com/api/?name=POPULAIRE&size=200&background=e9a28e&color=fff&bold=true",
   },
   // ARCHITECTURE
   {
@@ -96,9 +100,10 @@ const companies = [
     reviewCount: 18,
     projects: 55,
     teamSize: 15,
+    projectSize: "shared", // 15 team members
     bookmarkCount: 22,
     viewsLastMonth: 520,
-    imageUrl: "/images/companies/earth-lines.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=Earth+Lines&size=200&background=4a9d5f&color=fff&bold=true",
   },
   {
     name: "IBUKU",
@@ -112,9 +117,10 @@ const companies = [
     reviewCount: 60,
     projects: 80,
     teamSize: 55,
+    projectSize: "shared", // 55 team members
     bookmarkCount: 95,
     viewsLastMonth: 2200,
-    imageUrl: "/images/companies/ibuku.png",
+    imageUrl: "https://ui-avatars.com/api/?name=IBUKU&size=200&background=8b6f47&color=fff&bold=true",
   },
   {
     name: "Studio Jencquel",
@@ -128,9 +134,10 @@ const companies = [
     reviewCount: 15,
     projects: 30,
     teamSize: 12,
+    projectSize: "shared", // 12 team members
     bookmarkCount: 35,
     viewsLastMonth: 780,
-    imageUrl: "/images/companies/studio-jencquel.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=Jencquel&size=200&background=333&color=fff&bold=true",
   },
   {
     name: "Cipta Bali Architect",
@@ -144,9 +151,10 @@ const companies = [
     reviewCount: 12,
     projects: 40,
     teamSize: 18,
+    projectSize: "shared", // 18 team members
     bookmarkCount: 15,
     viewsLastMonth: 390,
-    imageUrl: "/images/companies/cipta-bali.png",
+    imageUrl: "https://ui-avatars.com/api/?name=Cipta&size=200&background=f14110&color=fff&bold=true",
   },
   {
     name: "Lumbung Architect",
@@ -160,9 +168,10 @@ const companies = [
     reviewCount: 35,
     projects: 130,
     teamSize: 67,
+    projectSize: "shared", // 67 team members
     bookmarkCount: 48,
     viewsLastMonth: 950,
-    imageUrl: "/images/companies/lumbung.png",
+    imageUrl: "https://ui-avatars.com/api/?name=Lumbung&size=200&background=8b6f47&color=fff&bold=true",
   },
   // INTERIOR DESIGN
   {
@@ -177,9 +186,10 @@ const companies = [
     reviewCount: 30,
     projects: 95,
     teamSize: 22,
+    projectSize: "shared", // 22 team members
     bookmarkCount: 38,
     viewsLastMonth: 870,
-    imageUrl: "/images/companies/bali-design-solutions.png",
+    imageUrl: "https://ui-avatars.com/api/?name=BDS&size=200&background=3a6ea5&color=fff&bold=true",
   },
   {
     name: "Design Assembly",
@@ -193,9 +203,10 @@ const companies = [
     reviewCount: 16,
     projects: 42,
     teamSize: 10,
+    projectSize: "shared", // 10 team members
     bookmarkCount: 20,
     viewsLastMonth: 460,
-    imageUrl: "/images/companies/design-assembly.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=DA&size=200&background=e9a28e&color=fff&bold=true",
   },
   {
     name: "Mahallati Interior",
@@ -209,9 +220,10 @@ const companies = [
     reviewCount: 28,
     projects: 110,
     teamSize: 50,
+    projectSize: "shared", // 50 team members
     bookmarkCount: 42,
     viewsLastMonth: 1050,
-    imageUrl: "/images/companies/mahallati.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=Mahallati&size=200&background=8b4513&color=fff&bold=true",
   },
   {
     name: "Azula Designs",
@@ -225,9 +237,10 @@ const companies = [
     reviewCount: 8,
     projects: 25,
     teamSize: 6,
+    projectSize: "family", // 6 team members - FAMILY for variety
     bookmarkCount: 12,
     viewsLastMonth: 310,
-    imageUrl: "/images/companies/azula-designs.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=Azula&size=200&background=4a90e2&color=fff&bold=true",
   },
   {
     name: "Canggu & Co",
@@ -241,9 +254,10 @@ const companies = [
     reviewCount: 10,
     projects: 35,
     teamSize: 8,
+    projectSize: "shared", // 8 team members
     bookmarkCount: 14,
     viewsLastMonth: 350,
-    imageUrl: "/images/companies/canggu-co.jpg",
+    imageUrl: "https://ui-avatars.com/api/?name=Canggu+Co&size=200&background=f4c542&color=333&bold=true",
   },
   // RENOVATION
   {
@@ -258,9 +272,10 @@ const companies = [
     reviewCount: 11,
     projects: 28,
     teamSize: 9,
+    projectSize: "shared", // 9 team members
     bookmarkCount: 10,
     viewsLastMonth: 280,
-    imageUrl: "/images/companies/nc-eco-design.png",
+    imageUrl: "https://ui-avatars.com/api/?name=NC+Eco&size=200&background=4a9d5f&color=fff&bold=true",
   },
   {
     name: "Bali Renovation Pro",
@@ -274,9 +289,10 @@ const companies = [
     reviewCount: 32,
     projects: 75,
     teamSize: 25,
+    projectSize: "shared", // 25 team members
     bookmarkCount: 42,
     viewsLastMonth: 890,
-    imageUrl: "/images/companies/bali-construction.png",
+    imageUrl: "https://ui-avatars.com/api/?name=Reno+Pro&size=200&background=f14110&color=fff&bold=true",
   },
   {
     name: "Tropical Home Renovations",
@@ -290,9 +306,10 @@ const companies = [
     reviewCount: 18,
     projects: 45,
     teamSize: 12,
+    projectSize: "shared", // 12 team members
     bookmarkCount: 28,
     viewsLastMonth: 520,
-    imageUrl: "/images/companies/populaire.png",
+    imageUrl: "https://ui-avatars.com/api/?name=Tropical&size=200&background=2ecc71&color=fff&bold=true",
   },
   {
     name: "Villa Refresh Bali",
@@ -306,9 +323,10 @@ const companies = [
     reviewCount: 14,
     projects: 38,
     teamSize: 10,
+    projectSize: "shared", // 10 team members
     bookmarkCount: 22,
     viewsLastMonth: 410,
-    imageUrl: "/images/companies/ibuku.png",
+    imageUrl: "https://ui-avatars.com/api/?name=Villa+Refresh&size=200&background=3498db&color=fff&bold=true",
   },
   // REAL ESTATE
   {
