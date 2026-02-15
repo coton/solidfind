@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -69,11 +69,21 @@ interface DropdownProps {
 
 function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, width: 0 });
   const selectedOption = options.find(opt => opt.id === value);
+
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    }
+  }, [isOpen]);
 
   return (
     <div className={`relative ${width}`}>
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="h-10 bg-[#f8f8f8] rounded-[6px] flex items-center justify-between px-3 w-full"
       >
@@ -86,7 +96,7 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: Drop
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-[calc(100%+4px)] left-0 bg-white rounded-[6px] shadow-lg z-50 min-w-full max-h-[300px] overflow-y-auto">
+          <div className="fixed bg-white rounded-[6px] shadow-lg z-50 max-h-[300px] overflow-y-auto" style={{ top: menuPos.top, left: menuPos.left, minWidth: menuPos.width }}>
             <div className="p-2">
               <p className="text-[9px] text-[#333]/50 mb-2 px-2">
                 Services Provided /<br />Layanan yang Disediakan
