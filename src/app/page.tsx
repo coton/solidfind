@@ -89,6 +89,7 @@ function HomeContent() {
     isFeatured: false,
     isSaved: savedIdSet.has(c._id),
     imageUrl: c.imageUrl,
+    projectImageIds: c.projectImageIds ?? [],
   }));
 
   const latestListings = (latestCompanies ?? []).map((c) => ({
@@ -105,6 +106,7 @@ function HomeContent() {
     isFeatured: false,
     isSaved: savedIdSet.has(c._id),
     imageUrl: c.imageUrl,
+    projectImageIds: c.projectImageIds ?? [],
   }));
 
   const showEmptyState = hasFilters && companies !== undefined && companies.length === 0;
