@@ -4,7 +4,7 @@ import { Suspense, useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 
 const mainCategories = [
   { id: "construction", label: "01. Construction" },
@@ -228,13 +228,6 @@ function HeaderInner() {
               >
                 <Image src="/images/icon-account.svg" alt="Dashboard" width={19} height={20} />
               </Link>
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: "w-8 h-8 sm:w-10 sm:h-10",
-                  },
-                }}
-              />
             </SignedIn>
 
             <SignedOut>
