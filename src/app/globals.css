@@ -125,6 +125,21 @@
     @apply bg-background text-foreground;
     @apply bg-background text-foreground;
   }
+  
+  /* Cursor pointer for all clickable elements */
+  a,
+  button:not(:disabled),
+  [role="button"],
+  .cursor-pointer {
+    cursor: pointer;
+  }
+  
+  /* Smooth hover transitions */
+  a:hover,
+  button:not(:disabled):hover {
+    opacity: 0.85;
+    transition: opacity 0.15s ease-in-out;
+  }
 }
 
 @layer utilities {

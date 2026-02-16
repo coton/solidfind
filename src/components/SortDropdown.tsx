@@ -35,37 +35,51 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
       {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-[6px] text-[11px] font-medium text-[#333] tracking-[0.22px] leading-[14px] text-right hover:opacity-70 transition-opacity"
+        className="flex items-center gap-[6px] text-[11px] font-medium text-[#333] tracking-[0.22px] leading-[14px] text-right hover:opacity-70 transition-opacity cursor-pointer"
       >
         {selectedOption.label}
         {/* Down arrow from Figma — 6x4 */}
-        <svg width="6" height="4" viewBox="0 0 6 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg 
+          width="6" 
+          height="4" 
+          viewBox="0 0 6 4" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        >
           <path d="M3 4L0 0h6L3 4z" fill="#f14110"/>
         </svg>
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div className="absolute top-[20px] right-0 w-[170px] bg-white rounded-[6px] shadow-md z-50 py-[10px] px-[9px]">
-          <div className="flex flex-col gap-[10px]">
-            {sortOptions.map((option, idx) => (
-              <div key={option.value}>
-                <button
-                  onClick={() => { onChange(option.value); setIsOpen(false); }}
-                  className={`w-full text-right text-[11px] font-medium tracking-[0.22px] leading-[14px] transition-colors ${
-                    value === option.value ? 'text-[#f14110]' : 'text-[#333]'
-                  } hover:text-[#f14110]`}
-                >
-                  {option.label}
-                </button>
-                {idx < sortOptions.length - 1 && (
-                  <div className="w-full h-[1px] bg-[#e4e4e4] mt-[10px]" />
-                )}
-              </div>
-            ))}
-          </div>
+      {/* Dropdown with smooth animation */}
+      <div 
+        className={`
+          absolute top-[20px] right-0 w-[170px] bg-white rounded-[6px] shadow-md z-50 py-[10px] px-[9px]
+          transition-all duration-200 ease-out origin-top-right
+          ${isOpen 
+            ? 'opacity-100 scale-100 pointer-events-auto' 
+            : 'opacity-0 scale-95 pointer-events-none'
+          }
+        `}
+      >
+        <div className="flex flex-col gap-[10px]">
+          {sortOptions.map((option, idx) => (
+            <div key={option.value}>
+              <button
+                onClick={() => { onChange(option.value); setIsOpen(false); }}
+                className={`w-full text-right text-[11px] font-medium tracking-[0.22px] leading-[14px] transition-colors cursor-pointer ${
+                  value === option.value ? 'text-[#f14110]' : 'text-[#333]'
+                } hover:text-[#f14110]`}
+              >
+                {option.label}
+              </button>
+              {idx < sortOptions.length - 1 && (
+                <div className="w-full h-[1px] bg-[#e4e4e4] mt-[10px]" />
+              )}
+            </div>
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
