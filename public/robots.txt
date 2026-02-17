@@ -1,0 +1,12 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow authentication pages
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /dashboard
+Disallow: /company-dashboard
+
+# Sitemap
+Sitemap: https://solidfind.vercel.app/sitemap.xml
