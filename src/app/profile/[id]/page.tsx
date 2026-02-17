@@ -420,10 +420,8 @@ export default function ProfilePage() {
 
             <button onClick={handleShare} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors relative">
               <span className="text-[9px] font-mono">Share</span>
-              <svg width="15" height="20" viewBox="0 0 15 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.5 0V12M7.5 0L3 4.5M7.5 0L12 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M1 9V17C1 17.5523 1.44772 18 2 18H13C13.5523 18 14 17.5523 14 17V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/icon-share.svg" alt="Share" width={17} height={22} className="opacity-60" />
               {showCopiedToast && (
                 <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">
                   Link copied!
@@ -433,10 +431,8 @@ export default function ProfilePage() {
 
             <button onClick={() => setShowReportModal(true)} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
               <span className="text-[9px] font-mono">Report</span>
-              <svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1V17M1 1H11L15 5V13L11 17H1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M8 6V10M8 13V13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/icon-report.svg" alt="Report" width={16} height={18} className="opacity-60" />
             </button>
           </div>
         </div>
