@@ -13,6 +13,7 @@ import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
 import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 
 function useStorageUrl(storageId: Id<"_storage"> | undefined) {
@@ -206,8 +207,32 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen bg-[#e4e4e4]">
         <Header />
-        <main className="max-w-[900px] mx-auto px-6 py-8">
-          <p className="text-[#333]/50">Loading...</p>
+        <main className="max-w-[900px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          {/* Back row */}
+          <div className="h-[36px] mb-6 border-b border-[#333]/10" />
+          {/* Title */}
+          <Skeleton className="h-[28px] w-[200px] mb-6" />
+          {/* Main grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-[210px_210px_1fr_70px] gap-5 mb-8">
+            <Skeleton className="w-full aspect-square rounded-[6px]" />
+            <div className="space-y-3">
+              <Skeleton className="h-[14px] w-[120px]" />
+              <Skeleton className="h-[14px] w-[80px]" />
+              <Skeleton className="h-[60px] w-full" />
+            </div>
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-[36px] w-full" />
+              ))}
+              <Skeleton className="h-[60px] w-full mt-4" />
+            </div>
+          </div>
+          {/* Image grid */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-8">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="w-full aspect-square rounded-[6px]" />
+            ))}
+          </div>
         </main>
         <Footer />
       </div>

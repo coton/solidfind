@@ -12,6 +12,7 @@ import { WelcomeCard, FeaturedCard, ListingCard } from "@/components/cards";
 import { Pagination } from "@/components/Pagination";
 import { SortDropdown } from "@/components/SortDropdown";
 import { AdBanner } from "@/components/AdBanner";
+import { ListingCardSkeleton } from "@/components/ui/ListingCardSkeleton";
 
 export default function Home() {
   return (
@@ -157,14 +158,17 @@ function HomeContent() {
                 address="Jl. Imam Bonjol No.198/249, Pemecutan Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80119"
               />
 
-              {/* Listing Cards */}
-              {listings.map((listing) => (
-                <ListingCard
-                  key={listing.id}
-                  {...listing}
-                  onBookmark={() => handleBookmark(listing.id, listing.category)}
-                />
-              ))}
+              {/* Listing Cards - show skeletons while Convex loads */}
+              {companies === undefined
+                ? Array.from({ length: 10 }).map((_, i) => <ListingCardSkeleton key={i} />)
+                : listings.map((listing) => (
+                  <ListingCard
+                    key={listing.id}
+                    {...listing}
+                    onBookmark={() => handleBookmark(listing.id, listing.category)}
+                  />
+                ))
+              }
             </div>
 
             {/* Pagination */}

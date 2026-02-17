@@ -72,7 +72,7 @@ export default function RootLayout({
             className={`${sora.variable} font-sans antialiased`}
             style={{ fontFamily: "var(--font-sora), sans-serif" }}
           >
-            <NextTopLoader color="#e05c3a" showSpinner={false} height={3} />
+            <NextTopLoader color="#f14110" showSpinner={false} height={3} />
             <ConvexClientProvider>
               {children}
             </ConvexClientProvider>
