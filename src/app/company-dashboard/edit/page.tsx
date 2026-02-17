@@ -10,7 +10,8 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Star } from "lucide-react";
+import { Star, X, Upload, Lock } from "lucide-react";
+import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 
 const projectSizeOptions = [
   { id: "any", label: "ANY SIZE" },
@@ -133,7 +134,9 @@ export default function EditProfilePage() {
   // Image state
   const [logoId, setLogoId] = useState<Id<"_storage"> | undefined>();
   const [projectImageIds, setProjectImageIds] = useState<Id<"_storage">[]>([]);
-  const [uploading, setUploading] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const logoUrl = useStorageUrl(logoId);
 
@@ -174,42 +177,61 @@ export default function EditProfilePage() {
 
   const uploadFile = async (file: File): Promise<Id<"_storage">> => {
     const uploadUrl = await generateUploadUrl();
-    const result = await fetch(uploadUrl, {
-      method: "POST",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-    const { storageId } = await result.json();
+    const storageId = await uploadFileToStorage(file, uploadUrl);
     return storageId as Id<"_storage">;
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !company) return;
-    setUploading(true);
+    if (file.size > 2 * 1024 * 1024) {
+      setUploadError("Logo file must be under 2MB");
+      return;
+    }
+    setUploadError(null);
+    setLogoUploading(true);
     try {
       const id = await uploadFile(file);
       setLogoId(id);
       await updateCompany({ id: company._id, logoId: id });
+    } catch {
+      setUploadError("Failed to upload logo. Please try again.");
     } finally {
-      setUploading(false);
+      setLogoUploading(false);
+      if (logoInputRef.current) logoInputRef.current.value = "";
     }
   };
 
   const handleProjectImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !company) return;
-    const maxImages = company.isPro ? 12 : 4;
-    if (projectImageIds.length >= maxImages) return;
-    setUploading(true);
+    if (file.size > 2 * 1024 * 1024) {
+      setUploadError("Image file must be under 2MB");
+      return;
+    }
+    const max = company.isPro ? 12 : 3;
+    if (projectImageIds.length >= max) return;
+    setUploadError(null);
+    const slotIndex = projectImageIds.length;
+    setUploadingSlot(slotIndex);
     try {
       const id = await uploadFile(file);
       const newIds = [...projectImageIds, id];
       setProjectImageIds(newIds);
       await updateCompany({ id: company._id, projectImageIds: newIds });
+    } catch {
+      setUploadError("Failed to upload image. Please try again.");
     } finally {
-      setUploading(false);
+      setUploadingSlot(null);
+      if (projectInputRef.current) projectInputRef.current.value = "";
     }
+  };
+
+  const handleRemoveProjectImage = async (index: number) => {
+    if (!company) return;
+    const newIds = projectImageIds.filter((_, i) => i !== index);
+    setProjectImageIds(newIds);
+    await updateCompany({ id: company._id, projectImageIds: newIds });
   };
 
   const createCompany = useMutation(api.companies.create);
@@ -255,7 +277,7 @@ export default function EditProfilePage() {
     router.push("/company-dashboard");
   };
 
-  const maxImages = company?.isPro ? 12 : 4;
+  const maxImages = company?.isPro ? 12 : 3;
   const totalSlots = 12;
 
   return (
@@ -265,6 +287,16 @@ export default function EditProfilePage() {
       {/* Hidden file inputs */}
       <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
       <input ref={projectInputRef} type="file" accept="image/*" className="hidden" onChange={handleProjectImageUpload} />
+
+      {/* Upload error toast */}
+      {uploadError && (
+        <div className="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 text-red-700 text-[12px] px-4 py-3 rounded-[6px] shadow-lg flex items-center gap-2">
+          <span>{uploadError}</span>
+          <button onClick={() => setUploadError(null)} className="text-red-400 hover:text-red-600">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       <main className="max-w-[900px] mx-auto px-6 py-8">
         {/* Header Row */}
@@ -319,21 +351,22 @@ export default function EditProfilePage() {
               </label>
               <div
                 onClick={() => logoInputRef.current?.click()}
-                className="w-[100px] h-[100px] rounded-[6px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden relative"
-                style={!logoUrl ? {
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23e4e4e4'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23e4e4e4'/%3E%3C/svg%3E")`,
-                  backgroundSize: '10px 10px'
-                } : undefined}
+                className={`w-[100px] h-[100px] rounded-[6px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden relative ${!logoUrl ? 'border-2 border-dashed border-[#ccc] flex items-center justify-center bg-white' : ''}`}
               >
-                {logoUrl && (
+                {logoUrl ? (
                   <Image src={logoUrl} alt="Company logo" fill className="object-cover" />
+                ) : (
+                  <Upload className="w-5 h-5 text-[#ccc]" />
                 )}
-                {uploading && (
+                {logoUploading && (
                   <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   </div>
                 )}
               </div>
+              <p className="text-[8px] text-[#333]/50 mt-1 tracking-[0.16px]">
+                Recommended: 400x400px, max 2MB
+              </p>
             </div>
 
             {/* Company Name */}
@@ -546,24 +579,46 @@ export default function EditProfilePage() {
               <div className="grid grid-cols-4 gap-2">
                 {Array(totalSlots).fill(null).map((_, index) => {
                   const imgId = projectImageIds[index];
-                  const isClickable = index < maxImages && index <= projectImageIds.length;
-                  const isLocked = index >= maxImages && !company?.isPro;
+                  const isLocked = index >= maxImages;
+                  const isNextEmpty = !imgId && index === projectImageIds.length && !isLocked;
+                  const isUploading = uploadingSlot === index;
                   return (
                     <div
                       key={index}
                       onClick={() => {
-                        if (isClickable && !imgId) projectInputRef.current?.click();
+                        if (isNextEmpty && uploadingSlot === null) projectInputRef.current?.click();
                       }}
-                      className={`aspect-square rounded-[4px] overflow-hidden relative ${isClickable && !imgId ? 'cursor-pointer hover:opacity-80' : ''} ${isLocked ? 'opacity-40' : ''} transition-opacity`}
-                      style={!imgId ? {
+                      className={`aspect-square rounded-[4px] overflow-hidden relative group ${isNextEmpty ? 'cursor-pointer border-2 border-dashed border-[#ccc] flex items-center justify-center bg-white hover:border-[#f14110] transition-colors' : ''} ${isLocked && !imgId ? '' : ''}`}
+                      style={!imgId && !isNextEmpty ? {
                         backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23e4e4e4'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23e4e4e4'/%3E%3C/svg%3E")`,
                         backgroundSize: '10px 10px'
                       } : undefined}
                     >
                       {imgId && <ProjectImage storageId={imgId} />}
-                      {isLocked && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-[8px] text-[#333]/50 font-medium">PRO</span>
+                      {imgId && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveProjectImage(index);
+                          }}
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                        >
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                      )}
+                      {isNextEmpty && !isUploading && (
+                        <Upload className="w-4 h-4 text-[#ccc]" />
+                      )}
+                      {isUploading && (
+                        <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                          <div className="w-5 h-5 border-2 border-[#f14110] border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      )}
+                      {isLocked && !imgId && (
+                        <div className="absolute inset-0 bg-[#f8f8f8]/80 flex flex-col items-center justify-center">
+                          <Lock className="w-3 h-3 text-[#333]/30 mb-0.5" />
+                          <span className="text-[7px] text-[#333]/40 font-medium">PRO</span>
                         </div>
                       )}
                     </div>
@@ -571,9 +626,9 @@ export default function EditProfilePage() {
                 })}
               </div>
               <p className="text-[8px] text-[#333]/50 mt-2 tracking-[0.16px]">
-                4 pictures for Free account + 12 pictures with premium / 4 gambar untuk
+                3 pictures for Free account / 12 pictures with PRO / 3 gambar untuk
                 <br />
-                akun gratis + 12 gambar dengan akun pro
+                akun gratis / 12 gambar dengan akun PRO
               </p>
             </div>
           </div>
