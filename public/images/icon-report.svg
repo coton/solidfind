@@ -1,4 +1,3 @@
-<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path id="BTN_Report" d="M1 1V17M1 1H11L15 5V13L11 17H1" stroke="var(--stroke-0, #D8D8D8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M8 6V10M8 13V13.5" stroke="var(--stroke-0, #D8D8D8)" stroke-width="2" stroke-linecap="round"/>
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 20 21.9999" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="ICO_Report" d="M1 20.9999V12.8746M1 12.8746C7.54525 7.81917 12.4548 17.93 19 12.8746V2.45931C12.4548 7.51473 7.54525 -2.59611 1 2.45931V12.8746Z" stroke="var(--stroke-0, #D8D8D8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
