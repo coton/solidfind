@@ -29,6 +29,35 @@ function formatWhatsApp(num: string): string {
   return num.replace(/^[+0]+/, "");
 }
 
+function ProjectImagesGrid({
+  imageUrls,
+  imageIds,
+}: {
+  imageUrls: string[];
+  imageIds: Id<"_storage">[];
+}) {
+  const urlImages = imageUrls.filter(Boolean);
+  const idImages = imageIds.filter(Boolean);
+  const totalCount = urlImages.length + idImages.length;
+
+  if (totalCount === 0) return <div />;
+
+  return (
+    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5">
+      {urlImages.map((src, i) => (
+        <div key={`url-${i}`} className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
+          <Image src={src} alt={`Project ${i + 1}`} fill className="object-cover" />
+        </div>
+      ))}
+      {idImages.map((id, i) => (
+        <div key={`id-${i}`} className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
+          <StorageImage storageId={id} alt={`Project ${urlImages.length + i + 1}`} fill className="object-cover" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ReportModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [text, setText] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -389,29 +418,11 @@ export default function ProfilePage() {
 
         {/* Photos Grid + Services - Mobile: stack, Desktop: side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-[440px_1fr] gap-6 lg:gap-5 mb-8">
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5">
-            {Array(12).fill(null).map((_, index) => {
-              const imgId = company.projectImageIds?.[index];
-              const imgUrl = company.projectImageUrls?.[index];
-              const hasImage = !!(imgId || imgUrl);
-              return (
-                <div
-                  key={index}
-                  className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative"
-                  style={!hasImage ? {
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3C/svg%3E")`,
-                    backgroundSize: '10px 10px'
-                  } : undefined}
-                >
-                  {imgUrl ? (
-                    <Image src={imgUrl} alt={`Project ${index + 1}`} fill className="object-cover" />
-                  ) : imgId ? (
-                    <StorageImage storageId={imgId} alt={`Project ${index + 1}`} fill className="object-cover" />
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
+          {/* Only render grid if there are actual images */}
+          <ProjectImagesGrid
+            imageUrls={company.projectImageUrls ?? []}
+            imageIds={company.projectImageIds ?? []}
+          />
 
           <div className="space-y-4">
             <p className="text-[9px] text-[#333] font-mono">Services provided:</p>
