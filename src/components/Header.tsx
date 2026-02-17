@@ -222,6 +222,12 @@ function HeaderInner() {
 
             <SignedIn>
               <Link
+                href="/register-business"
+                className="hidden sm:flex h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors items-center"
+              >
+                List your business
+              </Link>
+              <Link
                 href={userType === "company" ? "/company-dashboard" : "/dashboard"}
                 className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
                 title="Dashboard"

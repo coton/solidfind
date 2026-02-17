@@ -83,8 +83,8 @@ export default function CompanyDashboardPage() {
 
   const isPro = company?.isPro ?? false;
 
-  // If company user has no company yet, show onboarding prompt
-  if (currentUser && currentUser.accountType === "company" && company === null) {
+  // If user has no company yet, show onboarding prompt
+  if (currentUser && company === null) {
     return (
       <div className="min-h-screen bg-[#f8f8f8]">
         <Header />
@@ -94,13 +94,13 @@ export default function CompanyDashboardPage() {
               Welcome!
             </h1>
             <p className="text-[14px] text-[#333]/70 mb-8 max-w-[400px] mx-auto">
-              Set up your company profile to get listed on SolidFind.
+              {"You haven't listed your business yet. Register your company to get discovered on SolidFind."}
             </p>
             <Link
-              href="/company-dashboard/edit"
+              href="/register-business"
               className="inline-flex items-center h-10 px-8 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
             >
-              Create Company Profile
+              Register your business
             </Link>
           </div>
         </main>

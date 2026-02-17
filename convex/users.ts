@@ -42,6 +42,21 @@ export const getCurrentUser = query({
   },
 });
 
+export const updateAccountType = mutation({
+  args: {
+    clerkId: v.string(),
+    accountType: v.union(v.literal("company"), v.literal("individual")),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+    if (!user) return;
+    await ctx.db.patch(user._id, { accountType: args.accountType });
+  },
+});
+
 export const deleteAccount = mutation({
   args: { clerkId: v.string() },
   handler: async (ctx, args) => {

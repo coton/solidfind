@@ -95,6 +95,10 @@ export const create = mutation({
     isPro: v.boolean(),
     projects: v.optional(v.number()),
     teamSize: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    email: v.optional(v.string()),
+    website: v.optional(v.string()),
+    whatsapp: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("companies", {
