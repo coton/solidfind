@@ -155,12 +155,12 @@ export default function CompanyDashboardPage() {
                 DELETE PROFILE
               </button>
             ) : (
-              <button
-                onClick={() => setShowProModal(true)}
+              <Link
+                href="/upgrade"
                 className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]"
               >
                 UPGRADE FOR MORE
-              </button>
+              </Link>
             )}
           </div>
         </div>
@@ -175,12 +175,12 @@ export default function CompanyDashboardPage() {
               Get AD space
             </button>
           ) : (
-            <button
-              onClick={() => setShowProModal(true)}
-              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"
+            <Link
+              href="/upgrade"
+              className="h-10 px-6 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors flex items-center"
             >
-              Get PRO
-            </button>
+              Upgrade to Pro
+            </Link>
           )}
           <Link
             href="/company-dashboard/edit"

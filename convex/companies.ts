@@ -99,6 +99,8 @@ export const create = mutation({
     email: v.optional(v.string()),
     website: v.optional(v.string()),
     whatsapp: v.optional(v.string()),
+    facebook: v.optional(v.string()),
+    linkedin: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("companies", {

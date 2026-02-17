@@ -137,6 +137,7 @@ export default function EditProfilePage() {
   const [logoUploading, setLogoUploading] = useState(false);
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const logoUrl = useStorageUrl(logoId);
 
@@ -237,44 +238,52 @@ export default function EditProfilePage() {
   const createCompany = useMutation(api.companies.create);
 
   const handleSave = async () => {
-    if (!currentUser) return;
-
-    if (company) {
-      await updateCompany({
-        id: company._id,
-        name: companyName || undefined,
-        description: description || undefined,
-        address: address || undefined,
-        projects: projectsNumber ? parseInt(projectsNumber) : undefined,
-        teamSize: teamSize ? parseInt(teamSize) : undefined,
-        phone: phone || undefined,
-        email: email || undefined,
-        website: website || undefined,
-        whatsapp: whatsapp || undefined,
-        facebook: facebook || undefined,
-        linkedin: linkedin || undefined,
-        projectSizes: projectSizeEnabled ? selectedProjectSizes : [],
-        constructionTypes: constructionEnabled ? selectedConstruction : [],
-        constructionLocations: constructionEnabled ? selectedConstructionLocations : [],
-        renovationTypes: renovationEnabled ? selectedRenovation : [],
-        renovationLocations: renovationEnabled ? selectedRenovationLocations : [],
-        logoId: logoId ?? undefined,
-        projectImageIds,
-      });
-    } else {
-      await createCompany({
-        ownerId: currentUser._id,
-        name: companyName || currentUser.companyName || "My Company",
-        description: description || undefined,
-        category: selectedConstruction.length > 0 ? "construction" : "renovation",
-        location: selectedConstructionLocations[0] || selectedRenovationLocations[0] || "bali",
-        address: address || undefined,
-        isPro: false,
-        projects: projectsNumber ? parseInt(projectsNumber) : undefined,
-        teamSize: teamSize ? parseInt(teamSize) : undefined,
-      });
+    if (!currentUser || saving) return;
+    setSaving(true);
+    try {
+      if (company) {
+        await updateCompany({
+          id: company._id,
+          name: companyName || undefined,
+          description: description || undefined,
+          address: address || undefined,
+          projects: projectsNumber ? parseInt(projectsNumber) : undefined,
+          teamSize: teamSize ? parseInt(teamSize) : undefined,
+          phone: phone || undefined,
+          email: email || undefined,
+          website: website || undefined,
+          whatsapp: whatsapp || undefined,
+          facebook: facebook || undefined,
+          linkedin: linkedin || undefined,
+          projectSizes: projectSizeEnabled ? selectedProjectSizes : [],
+          constructionTypes: constructionEnabled ? selectedConstruction : [],
+          constructionLocations: constructionEnabled ? selectedConstructionLocations : [],
+          renovationTypes: renovationEnabled ? selectedRenovation : [],
+          renovationLocations: renovationEnabled ? selectedRenovationLocations : [],
+          logoId: logoId ?? undefined,
+          projectImageIds,
+        });
+      } else {
+        await createCompany({
+          ownerId: currentUser._id,
+          name: companyName || currentUser.companyName || "My Company",
+          description: description || undefined,
+          category: selectedConstruction.length > 0 ? "construction" : "renovation",
+          location: selectedConstructionLocations[0] || selectedRenovationLocations[0] || "bali",
+          address: address || undefined,
+          isPro: false,
+          projects: projectsNumber ? parseInt(projectsNumber) : undefined,
+          teamSize: teamSize ? parseInt(teamSize) : undefined,
+          phone: phone || undefined,
+          email: email || undefined,
+          website: website || undefined,
+          whatsapp: whatsapp || undefined,
+        });
+      }
+      router.push("/company-dashboard");
+    } finally {
+      setSaving(false);
     }
-    router.push("/company-dashboard");
   };
 
   const maxImages = company?.isPro ? 12 : 3;
@@ -314,7 +323,7 @@ export default function EditProfilePage() {
 
           <div className="text-right">
             <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">
-              PRO ACCOUNT
+              {company?.isPro ? "PRO ACCOUNT" : "FREE ACCOUNT"}
             </p>
             <Link
               href="/company-dashboard"
@@ -332,9 +341,10 @@ export default function EditProfilePage() {
           </button>
           <button
             onClick={handleSave}
-            className="h-10 px-8 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors"
+            disabled={saving}
+            className="h-10 px-8 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
 
@@ -790,9 +800,10 @@ export default function EditProfilePage() {
           </p>
           <button
             onClick={handleSave}
-            className="h-10 px-8 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors"
+            disabled={saving}
+            className="h-10 px-8 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </main>

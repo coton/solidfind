@@ -101,32 +101,51 @@ export default function AboutPage() {
 
             {/* Account Types */}
             <div className="mt-8 space-y-4">
-              <div>
-                <h3 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
+              <h3 className="text-[12px] font-semibold text-[#333] tracking-[0.24px] mb-2">
+                How it works
+              </h3>
+
+              <div className="p-3 bg-white rounded-[6px]">
+                <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
                   INDIVIDUAL ACCOUNT
-                </h3>
-                <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
-                  Solo / Couple, Family / Co-Hosting, Shared / Community
+                </h4>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
+                  For property owners & renters — browse listings, bookmark companies, write reviews, and find the right professionals for your project. Choose your household type: Solo / Couple, Family / Co-Hosting, or Shared / Community.
                 </p>
               </div>
 
-              <div>
-                <h3 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
-                  FREE ACCOUNT
-                </h3>
-                <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
-                  Residential, Commercial, Hospitality
+              <div className="p-3 bg-white rounded-[6px]">
+                <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
+                  FREE COMPANY ACCOUNT
+                </h4>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
+                  For construction & renovation professionals — create your company profile, showcase up to 3 project photos, receive reviews, and get discovered by potential clients across Bali.
                 </p>
               </div>
 
-              <div>
-                <h3 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
-                  PRO ACCOUNT
-                </h3>
-                <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
-                  Whole House, Bathroom, Bedroom, Living room, Electricity, Roof, Pool, Mold, Tiling, Painting, Fencing
+              <div className="p-3 bg-white rounded-[6px]">
+                <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
+                  PRO COMPANY ACCOUNT
+                </h4>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
+                  Everything in Free, plus: top search ranking, AI search optimization, detailed analytics, 12 project photos, and access to premium ad space. Built for companies ready to grow.
                 </p>
               </div>
+            </div>
+
+            {/* Contact */}
+            <div className="mt-8 pt-4 border-t border-[#e4e4e4]">
+              <h3 className="text-[12px] font-semibold text-[#333] tracking-[0.24px] mb-2">
+                Get in touch
+              </h3>
+              <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
+                Questions, feedback, or partnership inquiries?
+                <br />
+                Reach us at{" "}
+                <a href="mailto:hello@solidfind.id" className="text-[#f14110] hover:underline">
+                  hello@solidfind.id
+                </a>
+              </p>
             </div>
           </div>
         </div>
