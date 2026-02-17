@@ -43,6 +43,7 @@ const companies = [
     viewsLastMonth: 1350,
     imageUrl: "/images/companies/balitecture.jpg",
     projectImageUrls: projectImagePool.slice(0, 12),
+    since: 2016,
   },
   {
     name: "Bali Construction",
@@ -61,6 +62,7 @@ const companies = [
     viewsLastMonth: 1100,
     imageUrl: "/images/companies/bali-construction.jpg",
     projectImageUrls: projectImagePool.slice(1, 13),
+    since: 2010,
   },
   {
     name: "888 Design & Build",
@@ -79,6 +81,7 @@ const companies = [
     viewsLastMonth: 680,
     imageUrl: "/images/companies/888-design-build.jpg",
   projectImageUrls: projectImagePool.slice(5, 17),
+    since: 2018,
   },
   {
     name: "Karyanusa Asia",
@@ -97,6 +100,7 @@ const companies = [
     viewsLastMonth: 1800,
     imageUrl: "/images/companies/karyanusa.jpg",
   projectImageUrls: projectImagePool.slice(8, 20),
+    since: 2005,
   },
   {
     name: "POPULAIRE",
@@ -115,6 +119,7 @@ const companies = [
     viewsLastMonth: 1600,
     imageUrl: "/images/companies/populaire.jpg",
   projectImageUrls: projectImagePool.slice(7, 19),
+    since: 2017,
   },
   // ARCHITECTURE
   {
@@ -134,6 +139,7 @@ const companies = [
     viewsLastMonth: 520,
     imageUrl: "/images/companies/earth-lines.jpg",
   projectImageUrls: projectImagePool.slice(6, 18),
+    since: 2012,
   },
   {
     name: "IBUKU",
@@ -152,6 +158,7 @@ const companies = [
     viewsLastMonth: 2200,
     imageUrl: "/images/companies/ibuku.jpg",
   projectImageUrls: projectImagePool.slice(3, 15),
+    since: 2010,
   },
   {
     name: "Studio Jencquel",
@@ -170,6 +177,7 @@ const companies = [
     viewsLastMonth: 780,
     imageUrl: "/images/companies/studio-jencquel.jpg",
   projectImageUrls: projectImagePool.slice(3, 15),
+    since: 2015,
   },
   {
     name: "Cipta Bali Architect",
@@ -188,6 +196,7 @@ const companies = [
     viewsLastMonth: 390,
     imageUrl: "/images/companies/cipta-bali.jpg",
   projectImageUrls: projectImagePool.slice(2, 14),
+    since: 2008,
   },
   {
     name: "Lumbung Architect",
@@ -206,6 +215,7 @@ const companies = [
     viewsLastMonth: 950,
     imageUrl: "/images/companies/lumbung.jpg",
   projectImageUrls: projectImagePool.slice(8, 20),
+    since: 2009,
   },
   // INTERIOR DESIGN
   {
@@ -225,6 +235,7 @@ const companies = [
     viewsLastMonth: 870,
     imageUrl: "/images/companies/bali-design-solutions.jpg",
   projectImageUrls: projectImagePool.slice(2, 14),
+    since: 2000,
   },
   {
     name: "Design Assembly",
@@ -243,6 +254,7 @@ const companies = [
     viewsLastMonth: 460,
     imageUrl: "/images/companies/design-assembly.jpg",
   projectImageUrls: projectImagePool.slice(7, 19),
+    since: 2015,
   },
   {
     name: "Mahallati Interior",
@@ -261,6 +273,7 @@ const companies = [
     viewsLastMonth: 1050,
     imageUrl: "/images/companies/mahallati.jpg",
   projectImageUrls: projectImagePool.slice(7, 19),
+    since: 2003,
   },
   {
     name: "Azula Designs",
@@ -279,6 +292,7 @@ const companies = [
     viewsLastMonth: 310,
     imageUrl: "/images/companies/azula-designs.jpg",
   projectImageUrls: projectImagePool.slice(1, 13),
+    since: 2019,
   },
   {
     name: "Canggu & Co",
@@ -297,6 +311,7 @@ const companies = [
     viewsLastMonth: 350,
     imageUrl: "/images/companies/canggu-co.jpg",
   projectImageUrls: projectImagePool.slice(4, 16),
+    since: 2017,
   },
   // RENOVATION
   {
@@ -316,6 +331,7 @@ const companies = [
     viewsLastMonth: 280,
     imageUrl: "/images/companies/nc-eco-design.jpg",
   projectImageUrls: projectImagePool.slice(0, 12),
+    since: 2014,
   },
   {
     name: "Bali Renovation Pro",
@@ -334,6 +350,7 @@ const companies = [
     viewsLastMonth: 890,
     imageUrl: "/images/companies/bali-renovation-pro.jpg",
   projectImageUrls: projectImagePool.slice(5, 17),
+    since: 2013,
   },
   {
     name: "Tropical Home Renovations",
@@ -352,6 +369,7 @@ const companies = [
     viewsLastMonth: 520,
     imageUrl: "/images/companies/tropical-home.jpg",
   projectImageUrls: projectImagePool.slice(3, 15),
+    since: 2016,
   },
   {
     name: "Villa Refresh Bali",
@@ -370,6 +388,7 @@ const companies = [
     viewsLastMonth: 410,
     imageUrl: "/images/companies/villa-refresh.jpg",
   projectImageUrls: projectImagePool.slice(4, 16),
+    since: 2018,
   },
   // REAL ESTATE
   {
@@ -389,6 +408,7 @@ const companies = [
     viewsLastMonth: 1900,
     imageUrl: "/images/companies/mirah.jpg",
   projectImageUrls: projectImagePool.slice(3, 15),
+    since: 2006,
   },
   {
     name: "COCO Development Group",
@@ -407,6 +427,7 @@ const companies = [
     viewsLastMonth: 520,
     imageUrl: "/images/companies/coco-development.jpg",
   projectImageUrls: projectImagePool.slice(6, 18),
+    since: 2015,
   },
   {
     name: "Lyvin Properties",
@@ -425,6 +446,7 @@ const companies = [
     viewsLastMonth: 640,
     imageUrl: "/images/companies/lyvin.jpg",
   projectImageUrls: projectImagePool.slice(8, 20),
+    since: 2019,
   },
   {
     name: "Ciputra Group",
@@ -443,6 +465,7 @@ const companies = [
     viewsLastMonth: 2100,
     imageUrl: "/images/companies/ciputra.jpg",
   projectImageUrls: projectImagePool.slice(1, 13),
+    since: 1981,
   },
 ];
 
@@ -615,6 +638,7 @@ export const seed = mutation({
         bookmarkCount: company.bookmarkCount,
         viewsLastMonth: company.viewsLastMonth,
         projectImageIds: undefined, // Don't set fake storage IDs
+        since: (company as any).since,
         createdAt: Date.now(),
       });
 

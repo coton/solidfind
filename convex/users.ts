@@ -57,6 +57,13 @@ export const updateAccountType = mutation({
   },
 });
 
+export const listAll = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("users").order("desc").collect();
+  },
+});
+
 export const deleteAccount = mutation({
   args: { clerkId: v.string() },
   handler: async (ctx, args) => {

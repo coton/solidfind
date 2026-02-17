@@ -88,6 +88,7 @@ export default function RegisterBusinessPage() {
         whatsapp: whatsapp.trim() || undefined,
         email: email.trim() || undefined,
         website: website.trim() || undefined,
+        since: foundingYear ? parseInt(foundingYear) : undefined,
       });
 
       await updateAccountType({

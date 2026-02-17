@@ -120,6 +120,7 @@ export default function EditProfilePage() {
   const [description, setDescription] = useState("");
   const [projectsNumber, setProjectsNumber] = useState("");
   const [teamSize, setTeamSize] = useState("");
+  const [foundedYear, setFoundedYear] = useState("");
 
   // Toggles
   const [selectedProjectSizes, setSelectedProjectSizes] = useState<string[]>([]);
@@ -165,6 +166,7 @@ export default function EditProfilePage() {
       setSelectedRenovationLocations(company.renovationLocations ?? []);
       setLogoId(company.logoId ?? undefined);
       setProjectImageIds(company.projectImageIds ?? []);
+      setFoundedYear(company.since?.toString() ?? "");
     }
   }, [company]);
 
@@ -262,6 +264,7 @@ export default function EditProfilePage() {
           renovationLocations: renovationEnabled ? selectedRenovationLocations : [],
           logoId: logoId ?? undefined,
           projectImageIds,
+          since: foundedYear ? parseInt(foundedYear) : undefined,
         });
       } else {
         await createCompany({
@@ -577,6 +580,22 @@ export default function EditProfilePage() {
                   className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
                 />
               </div>
+            </div>
+
+            {/* Founded Year */}
+            <div>
+              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                Founded year / Tahun berdiri
+              </label>
+              <input
+                type="number"
+                value={foundedYear}
+                onChange={(e) => setFoundedYear(e.target.value)}
+                placeholder="e.g. 2015"
+                min="1900"
+                max={new Date().getFullYear()}
+                className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
+              />
             </div>
 
             {/* Project Pictures Upload */}

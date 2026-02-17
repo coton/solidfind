@@ -101,6 +101,7 @@ export const create = mutation({
     whatsapp: v.optional(v.string()),
     facebook: v.optional(v.string()),
     linkedin: v.optional(v.string()),
+    since: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("companies", {
@@ -139,6 +140,7 @@ export const update = mutation({
     renovationLocations: v.optional(v.array(v.string())),
     logoId: v.optional(v.id("_storage")),
     projectImageIds: v.optional(v.array(v.id("_storage"))),
+    since: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
@@ -150,5 +152,57 @@ export const update = mutation({
       }
     }
     await ctx.db.patch(id, filtered);
+  },
+});
+
+export const listAll = query({
+  args: {},
+  handler: async (ctx) => {
+    const companies = await ctx.db.query("companies").order("desc").collect();
+    const enriched = await Promise.all(
+      companies.map(async (c) => {
+        const owner = await ctx.db.get(c.ownerId);
+        return { ...c, ownerEmail: owner?.email ?? "unknown" };
+      })
+    );
+    return enriched;
+  },
+});
+
+export const remove = mutation({
+  args: { id: v.id("companies") },
+  handler: async (ctx, args) => {
+    // Delete associated reviews
+    const reviews = await ctx.db
+      .query("reviews")
+      .withIndex("by_companyId", (q) => q.eq("companyId", args.id))
+      .collect();
+    for (const review of reviews) {
+      await ctx.db.delete(review._id);
+    }
+    // Delete associated saved listings
+    const saved = await ctx.db.query("savedListings").collect();
+    for (const s of saved) {
+      if (s.companyId === args.id) {
+        await ctx.db.delete(s._id);
+      }
+    }
+    // Delete associated reports
+    const reports = await ctx.db
+      .query("reports")
+      .withIndex("by_companyId", (q) => q.eq("companyId", args.id))
+      .collect();
+    for (const report of reports) {
+      await ctx.db.delete(report._id);
+    }
+    await ctx.db.delete(args.id);
+  },
+});
+
+export const listIds = query({
+  args: {},
+  handler: async (ctx) => {
+    const companies = await ctx.db.query("companies").collect();
+    return companies.map((c) => ({ id: c._id, createdAt: c.createdAt }));
   },
 });

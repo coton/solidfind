@@ -1,9 +1,11 @@
 import { MetadataRoute } from 'next'
+import { fetchQuery } from 'convex/nextjs'
+import { api } from '../../convex/_generated/api'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://solidfind.vercel.app'
-  
-  return [
+
+  const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -28,7 +30,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.7,
     },
-    // TODO: Add dynamic company profile pages
-    // You can fetch from Convex and add all company URLs here
+    {
+      url: `${baseUrl}/sign-in`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/sign-up`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
   ]
+
+  try {
+    const companyIds = await fetchQuery(api.companies.listIds)
+    const companyPages: MetadataRoute.Sitemap = companyIds.map((c) => ({
+      url: `${baseUrl}/profile/${c.id}`,
+      lastModified: new Date(c.createdAt),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    }))
+    return [...staticPages, ...companyPages]
+  } catch {
+    return staticPages
+  }
 }

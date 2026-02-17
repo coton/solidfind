@@ -43,10 +43,21 @@ export default defineSchema({
     logoId: v.optional(v.id("_storage")),
     projectImageIds: v.optional(v.array(v.id("_storage"))),
     projectImageUrls: v.optional(v.array(v.string())), // External image URLs as fallback
+    since: v.optional(v.number()), // Founded year
     createdAt: v.number(),
   })
     .index("by_ownerId", ["ownerId"])
     .index("by_category", ["category"]),
+
+  reports: defineTable({
+    companyId: v.id("companies"),
+    reporterUserId: v.optional(v.id("users")),
+    text: v.string(),
+    status: v.union(v.literal("pending"), v.literal("reviewed"), v.literal("dismissed")),
+    createdAt: v.number(),
+  })
+    .index("by_companyId", ["companyId"])
+    .index("by_status", ["status"]),
 
   listings: defineTable({
     companyId: v.id("companies"),

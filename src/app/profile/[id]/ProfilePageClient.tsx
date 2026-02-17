@@ -59,11 +59,30 @@ function ProjectImagesGrid({
   );
 }
 
-function ReportModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function ReportModal({ isOpen, onClose, companyId, userId }: { isOpen: boolean; onClose: () => void; companyId: Id<"companies">; userId?: Id<"users"> }) {
   const [text, setText] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const createReport = useMutation(api.reports.create);
 
   if (!isOpen) return null;
+
+  const handleSubmit = async () => {
+    if (!text.trim()) return;
+    setSubmitting(true);
+    try {
+      await createReport({
+        companyId,
+        reporterUserId: userId,
+        text: text.trim(),
+      });
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Failed to submit report:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -95,11 +114,11 @@ function ReportModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
               className="w-full px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors resize-none mb-4"
             />
             <button
-              onClick={() => setSubmitted(true)}
-              disabled={!text.trim()}
+              onClick={handleSubmit}
+              disabled={!text.trim() || submitting}
               className="w-full h-10 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit Report
+              {submitting ? "Submitting..." : "Submit Report"}
             </button>
           </>
         )}
@@ -393,7 +412,7 @@ export default function ProfilePageClient() {
               </div>
               <div className="flex items-center justify-between border-b border-[#333]/20 py-1">
                 <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Since</span>
-                <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">2021</span>
+                <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">{company.since ?? new Date(company.createdAt).getFullYear()}</span>
               </div>
             </div>
 
@@ -567,10 +586,14 @@ export default function ProfilePageClient() {
         isOpen={showThankYou}
         onClose={() => setShowThankYou(false)}
       />
-      <ReportModal
-        isOpen={showReportModal}
-        onClose={() => setShowReportModal(false)}
-      />
+      {validId && (
+        <ReportModal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          companyId={validId}
+          userId={currentUser?._id}
+        />
+      )}
     </div>
   );
 }
