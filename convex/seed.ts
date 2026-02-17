@@ -41,7 +41,7 @@ const companies = [
     projectSize: "shared", // 35 team members
     bookmarkCount: 58,
     viewsLastMonth: 1350,
-    imageUrl: "https://ui-avatars.com/api/?name=Balitecture&size=200&background=f14110&color=fff&bold=true",
+    imageUrl: "/images/companies/balitecture.jpg",
     projectImageUrls: projectImagePool.slice(0, 12),
   },
   {
@@ -59,7 +59,7 @@ const companies = [
     projectSize: "shared", // 45 team members
     bookmarkCount: 45,
     viewsLastMonth: 1100,
-    imageUrl: "https://ui-avatars.com/api/?name=Bali+Construction&size=200&background=e9a28e&color=fff&bold=true",
+    imageUrl: "/images/companies/bali-construction.jpg",
     projectImageUrls: projectImagePool.slice(1, 13),
   },
   {
@@ -77,7 +77,7 @@ const companies = [
     projectSize: "shared", // 20 team members
     bookmarkCount: 28,
     viewsLastMonth: 680,
-    imageUrl: "https://ui-avatars.com/api/?name=888&size=200&background=f4c542&color=333&bold=true",
+    imageUrl: "/images/companies/888-design-build.jpg",
   projectImageUrls: projectImagePool.slice(5, 17),
   },
   {
@@ -95,7 +95,7 @@ const companies = [
     projectSize: "shared", // 60 team members
     bookmarkCount: 72,
     viewsLastMonth: 1800,
-    imageUrl: "https://ui-avatars.com/api/?name=Karyanusa&size=200&background=f14110&color=fff&bold=true",
+    imageUrl: "/images/companies/karyanusa.jpg",
   projectImageUrls: projectImagePool.slice(8, 20),
   },
   {
@@ -113,7 +113,7 @@ const companies = [
     projectSize: "shared", // 40 team members
     bookmarkCount: 65,
     viewsLastMonth: 1600,
-    imageUrl: "https://ui-avatars.com/api/?name=POPULAIRE&size=200&background=e9a28e&color=fff&bold=true",
+    imageUrl: "/images/companies/populaire.jpg",
   projectImageUrls: projectImagePool.slice(7, 19),
   },
   // ARCHITECTURE
@@ -132,7 +132,7 @@ const companies = [
     projectSize: "shared", // 15 team members
     bookmarkCount: 22,
     viewsLastMonth: 520,
-    imageUrl: "https://ui-avatars.com/api/?name=Earth+Lines&size=200&background=4a9d5f&color=fff&bold=true",
+    imageUrl: "/images/companies/earth-lines.jpg",
   projectImageUrls: projectImagePool.slice(6, 18),
   },
   {
@@ -150,7 +150,7 @@ const companies = [
     projectSize: "shared", // 55 team members
     bookmarkCount: 95,
     viewsLastMonth: 2200,
-    imageUrl: "https://ui-avatars.com/api/?name=IBUKU&size=200&background=8b6f47&color=fff&bold=true",
+    imageUrl: "/images/companies/ibuku.jpg",
   projectImageUrls: projectImagePool.slice(3, 15),
   },
   {
@@ -168,7 +168,7 @@ const companies = [
     projectSize: "shared", // 12 team members
     bookmarkCount: 35,
     viewsLastMonth: 780,
-    imageUrl: "https://ui-avatars.com/api/?name=Jencquel&size=200&background=333&color=fff&bold=true",
+    imageUrl: "/images/companies/studio-jencquel.jpg",
   projectImageUrls: projectImagePool.slice(3, 15),
   },
   {
@@ -186,7 +186,7 @@ const companies = [
     projectSize: "shared", // 18 team members
     bookmarkCount: 15,
     viewsLastMonth: 390,
-    imageUrl: "https://ui-avatars.com/api/?name=Cipta&size=200&background=f14110&color=fff&bold=true",
+    imageUrl: "/images/companies/cipta-bali.jpg",
   projectImageUrls: projectImagePool.slice(2, 14),
   },
   {
@@ -204,7 +204,7 @@ const companies = [
     projectSize: "shared", // 67 team members
     bookmarkCount: 48,
     viewsLastMonth: 950,
-    imageUrl: "https://ui-avatars.com/api/?name=Lumbung&size=200&background=8b6f47&color=fff&bold=true",
+    imageUrl: "/images/companies/lumbung.jpg",
   projectImageUrls: projectImagePool.slice(8, 20),
   },
   // INTERIOR DESIGN
@@ -223,7 +223,7 @@ const companies = [
     projectSize: "shared", // 22 team members
     bookmarkCount: 38,
     viewsLastMonth: 870,
-    imageUrl: "https://ui-avatars.com/api/?name=BDS&size=200&background=3a6ea5&color=fff&bold=true",
+    imageUrl: "/images/companies/bali-design-solutions.jpg",
   projectImageUrls: projectImagePool.slice(2, 14),
   },
   {
@@ -241,7 +241,7 @@ const companies = [
     projectSize: "shared", // 10 team members
     bookmarkCount: 20,
     viewsLastMonth: 460,
-    imageUrl: "https://ui-avatars.com/api/?name=DA&size=200&background=e9a28e&color=fff&bold=true",
+    imageUrl: "/images/companies/design-assembly.jpg",
   projectImageUrls: projectImagePool.slice(7, 19),
   },
   {
@@ -259,7 +259,7 @@ const companies = [
     projectSize: "shared", // 50 team members
     bookmarkCount: 42,
     viewsLastMonth: 1050,
-    imageUrl: "https://ui-avatars.com/api/?name=Mahallati&size=200&background=8b4513&color=fff&bold=true",
+    imageUrl: "/images/companies/mahallati.jpg",
   projectImageUrls: projectImagePool.slice(7, 19),
   },
   {
@@ -277,7 +277,7 @@ const companies = [
     projectSize: "family", // 6 team members - FAMILY for variety
     bookmarkCount: 12,
     viewsLastMonth: 310,
-    imageUrl: "https://ui-avatars.com/api/?name=Azula&size=200&background=4a90e2&color=fff&bold=true",
+    imageUrl: "/images/companies/azula-designs.jpg",
   projectImageUrls: projectImagePool.slice(1, 13),
   },
   {
@@ -295,7 +295,7 @@ const companies = [
     projectSize: "shared", // 8 team members
     bookmarkCount: 14,
     viewsLastMonth: 350,
-    imageUrl: "https://ui-avatars.com/api/?name=Canggu+Co&size=200&background=f4c542&color=333&bold=true",
+    imageUrl: "/images/companies/canggu-co.jpg",
   projectImageUrls: projectImagePool.slice(4, 16),
   },
   // RENOVATION
@@ -314,7 +314,7 @@ const companies = [
     projectSize: "shared", // 9 team members
     bookmarkCount: 10,
     viewsLastMonth: 280,
-    imageUrl: "https://ui-avatars.com/api/?name=NC+Eco&size=200&background=4a9d5f&color=fff&bold=true",
+    imageUrl: "/images/companies/nc-eco-design.jpg",
   projectImageUrls: projectImagePool.slice(0, 12),
   },
   {
@@ -332,7 +332,7 @@ const companies = [
     projectSize: "shared", // 25 team members
     bookmarkCount: 42,
     viewsLastMonth: 890,
-    imageUrl: "https://ui-avatars.com/api/?name=Reno+Pro&size=200&background=f14110&color=fff&bold=true",
+    imageUrl: "/images/companies/bali-renovation-pro.jpg",
   projectImageUrls: projectImagePool.slice(5, 17),
   },
   {
@@ -350,7 +350,7 @@ const companies = [
     projectSize: "shared", // 12 team members
     bookmarkCount: 28,
     viewsLastMonth: 520,
-    imageUrl: "https://ui-avatars.com/api/?name=Tropical&size=200&background=2ecc71&color=fff&bold=true",
+    imageUrl: "/images/companies/tropical-home.jpg",
   projectImageUrls: projectImagePool.slice(3, 15),
   },
   {
@@ -368,7 +368,7 @@ const companies = [
     projectSize: "shared", // 10 team members
     bookmarkCount: 22,
     viewsLastMonth: 410,
-    imageUrl: "https://ui-avatars.com/api/?name=Villa+Refresh&size=200&background=3498db&color=fff&bold=true",
+    imageUrl: "/images/companies/villa-refresh.jpg",
   projectImageUrls: projectImagePool.slice(4, 16),
   },
   // REAL ESTATE
@@ -387,7 +387,7 @@ const companies = [
     projectSize: "shared", // 55 team members
     bookmarkCount: 80,
     viewsLastMonth: 1900,
-    imageUrl: "https://ui-avatars.com/api/?name=Mirah&size=200&background=9b59b6&color=fff&bold=true",
+    imageUrl: "/images/companies/mirah.jpg",
   projectImageUrls: projectImagePool.slice(3, 15),
   },
   {
@@ -405,7 +405,7 @@ const companies = [
     projectSize: "shared", // 15 team members
     bookmarkCount: 18,
     viewsLastMonth: 520,
-    imageUrl: "https://ui-avatars.com/api/?name=COCO&size=200&background=8b4513&color=fff&bold=true",
+    imageUrl: "/images/companies/coco-development.jpg",
   projectImageUrls: projectImagePool.slice(6, 18),
   },
   {
@@ -423,7 +423,7 @@ const companies = [
     projectSize: "shared", // 18 team members
     bookmarkCount: 25,
     viewsLastMonth: 640,
-    imageUrl: "https://ui-avatars.com/api/?name=Lyvin&size=200&background=16a085&color=fff&bold=true",
+    imageUrl: "/images/companies/lyvin.jpg",
   projectImageUrls: projectImagePool.slice(8, 20),
   },
   {
@@ -441,7 +441,7 @@ const companies = [
     projectSize: "shared", // 70 team members
     bookmarkCount: 90,
     viewsLastMonth: 2100,
-    imageUrl: "https://ui-avatars.com/api/?name=Ciputra&size=200&background=e67e22&color=fff&bold=true",
+    imageUrl: "/images/companies/ciputra.jpg",
   projectImageUrls: projectImagePool.slice(1, 13),
   },
 ];
@@ -634,5 +634,48 @@ export const seed = mutation({
     }
 
     return `Seeded ${companies.length} real Bali companies with reviews`;
+  },
+});
+
+// Migration: fix imageUrl paths in live DB to match local .jpg files
+const imageUrlMap: Record<string, string> = {
+  Balitecture: "/images/companies/balitecture.jpg",
+  "Bali Construction": "/images/companies/bali-construction.jpg",
+  "888 Design & Build": "/images/companies/888-design-build.jpg",
+  "Karyanusa Asia": "/images/companies/karyanusa.jpg",
+  POPULAIRE: "/images/companies/populaire.jpg",
+  "Earth Lines Architects": "/images/companies/earth-lines.jpg",
+  IBUKU: "/images/companies/ibuku.jpg",
+  "Studio Jencquel": "/images/companies/studio-jencquel.jpg",
+  "Cipta Bali Architect": "/images/companies/cipta-bali.jpg",
+  "Lumbung Architect": "/images/companies/lumbung.jpg",
+  "Bali Design Solutions": "/images/companies/bali-design-solutions.jpg",
+  "Design Assembly": "/images/companies/design-assembly.jpg",
+  "Mahallati Interior": "/images/companies/mahallati.jpg",
+  "Azula Designs": "/images/companies/azula-designs.jpg",
+  "Canggu & Co": "/images/companies/canggu-co.jpg",
+  "NC Eco Design Studio": "/images/companies/nc-eco-design.jpg",
+  "Bali Renovation Pro": "/images/companies/bali-renovation-pro.jpg",
+  "Tropical Home Renovations": "/images/companies/tropical-home.jpg",
+  "Villa Refresh Bali": "/images/companies/villa-refresh.jpg",
+  "Mirah Investment & Development": "/images/companies/mirah.jpg",
+  "COCO Development Group": "/images/companies/coco-development.jpg",
+  "Lyvin Properties": "/images/companies/lyvin.jpg",
+  "Ciputra Group": "/images/companies/ciputra.jpg",
+};
+
+export const fixImageUrls = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const allCompanies = await ctx.db.query("companies").collect();
+    let updated = 0;
+    for (const company of allCompanies) {
+      const correctUrl = imageUrlMap[company.name];
+      if (correctUrl && company.imageUrl !== correctUrl) {
+        await ctx.db.patch(company._id, { imageUrl: correctUrl });
+        updated++;
+      }
+    }
+    return `Updated ${updated} company image URLs`;
   },
 });

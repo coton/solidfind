@@ -4,6 +4,7 @@ import { Star, ArrowRight } from "lucide-react";
 
 interface FeaturedCardProps {
   id?: string;
+  href?: string;
   image: string;
   title: string;
   address?: string;
@@ -12,15 +13,18 @@ interface FeaturedCardProps {
 }
 
 export function FeaturedCard({
-  id = "featured",
+  id,
+  href,
   image,
   title,
   address,
   rating = 4.5,
   reviewCount = 23,
 }: FeaturedCardProps) {
+  const linkHref = href ?? (id ? `/profile/${id}` : "/about");
+
   return (
-    <Link href={`/profile/${id}`} className="block">
+    <Link href={linkHref} className="block">
       <div className="relative w-[210px] h-[230px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
         {/* Image - top half */}
         <div className="relative h-[120px] w-full">
@@ -28,6 +32,8 @@ export function FeaturedCard({
             src={image}
             alt={title}
             fill
+            sizes="210px"
+            loading="eager"
             className="object-cover rounded-t-[6px]"
           />
         </div>

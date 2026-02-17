@@ -16,6 +16,7 @@ export function AdBanner({
           src={imageSrc}
           alt={alt}
           fill
+          sizes="(max-width: 640px) 100vw, 730px"
           className="object-cover"
         />
       ) : (
