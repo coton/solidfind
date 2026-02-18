@@ -1,0 +1,9 @@
+[    2009ms] [WARNING] Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview @ http://localhost:3002/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    6699ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/_next/image?url=%2Fimages%2Fcompanies%2Fbali-design-solutions.png&w=64&q=75:0
+[    6724ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/_next/image?url=%2Fimages%2Fcompanies%2Flumbung.png&w=64&q=75:0
+[    6738ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/_next/image?url=%2Fimages%2Fcompanies%2Fcipta-bali.png&w=64&q=75:0
+[    6749ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/_next/image?url=%2Fimages%2Fcompanies%2Fibuku.png&w=64&q=75:0
+[    6769ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/_next/image?url=%2Fimages%2Fcompanies%2Fbali-construction.png&w=64&q=75:0
+[    6787ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/_next/image?url=%2Fimages%2Fcompanies%2Fpopulaire.png&w=64&q=75:0
+[    7469ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/_next/image?url=%2Fimages%2Fcompanies%2Fnc-eco-design.png&w=64&q=75:0
+[    7928ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/_next/image?url=%2Fimages%2Fcompanies%2Fciputra.png&w=64&q=75:0

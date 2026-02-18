@@ -23,8 +23,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL?.toLowerCase().trim();
+  const userEmail = user?.primaryEmailAddress?.emailAddress?.toLowerCase().trim();
   const isAdmin = userEmail && adminEmail && userEmail === adminEmail;
 
   if (!isAdmin) {
@@ -32,8 +32,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-[24px] font-bold text-[#333] mb-2">Access Denied</h1>
-          <p className="text-[13px] text-[#333]/60 mb-6">
+          <p className="text-[13px] text-[#333]/60 mb-2">
             You do not have permission to access the admin panel.
+          </p>
+          <p className="text-[11px] text-[#333]/40 mb-6">
+            Logged in as: {userEmail || "not logged in"}
           </p>
           <Link
             href="/"
