@@ -5,17 +5,28 @@ import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 
+const CATEGORIES = ["all", "construction", "renovation", "architecture", "interior", "real-estate"] as const;
+const STATUS_OPTIONS = ["all", "pro", "free"] as const;
+
 export default function AdminCompanies() {
   const companies = useQuery(api.companies.listAll);
   const updateCompany = useMutation(api.companies.update);
   const removeCompany = useMutation(api.companies.remove);
 
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState<string>("all");
+  const [status, setStatus] = useState<string>("all");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  const filtered = companies?.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = companies?.filter((c) => {
+    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = category === "all" || c.category === category;
+    const matchesStatus =
+      status === "all" ||
+      (status === "pro" && c.isPro) ||
+      (status === "free" && !c.isPro);
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   const handleTogglePro = async (id: string, currentPro: boolean) => {
     await updateCompany({ id: id as any, isPro: !currentPro });
@@ -33,8 +44,8 @@ export default function AdminCompanies() {
         <span className="text-[12px] text-[#333]/50">{filtered?.length ?? 0} total</span>
       </div>
 
-      {/* Search */}
-      <div className="mb-4">
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
         <input
           type="text"
           value={search}
@@ -42,16 +53,39 @@ export default function AdminCompanies() {
           placeholder="Search companies..."
           className="w-full max-w-[300px] h-9 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
         />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="h-9 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
+        >
+          {CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat === "all" ? "All categories" : cat.charAt(0).toUpperCase() + cat.slice(1).replace("-", " ")}
+            </option>
+          ))}
+        </select>
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="h-9 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
+        >
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {s === "all" ? "All status" : s === "pro" ? "Pro" : "Free"}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-[8px] border border-[#e4e4e4] overflow-hidden">
-        <table className="w-full">
+      <div className="bg-white rounded-[8px] border border-[#e4e4e4] overflow-hidden overflow-x-auto">
+        <table className="w-full min-w-[800px]">
           <thead>
             <tr className="border-b border-[#e4e4e4] bg-[#fafafa]">
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Name</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Category</th>
-              <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Owner</th>
+              <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Rating</th>
+              <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Reviews</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Pro</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Created</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Actions</th>
@@ -60,13 +94,13 @@ export default function AdminCompanies() {
           <tbody>
             {filtered === undefined ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
+                <td colSpan={7} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
                   Loading...
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
+                <td colSpan={7} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
                   No companies found.
                 </td>
               </tr>
@@ -82,7 +116,16 @@ export default function AdminCompanies() {
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-[11px] text-[#333]/70 capitalize">{company.category}</td>
-                  <td className="px-4 py-3 text-[11px] text-[#333]/50">{company.ownerEmail}</td>
+                  <td className="px-4 py-3 text-[11px] text-[#333]/70">
+                    {company.rating ? (
+                      <span className="text-amber-500">★ {company.rating.toFixed(1)}</span>
+                    ) : (
+                      <span className="text-[#333]/30">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-[11px] text-[#333]/60">
+                    {company.reviewCount ?? 0}
+                  </td>
                   <td className="px-4 py-3">
                     {company.isPro ? (
                       <span className="text-[9px] font-medium text-[#f14110] bg-[#f14110]/10 px-2 py-0.5 rounded-full">

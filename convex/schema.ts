@@ -79,6 +79,7 @@ export default defineSchema({
     userName: v.string(),
     rating: v.float64(),
     content: v.string(),
+    flagged: v.optional(v.boolean()),
     createdAt: v.number(),
   })
     .index("by_companyId", ["companyId"])
