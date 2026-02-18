@@ -140,6 +140,7 @@ export const update = mutation({
     renovationLocations: v.optional(v.array(v.string())),
     logoId: v.optional(v.id("_storage")),
     projectImageIds: v.optional(v.array(v.id("_storage"))),
+    isFeatured: v.optional(v.boolean()),
     since: v.optional(v.number()),
   },
   handler: async (ctx, args) => {

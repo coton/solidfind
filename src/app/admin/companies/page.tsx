@@ -32,6 +32,10 @@ export default function AdminCompanies() {
     await updateCompany({ id: id as any, isPro: !currentPro });
   };
 
+  const handleToggleFeatured = async (id: string, currentFeatured: boolean) => {
+    await updateCompany({ id: id as any, isFeatured: !currentFeatured });
+  };
+
   const handleDelete = async (id: string) => {
     await removeCompany({ id: id as any });
     setConfirmDelete(null);
@@ -79,7 +83,7 @@ export default function AdminCompanies() {
 
       {/* Table */}
       <div className="bg-white rounded-[8px] border border-[#e4e4e4] overflow-hidden overflow-x-auto">
-        <table className="w-full min-w-[800px]">
+        <table className="w-full min-w-[900px]">
           <thead>
             <tr className="border-b border-[#e4e4e4] bg-[#fafafa]">
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Name</th>
@@ -87,6 +91,7 @@ export default function AdminCompanies() {
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Rating</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Reviews</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Pro</th>
+              <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Featured</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Created</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Actions</th>
             </tr>
@@ -94,13 +99,13 @@ export default function AdminCompanies() {
           <tbody>
             {filtered === undefined ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
+                <td colSpan={8} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
                   Loading...
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
+                <td colSpan={8} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
                   No companies found.
                 </td>
               </tr>
@@ -137,6 +142,13 @@ export default function AdminCompanies() {
                       </span>
                     )}
                   </td>
+                  <td className="px-4 py-3">
+                    {company.isFeatured ? (
+                      <span className="text-[11px]">⭐</span>
+                    ) : (
+                      <span className="text-[#333]/30 text-[11px]">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-[11px] text-[#333]/50">
                     {new Date(company.createdAt).toLocaleDateString()}
                   </td>
@@ -147,6 +159,12 @@ export default function AdminCompanies() {
                         className="text-[10px] font-medium px-3 py-1 rounded-full border border-[#e4e4e4] hover:bg-[#333] hover:text-white hover:border-[#333] transition-colors"
                       >
                         {company.isPro ? "Remove Pro" : "Make Pro"}
+                      </button>
+                      <button
+                        onClick={() => handleToggleFeatured(company._id, !!company.isFeatured)}
+                        className="text-[10px] font-medium px-3 py-1 rounded-full border border-[#e4e4e4] hover:bg-[#333] hover:text-white hover:border-[#333] transition-colors"
+                      >
+                        {company.isFeatured ? "Unfeature" : "Feature"}
                       </button>
                       {confirmDelete === company._id ? (
                         <div className="flex items-center gap-1">

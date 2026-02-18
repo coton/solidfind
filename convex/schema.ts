@@ -43,6 +43,7 @@ export default defineSchema({
     logoId: v.optional(v.id("_storage")),
     projectImageIds: v.optional(v.array(v.id("_storage"))),
     projectImageUrls: v.optional(v.array(v.string())), // External image URLs as fallback
+    isFeatured: v.optional(v.boolean()),
     since: v.optional(v.number()), // Founded year
     createdAt: v.number(),
   })
