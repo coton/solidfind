@@ -44,8 +44,20 @@ export const updateStatus = mutation({
   args: {
     id: v.id("reports"),
     status: v.union(v.literal("pending"), v.literal("reviewed"), v.literal("dismissed")),
+    adminEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, { status: args.status });
+
+    if (args.adminEmail) {
+      await ctx.db.insert("auditLogs", {
+        adminEmail: args.adminEmail,
+        action: `report_${args.status}`,
+        targetType: "report",
+        targetId: args.id,
+        details: `Status changed to ${args.status}`,
+        createdAt: Date.now(),
+      });
+    }
   },
 });

@@ -94,4 +94,14 @@ export default defineSchema({
   })
     .index("by_userId", ["userId"])
     .index("by_userId_companyId", ["userId", "companyId"]),
+
+  auditLogs: defineTable({
+    adminEmail: v.string(),
+    action: v.string(),
+    targetType: v.string(),
+    targetId: v.optional(v.string()),
+    details: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_createdAt", ["createdAt"]),
 });

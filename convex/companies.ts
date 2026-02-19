@@ -171,8 +171,9 @@ export const listAll = query({
 });
 
 export const remove = mutation({
-  args: { id: v.id("companies") },
+  args: { id: v.id("companies"), adminEmail: v.optional(v.string()) },
   handler: async (ctx, args) => {
+    const company = await ctx.db.get(args.id);
     // Delete associated reviews
     const reviews = await ctx.db
       .query("reviews")
@@ -197,6 +198,17 @@ export const remove = mutation({
       await ctx.db.delete(report._id);
     }
     await ctx.db.delete(args.id);
+
+    if (args.adminEmail) {
+      await ctx.db.insert("auditLogs", {
+        adminEmail: args.adminEmail,
+        action: "delete_company",
+        targetType: "company",
+        targetId: args.id,
+        details: company?.name ?? "Unknown",
+        createdAt: Date.now(),
+      });
+    }
   },
 });
 

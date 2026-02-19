@@ -107,7 +107,7 @@ export const listAll = query({
 
 // Admin: delete a review and recalculate company rating
 export const deleteReview = mutation({
-  args: { reviewId: v.id("reviews") },
+  args: { reviewId: v.id("reviews"), adminEmail: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const review = await ctx.db.get(args.reviewId);
     if (!review) return;
@@ -131,21 +131,52 @@ export const deleteReview = mutation({
         reviewCount: remaining.length,
       });
     }
+
+    if (args.adminEmail) {
+      await ctx.db.insert("auditLogs", {
+        adminEmail: args.adminEmail,
+        action: "delete_review",
+        targetType: "review",
+        targetId: args.reviewId,
+        details: `Rating: ${review.rating}, Content: ${review.content.slice(0, 50)}`,
+        createdAt: Date.now(),
+      });
+    }
   },
 });
 
 // Admin: flag a review as spam
 export const flagReview = mutation({
-  args: { reviewId: v.id("reviews") },
+  args: { reviewId: v.id("reviews"), adminEmail: v.optional(v.string()) },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.reviewId, { flagged: true });
+
+    if (args.adminEmail) {
+      await ctx.db.insert("auditLogs", {
+        adminEmail: args.adminEmail,
+        action: "flag_review_spam",
+        targetType: "review",
+        targetId: args.reviewId,
+        createdAt: Date.now(),
+      });
+    }
   },
 });
 
 // Admin: unflag a review
 export const unflagReview = mutation({
-  args: { reviewId: v.id("reviews") },
+  args: { reviewId: v.id("reviews"), adminEmail: v.optional(v.string()) },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.reviewId, { flagged: false });
+
+    if (args.adminEmail) {
+      await ctx.db.insert("auditLogs", {
+        adminEmail: args.adminEmail,
+        action: "unflag_review",
+        targetType: "review",
+        targetId: args.reviewId,
+        createdAt: Date.now(),
+      });
+    }
   },
 });

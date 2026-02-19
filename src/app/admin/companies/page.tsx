@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import Pagination, { PAGE_SIZE } from "../components/Pagination";
 
 const CATEGORIES = ["all", "construction", "renovation", "architecture", "interior", "real-estate"] as const;
 const STATUS_OPTIONS = ["all", "pro", "free"] as const;
@@ -17,6 +18,7 @@ export default function AdminCompanies() {
   const [category, setCategory] = useState<string>("all");
   const [status, setStatus] = useState<string>("all");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
 
   const filtered = companies?.filter((c) => {
     const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
@@ -28,16 +30,23 @@ export default function AdminCompanies() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  const totalItems = filtered?.length ?? 0;
+  const paginated = filtered?.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+
+  const handleFilterChange = () => setCurrentPage(0);
+
   const handleTogglePro = async (id: string, currentPro: boolean) => {
-    await updateCompany({ id: id as any, isPro: !currentPro });
+    await updateCompany({ id: id as Parameters<typeof updateCompany>[0]["id"], isPro: !currentPro });
   };
 
   const handleToggleFeatured = async (id: string, currentFeatured: boolean) => {
-    await updateCompany({ id: id as any, isFeatured: !currentFeatured });
+    await updateCompany({ id: id as Parameters<typeof updateCompany>[0]["id"], isFeatured: !currentFeatured });
   };
 
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "admin";
+
   const handleDelete = async (id: string) => {
-    await removeCompany({ id: id as any });
+    await removeCompany({ id: id as Parameters<typeof removeCompany>[0]["id"], adminEmail });
     setConfirmDelete(null);
   };
 
@@ -45,7 +54,7 @@ export default function AdminCompanies() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">Companies</h1>
-        <span className="text-[12px] text-[#333]/50">{filtered?.length ?? 0} total</span>
+        <span className="text-[12px] text-[#333]/50">{totalItems} total</span>
       </div>
 
       {/* Filters */}
@@ -53,13 +62,13 @@ export default function AdminCompanies() {
         <input
           type="text"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); handleFilterChange(); }}
           placeholder="Search companies..."
           className="w-full max-w-[300px] h-9 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
         />
         <select
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          onChange={(e) => { setCategory(e.target.value); handleFilterChange(); }}
           className="h-9 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
         >
           {CATEGORIES.map((cat) => (
@@ -70,7 +79,7 @@ export default function AdminCompanies() {
         </select>
         <select
           value={status}
-          onChange={(e) => setStatus(e.target.value)}
+          onChange={(e) => { setStatus(e.target.value); handleFilterChange(); }}
           className="h-9 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
         >
           {STATUS_OPTIONS.map((s) => (
@@ -97,20 +106,20 @@ export default function AdminCompanies() {
             </tr>
           </thead>
           <tbody>
-            {filtered === undefined ? (
+            {paginated === undefined ? (
               <tr>
                 <td colSpan={8} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
                   Loading...
                 </td>
               </tr>
-            ) : filtered.length === 0 ? (
+            ) : paginated.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
                   No companies found.
                 </td>
               </tr>
             ) : (
-              filtered.map((company) => (
+              paginated.map((company) => (
                 <tr key={company._id} className="border-b border-[#f0f0f0] hover:bg-[#fafafa]">
                   <td className="px-4 py-3">
                     <Link
@@ -197,6 +206,12 @@ export default function AdminCompanies() {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalItems={totalItems}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
