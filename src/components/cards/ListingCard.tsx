@@ -40,6 +40,11 @@ export function ListingCard({
 }: ListingCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [imageError, setImageError] = useState(false);
+  
+  // Debug logging
+  if (typeof window !== 'undefined' && imageUrl) {
+    console.log(`[ListingCard] ${name} imageUrl:`, imageUrl);
+  }
 
   const getInitials = (companyName: string) => {
     return companyName
