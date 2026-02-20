@@ -67,13 +67,11 @@ export function ListingCard({
           {/* Logo — 50x50 at (10, 10) */}
           <div className="absolute top-[10px] left-[10px] w-[50px] h-[50px] bg-[#d8d8d8] rounded-[6px] overflow-hidden">
             {imageUrl && !imageError ? (
-              <Image
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
                 src={imageUrl}
                 alt={name}
-                width={50}
-                height={50}
                 className="object-cover w-full h-full"
-                unoptimized
                 onError={() => setImageError(true)}
               />
             ) : (

@@ -47,7 +47,8 @@ function ProjectImagesGrid({
     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5">
       {urlImages.map((src, i) => (
         <div key={`url-${i}`} className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
-          <Image src={src} alt={`Project ${i + 1}`} fill sizes="(max-width: 640px) 33vw, 110px" className="object-cover" unoptimized />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={src} alt={`Project ${i + 1}`} className="object-cover w-full h-full absolute inset-0" />
         </div>
       ))}
       {idImages.map((id, i) => (
