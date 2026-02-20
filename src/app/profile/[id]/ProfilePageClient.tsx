@@ -23,7 +23,7 @@ function useStorageUrl(storageId: Id<"_storage"> | undefined) {
 function StorageImage({ storageId, alt, className, width, height, fill, sizes }: { storageId: Id<"_storage">; alt: string; className?: string; width?: number; height?: number; fill?: boolean; sizes?: string }) {
   const url = useStorageUrl(storageId);
   if (!url) return <div className={className} style={{ width, height, background: '#d8d8d8' }} />;
-  return fill ? <Image src={url} alt={alt} fill sizes={sizes ?? "210px"} className={className} /> : <Image src={url} alt={alt} width={width ?? 210} height={height ?? 210} className={className} />;
+  return fill ? <Image src={url} alt={alt} fill sizes={sizes ?? "210px"} className={className} unoptimized /> : <Image src={url} alt={alt} width={width ?? 210} height={height ?? 210} className={className} unoptimized />;
 }
 
 function formatWhatsApp(num: string): string {
@@ -47,7 +47,7 @@ function ProjectImagesGrid({
     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5">
       {urlImages.map((src, i) => (
         <div key={`url-${i}`} className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
-          <Image src={src} alt={`Project ${i + 1}`} fill sizes="(max-width: 640px) 33vw, 110px" className="object-cover" />
+          <Image src={src} alt={`Project ${i + 1}`} fill sizes="(max-width: 640px) 33vw, 110px" className="object-cover" unoptimized />
         </div>
       ))}
       {idImages.map((id, i) => (

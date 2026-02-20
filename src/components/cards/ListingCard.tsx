@@ -73,6 +73,7 @@ export function ListingCard({
                 width={50}
                 height={50}
                 className="object-cover w-full h-full"
+                unoptimized
                 onError={() => setImageError(true)}
               />
             ) : (
