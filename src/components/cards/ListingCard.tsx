@@ -66,13 +66,12 @@ export function ListingCard({
         <div className={`absolute inset-0 transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
           {/* Logo — 50x50 at (10, 10) */}
           <div className="absolute top-[10px] left-[10px] w-[50px] h-[50px] bg-[#d8d8d8] rounded-[6px] overflow-hidden">
-            {imageUrl && !imageError ? (
+            {imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imageUrl}
                 alt={name}
                 className="object-cover w-full h-full"
-                onError={() => setImageError(true)}
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-[#f14110] to-[#e9a28e] flex items-center justify-center">
