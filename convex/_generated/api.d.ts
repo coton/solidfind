@@ -15,6 +15,7 @@ import type * as reports from "../reports.js";
 import type * as reviews from "../reviews.js";
 import type * as savedListings from "../savedListings.js";
 import type * as seed from "../seed.js";
+import type * as tempFixImages from "../tempFixImages.js";
 import type * as users from "../users.js";
 
 import type {
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   reviews: typeof reviews;
   savedListings: typeof savedListings;
   seed: typeof seed;
+  tempFixImages: typeof tempFixImages;
   users: typeof users;
 }>;
 
