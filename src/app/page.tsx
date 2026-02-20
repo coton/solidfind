@@ -155,7 +155,6 @@ function HomeContent() {
               <FeaturedCard
                 image="/images/featured-bg.png"
                 title="FEATURED ARTICLE TITLE"
-                address="Jl. Imam Bonjol No.198/249, Pemecutan Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80119"
               />
 
               {/* Listing Cards - show skeletons while Convex loads */}
