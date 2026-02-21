@@ -66,9 +66,27 @@ interface DropdownProps {
   onChange: (value: string) => void;
   width?: string;
   isProjectSize?: boolean;
+  // Multi-select support (for location)
+  multiSelect?: boolean;
+  selectedValues?: string[];
+  displayText?: string;
+  isActive?: boolean;
+  customMenuWidth?: number;
 }
 
-function Dropdown({ label, options, value, onChange, width = "w-[140px]", isProjectSize = false }: DropdownProps) {
+function Dropdown({ 
+  label, 
+  options, 
+  value, 
+  onChange, 
+  width = "w-[140px]", 
+  isProjectSize = false,
+  multiSelect = false,
+  selectedValues = [],
+  displayText,
+  isActive = false,
+  customMenuWidth
+}: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0, width: 0 });
@@ -80,6 +98,16 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]", isProj
     if (!isProjectSize) return fullLabel;
     return fullLabel.replace(/\s*\([^)]*\)/, '');
   };
+
+  // Get display text for button
+  const getButtonText = () => {
+    if (displayText) return displayText;
+    if (selectedOption) return getDisplayLabel(selectedOption.label);
+    return label;
+  };
+
+  // Determine if button should show active color
+  const buttonIsActive = multiSelect ? isActive : !!value;
 
   useEffect(() => {
     if (isOpen && buttonRef.current) {
@@ -94,8 +122,8 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]", isProj
     }
   }, [isOpen]);
 
-  // Determine menu width (230px for PROJECT SIZE, otherwise match button)
-  const menuWidth = isProjectSize ? 230 : menuPos.width;
+  // Determine menu width
+  const menuWidth = customMenuWidth || (isProjectSize ? 230 : menuPos.width);
 
   return (
     <div className={`relative ${width}`}>
@@ -105,8 +133,8 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]", isProj
         className="h-10 bg-[#f8f8f8] rounded-[6px] flex items-center justify-between px-3 w-full"
         style={{ letterSpacing: '0.12px' }}
       >
-        <span className={`text-[11px] font-semibold ${value ? 'text-[#f14110]' : 'text-[#333]'}`}>
-          {selectedOption ? getDisplayLabel(selectedOption.label) : label}
+        <span className={`text-[11px] font-semibold ${buttonIsActive ? 'text-[#f14110]' : 'text-[#333]'}`}>
+          {getButtonText()}
         </span>
         <Image src="/images/btn-down.svg" alt="" width={8} height={5} className="rotate-90" />
       </button>
@@ -119,34 +147,42 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]", isProj
             style={{ top: menuPos.top, left: menuPos.left, width: menuWidth }}
           >
             <div className="pt-2 pb-[10px] px-3">
-              {options.map((option, index) => (
-                <button
-                  key={option.id}
-                  onClick={() => {
-                    onChange(option.id);
-                    setIsOpen(false);
-                  }}
-                  className={`w-full text-left py-2 text-[11px] flex items-center justify-between ${
-                    index < options.length - 1 ? 'mb-[2px]' : ''
-                  } ${
-                    value === option.id ? 'text-[#f14110]' : 'text-[#333]'
-                  }`}
-                  style={{ 
-                    fontFamily: 'var(--font-sora), sans-serif', 
-                    fontWeight: 500,
-                    letterSpacing: '0.22px',
-                    borderBottom: index < options.length - 1 ? '1px solid #e4e4e4' : 'none'
-                  }}
-                >
-                  <span className="whitespace-nowrap flex-1">{option.label}</span>
-                  <div 
-                    className={`flex-shrink-0 w-6 h-3 rounded-full ${value === option.id ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
-                    style={{ marginLeft: '10px' }}
+              {options.map((option, index) => {
+                const isSelected = multiSelect 
+                  ? selectedValues.includes(option.id)
+                  : value === option.id;
+                
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => {
+                      onChange(option.id);
+                      if (!multiSelect) {
+                        setIsOpen(false);
+                      }
+                    }}
+                    className={`w-full text-left py-2 text-[11px] flex items-center justify-between ${
+                      index < options.length - 1 ? 'mb-[2px]' : ''
+                    } ${
+                      isSelected ? 'text-[#f14110]' : 'text-[#333]'
+                    }`}
+                    style={{ 
+                      fontFamily: 'var(--font-sora), sans-serif', 
+                      fontWeight: 500,
+                      letterSpacing: '0.22px',
+                      borderBottom: index < options.length - 1 ? '1px solid #e4e4e4' : 'none'
+                    }}
                   >
-                    <div className={`w-2 h-2 bg-white rounded-full mt-0.5 transition-all ${value === option.id ? 'ml-3.5' : 'ml-0.5'}`} />
-                  </div>
-                </button>
-              ))}
+                    <span className="whitespace-nowrap flex-1">{option.label}</span>
+                    <div 
+                      className={`flex-shrink-0 w-6 h-3 rounded-full ${isSelected ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
+                      style={{ marginLeft: '10px' }}
+                    >
+                      <div className={`w-2 h-2 bg-white rounded-full mt-0.5 transition-all ${isSelected ? 'ml-3.5' : 'ml-0.5'}`} />
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </>
@@ -172,7 +208,10 @@ function HeaderInner() {
   const [keywords, setKeywords] = useState(searchParams.get("search") ?? "");
   const [projectSize, setProjectSize] = useState(searchParams.get("projectSize") ?? "");
   const [category, setCategory] = useState(searchParams.get("subcategory") ?? "");
-  const [location, setLocation] = useState(searchParams.get("location") ?? "");
+  // Location now supports multiple values (comma-separated)
+  const [locations, setLocations] = useState<string[]>(
+    searchParams.get("location") ? searchParams.get("location")!.split(",") : []
+  );
 
   const activeCategory = searchParams.get("category") ?? "construction";
 
@@ -209,9 +248,43 @@ function HeaderInner() {
     setKeywords("");
     setProjectSize("");
     setCategory("");
-    setLocation("");
+    setLocations([]);
     router.push("/");
   };
+
+  // Handle location multi-select
+  const handleLocationChange = (locationId: string) => {
+    let newLocations: string[];
+    
+    if (locationId === "bali") {
+      // If BALI is selected, clear all others and set only BALI
+      newLocations = ["bali"];
+    } else {
+      // Remove BALI if it was selected
+      let filtered = locations.filter(loc => loc !== "bali");
+      
+      if (filtered.includes(locationId)) {
+        // Remove if already selected
+        newLocations = filtered.filter(loc => loc !== locationId);
+      } else {
+        // Add to selection
+        newLocations = [...filtered, locationId];
+      }
+    }
+    
+    setLocations(newLocations);
+    updateParams({ location: newLocations.length > 0 ? newLocations.join(",") : null });
+  };
+
+  // Get location display text
+  const getLocationDisplayText = () => {
+    if (locations.length === 0) return "LOCATION";
+    if (locations.includes("bali")) return "BALI";
+    if (locations.length === 1) return locations[0].toUpperCase();
+    return "LOCATION"; // Multiple locations selected
+  };
+
+  const isLocationActive = locations.length > 0;
 
   // Get categories based on active main category
   const getCategoryOptions = () => {
@@ -343,14 +416,19 @@ function HeaderInner() {
                 />
               </div>
 
-              {/* Location Dropdown */}
+              {/* Location Dropdown - multi-select enabled */}
               <div className="flex-shrink-0">
                 <Dropdown
                   label="LOCATION"
                   options={locationOptions}
-                  value={location}
-                  onChange={(val) => { setLocation(val); updateParams({ location: val || null }); }}
+                  value="" // Not used in multi-select mode
+                  onChange={handleLocationChange}
                   width="w-[100px] sm:w-[120px]"
+                  multiSelect={true}
+                  selectedValues={locations}
+                  displayText={getLocationDisplayText()}
+                  isActive={isLocationActive}
+                  customMenuWidth={200}
                 />
               </div>
 
