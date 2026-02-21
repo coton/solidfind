@@ -231,7 +231,7 @@ function HeaderInner() {
         }}
       />
 
-      <div className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6 pb-6 sm:pb-8">
+      <div className="relative z-10 px-4 sm:px-0 pt-4 sm:pt-6 pb-6 sm:pb-8">
         {/* Top Bar */}
         <div className="max-w-[900px] mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 justify-between mb-4 sm:mb-6">
           {/* Logo */}

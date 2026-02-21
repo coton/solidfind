@@ -70,7 +70,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-6 py-8 flex-grow w-full">
+      <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         {/* User Info Section */}
         <div className="flex items-start justify-between mb-8">
           <div>

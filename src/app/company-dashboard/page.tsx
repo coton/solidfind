@@ -88,7 +88,7 @@ export default function CompanyDashboardPage() {
     return (
       <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
         <Header />
-        <main className="max-w-[900px] mx-auto px-6 py-8 flex-grow w-full">
+        <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
           <div className="text-center py-20">
             <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-4">
               Welcome!
@@ -134,7 +134,7 @@ export default function CompanyDashboardPage() {
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-6 py-8 flex-grow w-full">
+      <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         {/* Header Row */}
         <div className="flex items-start justify-between mb-6">
           <div>

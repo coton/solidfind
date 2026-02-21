@@ -20,7 +20,7 @@ export default function CompanyReviewsPage() {
     <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-6 py-8 flex-grow w-full">
+      <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         <Link
           href={`/profile/${companyId}`}
           className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors mb-6"
