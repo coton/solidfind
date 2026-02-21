@@ -103,8 +103,9 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]", isProj
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="h-10 bg-[#f8f8f8] rounded-[6px] flex items-center justify-between px-3 w-full"
+        style={{ letterSpacing: '0.12px' }}
       >
-        <span className={`text-[11px] font-semibold tracking-[0.22px] ${value ? 'text-[#f14110]' : 'text-[#333]'}`}>
+        <span className={`text-[11px] font-semibold ${value ? 'text-[#f14110]' : 'text-[#333]'}`}>
           {selectedOption ? getDisplayLabel(selectedOption.label) : label}
         </span>
         <Image src="/images/btn-down.svg" alt="" width={8} height={5} className="rotate-90" />
@@ -117,10 +118,7 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]", isProj
             className={`fixed bg-white rounded-[6px] shadow-lg z-50 max-h-[300px] overflow-y-auto transition-opacity duration-75 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
             style={{ top: menuPos.top, left: menuPos.left, width: menuWidth }}
           >
-            <div className="pt-2 px-2 pb-[10px]">
-              <p className="text-[9px] text-[#333]/50 mb-2 px-2">
-                Services Provided /<br />Layanan yang Disediakan
-              </p>
+            <div className="pt-2 pb-[10px] px-3">
               {options.map((option, index) => (
                 <button
                   key={option.id}
@@ -128,13 +126,16 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]", isProj
                     onChange(option.id);
                     setIsOpen(false);
                   }}
-                  className={`w-full text-left px-2 py-2 text-[11px] tracking-[0.22px] border-b border-[#e4e4e4] last:border-0 flex items-center justify-between ${
+                  className={`w-full text-left py-2 text-[11px] flex items-center justify-between ${
+                    index < options.length - 1 ? 'mb-[2px]' : ''
+                  } ${
                     value === option.id ? 'text-[#f14110]' : 'text-[#333]'
                   }`}
                   style={{ 
                     fontFamily: 'var(--font-sora), sans-serif', 
                     fontWeight: 500,
-                    paddingBottom: index === options.length - 1 ? '8px' : undefined
+                    letterSpacing: '0.22px',
+                    borderBottom: index < options.length - 1 ? '1px solid #e4e4e4' : 'none'
                   }}
                 >
                   <span className="whitespace-nowrap flex-1">{option.label}</span>
@@ -304,7 +305,7 @@ function HeaderInner() {
         {/* Search Bar */}
         <div className="max-w-[900px] mx-auto">
           {/* Mobile: Stack vertically */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-[2px]">
             {/* Keywords Input - Full width on mobile */}
             <div className="flex-1 h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
               <input
@@ -318,7 +319,7 @@ function HeaderInner() {
             </div>
 
             {/* Filters Row - Horizontal on mobile */}
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-[2px] overflow-x-auto scrollbar-hide">
               {/* Project Size Dropdown */}
               <div className="flex-shrink-0">
                 <Dropdown
