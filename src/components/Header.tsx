@@ -304,22 +304,22 @@ function HeaderInner() {
 
         {/* Search Bar */}
         <div className="max-w-[900px] mx-auto">
-          {/* Mobile: Stack vertically */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-[2px]">
-            {/* Keywords Input - Full width on mobile */}
-            <div className="flex-1 h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
-              <input
-                type="text"
-                placeholder="Search by keywords"
-                value={keywords}
-                onChange={(e) => setKeywords(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full bg-transparent text-[11px] text-[#333] placeholder:text-[#333]/55 outline-none font-medium"
-              />
-            </div>
+          {/* Mobile: Stack vertically, Desktop: Flex with Clear button positioned right */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between gap-2 sm:gap-0">
+            {/* Left side: Keywords + Filters */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-[2px]">
+              {/* Keywords Input - reduced width by 20px on desktop */}
+              <div className="w-full sm:w-[calc(340px-20px)] h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
+                <input
+                  type="text"
+                  placeholder="Search by keywords"
+                  value={keywords}
+                  onChange={(e) => setKeywords(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full bg-transparent text-[11px] text-[#333] placeholder:text-[#333]/55 outline-none font-medium"
+                />
+              </div>
 
-            {/* Filters Row - Horizontal on mobile */}
-            <div className="flex items-center gap-[2px] overflow-x-auto scrollbar-hide">
               {/* Project Size Dropdown */}
               <div className="flex-shrink-0">
                 <Dropdown
@@ -358,15 +358,15 @@ function HeaderInner() {
               <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0">
                 <Image src="/images/btn-search.svg" alt="Search" width={40} height={40} className="w-10 h-10" />
               </button>
-
-              {/* Clear Filters */}
-              <button
-                onClick={clearFilters}
-                className="text-[#f8f8f8] text-[10px] sm:text-[11px] font-medium underline tracking-[0.22px] whitespace-nowrap flex-shrink-0"
-              >
-                Clear
-              </button>
             </div>
+
+            {/* Clear Filters - aligned to right of 900px container */}
+            <button
+              onClick={clearFilters}
+              className="text-[#f8f8f8] text-[10px] sm:text-[11px] font-medium underline tracking-[0.22px] whitespace-nowrap"
+            >
+              Clear
+            </button>
           </div>
         </div>
       </div>
