@@ -19,8 +19,8 @@ export function WelcomeCard() {
         </div>
 
         {/* Text bottom section - align with other cards description */}
-        <div className="absolute top-[137px] left-[10px] right-[10px] bottom-[20px]">
-          <p className="text-[10px] leading-[14px] tracking-[0.2px] text-[#333]/50 line-clamp-5" style={{ fontFamily: "'Sora', sans-serif" }}>
+        <div className="absolute top-[132px] left-[10px] right-[10px] bottom-[20px]">
+          <p className="text-[10px] leading-[14px] tracking-[0.2px] text-[#333] font-bold line-clamp-5" style={{ fontFamily: "'Sora', sans-serif" }}>
             We help you find trusted professionals to build, renovate, design and shape the places you live in.
           </p>
         </div>
