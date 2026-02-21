@@ -18,7 +18,7 @@ export function FeaturedCard({
 
   return (
     <Link href={linkHref} className="block">
-      <div className="relative w-[210px] h-[230px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
+      <div className="relative w-[210px] h-[220px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
         {/* Image - top half */}
         <div className="relative h-[120px] w-full">
           <Image

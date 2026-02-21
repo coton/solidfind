@@ -76,7 +76,7 @@ export function ListingCard({
   return (
     <Link href={`/profile/${id}`} className="block">
       <div
-        className={`relative w-[210px] h-[230px] rounded-[6px] overflow-hidden cursor-pointer transition-all ${
+        className={`relative w-[210px] h-[220px] rounded-[6px] overflow-hidden cursor-pointer transition-all ${
           isHovered ? 'bg-[#333]' : 'bg-[#f8f8f8]'
         } ${isFeatured ? 'ring-2 ring-[#f14110]' : ''}`}
         onMouseEnter={() => setIsHovered(true)}
@@ -100,10 +100,10 @@ export function ListingCard({
             )}
           </div>
 
-          {/* Pro Account badge — extended width, aligned with middle of thumbnail (45px) */}
+          {/* Pro Account badge — min-width 80px, decreased padding */}
           {isPro && (
             <div className="absolute top-[45px] right-[10px]">
-              <div className="bg-[#e4e4e4] rounded-[10px] h-[16px] px-[12px] flex items-center min-w-[100px] justify-center">
+              <div className="bg-[#e4e4e4] rounded-[10px] h-[16px] px-[8px] flex items-center min-w-[80px] justify-center">
                 <span className="text-[9px] text-[#333]/35 font-medium leading-[12px]">Pro Account</span>
               </div>
             </div>
@@ -116,16 +116,6 @@ export function ListingCard({
               <path d="M6.438 3.067C7.578 1.022 8.148 0 9 0c.852 0 1.422 1.022 2.562 3.067l.295.53c.324.581.486.872.738 1.063.252.192.567.263 1.197.405l.572.13c2.214.5 3.32.75 3.584 1.598.263.846-.491 1.729-2 3.494l-.39.456c-.429.501-.644.752-.74 1.062-.096.31-.064.645.001 1.314l.06.609c.227 2.355.342 3.533-.348 4.055-.689.523-1.726.046-3.798-0.908l-.537-.247c-.589-.272-.883-.407-1.195-.407-.312 0-.607.135-1.195.407l-.537.247c-2.072.954-3.109 1.431-3.798.909-.69-.524-.576-1.701-.348-4.056l.06-.608c.064-.67.097-1.005 0-1.314-.096-.31-.311-.562-.739-1.062l-.39-.457c-1.51-1.764-2.264-2.647-2-3.494.262-.846 1.37-1.097 3.584-1.598l.573-.13c.63-.142.944-.213 1.196-.405.253-.192.414-.482.738-1.063l.296-.53z" fill="#d8d8d8"/>
             </svg>
           </div>
-
-          {/* Share — top-left, D8D8D8 static */}
-          <button
-            className="absolute top-[10px] left-[10px] hover:opacity-70 transition-opacity"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          >
-            <svg width="17" height="22" viewBox="0 0 17 22.4" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12.68 8.933H14.34c.44 0 .862.175 1.174.487.311.311.486.734.486 1.175v9.143c0 .441-.175.864-.486 1.175a1.659 1.659 0 01-1.174.487H2.66a1.659 1.659 0 01-1.174-.487A1.664 1.664 0 011 19.738v-9.143c0-.441.175-.863.486-1.175a1.659 1.659 0 011.174-.487h1.659M11.819 4.323L8.5 1m0 0L5.181 4.323M8.5 1v14.131" stroke="#D8D8D8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
 
           {/* Bookmark — top-right, D8D8D8 static */}
           <button
@@ -141,8 +131,8 @@ export function ListingCard({
             </svg>
           </button>
 
-          {/* Company Name — 2 lines max, 10px gap from thumbnail (starts at 90px) */}
-          <div className="absolute top-[90px] left-[10px] right-[10px]">
+          {/* Company Name — 2 lines max, 20px gap from thumbnail (starts at 100px) */}
+          <div className="absolute top-[100px] left-[10px] right-[10px]">
             <h3 
               className="font-semibold text-[16px] leading-[16px] tracking-[0.32px] text-[#333] uppercase overflow-hidden"
               style={{
@@ -156,8 +146,8 @@ export function ListingCard({
             </h3>
           </div>
 
-          {/* Description — 10px gap from title (starts at 132px), 20px from bottom */}
-          <div className="absolute top-[132px] left-[10px] right-[10px] bottom-[20px]">
+          {/* Description — 10px gap from title (starts at 142px), 20px from bottom */}
+          <div className="absolute top-[142px] left-[10px] right-[10px] bottom-[20px]">
             <p className="text-[10px] leading-[14px] tracking-[0.2px] text-[#333]/50 line-clamp-5" style={{ fontFamily: "'Sora', sans-serif" }}>
               {description}
             </p>
@@ -199,7 +189,7 @@ export function ListingCard({
           </div>
 
           {/* Address — same height as description (10px gap spacing) */}
-          <div className="absolute top-[132px] left-[10px] right-[10px] bottom-[20px]">
+          <div className="absolute top-[142px] left-[10px] right-[10px] bottom-[20px]">
             <p className="text-[10px] text-[#d8d8d8]/75 leading-[14px] tracking-[0.2px] line-clamp-5" style={{ fontFamily: "'Sora', sans-serif" }}>
               {address}
             </p>

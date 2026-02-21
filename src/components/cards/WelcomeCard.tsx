@@ -4,7 +4,7 @@ import Image from "next/image";
 export function WelcomeCard() {
   return (
     <Link href="/about" className="block">
-      <div className="relative w-[210px] h-[230px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
+      <div className="relative w-[210px] h-[220px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
         {/* Orange gradient top section - rounded top, square bottom */}
         <div
           className="absolute top-0 left-0 right-0 h-[120px] rounded-t-[6px] flex items-end p-[10px]"
@@ -19,7 +19,7 @@ export function WelcomeCard() {
         </div>
 
         {/* Text bottom section - 11px font size */}
-        <div className="absolute top-[132px] left-[10px] right-[10px] bottom-[20px]">
+        <div className="absolute top-[142px] left-[10px] right-[10px] bottom-[20px]">
           <p className="text-[11px] leading-[15px] tracking-[0.22px] text-[#333] font-bold line-clamp-5" style={{ fontFamily: "'Sora', sans-serif" }}>
             We help you find trusted professionals to build, renovate, design and shape the places you live in.
           </p>
