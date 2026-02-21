@@ -43,10 +43,10 @@ export default function AboutPage() {
             {/* Logo */}
             <div className="w-[180px] sm:w-[200px] h-[180px] sm:h-[200px] rounded-[6px] mb-4 bg-[#f8f8f8] flex items-center justify-center p-6 sm:p-8">
               <Image 
-                src="/images/logo-solid.svg" 
+                src="/images/logo-full.svg" 
                 alt="SOLIDFIND.ID Logo" 
-                width={150} 
-                height={150}
+                width={175} 
+                height={19}
                 className="w-full h-auto"
               />
             </div>

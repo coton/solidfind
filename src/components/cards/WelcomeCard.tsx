@@ -14,9 +14,7 @@ export function WelcomeCard() {
         >
           {/* Logo */}
           <div className="flex items-baseline h-[13px]">
-            <Image src="/images/logo-solid-white.svg" alt="SOLID" width={54} height={13} className="h-[13px] w-auto" />
-            <Image src="/images/logo-find-white.svg" alt="FIND" width={40} height={13} className="h-[13px] w-auto" />
-            <Image src="/images/logo-id-white.svg" alt=".id" width={22} height={13} className="h-[11px] w-auto" />
+            <Image src="/images/logo-full-white.svg" alt="SolidFind.id" width={120} height={13} className="h-[13px] w-auto" />
           </div>
         </div>
 

@@ -217,11 +217,7 @@ function HeaderInner() {
         <div className="max-w-[900px] mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 justify-between mb-4 sm:mb-6">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <div className="flex items-baseline">
-              <Image src="/images/logo-solid.svg" alt="SOLID" width={85} height={19} className="h-[19px] w-auto" />
-              <Image src="/images/logo-find.svg" alt="FIND" width={72} height={19} className="h-[19px] w-auto" />
-              <Image src="/images/logo-id.svg" alt=".id" width={40} height={19} className="h-[16px] w-auto" />
-            </div>
+            <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className="h-[19px] w-auto" />
           </Link>
 
           {/* Right Side Buttons */}

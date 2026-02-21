@@ -136,7 +136,7 @@ function HomeContent() {
                 In the meantime, here are the latest added profiles:
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 justify-items-center lg:justify-items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 justify-items-center lg:justify-items-start">
               {latestListings.map((listing) => (
                 <ListingCard
                   key={listing.id}
@@ -149,7 +149,7 @@ function HomeContent() {
         ) : (
           <>
             {/* Results Grid - Mobile: 1 col, Tablet: 2 cols, Desktop: 4 cols */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8 justify-items-center lg:justify-items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8 justify-items-center lg:justify-items-start">
               {/* First Row: Welcome + Featured + Listing Cards */}
               <WelcomeCard />
               <FeaturedCard
