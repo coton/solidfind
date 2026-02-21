@@ -69,8 +69,8 @@ export function ListingCard({
       >
         {/* ===== Normal State ===== */}
         <div className={`absolute inset-0 transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
-          {/* Logo — 50x50 at (10, 10) */}
-          <div className="absolute top-[10px] left-[10px] w-[50px] h-[50px] bg-[#d8d8d8] rounded-[6px] overflow-hidden">
+          {/* Logo — 60x60 at (10, 10) */}
+          <div className="absolute top-[10px] left-[10px] w-[60px] h-[60px] bg-[#d8d8d8] rounded-[6px] overflow-hidden">
             {imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -80,18 +80,18 @@ export function ListingCard({
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-[#f14110] to-[#e9a28e] flex items-center justify-center">
-                <span className="text-white text-[16px] font-bold">{getInitials(name)}</span>
+                <span className="text-white text-[18px] font-bold">{getInitials(name)}</span>
               </div>
             )}
           </div>
 
-          {/* Star + Rating — 18x18 star at (70, 12), text at (92, ~14) */}
-          <div className="absolute top-[12px] left-[70px] flex items-center gap-[4px]">
+          {/* Rating: Number first, then star — at (80, 12) */}
+          <div className="absolute top-[12px] left-[80px] flex items-center gap-[4px]">
+            <span className="text-[13px] font-semibold text-[#d8d8d8] leading-[17px]">{rating}</span>
             {/* Figma star SVG — 18x18, filled #d8d8d8 */}
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6.438 3.067C7.578 1.022 8.148 0 9 0c.852 0 1.422 1.022 2.562 3.067l.295.53c.324.581.486.872.738 1.063.252.192.567.263 1.197.405l.572.13c2.214.5 3.32.75 3.584 1.598.263.846-.491 1.729-2 3.494l-.39.456c-.429.501-.644.752-.74 1.062-.096.31-.064.645.001 1.314l.06.609c.227 2.355.342 3.533-.348 4.055-.689.523-1.726.046-3.798-0.908l-.537-.247c-.589-.272-.883-.407-1.195-.407-.312 0-.607.135-1.195.407l-.537.247c-2.072.954-3.109 1.431-3.798.909-.69-.524-.576-1.701-.348-4.056l.06-.608c.064-.67.097-1.005 0-1.314-.096-.31-.311-.562-.739-1.062l-.39-.457c-1.51-1.764-2.264-2.647-2-3.494.262-.846 1.37-1.097 3.584-1.598l.573-.13c.63-.142.944-.213 1.196-.405.253-.192.414-.482.738-1.063l.296-.53z" fill="#d8d8d8"/>
             </svg>
-            <span className="text-[13px] font-semibold text-[#d8d8d8] leading-[17px]">{rating}</span>
           </div>
 
           {/* Bookmark — 17x22.6 at right:10px, top ~10px */}
@@ -108,26 +108,33 @@ export function ListingCard({
             </svg>
           </button>
 
-          {/* Pro Account badge — icon at (182, 40), pill at (86, 42) w=91 h=16 */}
+          {/* Pro Account badge — aligned with middle of thumbnail (40px) */}
           {isPro && (
-            <div className="absolute top-[40px] right-[8px] flex items-center gap-[4px]">
+            <div className="absolute top-[40px] right-[10px]">
               <div className="bg-[#e4e4e4] rounded-[10px] h-[16px] px-[8px] flex items-center">
                 <span className="text-[9px] text-[#333]/35 font-medium leading-[12px]">Pro Account</span>
               </div>
-              <Image src="/images/icon-sponsored.svg" alt="" width={20} height={20} />
             </div>
           )}
 
-          {/* Company Name — from ~30% to ~35% of height = top:70px */}
-          <div className="absolute top-[70px] left-[10px] right-[10px] bottom-[80px]">
-            <h3 className="font-semibold text-[16px] leading-[16px] tracking-[0.32px] text-[#333] uppercase line-clamp-4">
+          {/* Company Name — 3 lines max with ellipsis, below thumbnail */}
+          <div className="absolute top-[80px] left-[10px] right-[10px]">
+            <h3 
+              className="font-semibold text-[16px] leading-[16px] tracking-[0.32px] text-[#333] uppercase overflow-hidden"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                maxHeight: '48px' // 16px * 3 lines
+              }}
+            >
               {name}
             </h3>
           </div>
 
-          {/* Description — from ~64% of height = top:147px */}
-          <div className="absolute top-[147px] left-[10px] right-[10px] bottom-[4px]">
-            <p className="text-[10px] leading-[14px] tracking-[0.2px] text-[#333]/50 line-clamp-4" style={{ fontFamily: "'Sora', sans-serif" }}>
+          {/* Description — 20px from bottom */}
+          <div className="absolute top-[137px] left-[10px] right-[10px] bottom-[20px]">
+            <p className="text-[10px] leading-[14px] tracking-[0.2px] text-[#333]/50 line-clamp-5" style={{ fontFamily: "'Sora', sans-serif" }}>
               {description}
             </p>
           </div>
@@ -174,13 +181,14 @@ export function ListingCard({
             </p>
           </div>
 
-          {/* Bottom: Rating + Arrow — at bottom:10px */}
-          <div className="absolute bottom-[10px] left-[10px] right-[10px] flex items-center justify-between">
+          {/* Bottom: Rating + Arrow — 20px from bottom */}
+          <div className="absolute bottom-[20px] left-[10px] right-[10px] flex items-center justify-between">
             <div className="flex items-center gap-[7px]">
+              {/* Rating: Number first, then star */}
+              <span className="text-[13px] font-semibold text-[#d8d8d8] leading-[17px]">{rating}</span>
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M6.438 3.067C7.578 1.022 8.148 0 9 0c.852 0 1.422 1.022 2.562 3.067l.295.53c.324.581.486.872.738 1.063.252.192.567.263 1.197.405l.572.13c2.214.5 3.32.75 3.584 1.598.263.846-.491 1.729-2 3.494l-.39.456c-.429.501-.644.752-.74 1.062-.096.31-.064.645.001 1.314l.06.609c.227 2.355.342 3.533-.348 4.055-.689.523-1.726.046-3.798-0.908l-.537-.247c-.589-.272-.883-.407-1.195-.407-.312 0-.607.135-1.195.407l-.537.247c-2.072.954-3.109 1.431-3.798.909-.69-.524-.576-1.701-.348-4.056l.06-.608c.064-.67.097-1.005 0-1.314-.096-.31-.311-.562-.739-1.062l-.39-.457c-1.51-1.764-2.264-2.647-2-3.494.262-.846 1.37-1.097 3.584-1.598l.573-.13c.63-.142.944-.213 1.196-.405.253-.192.414-.482.738-1.063l.296-.53z" fill="#d8d8d8"/>
               </svg>
-              <span className="text-[13px] font-semibold text-[#d8d8d8] leading-[17px]">{rating}</span>
               <span className="text-[14px] text-[#d8d8d8]/50 tracking-[-0.7px] leading-[12px]">({reviewCount})</span>
             </div>
             <div className="w-[36px] h-[36px] border-2 border-[#e4e4e4] rounded-[6px] flex items-center justify-center">
