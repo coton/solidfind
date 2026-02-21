@@ -146,9 +146,9 @@ export function ListingCard({
             </h3>
           </div>
 
-          {/* Description — 10px gap from title (starts at 142px), 20px from bottom */}
-          <div className="absolute top-[142px] left-[10px] right-[10px] bottom-[20px]">
-            <p className="text-[10px] leading-[14px] tracking-[0.2px] text-[#333]/50 line-clamp-5" style={{ fontFamily: "'Sora', sans-serif" }}>
+          {/* Description — 20px gap from title (starts at 152px), 20px from bottom, max 4 lines */}
+          <div className="absolute top-[152px] left-[10px] right-[10px] bottom-[20px]">
+            <p className="text-[10px] leading-[14px] tracking-[0.2px] text-[#333]/50 line-clamp-4" style={{ fontFamily: "'Sora', sans-serif" }}>
               {description}
             </p>
           </div>
@@ -188,9 +188,9 @@ export function ListingCard({
             </div>
           </div>
 
-          {/* Address — same height as description (10px gap spacing) */}
-          <div className="absolute top-[142px] left-[10px] right-[10px] bottom-[20px]">
-            <p className="text-[10px] text-[#d8d8d8]/75 leading-[14px] tracking-[0.2px] line-clamp-5" style={{ fontFamily: "'Sora', sans-serif" }}>
+          {/* Address — same height as description (20px gap spacing) */}
+          <div className="absolute top-[152px] left-[10px] right-[10px] bottom-[20px]">
+            <p className="text-[10px] text-[#d8d8d8]/75 leading-[14px] tracking-[0.2px] line-clamp-4" style={{ fontFamily: "'Sora', sans-serif" }}>
               {address}
             </p>
           </div>
