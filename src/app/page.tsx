@@ -155,6 +155,7 @@ function HomeContent() {
               <FeaturedCard
                 image="/images/featured-bg.png"
                 title="FEATURED ARTICLE TITLE"
+                description="Here goes the description of this first article, re-directing to a special page."
               />
 
               {/* Listing Cards - show skeletons while Convex loads */}

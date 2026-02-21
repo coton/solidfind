@@ -6,6 +6,7 @@ interface FeaturedCardProps {
   href?: string;
   image: string;
   title: string;
+  description?: string;
 }
 
 export function FeaturedCard({
@@ -13,14 +14,15 @@ export function FeaturedCard({
   href,
   image,
   title,
+  description = "Here goes the description of this first article, re-directing to a special page.",
 }: FeaturedCardProps) {
   const linkHref = href ?? (id ? `/profile/${id}` : "/about");
 
   return (
     <Link href={linkHref} className="block">
       <div className="relative w-[210px] h-[220px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
-        {/* Image - top half */}
-        <div className="relative h-[120px] w-full">
+        {/* Background image with title overlay */}
+        <div className="absolute top-0 left-0 right-0 h-[120px] rounded-t-[6px] flex items-end p-[10px]">
           <Image
             src={image}
             alt={title}
@@ -29,13 +31,17 @@ export function FeaturedCard({
             loading="eager"
             className="object-cover rounded-t-[6px]"
           />
-        </div>
-
-        {/* Content - bottom half */}
-        <div className="p-[10px] pt-3">
-          <h3 className="font-semibold text-[16px] leading-[16px] tracking-[0.32px] text-[#333] uppercase">
+          {/* Title overlaid on image */}
+          <h3 className="relative z-10 font-semibold text-[16px] leading-[16px] tracking-[0.32px] text-white uppercase">
             {title}
           </h3>
+        </div>
+
+        {/* Description - same styling as WelcomeCard */}
+        <div className="absolute top-[140px] left-[10px] right-[10px] bottom-[20px]">
+          <p className="text-[11px] leading-[15px] tracking-[0.22px] text-[#333] font-bold line-clamp-4" style={{ fontFamily: "'Sora', sans-serif" }}>
+            {description}
+          </p>
         </div>
       </div>
     </Link>
