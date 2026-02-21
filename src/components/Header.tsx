@@ -65,14 +65,21 @@ interface DropdownProps {
   value: string;
   onChange: (value: string) => void;
   width?: string;
+  isProjectSize?: boolean;
 }
 
-function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: DropdownProps) {
+function Dropdown({ label, options, value, onChange, width = "w-[140px]", isProjectSize = false }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0, width: 0 });
   const [isPositioned, setIsPositioned] = useState(false);
   const selectedOption = options.find(opt => opt.id === value);
+
+  // For PROJECT SIZE: remove numbers in parentheses when closed
+  const getDisplayLabel = (fullLabel: string) => {
+    if (!isProjectSize) return fullLabel;
+    return fullLabel.replace(/\s*\([^)]*\)/, '');
+  };
 
   useEffect(() => {
     if (isOpen && buttonRef.current) {
@@ -87,6 +94,9 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: Drop
     }
   }, [isOpen]);
 
+  // Determine menu width (230px for PROJECT SIZE, otherwise match button)
+  const menuWidth = isProjectSize ? 230 : menuPos.width;
+
   return (
     <div className={`relative ${width}`}>
       <button
@@ -95,7 +105,7 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: Drop
         className="h-10 bg-[#f8f8f8] rounded-[6px] flex items-center justify-between px-3 w-full"
       >
         <span className={`text-[11px] font-semibold tracking-[0.22px] ${value ? 'text-[#f14110]' : 'text-[#333]'}`}>
-          {selectedOption ? selectedOption.label : label}
+          {selectedOption ? getDisplayLabel(selectedOption.label) : label}
         </span>
         <Image src="/images/btn-down.svg" alt="" width={8} height={5} className="rotate-90" />
       </button>
@@ -105,13 +115,13 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: Drop
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div 
             className={`fixed bg-white rounded-[6px] shadow-lg z-50 max-h-[300px] overflow-y-auto transition-opacity duration-75 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
-            style={{ top: menuPos.top, left: menuPos.left, minWidth: menuPos.width }}
+            style={{ top: menuPos.top, left: menuPos.left, width: menuWidth }}
           >
-            <div className="p-2">
+            <div className="pt-2 px-2 pb-[10px]">
               <p className="text-[9px] text-[#333]/50 mb-2 px-2">
                 Services Provided /<br />Layanan yang Disediakan
               </p>
-              {options.map((option) => (
+              {options.map((option, index) => (
                 <button
                   key={option.id}
                   onClick={() => {
@@ -119,11 +129,19 @@ function Dropdown({ label, options, value, onChange, width = "w-[140px]" }: Drop
                     setIsOpen(false);
                   }}
                   className={`w-full text-left px-2 py-2 text-[11px] tracking-[0.22px] border-b border-[#e4e4e4] last:border-0 flex items-center justify-between ${
-                    value === option.id ? 'text-[#f14110] font-medium' : 'text-[#333]'
+                    value === option.id ? 'text-[#f14110]' : 'text-[#333]'
                   }`}
+                  style={{ 
+                    fontFamily: 'var(--font-sora), sans-serif', 
+                    fontWeight: 500,
+                    paddingBottom: index === options.length - 1 ? '8px' : undefined
+                  }}
                 >
-                  <span>{option.label}</span>
-                  <div className={`w-6 h-3 rounded-full ${value === option.id ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}>
+                  <span className="whitespace-nowrap flex-1">{option.label}</span>
+                  <div 
+                    className={`flex-shrink-0 w-6 h-3 rounded-full ${value === option.id ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
+                    style={{ marginLeft: '10px' }}
+                  >
                     <div className={`w-2 h-2 bg-white rounded-full mt-0.5 transition-all ${value === option.id ? 'ml-3.5' : 'ml-0.5'}`} />
                   </div>
                 </button>
@@ -309,6 +327,7 @@ function HeaderInner() {
                   value={projectSize}
                   onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
                   width="w-[120px] sm:w-[140px]"
+                  isProjectSize={true}
                 />
               </div>
 
