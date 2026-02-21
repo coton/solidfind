@@ -72,6 +72,8 @@ interface DropdownProps {
   displayText?: string;
   isActive?: boolean;
   customMenuWidth?: number;
+  // Special function to check if an option should be selected (for BALI toggle)
+  isOptionSelected?: (optionId: string) => boolean;
 }
 
 function Dropdown({ 
@@ -85,7 +87,8 @@ function Dropdown({
   selectedValues = [],
   displayText,
   isActive = false,
-  customMenuWidth
+  customMenuWidth,
+  isOptionSelected
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -148,9 +151,11 @@ function Dropdown({
           >
             <div className="pt-2 pb-[10px] px-3">
               {options.map((option, index) => {
-                const isSelected = multiSelect 
-                  ? selectedValues.includes(option.id)
-                  : value === option.id;
+                const isSelected = isOptionSelected 
+                  ? isOptionSelected(option.id)
+                  : (multiSelect 
+                      ? selectedValues.includes(option.id)
+                      : value === option.id);
                 
                 return (
                   <button
@@ -257,18 +262,25 @@ function HeaderInner() {
     let newLocations: string[];
     
     if (locationId === "bali") {
-      // If BALI is selected, clear all others and set only BALI
-      newLocations = ["bali"];
-    } else {
-      // Remove BALI if it was selected
-      let filtered = locations.filter(loc => loc !== "bali");
+      // Toggle BALI: if currently has all regions, clear all; otherwise select all
+      const allRegions = locationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
+      const hasAllRegions = allRegions.every(region => locations.includes(region));
       
-      if (filtered.includes(locationId)) {
+      if (hasAllRegions || locations.includes("bali")) {
+        // Turn off BALI: clear all
+        newLocations = [];
+      } else {
+        // Turn on BALI: select all regions
+        newLocations = ["bali", ...allRegions];
+      }
+    } else {
+      // Toggle individual region
+      if (locations.includes(locationId)) {
         // Remove if already selected
-        newLocations = filtered.filter(loc => loc !== locationId);
+        newLocations = locations.filter(loc => loc !== locationId && loc !== "bali");
       } else {
         // Add to selection
-        newLocations = [...filtered, locationId];
+        newLocations = [...locations.filter(loc => loc !== "bali"), locationId];
       }
     }
     
@@ -279,12 +291,23 @@ function HeaderInner() {
   // Get location display text
   const getLocationDisplayText = () => {
     if (locations.length === 0) return "LOCATION";
-    if (locations.includes("bali")) return "BALI";
+    
+    // Check if all regions are selected (BALI mode)
+    const allRegions = locationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
+    const hasAllRegions = allRegions.every(region => locations.includes(region));
+    
+    if (locations.includes("bali") || hasAllRegions) return "BALI";
     if (locations.length === 1) return locations[0].toUpperCase();
     return "LOCATION"; // Multiple locations selected
   };
 
   const isLocationActive = locations.length > 0;
+  
+  // Check if BALI toggle should appear active (all regions selected)
+  const isBaliActive = () => {
+    const allRegions = locationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
+    return allRegions.every(region => locations.includes(region)) || locations.includes("bali");
+  };
 
   // Get categories based on active main category
   const getCategoryOptions = () => {
@@ -428,7 +451,11 @@ function HeaderInner() {
                   selectedValues={locations}
                   displayText={getLocationDisplayText()}
                   isActive={isLocationActive}
-                  customMenuWidth={200}
+                  customMenuWidth={180}
+                  isOptionSelected={(optionId) => {
+                    if (optionId === "bali") return isBaliActive();
+                    return locations.includes(optionId);
+                  }}
                 />
               </div>
 
