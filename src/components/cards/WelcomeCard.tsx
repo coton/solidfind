@@ -5,9 +5,9 @@ export function WelcomeCard() {
   return (
     <Link href="/about" className="block">
       <div className="relative w-[210px] h-[230px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
-        {/* Orange gradient top section */}
+        {/* Orange gradient top section - rounded top, square bottom */}
         <div
-          className="absolute top-0 left-0 right-0 h-[120px] rounded-[6px] flex items-end p-[10px]"
+          className="absolute top-0 left-0 right-0 h-[120px] rounded-t-[6px] flex items-end p-[10px]"
           style={{
             background: "linear-gradient(to left, #f14110, #e9a28e)"
           }}
@@ -18,9 +18,9 @@ export function WelcomeCard() {
           </div>
         </div>
 
-        {/* Text bottom section - align with other cards description */}
+        {/* Text bottom section - 11px font size */}
         <div className="absolute top-[132px] left-[10px] right-[10px] bottom-[20px]">
-          <p className="text-[10px] leading-[14px] tracking-[0.2px] text-[#333] font-bold line-clamp-5" style={{ fontFamily: "'Sora', sans-serif" }}>
+          <p className="text-[11px] leading-[15px] tracking-[0.22px] text-[#333] font-bold line-clamp-5" style={{ fontFamily: "'Sora', sans-serif" }}>
             We help you find trusted professionals to build, renovate, design and shape the places you live in.
           </p>
         </div>
