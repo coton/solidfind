@@ -309,7 +309,7 @@ function HeaderInner() {
             {/* Left side: Keywords + Filters */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-[2px]">
               {/* Keywords Input - extended width on desktop */}
-              <div className="w-full sm:w-[360px] h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
+              <div className="w-full sm:w-[370px] h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
                 <input
                   type="text"
                   placeholder="Search by keywords"
