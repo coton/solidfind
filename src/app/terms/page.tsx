@@ -7,10 +7,10 @@ import { ArrowLeft } from "lucide-react";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#f8f8f8]">
+    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-6 py-8">
+      <main className="max-w-[900px] mx-auto px-6 py-8 flex-grow w-full">
         {/* Back Button */}
         <div className="mb-6">
           <Link

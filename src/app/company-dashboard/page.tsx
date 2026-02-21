@@ -86,9 +86,9 @@ export default function CompanyDashboardPage() {
   // If user has no company yet, show onboarding prompt
   if (currentUser && company === null) {
     return (
-      <div className="min-h-screen bg-[#f8f8f8]">
+      <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
         <Header />
-        <main className="max-w-[900px] mx-auto px-6 py-8">
+        <main className="max-w-[900px] mx-auto px-6 py-8 flex-grow w-full">
           <div className="text-center py-20">
             <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-4">
               Welcome!
@@ -131,10 +131,10 @@ export default function CompanyDashboardPage() {
   const maxViews = Math.max(...data.monthlyViews.map(m => m.views));
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8]">
+    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-6 py-8">
+      <main className="max-w-[900px] mx-auto px-6 py-8 flex-grow w-full">
         {/* Header Row */}
         <div className="flex items-start justify-between mb-6">
           <div>

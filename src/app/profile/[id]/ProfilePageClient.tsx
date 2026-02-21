@@ -225,9 +225,9 @@ export default function ProfilePageClient() {
 
   if (company === undefined) {
     return (
-      <div className="min-h-screen bg-[#e4e4e4]">
+      <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
         <Header />
-        <main className="max-w-[900px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <main className="max-w-[900px] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full">
           {/* Back row */}
           <div className="h-[36px] mb-6 border-b border-[#333]/10" />
           {/* Title */}
@@ -261,9 +261,9 @@ export default function ProfilePageClient() {
 
   if (company === null) {
     return (
-      <div className="min-h-screen bg-[#e4e4e4]">
+      <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
         <Header />
-        <main className="max-w-[900px] mx-auto px-6 py-8">
+        <main className="max-w-[900px] mx-auto px-6 py-8 flex-grow w-full">
           <p className="text-[#333]">Company not found.</p>
         </main>
         <Footer />
@@ -279,10 +279,10 @@ export default function ProfilePageClient() {
   }));
 
   return (
-    <div className="min-h-screen bg-[#e4e4e4]">
+    <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <main className="max-w-[900px] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full">
         {/* Back Button Row */}
         <div className="flex items-center justify-between mb-4 sm:mb-6 pb-4 border-b border-[#333]/10">
           <Link

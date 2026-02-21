@@ -293,7 +293,7 @@ export default function EditProfilePage() {
   const totalSlots = 12;
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8]">
+    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
       {/* Hidden file inputs */}
@@ -310,7 +310,7 @@ export default function EditProfilePage() {
         </div>
       )}
 
-      <main className="max-w-[900px] mx-auto px-6 py-8">
+      <main className="max-w-[900px] mx-auto px-6 py-8 flex-grow w-full">
         {/* Header Row */}
         <div className="flex items-start justify-between mb-6">
           <div>
