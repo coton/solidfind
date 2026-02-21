@@ -21,9 +21,13 @@ export const list = query({
     }
 
     if (args.location) {
-      companies = companies.filter(
-        (c) => c.location?.toLowerCase().includes(args.location!.toLowerCase())
-      );
+      // Handle comma-separated multiple locations
+      const selectedLocations = args.location.toLowerCase().split(",");
+      companies = companies.filter((c) => {
+        if (!c.location) return false;
+        const companyLocation = c.location.toLowerCase();
+        return selectedLocations.some(loc => companyLocation.includes(loc.trim()));
+      });
     }
 
     if (args.search) {
