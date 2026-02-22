@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <footer className="relative h-[190px] sm:h-[190px] rounded-t-[6px] overflow-hidden">
+    <footer className="relative h-[170px] sm:h-[190px] rounded-t-[6px] overflow-hidden">
       {/* Gradient: E9A28E → F14110 (both mobile & desktop) */}
       <div
         className="absolute inset-0"
@@ -14,13 +14,13 @@ export function Footer() {
       {/* Mobile Layout - Right-aligned like desktop */}
       <div className="sm:hidden absolute inset-0 flex items-center justify-end p-5 z-10">
         <div className="flex flex-col items-end gap-4">
-          {/* Description - Force 2 lines */}
+          {/* Description - Break after "clarity," */}
           <div className="text-right max-w-[280px]">
             <p className="text-[#f8f8f8] text-[9px] leading-[12px] font-medium tracking-[0.18px]">
               <span className="font-bold">SOLIDFIND.ID</span>
-              {" is an independent platform built to bring clarity, trust,"}
+              {" is an independent platform built to bring clarity,"}
               <br />
-              {"and perspective to the places we live in."}
+              {"trust, and perspective to the places we live in."}
             </p>
           </div>
 
