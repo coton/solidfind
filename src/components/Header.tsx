@@ -130,7 +130,7 @@ function Dropdown({
   }, [isOpen]);
 
   // Determine menu width
-  const menuWidth = customMenuWidth || (isProjectSize ? 230 : menuPos.width);
+  const menuWidth = customMenuWidth || menuPos.width;
 
   return (
     <div className={`relative ${width}`}>
@@ -150,13 +150,16 @@ function Dropdown({
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div 
-            className={`fixed bg-white rounded-[6px] shadow-lg z-50 transition-opacity duration-75 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
-            style={alignRight 
-              ? { top: menuPos.top, right: menuPos.right, width: menuWidth }
-              : { top: menuPos.top, left: menuPos.left, width: menuWidth }
-            }
+            className={`fixed bg-white rounded-[6px] shadow-lg transition-opacity duration-75 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
+            style={{
+              zIndex: 9999,
+              ...(alignRight 
+                ? { top: menuPos.top, right: menuPos.right, width: menuWidth }
+                : { top: menuPos.top, left: menuPos.left, width: menuWidth }
+              )
+            }}
           >
-            <div className="pt-2 pb-[10px] px-3">
+            <div className="py-[30px] px-[30px]">
               {options.map((option, index) => {
                 const isSelected = isOptionSelected 
                   ? isOptionSelected(option.id)
@@ -173,7 +176,7 @@ function Dropdown({
                         setIsOpen(false);
                       }
                     }}
-                    className={`w-full text-left py-2 text-[11px] flex items-center justify-between ${
+                    className={`w-full text-left py-2 text-[11px] flex items-center ${
                       index < options.length - 1 ? 'mb-[2px]' : ''
                     } ${
                       isSelected ? 'text-[#f14110]' : 'text-[#333]'
@@ -185,10 +188,9 @@ function Dropdown({
                       borderBottom: index < options.length - 1 ? '1px solid #e4e4e4' : 'none'
                     }}
                   >
-                    <span className="whitespace-nowrap flex-1">{option.label}</span>
+                    <span className="whitespace-nowrap mr-[40px]">{option.label}</span>
                     <div 
-                      className={`flex-shrink-0 w-6 h-3 rounded-full ${isSelected ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
-                      style={{ marginLeft: '10px' }}
+                      className={`flex-shrink-0 w-6 h-3 rounded-full ml-auto ${isSelected ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
                     >
                       <div className={`w-2 h-2 bg-white rounded-full mt-0.5 transition-all ${isSelected ? 'ml-3.5' : 'ml-0.5'}`} />
                     </div>
@@ -442,6 +444,7 @@ function HeaderInner() {
                 onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
                 width="w-[140px]"
                 isProjectSize={true}
+                customMenuWidth={310}
               />
 
               {/* Categories Dropdown */}
@@ -451,6 +454,7 @@ function HeaderInner() {
                 value={category}
                 onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
                 width="w-[140px]"
+                customMenuWidth={280}
               />
 
               {/* Location Dropdown - multi-select enabled */}
@@ -464,7 +468,7 @@ function HeaderInner() {
                 selectedValues={locations}
                 displayText={getLocationDisplayText()}
                 isActive={isLocationActive}
-                customMenuWidth={180}
+                customMenuWidth={240}
                 isOptionSelected={(optionId) => {
                   if (optionId === "bali") return isBaliActive();
                   return locations.includes(optionId);
@@ -519,6 +523,7 @@ function HeaderInner() {
                     onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
                     width="w-full"
                     isProjectSize={true}
+                    customMenuWidth={310}
                   />
                 </div>
 
@@ -530,7 +535,7 @@ function HeaderInner() {
                     value={category}
                     onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
                     width="w-full"
-                    customMenuWidth={220}
+                    customMenuWidth={280}
                   />
                 </div>
 
@@ -546,7 +551,7 @@ function HeaderInner() {
                     selectedValues={locations}
                     displayText={getLocationDisplayText()}
                     isActive={isLocationActive}
-                    customMenuWidth={180}
+                    customMenuWidth={240}
                     isOptionSelected={(optionId) => {
                       if (optionId === "bali") return isBaliActive();
                       return locations.includes(optionId);
