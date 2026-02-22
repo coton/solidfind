@@ -133,7 +133,7 @@ function HomeContent() {
     <div className="min-h-screen bg-[#ececec] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-6 sm:py-8 flex-grow w-full">
+      <main className="max-w-[900px] mx-auto px-4 sm:px-0 pt-6 sm:pt-8 flex-grow w-full">
         {/* Results Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]">{listings.length} Solid Finds</h2>
