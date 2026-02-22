@@ -319,9 +319,15 @@ function HeaderInner() {
 
   return (
     <header className="relative">
-      {/* Gradient Background - matches Figma: #E4E4E4 to #F14110 */}
+      {/* Gradient Background - Desktop: #E4E4E4 to #F14110, Mobile: #E9A28E to #F14110 */}
       <div
         className="absolute inset-0 rounded-b-[6px]"
+        style={{
+          background: "linear-gradient(to right, #E9A28E, #F14110)"
+        }}
+      />
+      <div
+        className="hidden sm:block absolute inset-0 rounded-b-[6px]"
         style={{
           background: "linear-gradient(to right, #E4E4E4, #F14110)"
         }}
@@ -329,7 +335,7 @@ function HeaderInner() {
 
       <div className="relative z-10 px-5 sm:px-0 pt-4 sm:pt-6 pb-6 sm:pb-8">
         {/* Top Bar */}
-        <div className="max-w-[900px] mx-auto flex items-center justify-between mb-4 sm:mb-6">
+        <div className="max-w-[900px] mx-auto flex items-center justify-between mb-8 sm:mb-6">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className="h-[19px] w-auto" />
@@ -472,7 +478,7 @@ function HeaderInner() {
           {/* Mobile: Stack vertically with equal-width filters */}
           <div className="flex sm:hidden flex-col gap-[2px]">
             {/* Keywords Input with Search Button */}
-            <div className="flex items-center gap-[2px]">
+            <div className="flex items-center gap-[2px] mb-[2px]">
               <div className="flex-1 h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
                 <input
                   type="text"
@@ -489,54 +495,57 @@ function HeaderInner() {
               </button>
             </div>
 
-            {/* Filters Row - Equal width with 2px gap */}
+            {/* Filters Row + Clear - with vertical centering */}
             <div className="flex items-center gap-[2px]">
-              {/* Project Size Dropdown */}
-              <div className="flex-1">
-                <Dropdown
-                  label="PROJECT SIZE"
-                  options={projectSizeOptions}
-                  value={projectSize}
-                  onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
-                  width="w-full"
-                  isProjectSize={true}
-                />
-              </div>
+              {/* Filters Row - Equal width with 2px gap */}
+              <div className="flex-1 flex items-center gap-[2px]">
+                {/* Project Size Dropdown */}
+                <div className="flex-1">
+                  <Dropdown
+                    label="PROJECT SIZE"
+                    options={projectSizeOptions}
+                    value={projectSize}
+                    onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
+                    width="w-full"
+                    isProjectSize={true}
+                  />
+                </div>
 
-              {/* Categories Dropdown */}
-              <div className="flex-1">
-                <Dropdown
-                  label="CATEGORIES"
-                  options={getCategoryOptions()}
-                  value={category}
-                  onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
-                  width="w-full"
-                />
-              </div>
+                {/* Categories Dropdown */}
+                <div className="flex-1">
+                  <Dropdown
+                    label="CATEGORIES"
+                    options={getCategoryOptions()}
+                    value={category}
+                    onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
+                    width="w-full"
+                  />
+                </div>
 
-              {/* Location Dropdown */}
-              <div className="flex-1">
-                <Dropdown
-                  label="LOCATION"
-                  options={locationOptions}
-                  value="" // Not used in multi-select mode
-                  onChange={handleLocationChange}
-                  width="w-full"
-                  multiSelect={true}
-                  selectedValues={locations}
-                  displayText={getLocationDisplayText()}
-                  isActive={isLocationActive}
-                  customMenuWidth={180}
-                  isOptionSelected={(optionId) => {
-                    if (optionId === "bali") return isBaliActive();
-                    return locations.includes(optionId);
-                  }}
-                />
+                {/* Location Dropdown */}
+                <div className="flex-1">
+                  <Dropdown
+                    label="LOCATION"
+                    options={locationOptions}
+                    value="" // Not used in multi-select mode
+                    onChange={handleLocationChange}
+                    width="w-full"
+                    multiSelect={true}
+                    selectedValues={locations}
+                    displayText={getLocationDisplayText()}
+                    isActive={isLocationActive}
+                    customMenuWidth={180}
+                    isOptionSelected={(optionId) => {
+                      if (optionId === "bali") return isBaliActive();
+                      return locations.includes(optionId);
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Clear Filters - aligned right */}
-            <div className="flex justify-end">
+            {/* Clear Filters - aligned right, vertically centered */}
+            <div className="flex justify-end mt-2">
               <button
                 onClick={clearFilters}
                 className="text-[#f8f8f8] text-[10px] font-medium underline tracking-[0.22px]"

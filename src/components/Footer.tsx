@@ -4,14 +4,22 @@ import Image from "next/image";
 export function Footer() {
   return (
     <footer
-      className="relative h-[140px] sm:h-[190px] rounded-t-[6px] overflow-hidden"
+      className="relative h-[190px] sm:h-[190px] rounded-t-[6px] overflow-hidden"
       style={{
-        background: "linear-gradient(to right, #E4E4E4, #F14110)"
+        background: "linear-gradient(to right, #E9A28E, #F14110)"
       }}
     >
-      {/* Mobile Layout */}
-      <div className="sm:hidden absolute inset-0 flex items-center justify-center px-5">
-        <div className="flex flex-col items-center gap-4">
+      {/* Mobile Layout - Right-aligned like desktop */}
+      <div className="sm:hidden absolute inset-0 flex items-center justify-end px-5">
+        <div className="flex flex-col items-end gap-4">
+          {/* Description */}
+          <div className="text-right max-w-[320px]">
+            <p className="text-[#f8f8f8] text-[9px] leading-[12px] font-medium tracking-[0.18px]">
+              <span className="font-bold">SOLIDFIND.ID</span>
+              {" is an independent platform built to bring clarity, trust, and perspective to the places we live in."}
+            </p>
+          </div>
+
           {/* Social Icons & About */}
           <div className="flex items-center gap-5">
             <Link href="#" className="hover:opacity-80 transition-opacity">
