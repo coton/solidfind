@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
@@ -35,6 +35,11 @@ function HomeContent() {
   const projectSizeParam = searchParams.get("projectSize") || undefined;
 
   const hasFilters = !!(categoryParam || locationParam || searchParam || projectSizeParam);
+
+  // Items per page: 3 rows (10 cards) default, 7 rows (26 cards) with filters/search
+  // Row 1 has WelcomeCard + FeaturedCard + 2 listings
+  // Subsequent rows have 4 listings each
+  const itemsPerPage = hasFilters ? 26 : 10;
 
   const companies = useQuery(api.companies.list, {
     category: categoryParam,
@@ -113,6 +118,17 @@ function HomeContent() {
 
   const showEmptyState = hasFilters && companies !== undefined && companies.length === 0;
 
+  // Calculate pagination
+  const totalPages = Math.max(1, Math.ceil(listings.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedListings = listings.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryParam, locationParam, searchParam, projectSizeParam]);
+
   return (
     <div className="min-h-screen bg-[#ececec] flex flex-col">
       <Header />
@@ -160,8 +176,8 @@ function HomeContent() {
 
               {/* Listing Cards - show skeletons while Convex loads */}
               {companies === undefined
-                ? Array.from({ length: 10 }).map((_, i) => <ListingCardSkeleton key={i} />)
-                : listings.map((listing) => (
+                ? Array.from({ length: itemsPerPage }).map((_, i) => <ListingCardSkeleton key={i} />)
+                : paginatedListings.map((listing) => (
                   <ListingCard
                     key={listing.id}
                     {...listing}
@@ -175,7 +191,7 @@ function HomeContent() {
             <div className="flex justify-start mb-8">
               <Pagination
                 currentPage={currentPage}
-                totalPages={Math.max(1, Math.ceil(listings.length / 9))}
+                totalPages={totalPages}
                 onPageChange={setCurrentPage}
               />
             </div>
