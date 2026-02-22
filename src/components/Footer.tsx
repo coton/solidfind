@@ -3,14 +3,23 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <footer
-      className="relative h-[190px] sm:h-[190px] rounded-t-[6px] overflow-hidden"
-      style={{
-        background: "linear-gradient(to right, #E9A28E, #F14110)"
-      }}
-    >
+    <footer className="relative h-[190px] sm:h-[190px] rounded-t-[6px] overflow-hidden">
+      {/* Mobile gradient: E9A28E → F14110 */}
+      <div
+        className="sm:hidden absolute inset-0"
+        style={{
+          background: "linear-gradient(to right, #E9A28E, #F14110)"
+        }}
+      />
+      {/* Desktop gradient: E4E4E4 → F14110 */}
+      <div
+        className="hidden sm:block absolute inset-0"
+        style={{
+          background: "linear-gradient(to right, #E4E4E4, #F14110)"
+        }}
+      />
       {/* Mobile Layout - Right-aligned like desktop */}
-      <div className="sm:hidden absolute inset-0 flex items-center justify-end px-5">
+      <div className="sm:hidden absolute inset-0 flex items-center justify-end px-5 z-10">
         <div className="flex flex-col items-end gap-4">
           {/* Description */}
           <div className="text-right max-w-[320px]">
@@ -52,7 +61,7 @@ export function Footer() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden sm:flex absolute inset-0 items-center justify-end px-10">
+      <div className="hidden sm:flex absolute inset-0 items-center justify-end px-10 z-10">
         <div className="flex flex-col items-end gap-4">
           {/* Description */}
           <div className="text-right max-w-[426px]">
