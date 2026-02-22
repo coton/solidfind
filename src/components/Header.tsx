@@ -74,6 +74,8 @@ interface DropdownProps {
   customMenuWidth?: number;
   // Special function to check if an option should be selected (for BALI toggle)
   isOptionSelected?: (optionId: string) => boolean;
+  // Align menu to right edge of button
+  alignRight?: boolean;
 }
 
 function Dropdown({ 
@@ -88,11 +90,12 @@ function Dropdown({
   displayText,
   isActive = false,
   customMenuWidth,
-  isOptionSelected
+  isOptionSelected,
+  alignRight = false
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, width: 0 });
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, right: 0, width: 0 });
   const [isPositioned, setIsPositioned] = useState(false);
   const selectedOption = options.find(opt => opt.id === value);
 
@@ -115,7 +118,8 @@ function Dropdown({
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+      const rightPos = window.innerWidth - rect.right;
+      setMenuPos({ top: rect.bottom + 4, left: rect.left, right: rightPos, width: rect.width });
       // Allow rendering after position is calculated
       requestAnimationFrame(() => {
         setIsPositioned(true);
@@ -147,7 +151,10 @@ function Dropdown({
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div 
             className={`fixed bg-white rounded-[6px] shadow-lg z-50 max-h-[300px] overflow-y-auto transition-opacity duration-75 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
-            style={{ top: menuPos.top, left: menuPos.left, width: menuWidth }}
+            style={alignRight 
+              ? { top: menuPos.top, right: menuPos.right, width: menuWidth }
+              : { top: menuPos.top, left: menuPos.left, width: menuWidth }
+            }
           >
             <div className="pt-2 pb-[10px] px-3">
               {options.map((option, index) => {
@@ -543,6 +550,7 @@ function HeaderInner() {
                       if (optionId === "bali") return isBaliActive();
                       return locations.includes(optionId);
                     }}
+                    alignRight={true}
                   />
                 </div>
               </div>
