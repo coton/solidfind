@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <footer className="relative h-[170px] sm:h-[190px] rounded-t-[6px] overflow-hidden">
+    <footer className="relative h-[150px] sm:h-[190px] rounded-t-[6px] overflow-hidden">
       {/* Gradient: E9A28E → F14110 (both mobile & desktop) */}
       <div
         className="absolute inset-0"
@@ -11,47 +11,45 @@ export function Footer() {
           background: "linear-gradient(to right, #E9A28E, #F14110)"
         }}
       />
-      {/* Mobile Layout - Right-aligned like desktop */}
-      <div className="sm:hidden absolute inset-0 flex items-center justify-end p-5 z-10">
-        <div className="flex flex-col items-end gap-4">
-          {/* Description - Break after "clarity," */}
-          <div className="text-right max-w-[320px]">
-            <p className="text-[#f8f8f8] text-[9px] leading-[12px] font-medium tracking-[0.18px]">
-              <span className="font-bold">SOLIDFIND.ID</span>
-              {" is an independent platform built to bring clarity,"}
-              <br />
-              {"trust, and perspective to the places we live in."}
-            </p>
-          </div>
+      {/* Mobile Layout */}
+      <div className="sm:hidden absolute inset-0 flex flex-col items-center justify-center p-5 z-10 gap-3">
+        {/* Description - Right-aligned */}
+        <div className="text-right w-full max-w-[320px] ml-auto">
+          <p className="text-[#f8f8f8] text-[9px] leading-[12px] font-medium tracking-[0.18px]">
+            <span className="font-bold">SOLIDFIND.ID</span>
+            {" is an independent platform built to bring clarity,"}
+            <br />
+            {"trust, and perspective to the places we live in."}
+          </p>
+        </div>
 
-          {/* Social Icons & About */}
-          <div className="flex items-center gap-5">
-            <Link href="#" className="hover:opacity-80 transition-opacity">
-              <Image src="/images/footer-ig.svg" alt="Instagram" width={20} height={20} />
-            </Link>
-            <Link href="#" className="hover:opacity-80 transition-opacity">
-              <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
-            </Link>
-            <Link href="#" className="hover:opacity-80 transition-opacity">
-              <Image src="/images/footer-mail.svg" alt="Email" width={24} height={19} />
-            </Link>
-            <Link
-              href="/about"
-              className="text-[#e4e4e4] font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
-            >
-              ABOUT
-            </Link>
-          </div>
+        {/* Social Icons & About - Center-aligned */}
+        <div className="flex items-center gap-5">
+          <Link href="#" className="hover:opacity-80 transition-opacity">
+            <Image src="/images/footer-ig.svg" alt="Instagram" width={20} height={20} />
+          </Link>
+          <Link href="#" className="hover:opacity-80 transition-opacity">
+            <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
+          </Link>
+          <Link href="#" className="hover:opacity-80 transition-opacity">
+            <Image src="/images/footer-mail.svg" alt="Email" width={24} height={19} />
+          </Link>
+          <Link
+            href="/about"
+            className="text-[#e4e4e4] font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
+          >
+            ABOUT
+          </Link>
+        </div>
 
-          {/* Bottom Links */}
-          <div className="flex items-center gap-5 text-[#f8f8f8]">
-            <Link href="/terms" className="text-[8px] font-bold tracking-[0.4px] underline hover:opacity-80">
-              Terms & Conditions.
-            </Link>
-            <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
-              SOLIDFIND.ID © 2026
-            </span>
-          </div>
+        {/* Bottom Links - Right-aligned */}
+        <div className="flex items-center gap-5 text-[#f8f8f8] w-full max-w-[320px] ml-auto justify-end">
+          <Link href="/terms" className="text-[8px] font-bold tracking-[0.4px] underline hover:opacity-80">
+            Terms & Conditions.
+          </Link>
+          <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
+            SOLIDFIND.ID © 2026
+          </span>
         </div>
       </div>
 
