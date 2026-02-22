@@ -1,6 +1,3 @@
-<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="BTN_Mail">
-<rect id="Rectangle 95" x="1" y="8" width="22" height="17" rx="2" stroke="var(--stroke-0, #E4E4E4)" stroke-width="2"/>
-<path id="Rectangle 96" d="M23.5001 11.5001L12 17L0.49994 11.5001" stroke="var(--stroke-0, #E4E4E4)" stroke-width="2"/>
-</g>
+<svg width="25" height="20" viewBox="0 0 25 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.001 0C23.6576 0.000241177 25.0009 1.34332 25.001 3V16.999C25.001 18.6557 23.6576 19.9988 22.001 19.999H3C1.34314 19.999 0 18.6559 0 16.999V3C2.70589e-05 1.34317 1.34316 0 3 0H22.001ZM12.9287 11.4365L12.5 11.6445L12.0713 11.4365L2 6.55762V16.999C2 17.5513 2.44772 17.999 3 17.999H22.001C22.5531 17.9988 23.001 17.5512 23.001 16.999V6.55762L12.9287 11.4365ZM3 2C2.44773 2 2.00003 2.44774 2 3V4.32715L12.5 9.41211L23.001 4.32715V3C23.0009 2.44789 22.553 2.00024 22.001 2H3Z" fill="#f8f8f8"/>
 </svg>
