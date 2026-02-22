@@ -150,7 +150,7 @@ function Dropdown({
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div 
-            className={`fixed bg-white rounded-[6px] shadow-lg z-50 max-h-[300px] overflow-y-auto transition-opacity duration-75 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
+            className={`fixed bg-white rounded-[6px] shadow-lg z-50 transition-opacity duration-75 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
             style={alignRight 
               ? { top: menuPos.top, right: menuPos.right, width: menuWidth }
               : { top: menuPos.top, left: menuPos.left, width: menuWidth }
