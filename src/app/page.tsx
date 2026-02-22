@@ -188,7 +188,7 @@ function HomeContent() {
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-start mb-8">
+            <div className="flex justify-start mb-[52px]">
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -199,7 +199,7 @@ function HomeContent() {
         )}
 
         {/* Ad Banner */}
-        <div className="mb-8">
+        <div className="mb-[52px]">
           <AdBanner imageSrc="/images/ad-kini-resort.png" alt="Kini Resort" />
         </div>
       </main>
