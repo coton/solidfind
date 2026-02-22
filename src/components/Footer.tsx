@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <footer className="relative h-[150px] sm:h-[190px] rounded-t-[6px] overflow-hidden">
+    <footer className="relative h-[150px] sm:h-[190px] rounded-t-[6px] overflow-hidden z-0">
       {/* Gradient: E9A28E → F14110 (both mobile & desktop) */}
       <div
         className="absolute inset-0"
