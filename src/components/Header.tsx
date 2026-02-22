@@ -385,7 +385,7 @@ function HeaderInner() {
                   className={`h-10 px-4 sm:px-5 rounded-full text-[11px] sm:text-[12px] font-medium transition-all whitespace-nowrap ${
                     activeCategory === cat.id
                       ? "bg-[#f8f8f8] text-[#f14110]"
-                      : "text-[#f8f8f8] border border-transparent hover:border-white"
+                      : "text-[#f8f8f8] border border-transparent hover:border-white hover:text-[#FFF]"
                   }`}
                 >
                   {cat.label}
