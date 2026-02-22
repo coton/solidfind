@@ -133,7 +133,7 @@ function HomeContent() {
     <div className="min-h-screen bg-[#ececec] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 pt-3 sm:pt-4 flex-grow w-full">
+      <main className="max-w-[900px] mx-auto px-5 sm:px-0 pt-3 sm:pt-4 flex-grow w-full">
         {/* Results Header */}
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h2 className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]">{listings.length} Solid Finds</h2>
@@ -164,36 +164,62 @@ function HomeContent() {
           </div>
         ) : (
           <>
-            {/* Results Grid - Mobile: 1 col, Tablet: 2 cols, Desktop: 4 cols */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-              {/* First Row: Welcome + Featured + Listing Cards */}
-              <WelcomeCard />
-              <FeaturedCard
-                image="/images/featured-bg.png"
-                title="FEATURED ARTICLE TITLE"
-                description="Here goes the description of this first article, re-directing to a special page."
-              />
-
-              {/* Listing Cards - show skeletons while Convex loads */}
-              {companies === undefined
-                ? Array.from({ length: itemsPerPage }).map((_, i) => <ListingCardSkeleton key={i} />)
-                : paginatedListings.map((listing) => (
-                  <ListingCard
-                    key={listing.id}
-                    {...listing}
-                    onBookmark={() => handleBookmark(listing.id, listing.category)}
+            {/* Mobile: Horizontal Scroll (1 row) */}
+            <div className="sm:hidden mb-8">
+              <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
+                <div className="flex gap-5 pb-2">
+                  <WelcomeCard />
+                  <FeaturedCard
+                    image="/images/featured-bg.png"
+                    title="FEATURED ARTICLE TITLE"
+                    description="Here goes the description of this first article, re-directing to a special page."
                   />
-                ))
-              }
+                  {companies === undefined
+                    ? Array.from({ length: 6 }).map((_, i) => <ListingCardSkeleton key={i} />)
+                    : listings.slice(0, 10).map((listing) => (
+                      <ListingCard
+                        key={listing.id}
+                        {...listing}
+                        onBookmark={() => handleBookmark(listing.id, listing.category)}
+                      />
+                    ))
+                  }
+                </div>
+              </div>
             </div>
 
-            {/* Pagination */}
-            <div className="flex justify-start mb-[52px]">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+            {/* Desktop: Grid with Pagination */}
+            <div className="hidden sm:block">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                {/* First Row: Welcome + Featured + Listing Cards */}
+                <WelcomeCard />
+                <FeaturedCard
+                  image="/images/featured-bg.png"
+                  title="FEATURED ARTICLE TITLE"
+                  description="Here goes the description of this first article, re-directing to a special page."
+                />
+
+                {/* Listing Cards - show skeletons while Convex loads */}
+                {companies === undefined
+                  ? Array.from({ length: itemsPerPage }).map((_, i) => <ListingCardSkeleton key={i} />)
+                  : paginatedListings.map((listing) => (
+                    <ListingCard
+                      key={listing.id}
+                      {...listing}
+                      onBookmark={() => handleBookmark(listing.id, listing.category)}
+                    />
+                  ))
+                }
+              </div>
+
+              {/* Pagination */}
+              <div className="flex justify-start mb-[52px]">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
             </div>
           </>
         )}

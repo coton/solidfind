@@ -327,9 +327,9 @@ function HeaderInner() {
         }}
       />
 
-      <div className="relative z-10 px-4 sm:px-0 pt-4 sm:pt-6 pb-6 sm:pb-8">
+      <div className="relative z-10 px-5 sm:px-0 pt-4 sm:pt-6 pb-6 sm:pb-8">
         {/* Top Bar */}
-        <div className="max-w-[900px] mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 justify-between mb-4 sm:mb-6">
+        <div className="max-w-[900px] mx-auto flex items-center justify-between mb-4 sm:mb-6">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className="h-[19px] w-auto" />
@@ -337,20 +337,21 @@ function HeaderInner() {
 
           {/* Right Side Buttons */}
           <div className="flex items-center gap-3 sm:gap-5">
-            <button className="text-[#f8f8f8] hover:opacity-80 transition-opacity">
+            {/* Desktop: IG + Account/Business buttons */}
+            <button className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity">
               <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
             </button>
 
             <SignedIn>
               <Link
                 href="/register-business"
-                className="hidden sm:flex h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors items-center"
+                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
               >
                 List your business
               </Link>
               <Link
                 href={userType === "company" ? "/company-dashboard" : "/dashboard"}
-                className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
+                className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity"
                 title="Dashboard"
               >
                 <Image src="/images/icon-account.svg" alt="Dashboard" width={19} height={20} />
@@ -359,16 +360,16 @@ function HeaderInner() {
 
             <SignedOut>
               <Link
-                href="/sign-in"
-                className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
-              >
-                <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
-              </Link>
-              <Link
                 href="/sign-up"
-                className="hidden sm:flex h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors items-center"
+                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
               >
                 List your business
+              </Link>
+              <Link
+                href="/sign-in"
+                className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity"
+              >
+                <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
               </Link>
             </SignedOut>
           </div>
@@ -400,12 +401,12 @@ function HeaderInner() {
 
         {/* Search Bar */}
         <div className="max-w-[900px] mx-auto">
-          {/* Mobile: Stack vertically, Desktop: Flex with Clear button positioned right */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between gap-2 sm:gap-0">
+          {/* Desktop: Flex with Clear button positioned right */}
+          <div className="hidden sm:flex items-center justify-between gap-0">
             {/* Left side: Keywords + Filters */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-[2px]">
+            <div className="flex items-center gap-[2px]">
               {/* Keywords Input - extended width on desktop */}
-              <div className="w-full sm:w-[390px] h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
+              <div className="w-[390px] h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
                 <input
                   type="text"
                   placeholder="Search by keywords"
@@ -417,36 +418,110 @@ function HeaderInner() {
               </div>
 
               {/* Project Size Dropdown */}
-              <div className="flex-shrink-0">
+              <Dropdown
+                label="PROJECT SIZE"
+                options={projectSizeOptions}
+                value={projectSize}
+                onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
+                width="w-[140px]"
+                isProjectSize={true}
+              />
+
+              {/* Categories Dropdown */}
+              <Dropdown
+                label="CATEGORIES"
+                options={getCategoryOptions()}
+                value={category}
+                onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
+                width="w-[140px]"
+              />
+
+              {/* Location Dropdown - multi-select enabled */}
+              <Dropdown
+                label="LOCATION"
+                options={locationOptions}
+                value="" // Not used in multi-select mode
+                onChange={handleLocationChange}
+                width="w-[120px]"
+                multiSelect={true}
+                selectedValues={locations}
+                displayText={getLocationDisplayText()}
+                isActive={isLocationActive}
+                customMenuWidth={180}
+                isOptionSelected={(optionId) => {
+                  if (optionId === "bali") return isBaliActive();
+                  return locations.includes(optionId);
+                }}
+              />
+
+              {/* Search Button - 40x40 container with 34x34 icon centered */}
+              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[#f8f8f8] rounded-[6px]">
+                <Image src="/images/btn-search.svg" alt="Search" width={34} height={34} className="w-[34px] h-[34px]" />
+              </button>
+            </div>
+
+            {/* Clear Filters - aligned to right of 900px container */}
+            <button
+              onClick={clearFilters}
+              className="text-[#f8f8f8] text-[11px] font-medium underline tracking-[0.22px] whitespace-nowrap"
+            >
+              Clear
+            </button>
+          </div>
+
+          {/* Mobile: Stack vertically with equal-width filters */}
+          <div className="flex sm:hidden flex-col gap-[2px]">
+            {/* Keywords Input with Search Button */}
+            <div className="flex items-center gap-[2px]">
+              <div className="flex-1 h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
+                <input
+                  type="text"
+                  placeholder="Enter Keywords"
+                  value={keywords}
+                  onChange={(e) => setKeywords(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full bg-transparent text-[11px] text-[#333] placeholder:text-[#333]/55 outline-none font-medium"
+                />
+              </div>
+              {/* Search Button */}
+              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[#f8f8f8] rounded-[6px]">
+                <Image src="/images/btn-search.svg" alt="Search" width={34} height={34} className="w-[34px] h-[34px]" />
+              </button>
+            </div>
+
+            {/* Filters Row - Equal width with 2px gap */}
+            <div className="flex items-center gap-[2px]">
+              {/* Project Size Dropdown */}
+              <div className="flex-1">
                 <Dropdown
                   label="PROJECT SIZE"
                   options={projectSizeOptions}
                   value={projectSize}
                   onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
-                  width="w-[120px] sm:w-[140px]"
+                  width="w-full"
                   isProjectSize={true}
                 />
               </div>
 
               {/* Categories Dropdown */}
-              <div className="flex-shrink-0">
+              <div className="flex-1">
                 <Dropdown
                   label="CATEGORIES"
                   options={getCategoryOptions()}
                   value={category}
                   onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
-                  width="w-[120px] sm:w-[140px]"
+                  width="w-full"
                 />
               </div>
 
-              {/* Location Dropdown - multi-select enabled */}
-              <div className="flex-shrink-0">
+              {/* Location Dropdown */}
+              <div className="flex-1">
                 <Dropdown
                   label="LOCATION"
                   options={locationOptions}
                   value="" // Not used in multi-select mode
                   onChange={handleLocationChange}
-                  width="w-[100px] sm:w-[120px]"
+                  width="w-full"
                   multiSelect={true}
                   selectedValues={locations}
                   displayText={getLocationDisplayText()}
@@ -458,20 +533,17 @@ function HeaderInner() {
                   }}
                 />
               </div>
-
-              {/* Search Button - 40x40 container with 34x34 icon centered */}
-              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[#f8f8f8] rounded-[6px]">
-                <Image src="/images/btn-search.svg" alt="Search" width={34} height={34} className="w-[34px] h-[34px]" />
-              </button>
             </div>
 
-            {/* Clear Filters - aligned to right of 900px container */}
-            <button
-              onClick={clearFilters}
-              className="text-[#f8f8f8] text-[10px] sm:text-[11px] font-medium underline tracking-[0.22px] whitespace-nowrap"
-            >
-              Clear
-            </button>
+            {/* Clear Filters - aligned right */}
+            <div className="flex justify-end">
+              <button
+                onClick={clearFilters}
+                className="text-[#f8f8f8] text-[10px] font-medium underline tracking-[0.22px]"
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
       </div>
