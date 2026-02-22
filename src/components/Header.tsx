@@ -459,9 +459,9 @@ function HeaderInner() {
                 />
               </div>
 
-              {/* Search Button - 40x40 to match input height */}
-              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0">
-                <Image src="/images/btn-search.svg" alt="Search" width={40} height={40} className="w-10 h-10" />
+              {/* Search Button - 34x34 */}
+              <button onClick={handleSearch} className="w-[34px] h-[34px] flex-shrink-0">
+                <Image src="/images/btn-search.svg" alt="Search" width={34} height={34} className="w-[34px] h-[34px]" />
               </button>
             </div>
 
