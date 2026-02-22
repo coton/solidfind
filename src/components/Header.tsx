@@ -148,7 +148,7 @@ function Dropdown({
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0" style={{ zIndex: 9998 }} onClick={() => setIsOpen(false)} />
           <div 
             className={`fixed bg-white rounded-[6px] shadow-lg transition-opacity duration-75 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
             style={{
