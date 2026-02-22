@@ -225,7 +225,7 @@ function HomeContent() {
         )}
 
         {/* Ad Banner */}
-        <div className="mb-[52px]">
+        <div className="mb-[32px] sm:mb-[52px]">
           <AdBanner imageSrc="/images/ad-kini-resort.png" alt="Kini Resort" />
         </div>
       </main>

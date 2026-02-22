@@ -12,13 +12,15 @@ export function Footer() {
         }}
       />
       {/* Mobile Layout - Right-aligned like desktop */}
-      <div className="sm:hidden absolute inset-0 flex items-center justify-end px-5 z-10">
+      <div className="sm:hidden absolute inset-0 flex items-center justify-end p-5 z-10">
         <div className="flex flex-col items-end gap-4">
-          {/* Description */}
-          <div className="text-right max-w-[320px]">
+          {/* Description - Force 2 lines */}
+          <div className="text-right max-w-[280px]">
             <p className="text-[#f8f8f8] text-[9px] leading-[12px] font-medium tracking-[0.18px]">
               <span className="font-bold">SOLIDFIND.ID</span>
-              {" is an independent platform built to bring clarity, trust, and perspective to the places we live in."}
+              {" is an independent platform built to bring clarity, trust,"}
+              <br />
+              {"and perspective to the places we live in."}
             </p>
           </div>
 
