@@ -109,9 +109,9 @@ export function ListingCard({
             </div>
           )}
 
-          {/* Rating: Number first, then star — positioned to left of bookmark */}
-          <div className="absolute top-[12px] right-[35px] flex items-center gap-[4px]">
-            <span className="text-[13px] font-semibold text-[#d8d8d8] leading-[17px]">{rating}</span>
+          {/* Rating: Number first, then star — 30px gap from bookmark */}
+          <div className="absolute top-[12px] right-[40px] flex items-center gap-[4px]">
+            <span className="text-[13px] font-semibold text-[#d8d8d8] leading-[17px] text-right">{rating}</span>
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6.438 3.067C7.578 1.022 8.148 0 9 0c.852 0 1.422 1.022 2.562 3.067l.295.53c.324.581.486.872.738 1.063.252.192.567.263 1.197.405l.572.13c2.214.5 3.32.75 3.584 1.598.263.846-.491 1.729-2 3.494l-.39.456c-.429.501-.644.752-.74 1.062-.096.31-.064.645.001 1.314l.06.609c.227 2.355.342 3.533-.348 4.055-.689.523-1.726.046-3.798-0.908l-.537-.247c-.589-.272-.883-.407-1.195-.407-.312 0-.607.135-1.195.407l-.537.247c-2.072.954-3.109 1.431-3.798.909-.69-.524-.576-1.701-.348-4.056l.06-.608c.064-.67.097-1.005 0-1.314-.096-.31-.311-.562-.739-1.062l-.39-.457c-1.51-1.764-2.264-2.647-2-3.494.262-.846 1.37-1.097 3.584-1.598l.573-.13c.63-.142.944-.213 1.196-.405.253-.192.414-.482.738-1.063l.296-.53z" fill="#d8d8d8"/>
             </svg>
