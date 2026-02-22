@@ -530,6 +530,7 @@ function HeaderInner() {
                     value={category}
                     onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
                     width="w-full"
+                    customMenuWidth={220}
                   />
                 </div>
 
