@@ -140,10 +140,10 @@ function Dropdown({
         className="h-10 bg-[#f8f8f8] rounded-[6px] flex items-center justify-between px-3 w-full"
         style={{ letterSpacing: '0.12px' }}
       >
-        <span className={`text-[11px] font-semibold ${buttonIsActive ? 'text-[#f14110]' : 'text-[#333]'}`}>
+        <span className={`text-[11px] font-semibold leading-[11px] ${buttonIsActive ? 'text-[#f14110]' : 'text-[#333]'}`}>
           {getButtonText()}
         </span>
-        <Image src="/images/btn-down.svg" alt="" width={8} height={5} className="rotate-90" />
+        <Image src="/images/btn-down.svg" alt="" width={8} height={5} className="rotate-90 flex-shrink-0" />
       </button>
 
       {isOpen && (
