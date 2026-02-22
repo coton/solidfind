@@ -4,18 +4,11 @@ import Image from "next/image";
 export function Footer() {
   return (
     <footer className="relative h-[190px] sm:h-[190px] rounded-t-[6px] overflow-hidden">
-      {/* Mobile gradient: E9A28E → F14110 */}
+      {/* Gradient: E9A28E → F14110 (both mobile & desktop) */}
       <div
-        className="sm:hidden absolute inset-0"
+        className="absolute inset-0"
         style={{
           background: "linear-gradient(to right, #E9A28E, #F14110)"
-        }}
-      />
-      {/* Desktop gradient: E4E4E4 → F14110 */}
-      <div
-        className="hidden sm:block absolute inset-0"
-        style={{
-          background: "linear-gradient(to right, #E4E4E4, #F14110)"
         }}
       />
       {/* Mobile Layout - Right-aligned like desktop */}
