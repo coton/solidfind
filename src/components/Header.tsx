@@ -343,18 +343,13 @@ function HeaderInner() {
 
           {/* Right Side Buttons */}
           <div className="flex items-center gap-3 sm:gap-5">
-            {/* Desktop: IG + Account/Business buttons */}
+            {/* Desktop: IG (first) */}
             <button className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity">
               <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
             </button>
 
             <SignedIn>
-              <Link
-                href="/register-business"
-                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
-              >
-                List your business
-              </Link>
+              {/* Desktop: Account icon (second) */}
               <Link
                 href={userType === "company" ? "/company-dashboard" : "/dashboard"}
                 className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity"
@@ -362,20 +357,29 @@ function HeaderInner() {
               >
                 <Image src="/images/icon-account.svg" alt="Dashboard" width={19} height={20} />
               </Link>
-            </SignedIn>
-
-            <SignedOut>
+              {/* List your business button (third) */}
               <Link
-                href="/sign-up"
+                href="/register-business"
                 className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
               >
                 List your business
               </Link>
+            </SignedIn>
+
+            <SignedOut>
+              {/* Desktop: Account icon (second) */}
               <Link
                 href="/sign-in"
                 className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity"
               >
                 <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
+              </Link>
+              {/* List your business button (third) */}
+              <Link
+                href="/sign-up"
+                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
+              >
+                List your business
               </Link>
             </SignedOut>
           </div>
