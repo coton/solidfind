@@ -26,9 +26,19 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
     };
+    
+    const handleScroll = () => {
+      if (isOpen) setIsOpen(false);
+    };
+    
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    window.addEventListener("scroll", handleScroll, true); // true = capture phase to catch all scrolls
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, [isOpen]);
 
   return (
     <div ref={ref} className="relative">
