@@ -62,6 +62,25 @@ const architectureCategories = [
   { id: "sustainable-eco", label: "SUSTAINABLE / ECO-ARCHI." },
 ];
 
+const interiorCategories = [
+  { id: "all", label: "ALL TYPES" },
+  { id: "residential", label: "RESIDENTIAL" },
+  { id: "commercial", label: "COMMERCIAL" },
+  { id: "hospitality", label: "HOSPITALITY" },
+  { id: "furnitures", label: "FURNITURES" },
+  { id: "lighting", label: "LIGHTING" },
+  { id: "styling-decoration", label: "STYLING & DECORATION" },
+];
+
+const realEstateCategories = [
+  { id: "all", label: "ALL TYPES" },
+  { id: "residential", label: "RESIDENTIAL" },
+  { id: "commercial", label: "COMMERCIAL" },
+  { id: "land-development", label: "LAND & DEVELOPMENT PLOTS" },
+  { id: "property-management", label: "PROPERTY MANAGEMENT" },
+  { id: "legal-notary", label: "LEGAL & NOTARY SERVICES" },
+];
+
 const locationOptions = [
   { id: "bali", label: "BALI" },
   { id: "badung", label: "BADUNG" },
@@ -336,6 +355,12 @@ function HeaderInner() {
     }
     if (activeCategory === "architecture") {
       return architectureCategories;
+    }
+    if (activeCategory === "interior") {
+      return interiorCategories;
+    }
+    if (activeCategory === "real-estate") {
+      return realEstateCategories;
     }
     return constructionCategories;
   };
