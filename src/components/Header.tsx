@@ -14,6 +14,14 @@ const mainCategories = [
   { id: "real-estate", label: "05. Real Estate" },
 ];
 
+const categorySubtitles: Record<string, string> = {
+  construction: "Find construction professionals for residential, commercial and hospitality projects.",
+  renovation: "Find renovation professionals for complete upgrades, targeted improvements, and structural works.",
+  architecture: "Find architecture studios for concept design, planning, and project development.",
+  interior: "Find interior professionals for space planning, styling, furnitures and full interior projects.",
+  "real-estate": "Find real estate professionals for property acquisition, sales, and investment opportunities.",
+};
+
 const projectSizeOptions = [
   { id: "any", label: "ANY SIZE" },
   { id: "solo", label: "SOLO / COUPLE (1-2)" },
@@ -409,7 +417,7 @@ function HeaderInner() {
             </div>
           </div>
           <p className="text-[#f8f8f8] text-[9px] mt-4 font-medium leading-[12px]">
-            Browse construction professionals for residential, commercial and hospitality projects in Indonesia.
+            {categorySubtitles[activeCategory] || categorySubtitles.construction}
           </p>
         </div>
 
