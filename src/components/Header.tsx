@@ -54,6 +54,14 @@ const renovationCategories = [
   { id: "fencing", label: "FENCING" },
 ];
 
+const architectureCategories = [
+  { id: "all", label: "ALL TYPES" },
+  { id: "residential", label: "RESIDENTIAL" },
+  { id: "commercial", label: "COMMERCIAL" },
+  { id: "renovations-extensions", label: "RENOVATIONS & EXTENSIONS" },
+  { id: "sustainable-eco", label: "SUSTAINABLE / ECO-ARCHI." },
+];
+
 const locationOptions = [
   { id: "bali", label: "BALI" },
   { id: "badung", label: "BADUNG" },
@@ -325,6 +333,9 @@ function HeaderInner() {
   const getCategoryOptions = () => {
     if (activeCategory === "renovation") {
       return renovationCategories;
+    }
+    if (activeCategory === "architecture") {
+      return architectureCategories;
     }
     return constructionCategories;
   };
