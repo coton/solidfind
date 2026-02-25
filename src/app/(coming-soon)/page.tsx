@@ -36,9 +36,9 @@ export default function ComingSoonPage() {
   };
 
   return (
-    <div className="relative w-screen h-screen bg-[#E4E4E4] overflow-hidden">
+    <div className="fixed inset-0 bg-[#E4E4E4] overflow-hidden">
       {/* Background Image - positioned right */}
-      <div className="absolute right-0 top-0 bottom-0 w-[1420px] h-[1005px]">
+      <div className="absolute right-0 top-0 w-[1420px] h-[1005px]">
         <Image
           src="/coming-soon/bg-blocks.png"
           alt="Construction blocks background"
