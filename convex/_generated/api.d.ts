@@ -16,6 +16,7 @@ import type * as reviews from "../reviews.js";
 import type * as savedListings from "../savedListings.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
+import type * as waitlist from "../waitlist.js";
 
 import type {
   ApiFromModules,
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   savedListings: typeof savedListings;
   seed: typeof seed;
   users: typeof users;
+  waitlist: typeof waitlist;
 }>;
 
 /**

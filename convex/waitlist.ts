@@ -38,13 +38,17 @@ export const getWaitlist = query({
     notified: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    let query = ctx.db.query("waitlist");
+    let waitlist;
 
     if (args.notified !== undefined) {
-      query = query.withIndex("by_notified", (q) => q.eq("notified", args.notified));
+      waitlist = await ctx.db
+        .query("waitlist")
+        .withIndex("by_notified", (q) => q.eq("notified", args.notified as boolean))
+        .order("desc")
+        .collect();
+    } else {
+      waitlist = await ctx.db.query("waitlist").order("desc").collect();
     }
-
-    const waitlist = await query.order("desc").collect();
 
     return {
       emails: waitlist,
