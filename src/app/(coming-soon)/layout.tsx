@@ -23,8 +23,10 @@ export default function ComingSoonLayout({
     <html lang="en" style={{ margin: 0, padding: 0, width: '100%', height: '100%' }}>
       <head>
         <style dangerouslySetInnerHTML={{ __html: `
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          html, body { margin: 0 !important; padding: 0 !important; width: 100%; height: 100%; overflow: hidden; }
+          * { margin: 0 !important; padding: 0 !important; box-sizing: border-box !important; }
+          html, body { margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; overflow: hidden !important; }
+          html { position: relative !important; left: 0 !important; }
+          body { position: relative !important; left: 0 !important; }
         ` }} />
       </head>
       <body

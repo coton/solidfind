@@ -52,12 +52,14 @@ export default function ComingSoonPage() {
     >
       {/* Background Image - positioned right */}
       <div 
-        className="absolute"
         style={{
-          right: 0,
-          top: 0,
+          position: 'absolute',
+          right: '0px',
+          top: '0px',
           width: '1420px',
-          height: '1005px'
+          height: '1005px',
+          margin: 0,
+          padding: 0
         }}
       >
         <Image
@@ -70,7 +72,13 @@ export default function ComingSoonPage() {
       </div>
 
       {/* Content Container - positioned at x:270, y:326 per design */}
-      <div className="absolute left-[270px] top-[326px] z-10 space-y-6">
+      <div 
+        className="absolute z-10 space-y-6"
+        style={{
+          left: '270px',
+          top: '326px'
+        }}
+      >
         {/* Logo - 175x19px */}
         <div className="text-[#333] font-semibold text-base tracking-wide">
           SOLIDFIND.id
