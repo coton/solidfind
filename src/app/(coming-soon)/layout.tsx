@@ -20,9 +20,9 @@ export default function ComingSoonLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="m-0 p-0">
       <body
-        className={`${sora.variable} font-sans antialiased`}
+        className={`${sora.variable} font-sans antialiased m-0 p-0 overflow-hidden`}
         style={{ fontFamily: "var(--font-sora), sans-serif" }}
       >
         <ConvexClientProvider>
