@@ -42,7 +42,7 @@ export default function ComingSoonPage() {
         {/* Background Image */}
         <div className="absolute right-0 top-0 w-[1420px] h-[1005px]">
           <Image
-            src="/coming-soon/bg-blocks.png"
+            src="/coming-soon/bg-blocks.jpg"
             alt="Construction blocks background"
             fill
             className="object-cover"
@@ -119,7 +119,7 @@ export default function ComingSoonPage() {
         {/* Background Image - full screen with overlay */}
         <div className="fixed inset-0 opacity-30">
           <Image
-            src="/coming-soon/bg-blocks.png"
+            src="/coming-soon/bg-blocks.jpg"
             alt="Construction blocks background"
             fill
             className="object-cover object-center"
