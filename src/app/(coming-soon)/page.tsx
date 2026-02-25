@@ -107,15 +107,15 @@ export default function ComingSoonPage() {
         </form>
       </div>
 
-      {/* Footer - bottom-right positioned */}
-      <div className="absolute bottom-8 right-8 text-right space-y-1">
+      {/* Footer - bottom-right positioned, horizontal layout matching Figma */}
+      <div className="absolute bottom-8 right-8 flex items-baseline gap-4">
         <Link
           href="/terms"
-          className="block text-[#333] text-[8px] font-bold underline hover:text-[#F14110] transition-colors"
+          className="text-[#333] text-[8px] font-bold underline hover:text-[#F14110] transition-colors whitespace-nowrap"
         >
           Terms &amp; Conditions.
         </Link>
-        <p className="text-[#333] text-[10px] font-bold tracking-[2.5px] uppercase">
+        <p className="text-[#333] text-[10px] font-bold tracking-[2.5px] uppercase whitespace-nowrap">
           SOLIDFIND.ID © 2026
         </p>
       </div>
