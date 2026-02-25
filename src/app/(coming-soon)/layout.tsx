@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
+import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import "../globals.css";
 
 const sora = Sora({
@@ -24,7 +25,9 @@ export default function ComingSoonLayout({
         className={`${sora.variable} font-sans antialiased`}
         style={{ fontFamily: "var(--font-sora), sans-serif" }}
       >
-        {children}
+        <ConvexClientProvider>
+          {children}
+        </ConvexClientProvider>
       </body>
     </html>
   );

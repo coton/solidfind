@@ -3,20 +3,36 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 export default function ComingSoonPage() {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  
+  const addToWaitlist = useMutation(api.waitlist.addToWaitlist);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Add email notification logic (Convex/API)
-    console.log("Email submitted:", email);
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setEmail("");
-      setIsSubmitted(false);
-    }, 3000);
+    setError("");
+
+    try {
+      const result = await addToWaitlist({ email });
+      
+      if (result.alreadyExists) {
+        setError("You're already on the waitlist!");
+      } else {
+        setIsSubmitted(true);
+        setTimeout(() => {
+          setEmail("");
+          setIsSubmitted(false);
+        }, 3000);
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      console.error("Waitlist error:", err);
+    }
   };
 
   return (
@@ -83,6 +99,11 @@ export default function ComingSoonPage() {
               {isSubmitted ? "✓ Notified!" : "Notify me"}
             </button>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <p className="text-[#F14110] text-xs font-medium">{error}</p>
+          )}
         </form>
       </div>
 

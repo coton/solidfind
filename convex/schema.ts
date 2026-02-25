@@ -104,4 +104,13 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_createdAt", ["createdAt"]),
+
+  waitlist: defineTable({
+    email: v.string(),
+    notified: v.boolean(),
+    notifiedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_email", ["email"])
+    .index("by_notified", ["notified"]),
 });
