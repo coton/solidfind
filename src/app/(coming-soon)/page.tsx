@@ -36,9 +36,30 @@ export default function ComingSoonPage() {
   };
 
   return (
-    <div className="fixed inset-0 bg-[#E4E4E4] overflow-hidden">
+    <div 
+      className="bg-[#E4E4E4] overflow-hidden"
+      style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh'
+      }}
+    >
       {/* Background Image - positioned right */}
-      <div className="absolute right-0 top-0 w-[1420px] h-[1005px]">
+      <div 
+        className="absolute"
+        style={{
+          right: 0,
+          top: 0,
+          width: '1420px',
+          height: '1005px'
+        }}
+      >
         <Image
           src="/coming-soon/bg-blocks.png"
           alt="Construction blocks background"

@@ -20,10 +20,23 @@ export default function ComingSoonLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="m-0 p-0">
+    <html lang="en" style={{ margin: 0, padding: 0, width: '100%', height: '100%' }}>
+      <head>
+        <style dangerouslySetInnerHTML={{ __html: `
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          html, body { margin: 0 !important; padding: 0 !important; width: 100%; height: 100%; overflow: hidden; }
+        ` }} />
+      </head>
       <body
-        className={`${sora.variable} font-sans antialiased m-0 p-0 overflow-hidden`}
-        style={{ fontFamily: "var(--font-sora), sans-serif" }}
+        className={`${sora.variable} font-sans antialiased`}
+        style={{ 
+          margin: 0,
+          padding: 0,
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
+          fontFamily: "var(--font-sora), sans-serif"
+        }}
       >
         <ConvexClientProvider>
           {children}
