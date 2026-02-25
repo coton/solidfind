@@ -110,7 +110,7 @@ export default function ComingSoonPage() {
       {/* Footer - bottom-right positioned, horizontal layout matching Figma */}
       <div className="absolute bottom-8 right-8 flex items-baseline gap-4">
         <Link
-          href="/terms"
+          href="/terms-preview"
           className="text-[#333] text-[8px] font-bold underline hover:text-[#F14110] transition-colors whitespace-nowrap"
         >
           Terms &amp; Conditions.
