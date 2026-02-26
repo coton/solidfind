@@ -420,7 +420,7 @@ function HeaderInner() {
               {/* List your business button (third) */}
               <Link
                 href="/register-business"
-                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
+                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
               >
                 List your business
               </Link>
@@ -437,7 +437,7 @@ function HeaderInner() {
               {/* List your business → opens REGISTER modal, company pre-selected */}
               <button
                 onClick={() => openAuthModal("company", "register")}
-                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
+                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
               >
                 List your business
               </button>
