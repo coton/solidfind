@@ -217,7 +217,7 @@ export default function AdminUI() {
         <Field label="Vertical Ad" hint="Appears on the left panel of popups (150×500px)">
           <TextInput value={s.adVerticalUrl} onChange={(v) => u({ adVerticalUrl: v })} placeholder="https://..." />
         </Field>
-        <Field label="Horizontal Ad" hint="Appears below search results (e.g. Kini Resort banner)">
+        <Field label="Horizontal Ad" hint="Appears below search results — 700×150px (scales proportionally on mobile)">
           <TextInput value={s.adHorizontalUrl} onChange={(v) => u({ adHorizontalUrl: v })} placeholder="https://..." />
         </Field>
       </SectionCard>

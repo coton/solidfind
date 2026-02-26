@@ -5,27 +5,48 @@ interface AdBannerProps {
   alt?: string;
 }
 
-export function AdBanner({
-  imageSrc,
-  alt = "Advertisement"
-}: AdBannerProps) {
+/**
+ * Horizontal ad banner — 700×150px at full size.
+ * On narrower viewports the banner scales down proportionally
+ * (aspect-ratio: 700/150 keeps height relative to width).
+ */
+export function AdBanner({ imageSrc, alt = "Advertisement" }: AdBannerProps) {
   return (
-    <div className="relative w-full max-w-[730px] bg-white p-[10px] sm:p-0 rounded-[10px] mx-auto">
-      <div className="relative w-full h-[120px] sm:h-[158px] rounded-[10px] overflow-hidden bg-[#d8d8d8]">
-        {imageSrc ? (
-          <Image
-            src={imageSrc}
-            alt={alt}
-            fill
-            sizes="(max-width: 640px) 100vw, 730px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-[#999] text-sm">
-            Ad Space - 730 x 158
-          </div>
-        )}
-      </div>
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        maxWidth: "700px",
+        aspectRatio: "700 / 150",
+        margin: "0 auto",
+        borderRadius: "10px",
+        overflow: "hidden",
+        backgroundColor: "#d8d8d8",
+      }}
+    >
+      {imageSrc ? (
+        <Image
+          src={imageSrc}
+          alt={alt}
+          fill
+          sizes="(max-width: 700px) 100vw, 700px"
+          style={{ objectFit: "cover" }}
+        />
+      ) : (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#999",
+            fontSize: "13px",
+          }}
+        >
+          Ad Space — 700 × 150 px
+        </div>
+      )}
     </div>
   );
 }

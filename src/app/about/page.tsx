@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { AdBanner } from "@/components/AdBanner";
+
 import { ArrowLeft } from "lucide-react";
 
 export default function AboutPage() {
@@ -150,10 +150,6 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Ad Banner */}
-        <div className="mb-8">
-          <AdBanner imageSrc="/images/ad-kini-resort.png" alt="Kini Resort" />
-        </div>
       </main>
 
       <Footer />
