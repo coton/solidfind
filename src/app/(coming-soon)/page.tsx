@@ -53,38 +53,47 @@ export default function ComingSoonPage() {
         </div>
 
         {/* Content */}
-        <div className="absolute left-[270px] top-[326px] z-10 space-y-6 w-[450px]">
-          <div className="text-[#333] font-semibold text-base tracking-wide">
-            SOLIDFIND.id
-          </div>
+        <div className="absolute left-[270px] top-[326px] z-10 w-[450px]">
+          {/* Logo SVG */}
+          <img
+            src="/images/logo-full.svg"
+            alt="SOLIDFIND.id"
+            width={175}
+            height={19}
+          />
 
-          <h1 className="text-[#F14110] font-semibold text-lg uppercase tracking-[0.36px]">
+          {/* 40px spacing between logo and "COMING SOON!" */}
+          <h1 className="mt-[40px] text-[#F14110] font-semibold text-lg uppercase tracking-[0.36px]">
             COMING SOON!
           </h1>
 
-          <p className="text-[#333] text-[10px] leading-[1.6] font-normal">
+          {/* 20px spacing between "COMING SOON!" and description */}
+          <p className="mt-[20px] text-[#333] text-[10px] leading-[1.6] font-normal">
             A curated platform connecting individuals and professionals across construction, 
             renovation, and real estate. <span className="font-bold">SolidFind</span> helps 
             you discover reliable partners and connect with them easily.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
+          {/* 20px spacing between description and form */}
+          <form onSubmit={handleSubmit} className="mt-[20px]">
+            {/* E-mail label — sentence case, not all caps */}
             <label 
               htmlFor="email-desktop" 
-              className="block text-[#333] text-[11px] font-medium tracking-[2px] uppercase"
+              className="block text-[#333] text-[11px] font-medium tracking-[2px] mb-2"
             >
               E-mail
             </label>
 
             <div className="flex items-center gap-4">
+              {/* Input: 40px height, placeholder _ */}
               <input
                 id="email-desktop"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder="_"
                 required
-                className="w-[210px] h-[58px] px-4 bg-[#F8F8F8] rounded-md text-sm text-[#333] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F14110]/30"
+                className="w-[210px] h-[40px] px-4 bg-[#F8F8F8] rounded-md text-sm text-[#333] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F14110]/30"
               />
 
               <button
@@ -97,7 +106,7 @@ export default function ComingSoonPage() {
             </div>
 
             {error && (
-              <p className="text-[#F14110] text-xs font-medium">{error}</p>
+              <p className="mt-2 text-[#F14110] text-xs font-medium">{error}</p>
             )}
           </form>
         </div>
@@ -130,38 +139,39 @@ export default function ComingSoonPage() {
           />
         </div>
 
-        {/* Content Container - centered */}
+        {/* Content Container */}
         <div className="relative z-10 min-h-screen flex flex-col justify-between p-6">
-          {/* Main Content */}
           <div className="flex-1 flex items-center justify-center">
-            <div className="w-full max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 space-y-6">
+            <div className="w-full max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8">
               {/* Logo */}
-              <div className="text-center">
-                <h2 className="text-[#333] font-bold text-2xl tracking-wide">
-                  SOLIDFIND.id
-                </h2>
+              <div className="text-center mb-[40px]">
+                <img
+                  src="/images/logo-full.svg"
+                  alt="SOLIDFIND.id"
+                  width={175}
+                  height={19}
+                  className="mx-auto"
+                />
               </div>
 
               {/* Title */}
-              <div className="text-center">
-                <h1 className="text-[#F14110] font-bold text-4xl uppercase tracking-wide">
-                  COMING SOON!
-                </h1>
-              </div>
+              <h1 className="text-[#F14110] font-bold text-4xl uppercase tracking-wide text-center">
+                COMING SOON!
+              </h1>
 
               {/* Description */}
-              <p className="text-[#333] text-center text-base leading-relaxed">
+              <p className="mt-[20px] text-[#333] text-center text-base leading-relaxed">
                 A curated platform connecting individuals and professionals across construction, 
                 renovation, and real estate. <span className="font-bold">SolidFind</span> helps 
                 you discover reliable partners and connect with them easily.
               </p>
 
-              {/* Registration Form */}
-              <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="mt-[20px] space-y-3">
                 <div className="space-y-2">
                   <label 
                     htmlFor="email-mobile" 
-                    className="block text-[#333] text-sm font-semibold tracking-wider uppercase"
+                    className="block text-[#333] text-sm font-semibold tracking-wider"
                   >
                     E-mail
                   </label>
@@ -170,16 +180,16 @@ export default function ComingSoonPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
+                    placeholder="_"
                     required
-                    className="w-full h-14 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base text-[#333] placeholder:text-gray-400 focus:outline-none focus:border-[#F14110] transition-colors"
+                    className="w-full h-[40px] px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base text-[#333] placeholder:text-gray-400 focus:outline-none focus:border-[#F14110] transition-colors"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitted}
-                  className="w-full h-14 rounded-full bg-[#F14110] text-white text-lg font-semibold hover:bg-[#d63a0e] active:scale-95 transition-all duration-200 disabled:opacity-50 shadow-lg"
+                  className="w-full h-[40px] rounded-full bg-[#F14110] text-white text-base font-semibold hover:bg-[#d63a0e] active:scale-95 transition-all duration-200 disabled:opacity-50 shadow-lg"
                 >
                   {isSubmitted ? "✓ You're on the list!" : "Notify me"}
                 </button>
