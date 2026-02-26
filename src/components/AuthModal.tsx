@@ -62,6 +62,7 @@ export function AuthModal({
   const [password, setPassword] = useState("");
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
   const [validationError, setValidationError] = useState(false);
+  const [submitHovered, setSubmitHovered] = useState(false);
 
   // Sync when props change (e.g. re-opening with different defaults)
   useEffect(() => { setMode(initialMode); }, [initialMode]);
@@ -174,7 +175,7 @@ export function AuthModal({
                 {/* Company */}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#333', letterSpacing: '0.5px' }}>COMPANY</span>
+                    <span style={{ fontSize: '11px', fontWeight: 500, color: '#333', letterSpacing: '0.22px', fontFamily: 'var(--font-sora), sans-serif' }}>COMPANY</span>
                     <Toggle
                       checked={accountType === "company"}
                       onChange={() => setAccountType("company")}
@@ -188,7 +189,7 @@ export function AuthModal({
                 {/* Individual */}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#333', letterSpacing: '0.5px' }}>INDIVIDUAL</span>
+                    <span style={{ fontSize: '11px', fontWeight: 500, color: '#333', letterSpacing: '0.22px', fontFamily: 'var(--font-sora), sans-serif' }}>INDIVIDUAL</span>
                     <Toggle
                       checked={accountType === "individual"}
                       onChange={() => setAccountType("individual")}
@@ -242,25 +243,29 @@ export function AuthModal({
               </div>
             )}
 
-            {/* Register / Login button */}
+            {/* Register / Login button — 145×40, centered, gradient on hover only */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
             <button
               type="submit"
+              onMouseEnter={() => setSubmitHovered(true)}
+              onMouseLeave={() => setSubmitHovered(false)}
               style={{
-                width: '100%',
-                height: '44px',
-                borderRadius: '22px',
-                border: 'none',
-                background: 'linear-gradient(to right, #E9A28E, #F14110)',
-                color: 'white',
+                width: '145px',
+                height: '40px',
+                borderRadius: '20px',
+                border: submitHovered ? 'none' : '1px solid #F14110',
+                background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
+                color: submitHovered ? 'white' : '#F14110',
                 fontSize: '13px',
                 fontWeight: 600,
                 letterSpacing: '0.5px',
                 cursor: 'pointer',
-                marginBottom: '12px',
+                transition: 'all 0.2s ease',
               }}
             >
               {mode === "login" ? "Login" : "Register"}
             </button>
+            </div>
 
             {/* Forgot password (login only) */}
             {mode === "login" && (
