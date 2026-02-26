@@ -153,7 +153,7 @@ function Dropdown({
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const rightPos = window.innerWidth - rect.right;
-      setMenuPos({ top: rect.bottom + 4, left: rect.left, right: rightPos, width: rect.width });
+      setMenuPos({ top: rect.bottom + 2, left: rect.left, right: rightPos, width: rect.width });
       // Allow rendering after position is calculated
       requestAnimationFrame(() => {
         setIsPositioned(true);
