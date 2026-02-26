@@ -98,6 +98,7 @@ export function AuthModal({
           display: 'flex',
           width: '100%',
           maxWidth: '500px',
+          height: '500px',
           borderRadius: '6px',
           overflow: 'hidden',
           boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
@@ -105,15 +106,13 @@ export function AuthModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── LEFT: Ad space ── */}
-        <div style={{
-          width: '160px',
+        {/* ── LEFT: Ad space — hidden on mobile ── */}
+        <div className="hidden sm:flex" style={{
+          width: '150px',
           flexShrink: 0,
           backgroundColor: '#D9D9D9',
-          display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: '520px',
         }}>
           <span style={{ color: '#999', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
             AD SPACE
@@ -121,7 +120,7 @@ export function AuthModal({
         </div>
 
         {/* ── RIGHT: Form ── */}
-        <div style={{ flex: 1, backgroundColor: '#F8F8F8', padding: '32px 28px', position: 'relative' }}>
+        <div style={{ flex: 1, backgroundColor: '#F8F8F8', padding: '32px 28px', position: 'relative', overflowY: 'auto' }}>
 
           {/* Close button */}
           <button
