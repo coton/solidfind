@@ -56,6 +56,7 @@ export function AuthModal({
   const router = useRouter();
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [accountType, setAccountType] = useState<AccountType>(initialAccountType);
+  const [closeHovered, setCloseHovered] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -125,7 +126,9 @@ export function AuthModal({
           {/* Close button */}
           <button
             onClick={onClose}
-            style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#999', lineHeight: 1 }}
+            onMouseEnter={() => setCloseHovered(true)}
+            onMouseLeave={() => setCloseHovered(false)}
+            style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: closeHovered ? '#F14110' : '#999', lineHeight: 1, transition: 'color 0.15s ease' }}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
