@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
+import { AuthModal } from "@/components/AuthModal";
 
 const mainCategories = [
   { id: "construction", label: "01. Construction" },
@@ -252,10 +253,18 @@ function HeaderInner() {
   const [keywords, setKeywords] = useState(searchParams.get("search") ?? "");
   const [projectSize, setProjectSize] = useState(searchParams.get("projectSize") ?? "");
   const [category, setCategory] = useState(searchParams.get("subcategory") ?? "");
-  // Location now supports multiple values (comma-separated)
   const [locations, setLocations] = useState<string[]>(
     searchParams.get("location") ? searchParams.get("location")!.split(",") : []
   );
+
+  // Auth modal state
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalAccountType, setAuthModalAccountType] = useState<"company" | "individual">("individual");
+
+  const openAuthModal = (accountType: "company" | "individual" = "individual") => {
+    setAuthModalAccountType(accountType);
+    setAuthModalOpen(true);
+  };
 
   const activeCategory = searchParams.get("category") ?? "construction";
 
@@ -366,6 +375,7 @@ function HeaderInner() {
   };
 
   return (
+    <>
     <header className="relative">
       {/* Gradient Background - Desktop: #E4E4E4 to #F14110, Mobile: #E9A28E to #F14110 */}
       <div
@@ -415,20 +425,20 @@ function HeaderInner() {
             </SignedIn>
 
             <SignedOut>
-              {/* Desktop: Account icon (second) */}
-              <Link
-                href="/sign-in"
+              {/* Desktop: Account icon → opens auth modal */}
+              <button
+                onClick={() => openAuthModal("individual")}
                 className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity"
               >
                 <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
-              </Link>
-              {/* List your business button (third) */}
-              <Link
-                href="/sign-up"
+              </button>
+              {/* List your business → opens auth modal with company pre-selected */}
+              <button
+                onClick={() => openAuthModal("company")}
                 className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
               >
                 List your business
-              </Link>
+              </button>
             </SignedOut>
           </div>
         </div>
@@ -608,5 +618,14 @@ function HeaderInner() {
         </div>
       </div>
     </header>
+
+    {/* Auth modal — rendered outside header so it can overlay everything */}
+    <AuthModal
+      isOpen={authModalOpen}
+      onClose={() => setAuthModalOpen(false)}
+      initialMode="register"
+      initialAccountType={authModalAccountType}
+    />
+    </>
   );
 }

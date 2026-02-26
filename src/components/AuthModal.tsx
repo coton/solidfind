@@ -10,203 +10,278 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: AuthMode;
+  initialAccountType?: AccountType;
   onAuthSuccess?: (accountType: AccountType) => void;
 }
 
-export function AuthModal({ isOpen, onClose, initialMode = "register", onAuthSuccess }: AuthModalProps) {
+// Pill toggle switch component
+function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onChange}
+      style={{
+        width: '36px',
+        height: '20px',
+        borderRadius: '10px',
+        background: checked ? 'linear-gradient(to right, #E9A28E, #F14110)' : '#ccc',
+        position: 'relative',
+        border: 'none',
+        cursor: 'pointer',
+        transition: 'background 0.2s ease',
+        flexShrink: 0,
+      }}
+    >
+      <div style={{
+        width: '14px',
+        height: '14px',
+        borderRadius: '50%',
+        backgroundColor: 'white',
+        position: 'absolute',
+        top: '3px',
+        left: checked ? '19px' : '3px',
+        transition: 'left 0.2s ease',
+      }} />
+    </button>
+  );
+}
+
+export function AuthModal({
+  isOpen,
+  onClose,
+  initialMode = "register",
+  initialAccountType = "individual",
+  onAuthSuccess,
+}: AuthModalProps) {
   const router = useRouter();
   const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [accountType, setAccountType] = useState<AccountType>("company");
+  const [accountType, setAccountType] = useState<AccountType>(initialAccountType);
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [companyName, setCompanyName] = useState("");
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
 
-  // Reset mode when initialMode changes
-  useEffect(() => {
-    setMode(initialMode);
-  }, [initialMode]);
+  // Sync when props change (e.g. re-opening with different defaults)
+  useEffect(() => { setMode(initialMode); }, [initialMode]);
+  useEffect(() => { setAccountType(initialAccountType); }, [initialAccountType]);
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Mock authentication - in real app, this would call an API
-    console.log({ mode, accountType, email, password, companyName, subscribeNewsletter });
-
-    // Store user type in localStorage for demo purposes
     localStorage.setItem("userType", accountType);
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("userEmail", email);
-
-    // Call success callback if provided
-    if (onAuthSuccess) {
-      onAuthSuccess(accountType);
-    }
-
-    // Close modal
+    if (onAuthSuccess) onAuthSuccess(accountType);
     onClose();
-
-    // Redirect based on account type
-    if (accountType === "company") {
-      router.push("/company-dashboard");
-    } else {
-      router.push("/dashboard");
-    }
+    router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
+    // Overlay: #333 at 85% opacity
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(51, 51, 51, 0.85)',
+      }}
+      onClick={onClose}
+    >
+      {/* Modal container */}
       <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
+        style={{
+          position: 'relative',
+          display: 'flex',
+          width: '100%',
+          maxWidth: '500px',
+          borderRadius: '6px',
+          overflow: 'hidden',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          margin: '0 16px',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* ── LEFT: Ad space ── */}
+        <div style={{
+          width: '160px',
+          flexShrink: 0,
+          backgroundColor: '#D9D9D9',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '520px',
+        }}>
+          <span style={{ color: '#999', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
+            AD SPACE
+          </span>
+        </div>
 
-      {/* Modal */}
-      <div className="relative bg-[#f8f8f8] w-full max-w-[400px] rounded-[6px] shadow-2xl">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333] transition-colors"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </button>
+        {/* ── RIGHT: Form ── */}
+        <div style={{ flex: 1, backgroundColor: '#F8F8F8', padding: '32px 28px', position: 'relative' }}>
 
-        <div className="p-8">
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#999', lineHeight: 1 }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
+
           {/* Title */}
-          <h2 className="text-[18px] font-bold text-[#333] text-center mb-6 tracking-[0.36px]">
+          <h2 style={{ textAlign: 'center', fontSize: '16px', fontWeight: 700, color: '#333', letterSpacing: '0.5px', marginBottom: '6px', marginTop: 0 }}>
             {mode === "login" ? "LOGIN" : "CREATE AN ACCOUNT"}
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <label className="block text-[10px] font-medium text-[#333]/70 mb-1 tracking-[0.2px]">
-                E-MAIL
+          {/* Subtitle (register only) */}
+          {mode === "register" && (
+            <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '20px', marginTop: 0 }}>
+              Welcome to the best Bali Directory.<br />
+              Selamat datang di direktori Bali terbaik.
+            </p>
+          )}
+
+          <form onSubmit={handleSubmit} style={{ marginBottom: 0 }}>
+
+            {/* E-mail */}
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
+                E-mail
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
                 required
+                style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
-            {/* Account Type (Register only) */}
+            {/* COMPANY / INDIVIDUAL toggles (register only) */}
             {mode === "register" && (
-              <div className="flex items-center gap-6">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={accountType === "company"}
-                    onChange={() => setAccountType("company")}
-                    className="w-4 h-4 accent-[#f14110]"
-                  />
-                  <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">COMPANY</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={accountType === "individual"}
-                    onChange={() => setAccountType("individual")}
-                    className="w-4 h-4 accent-[#f14110]"
-                  />
-                  <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">INDIVIDUAL</span>
-                </label>
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '14px', alignItems: 'flex-start' }}>
+                {/* Company */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#333', letterSpacing: '0.5px' }}>COMPANY</span>
+                    <Toggle
+                      checked={accountType === "company"}
+                      onChange={() => setAccountType("company")}
+                    />
+                  </div>
+                  <p style={{ fontSize: '9px', color: '#999', margin: 0, lineHeight: 1.4 }}>
+                    Create a profile page/<br />Buat halaman
+                  </p>
+                </div>
+
+                {/* Individual */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#333', letterSpacing: '0.5px' }}>INDIVIDUAL</span>
+                    <Toggle
+                      checked={accountType === "individual"}
+                      onChange={() => setAccountType("individual")}
+                    />
+                  </div>
+                  <p style={{ fontSize: '9px', color: '#999', margin: 0, lineHeight: 1.4 }}>
+                    Save listings/<br />Simpan daftar
+                  </p>
+                </div>
               </div>
             )}
 
-            {/* Company Name (Company only) */}
-            {mode === "register" && accountType === "company" && (
-              <div>
-                <label className="block text-[10px] font-medium text-[#333]/70 mb-1 tracking-[0.2px]">
-                  (COMPANY) NAME
+            {/* Name or Company Name (register only) */}
+            {mode === "register" && (
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
+                  Name or Company Name
                 </label>
                 <input
                   type="text"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
-                  required={accountType === "company"}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
                 />
               </div>
             )}
 
             {/* Password */}
-            <div>
-              <label className="block text-[10px] font-medium text-[#333]/70 mb-1 tracking-[0.2px]">
-                PASSWORD
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
+                Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
                 required
+                style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
-            {/* Newsletter (Register only) */}
+            {/* Subscribe to newsletter (register only) */}
             {mode === "register" && (
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', marginBottom: '18px' }}>
+                <span style={{ fontSize: '11px', color: '#333', letterSpacing: '0.22px' }}>Subscribe to newsletter</span>
+                <Toggle
                   checked={subscribeNewsletter}
-                  onChange={(e) => setSubscribeNewsletter(e.target.checked)}
-                  className="w-4 h-4 accent-[#f14110]"
+                  onChange={() => setSubscribeNewsletter(!subscribeNewsletter)}
                 />
-                <span className="text-[11px] text-[#333]/70 tracking-[0.22px]">Subscribe to newsletter</span>
-              </label>
+              </div>
             )}
 
-            {/* Submit Button */}
+            {/* Register / Login button */}
             <button
               type="submit"
-              className="w-full h-10 bg-white border border-[#333] text-[#333] text-[12px] font-medium tracking-[0.24px] rounded-[6px] hover:bg-[#333] hover:text-white transition-colors"
+              style={{
+                width: '100%',
+                height: '44px',
+                borderRadius: '22px',
+                border: 'none',
+                background: 'linear-gradient(to right, #E9A28E, #F14110)',
+                color: 'white',
+                fontSize: '13px',
+                fontWeight: 600,
+                letterSpacing: '0.5px',
+                cursor: 'pointer',
+                marginBottom: '12px',
+              }}
             >
-              {mode === "login" ? "LOGIN" : "REGISTER"}
+              {mode === "login" ? "Login" : "Register"}
             </button>
 
-            {/* Forgot Password (Login only) */}
+            {/* Forgot password (login only) */}
             {mode === "login" && (
-              <button
-                type="button"
-                className="block w-full text-center text-[11px] text-[#f14110] underline tracking-[0.22px]"
-              >
+              <button type="button" style={{ display: 'block', width: '100%', textAlign: 'center', fontSize: '11px', color: '#F14110', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', marginBottom: '8px' }}>
                 Forgot Password
               </button>
             )}
           </form>
 
-          {/* Switch Mode */}
-          <div className="mt-6 text-center">
+          {/* Switch mode */}
+          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: 0 }}>
             {mode === "login" ? (
-              <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
+              <>
                 Don&apos;t have an account?{" "}
-                <button
-                  onClick={() => setMode("register")}
-                  className="text-[#333] underline font-medium"
-                >
+                <button onClick={() => setMode("register")} style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
                   Sign up
                 </button>
-              </p>
+              </>
             ) : (
-              <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
+              <>
                 Already have an account?{" "}
-                <button
-                  onClick={() => setMode("login")}
-                  className="text-[#333] underline font-medium"
-                >
+                <button onClick={() => setMode("login")} style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
                   Log in
                 </button>
-              </p>
+              </>
             )}
-          </div>
+          </p>
         </div>
       </div>
     </div>
