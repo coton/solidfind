@@ -253,7 +253,7 @@ export function AuthModal({
             )}
 
             {/* Register / Login button — 145×40, centered, gradient on hover only */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '14px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '28px', marginBottom: '12px' }}>
             <button
               type="submit"
               onMouseEnter={() => setSubmitHovered(true)}
