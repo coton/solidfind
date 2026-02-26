@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { Star, X } from "lucide-react";
+import { starFillColor } from "@/lib/starColors";
 
 interface WriteReviewModalProps {
   isOpen: boolean;
@@ -83,11 +84,11 @@ export function WriteReviewModal({
                 className="transition-transform hover:scale-110"
               >
                 <Star
-                  className={`w-7 h-7 ${
-                    i <= (hoveredRating || rating)
-                      ? "fill-[#f14110] text-[#f14110]"
-                      : "fill-[#e4e4e4] text-[#e4e4e4]"
-                  }`}
+                  className="w-7 h-7"
+                  style={{
+                    fill: starFillColor(i - 1, hoveredRating || rating),
+                    color: starFillColor(i - 1, hoveredRating || rating),
+                  }}
                 />
               </button>
             ))}

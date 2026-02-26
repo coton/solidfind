@@ -15,6 +15,7 @@ import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
+import { starFillColor, starColor } from "@/lib/starColors";
 
 function useStorageUrl(storageId: Id<"_storage"> | undefined) {
   return useQuery(api.files.getUrl, storageId ? { storageId } : "skip");
@@ -134,7 +135,7 @@ function ReviewCard({ name, rating = 5, text, date }: { name: string; rating?: n
       <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-2">{name}</p>
       <div className="flex items-center gap-1.5 mb-2">
         {[1, 2, 3, 4, 5].map((i) => (
-          <Star key={i} className={`w-[14px] h-[14px] ${i <= rating ? 'fill-[#f14110] text-[#f14110]' : 'fill-[#e4e4e4] text-[#e4e4e4]'}`} />
+          <Star key={i} className="w-[14px] h-[14px]" style={{ fill: starFillColor(i - 1, rating), color: starFillColor(i - 1, rating) }} />
         ))}
       </div>
       <p className="text-[10px] text-[#333] leading-[18px] tracking-[0.2px] mb-2 line-clamp-4">{text}</p>
@@ -507,9 +508,11 @@ export default function ProfilePageClient() {
                 <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Ulasan terbaru</p>
               </div>
               <div className="flex items-center gap-1">
-                <Image src="/images/icon-star.svg" alt="" width={18} height={18} />
-                <span className="text-[22px] sm:text-[26px] font-semibold text-[#f14110] tracking-[0.52px]">{company.rating ?? 0}</span>
-                <span className="text-[10px] text-[#f14110]/70 tracking-[0.2px]">({company.reviewCount ?? 0})</span>
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6.438 3.067C7.578 1.022 8.148 0 9 0c.852 0 1.422 1.022 2.562 3.067l.295.53c.324.581.486.872.738 1.063.252.192.567.263 1.197.405l.572.13c2.214.5 3.32.75 3.584 1.598.263.846-.491 1.729-2 3.494l-.39.456c-.429.501-.644.752-.74 1.062-.096.31-.064.645.001 1.314l.06.609c.227 2.355.342 3.533-.348 4.055-.689.523-1.726.046-3.798-0.908l-.537-.247c-.589-.272-.883-.407-1.195-.407-.312 0-.607.135-1.195.407l-.537.247c-2.072.954-3.109 1.431-3.798.909-.69-.524-.576-1.701-.348-4.056l.06-.608c.064-.67.097-1.005 0-1.314-.096-.31-.311-.562-.739-1.062l-.39-.457c-1.51-1.764-2.264-2.647-2-3.494.262-.846 1.37-1.097 3.584-1.598l.573-.13c.63-.142.944-.213 1.196-.405.253-.192.414-.482.738-1.063l.296-.53z" fill={starColor(company.rating ?? 0)}/>
+                </svg>
+                <span className="text-[22px] sm:text-[26px] font-semibold tracking-[0.52px]" style={{ color: starColor(company.rating ?? 0) }}>{company.rating ?? 0}</span>
+                <span className="text-[10px] tracking-[0.2px]" style={{ color: starColor(company.rating ?? 0) + 'B3' }}>({company.reviewCount ?? 0})</span>
               </div>
             </div>
             <div className="flex items-center gap-3 w-full sm:w-auto">
