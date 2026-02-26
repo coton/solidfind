@@ -129,7 +129,7 @@ export function AuthModal({
         <div style={{
           flex: 1,
           backgroundColor: '#F8F8F8',
-          padding: '32px 28px',
+          padding: '20px 28px',
           position: 'relative',
           overflowY: 'auto',
           display: 'flex',
@@ -149,13 +149,13 @@ export function AuthModal({
             </svg>
           </button>
 
-          {/* Title */}
-          <h2 style={{ textAlign: 'center', fontSize: '16px', fontWeight: 700, color: '#333', letterSpacing: '0.5px', marginBottom: '6px', marginTop: 0 }}>
+          {/* Title — Sora semi-bold 18px, 2% letter-spacing */}
+          <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
             {mode === "login" ? "LOGIN" : "CREATE AN ACCOUNT"}
           </h2>
 
           {/* Subtitle */}
-          <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '20px', marginTop: 0 }}>
+          <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
             {mode === "register" ? (
               <>Welcome to the best Bali Directory.<br />Selamat datang di direktori Bali terbaik.</>
             ) : (
@@ -244,7 +244,7 @@ export function AuthModal({
 
             {/* Subscribe to newsletter (register only) */}
             {mode === "register" && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '9px' }}>
                 <span style={{ fontSize: '11px', color: '#333', letterSpacing: '0.22px' }}>Subscribe to newsletter</span>
                 <Toggle
                   checked={subscribeNewsletter}
@@ -254,7 +254,7 @@ export function AuthModal({
             )}
 
             {/* Register / Login button — 145×40, centered, gradient on hover only */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '28px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: mode === 'login' ? '28px' : '14px', marginBottom: '12px' }}>
             <button
               type="submit"
               onMouseEnter={() => setSubmitHovered(true)}
