@@ -81,6 +81,7 @@ export default function ComingSoonPage() {
               height: '40px',
               paddingLeft: '10px',
               paddingRight: '10px',
+              boxSizing: 'border-box',
               backgroundColor: '#F8F8F8',
               borderRadius: '6px',
               border: 'none',
