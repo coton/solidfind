@@ -286,7 +286,7 @@ export function AuthModal({
           </form>
 
           {/* Switch mode */}
-          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: '0 0 10px 0' }}>
+          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: 0 }}>
             {mode === "login" ? (
               <>
                 Don&apos;t have an account?{" "}
