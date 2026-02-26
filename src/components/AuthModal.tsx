@@ -15,16 +15,17 @@ interface AuthModalProps {
 }
 
 // Pill toggle switch component
+// Toggle sized to match the filter dropdown toggles (24×12px, 8×8px thumb)
 function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
     <button
       type="button"
       onClick={onChange}
       style={{
-        width: '36px',
-        height: '20px',
-        borderRadius: '10px',
-        background: checked ? 'linear-gradient(to right, #E9A28E, #F14110)' : '#ccc',
+        width: '24px',
+        height: '12px',
+        borderRadius: '6px',
+        background: checked ? 'linear-gradient(to left, #F14110, #E9A28E)' : 'rgba(51,51,51,0.25)',
         position: 'relative',
         border: 'none',
         cursor: 'pointer',
@@ -33,13 +34,13 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
       }}
     >
       <div style={{
-        width: '14px',
-        height: '14px',
+        width: '8px',
+        height: '8px',
         borderRadius: '50%',
         backgroundColor: 'white',
         position: 'absolute',
-        top: '3px',
-        left: checked ? '19px' : '3px',
+        top: '2px',
+        left: checked ? '14px' : '2px',
         transition: 'left 0.2s ease',
       }} />
     </button>
