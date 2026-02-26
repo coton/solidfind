@@ -260,9 +260,11 @@ function HeaderInner() {
   // Auth modal state
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalAccountType, setAuthModalAccountType] = useState<"company" | "individual">("individual");
+  const [authModalMode, setAuthModalMode] = useState<"login" | "register">("register");
 
-  const openAuthModal = (accountType: "company" | "individual" = "individual") => {
+  const openAuthModal = (accountType: "company" | "individual" = "individual", mode: "login" | "register" = "register") => {
     setAuthModalAccountType(accountType);
+    setAuthModalMode(mode);
     setAuthModalOpen(true);
   };
 
@@ -425,16 +427,16 @@ function HeaderInner() {
             </SignedIn>
 
             <SignedOut>
-              {/* Desktop: Account icon → opens auth modal */}
+              {/* Desktop: Account icon → opens LOGIN modal */}
               <button
-                onClick={() => openAuthModal("individual")}
+                onClick={() => openAuthModal("individual", "login")}
                 className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity"
               >
                 <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
               </button>
-              {/* List your business → opens auth modal with company pre-selected */}
+              {/* List your business → opens REGISTER modal, company pre-selected */}
               <button
-                onClick={() => openAuthModal("company")}
+                onClick={() => openAuthModal("company", "register")}
                 className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
               >
                 List your business
@@ -623,7 +625,7 @@ function HeaderInner() {
     <AuthModal
       isOpen={authModalOpen}
       onClose={() => setAuthModalOpen(false)}
-      initialMode="register"
+      initialMode={authModalMode}
       initialAccountType={authModalAccountType}
     />
     </>

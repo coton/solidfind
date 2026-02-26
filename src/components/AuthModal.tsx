@@ -61,6 +61,7 @@ export function AuthModal({
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
+  const [validationError, setValidationError] = useState(false);
 
   // Sync when props change (e.g. re-opening with different defaults)
   useEffect(() => { setMode(initialMode); }, [initialMode]);
@@ -70,6 +71,8 @@ export function AuthModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) { setValidationError(true); return; }
+    setValidationError(false);
     localStorage.setItem("userType", accountType);
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("userEmail", email);
@@ -140,13 +143,14 @@ export function AuthModal({
             {mode === "login" ? "LOGIN" : "CREATE AN ACCOUNT"}
           </h2>
 
-          {/* Subtitle (register only) */}
-          {mode === "register" && (
-            <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '20px', marginTop: 0 }}>
-              Welcome to the best Bali Directory.<br />
-              Selamat datang di direktori Bali terbaik.
-            </p>
-          )}
+          {/* Subtitle */}
+          <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '20px', marginTop: 0 }}>
+            {mode === "register" ? (
+              <>Welcome to the best Bali Directory.<br />Selamat datang di direktori Bali terbaik.</>
+            ) : (
+              <>Welcome back!<br />Selamat Datang kembali!</>
+            )}
+          </p>
 
           <form onSubmit={handleSubmit} style={{ marginBottom: 0 }}>
 
@@ -267,23 +271,31 @@ export function AuthModal({
           </form>
 
           {/* Switch mode */}
-          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: 0 }}>
+          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: '0 0 10px 0' }}>
             {mode === "login" ? (
               <>
                 Don&apos;t have an account?{" "}
-                <button onClick={() => setMode("register")} style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
-                  Sign up
+                <button onClick={() => { setMode("register"); setValidationError(false); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
+                  Sign up!
                 </button>
               </>
             ) : (
               <>
                 Already have an account?{" "}
-                <button onClick={() => setMode("login")} style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
+                <button onClick={() => { setMode("login"); setValidationError(false); }} style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
                   Log in
                 </button>
               </>
             )}
           </p>
+
+          {/* Validation error */}
+          {validationError && (
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*Please fill in all fields</p>
+              <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*Mohon isi semua kolom teks</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
