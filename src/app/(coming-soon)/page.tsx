@@ -10,7 +10,8 @@ export default function ComingSoonPage() {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState("");
-  
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
+
   const addToWaitlist = useMutation(api.waitlist.addToWaitlist);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,7 +20,7 @@ export default function ComingSoonPage() {
 
     try {
       const result = await addToWaitlist({ email });
-      
+
       if (result.alreadyExists) {
         setError("You're already on the waitlist!");
       } else {
@@ -27,7 +28,7 @@ export default function ComingSoonPage() {
         setTimeout(() => {
           setEmail("");
           setIsSubmitted(false);
-        }, 3000);
+        }, 4000);
       }
     } catch (err) {
       setError("Something went wrong. Please try again.");
@@ -35,7 +36,7 @@ export default function ComingSoonPage() {
     }
   };
 
-  // Shared content block (used in both layouts)
+  // Shared content block — used for both desktop and mobile
   const ContentBlock = ({ inputId }: { inputId: string }) => (
     <>
       {/* Logo */}
@@ -44,14 +45,14 @@ export default function ComingSoonPage() {
       {/* Spacer: 40px — logo → COMING SOON! */}
       <div style={{ height: '40px', flexShrink: 0 }} />
 
-      <h1 style={{ color: '#F14110', fontWeight: 600, fontSize: '18px', textTransform: 'uppercase', letterSpacing: '0.36px' }}>
+      <h1 style={{ color: '#F14110', fontWeight: 600, fontSize: '18px', textTransform: 'uppercase', letterSpacing: '0.36px', margin: 0 }}>
         COMING SOON!
       </h1>
 
       {/* Spacer: 20px — COMING SOON! → description */}
       <div style={{ height: '20px', flexShrink: 0 }} />
 
-      <p style={{ color: '#333', fontSize: '10px', lineHeight: 1.6, fontWeight: 400 }}>
+      <p style={{ color: '#333', fontSize: '10px', lineHeight: 1.6, fontWeight: 400, margin: 0 }}>
         A curated platform connecting individuals and professionals across construction,{' '}
         renovation, and real estate. <strong>SolidFind</strong> helps you discover reliable
         partners and connect with them easily.
@@ -61,6 +62,7 @@ export default function ComingSoonPage() {
       <div style={{ height: '20px', flexShrink: 0 }} />
 
       <form onSubmit={handleSubmit}>
+        {/* E-mail label */}
         <label
           htmlFor={inputId}
           style={{ display: 'block', color: '#333', fontSize: '11px', fontWeight: 500, letterSpacing: '2px', marginBottom: '8px' }}
@@ -68,50 +70,68 @@ export default function ComingSoonPage() {
           E-mail
         </label>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* Wrapper gives background + border-radius; input is offset 10px from left */}
-          <div style={{ position: 'relative', flex: 1, height: '40px', backgroundColor: '#F8F8F8', borderRadius: '6px' }}>
-            <input
-              id={inputId}
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="_"
-              required
-              style={{
-                position: 'absolute',
-                left: '10px',
-                right: '10px',
-                top: 0,
-                bottom: 0,
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                fontSize: '14px',
-                color: '#333',
-                width: 'calc(100% - 20px)',
-              }}
-            />
+        {/* Input + Button row — replaced by thank-you message on submit */}
+        {isSubmitted ? (
+          <div>
+            <p style={{ color: '#F14110', fontSize: '18px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.36px', margin: 0 }}>
+              THANK YOU!
+            </p>
+            <p style={{ color: '#888', fontSize: '10px', fontWeight: 400, marginTop: '6px' }}>
+              We will notify you when ready!
+            </p>
           </div>
-          <button
-            type="submit"
-            disabled={isSubmitted}
-            style={{
-              width: '130px',
-              height: '40px',
-              borderRadius: '20px',
-              border: '1px solid #F14110',
-              backgroundColor: 'transparent',
-              color: '#F14110',
-              fontSize: '11px',
-              fontWeight: 500,
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
-          >
-            {isSubmitted ? '✓ Notified!' : 'Notify me'}
-          </button>
-        </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Wrapper div gives bg + border-radius; input offset 10px from left */}
+            <div style={{ position: 'relative', flex: 1, height: '40px', backgroundColor: '#F8F8F8', borderRadius: '6px' }}>
+              <input
+                id={inputId}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="_"
+                required
+                style={{
+                  position: 'absolute',
+                  left: '10px',
+                  right: '10px',
+                  top: 0,
+                  bottom: 0,
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: '14px',
+                  color: '#333',
+                  width: 'calc(100% - 20px)',
+                }}
+              />
+            </div>
+
+            {/* Notify me — gradient on hover, white text on hover */}
+            <button
+              type="submit"
+              onMouseEnter={() => setIsButtonHovered(true)}
+              onMouseLeave={() => setIsButtonHovered(false)}
+              style={{
+                width: '130px',
+                height: '40px',
+                borderRadius: '20px',
+                border: isButtonHovered ? 'none' : '1px solid #F14110',
+                background: isButtonHovered
+                  ? 'linear-gradient(to right, #E9A28E, #F14110)'
+                  : 'transparent',
+                color: isButtonHovered ? '#fff' : '#F14110',
+                fontSize: '11px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                flexShrink: 0,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Notify me
+            </button>
+          </div>
+        )}
 
         {error && (
           <p style={{ color: '#F14110', fontSize: '12px', marginTop: '8px' }}>{error}</p>
@@ -157,7 +177,7 @@ export default function ComingSoonPage() {
           <Link href="/terms-preview" style={{ color: '#333', fontSize: '8px', fontWeight: 700, textDecoration: 'underline' }}>
             Terms &amp; Conditions.
           </Link>
-          <p style={{ color: '#333', fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
+          <p style={{ color: '#333', fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', margin: 0 }}>
             SOLIDFIND.ID © 2026
           </p>
         </div>
@@ -198,7 +218,7 @@ export default function ComingSoonPage() {
           <Link href="/terms-preview" style={{ color: '#333', fontSize: '8px', fontWeight: 700, textDecoration: 'underline' }}>
             Terms &amp; Conditions.
           </Link>
-          <p style={{ color: '#333', fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
+          <p style={{ color: '#333', fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', margin: 0 }}>
             SOLIDFIND.ID © 2026
           </p>
         </div>
