@@ -141,10 +141,10 @@ export default function ComingSoonPage() {
           />
         </div>
 
-        {/* Content: left-aligned, 20px L/R padding, vertically centered within top 1/3 */}
+        {/* Content: 20px from left/right edges, vertically centered within top 1/3 */}
         <div
-          className="absolute left-0 right-0 top-0 z-10 flex flex-col justify-center"
-          style={{ height: '33vh', paddingLeft: '20px', paddingRight: '20px' }}
+          className="absolute top-0 z-10 flex flex-col justify-center"
+          style={{ height: '33vh', left: '20px', right: '20px' }}
         >
           {/* Logo */}
           <img
