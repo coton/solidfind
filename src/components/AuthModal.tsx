@@ -125,7 +125,16 @@ export function AuthModal({
         </div>
 
         {/* ── RIGHT: Form ── */}
-        <div style={{ flex: 1, backgroundColor: '#F8F8F8', padding: '32px 28px', position: 'relative', overflowY: 'auto' }}>
+        <div style={{
+          flex: 1,
+          backgroundColor: '#F8F8F8',
+          padding: '32px 28px',
+          position: 'relative',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: mode === 'login' ? 'center' : 'flex-start',
+        }}>
 
           {/* Close button */}
           <button
@@ -244,7 +253,7 @@ export function AuthModal({
             )}
 
             {/* Register / Login button — 145×40, centered, gradient on hover only */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '14px', marginBottom: '12px' }}>
             <button
               type="submit"
               onMouseEnter={() => setSubmitHovered(true)}
