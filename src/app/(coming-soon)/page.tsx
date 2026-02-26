@@ -62,21 +62,21 @@ export default function ComingSoonPage() {
             height={19}
           />
 
-          {/* 40px spacing between logo and "COMING SOON!" */}
-          <h1 className="mt-[40px] text-[#F14110] font-semibold text-lg uppercase tracking-[0.36px]">
+          {/* 40px spacing: logo → COMING SOON! */}
+          <h1 style={{ marginTop: '40px' }} className="text-[#F14110] font-semibold text-lg uppercase tracking-[0.36px]">
             COMING SOON!
           </h1>
 
-          {/* 20px spacing between "COMING SOON!" and description */}
-          <p className="mt-[20px] text-[#333] text-[10px] leading-[1.6] font-normal">
+          {/* 20px spacing: COMING SOON! → description */}
+          <p style={{ marginTop: '20px' }} className="text-[#333] text-[10px] leading-[1.6] font-normal">
             A curated platform connecting individuals and professionals across construction, 
             renovation, and real estate. <span className="font-bold">SolidFind</span> helps 
             you discover reliable partners and connect with them easily.
           </p>
 
-          {/* 20px spacing between description and form */}
-          <form onSubmit={handleSubmit} className="mt-[20px]">
-            {/* E-mail label — sentence case, not all caps */}
+          {/* 20px spacing: description → form */}
+          <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+            {/* E-mail label — sentence case */}
             <label 
               htmlFor="email-desktop" 
               className="block text-[#333] text-[11px] font-medium tracking-[2px] mb-2"
@@ -85,7 +85,7 @@ export default function ComingSoonPage() {
             </label>
 
             <div className="flex items-center gap-4">
-              {/* Input: 40px height, placeholder _ */}
+              {/* Input: 40px height, 10px left/right padding, placeholder _ */}
               <input
                 id="email-desktop"
                 type="email"
@@ -93,7 +93,8 @@ export default function ComingSoonPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="_"
                 required
-                className="w-[210px] h-[40px] px-4 bg-[#F8F8F8] rounded-md text-sm text-[#333] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F14110]/30"
+                style={{ paddingLeft: '10px', paddingRight: '10px' }}
+                className="w-[210px] h-[40px] bg-[#F8F8F8] rounded-md text-sm text-[#333] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F14110]/30"
               />
 
               <button
@@ -144,7 +145,7 @@ export default function ComingSoonPage() {
           <div className="flex-1 flex items-center justify-center">
             <div className="w-full max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8">
               {/* Logo */}
-              <div className="text-center mb-[40px]">
+              <div className="text-center" style={{ marginBottom: '40px' }}>
                 <img
                   src="/images/logo-full.svg"
                   alt="SOLIDFIND.id"
@@ -160,14 +161,14 @@ export default function ComingSoonPage() {
               </h1>
 
               {/* Description */}
-              <p className="mt-[20px] text-[#333] text-center text-base leading-relaxed">
+              <p style={{ marginTop: '20px' }} className="text-[#333] text-center text-base leading-relaxed">
                 A curated platform connecting individuals and professionals across construction, 
                 renovation, and real estate. <span className="font-bold">SolidFind</span> helps 
                 you discover reliable partners and connect with them easily.
               </p>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="mt-[20px] space-y-3">
+              <form onSubmit={handleSubmit} style={{ marginTop: '20px' }} className="space-y-3">
                 <div className="space-y-2">
                   <label 
                     htmlFor="email-mobile" 
@@ -182,7 +183,8 @@ export default function ComingSoonPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="_"
                     required
-                    className="w-full h-[40px] px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base text-[#333] placeholder:text-gray-400 focus:outline-none focus:border-[#F14110] transition-colors"
+                    style={{ paddingLeft: '10px', paddingRight: '10px' }}
+                    className="w-full h-[40px] bg-gray-50 border-2 border-gray-200 rounded-xl text-base text-[#333] placeholder:text-gray-400 focus:outline-none focus:border-[#F14110] transition-colors"
                   />
                 </div>
 
