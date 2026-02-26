@@ -69,27 +69,30 @@ export default function ComingSoonPage() {
         </label>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <input
-            id={inputId}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="_"
-            required
-            style={{
-              flex: 1,
-              height: '40px',
-              paddingLeft: '10px',
-              paddingRight: '10px',
-              boxSizing: 'border-box',
-              backgroundColor: '#F8F8F8',
-              borderRadius: '6px',
-              border: 'none',
-              fontSize: '14px',
-              color: '#333',
-              outline: 'none',
-            }}
-          />
+          {/* Wrapper gives background + border-radius; input is offset 10px from left */}
+          <div style={{ position: 'relative', flex: 1, height: '40px', backgroundColor: '#F8F8F8', borderRadius: '6px' }}>
+            <input
+              id={inputId}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="_"
+              required
+              style={{
+                position: 'absolute',
+                left: '10px',
+                right: '10px',
+                top: 0,
+                bottom: 0,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                fontSize: '14px',
+                color: '#333',
+                width: 'calc(100% - 20px)',
+              }}
+            />
+          </div>
           <button
             type="submit"
             disabled={isSubmitted}
