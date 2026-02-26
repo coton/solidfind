@@ -52,8 +52,8 @@ export default function ComingSoonPage() {
           />
         </div>
 
-        {/* Content */}
-        <div className="absolute left-[270px] top-[326px] z-10 w-[450px]">
+        {/* Content — vertically centered, horizontally at left-[270px] */}
+        <div className="absolute left-[270px] top-1/2 -translate-y-1/2 z-10 w-[450px]">
           {/* Logo SVG */}
           <img
             src="/images/logo-full.svg"
