@@ -133,7 +133,7 @@ function HomeContent() {
     <div className="min-h-screen bg-[#ececec] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-5 sm:px-0 pt-3 sm:pt-4 flex-grow w-full">
+      <main className="max-w-[900px] mx-auto px-5 sm:px-0 pt-3 sm:pt-4 flex-grow w-full flex flex-col">
         {/* Results Header */}
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h2 className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]">{listings.length} Solid Finds</h2>
@@ -141,25 +141,42 @@ function HomeContent() {
         </div>
 
         {showEmptyState ? (
-          /* Empty State */
-          <div className="mb-8">
-            <div className="py-8 sm:py-12">
-              <p className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px] mb-4">No results</p>
-              <h3 className="text-[26px] font-semibold text-[#f14110] leading-[30px] mb-6">
+          /* Empty State — flex column filling remaining height, no ad */
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+            {/* Orange message — vertically centered in available space */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <p className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]" style={{ marginBottom: '16px' }}>No results</p>
+              <h3 style={{ fontSize: '26px', fontWeight: 600, color: '#f14110', lineHeight: '30px' }}>
                 We are still finding some solid profiles for your search. Come back soon ; )
               </h3>
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] leading-[14px] mb-6">
+            </div>
+
+            {/* Suggested profiles — pinned to bottom above footer */}
+            <div style={{ paddingBottom: '32px' }}>
+              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] leading-[14px]" style={{ marginBottom: '20px' }}>
                 In the meantime, here are the latest added profiles:
               </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {latestListings.map((listing) => (
-                <ListingCard
-                  key={listing.id}
-                  {...listing}
-                  onBookmark={() => handleBookmark(listing.id, listing.category)}
+
+              {/* Mobile: 2-column grid with WelcomeCard + FeaturedCard */}
+              <div className="sm:hidden grid grid-cols-2 gap-5">
+                <WelcomeCard />
+                <FeaturedCard
+                  image="/images/featured-bg.png"
+                  title="FEATURED ARTICLE TITLE"
+                  description="Here goes the description of this first article, re-directing to a special page."
                 />
-              ))}
+              </div>
+
+              {/* Desktop: 4-column grid of latest profiles */}
+              <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {latestListings.map((listing) => (
+                  <ListingCard
+                    key={listing.id}
+                    {...listing}
+                    onBookmark={() => handleBookmark(listing.id, listing.category)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         ) : (
@@ -221,13 +238,13 @@ function HomeContent() {
                 />
               </div>
             </div>
+
+            {/* Ad Banner — only shown when there are results */}
+            <div className="mb-[32px] sm:mb-[52px]">
+              <AdBanner imageSrc="/images/ad-kini-resort.png" alt="Kini Resort" />
+            </div>
           </>
         )}
-
-        {/* Ad Banner */}
-        <div className="mb-[32px] sm:mb-[52px]">
-          <AdBanner imageSrc="/images/ad-kini-resort.png" alt="Kini Resort" />
-        </div>
       </main>
 
       <Footer />
