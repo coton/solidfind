@@ -226,7 +226,7 @@ export function AuthModal({
 
             {/* Subscribe to newsletter (register only) */}
             {mode === "register" && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', marginBottom: '18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '18px' }}>
                 <span style={{ fontSize: '11px', color: '#333', letterSpacing: '0.22px' }}>Subscribe to newsletter</span>
                 <Toggle
                   checked={subscribeNewsletter}
