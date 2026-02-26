@@ -137,7 +137,7 @@ function HomeContent() {
         {/* Results Header */}
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h2 className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]">{listings.length} Solid Finds</h2>
-          <SortDropdown value={sortBy} onChange={setSortBy} />
+          {!showEmptyState && <SortDropdown value={sortBy} onChange={setSortBy} />}
         </div>
 
         {showEmptyState ? (
