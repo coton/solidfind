@@ -38,14 +38,16 @@ export default function ComingSoonPage() {
   return (
     <>
       {/* Desktop Layout */}
-      <div className="hidden md:block fixed inset-0 bg-[#E4E4E4]">
-        {/* Background Image */}
-        <div className="absolute right-0 top-0 w-[1420px] h-[1005px]">
+      {/* White background = 10px white border frame around the background image */}
+      <div className="hidden md:block fixed inset-0 bg-white">
+
+        {/* Background Image: inset-[10px] = 10px white border on all sides, rounded-[6px] = 6px corners */}
+        <div className="absolute inset-[10px] rounded-[6px] overflow-hidden">
           <Image
-            src="/coming-soon/bg-blocks.jpg"
+            src="/coming-soon/bg-photo.jpg"
             alt="Construction blocks background"
             fill
-            className="object-cover"
+            className="object-cover object-center"
             priority
           />
         </div>
@@ -101,7 +103,7 @@ export default function ComingSoonPage() {
         </div>
 
         {/* Footer */}
-        <div className="absolute bottom-8 right-8 flex items-baseline gap-4">
+        <div className="absolute bottom-8 right-8 z-10 flex items-baseline gap-4">
           <Link
             href="/terms-preview"
             className="text-[#333] text-[8px] font-bold underline hover:text-[#F14110] transition-colors whitespace-nowrap"
@@ -115,11 +117,12 @@ export default function ComingSoonPage() {
       </div>
 
       {/* Mobile Layout */}
-      <div className="md:hidden min-h-screen bg-[#E4E4E4] relative overflow-hidden">
-        {/* Background Image - full screen with overlay */}
-        <div className="fixed inset-0 opacity-30">
+      {/* White background = 10px white border frame */}
+      <div className="md:hidden min-h-screen bg-white relative overflow-hidden">
+        {/* Background Image: inset-[10px] = 10px white border, rounded-[6px] = 6px corners */}
+        <div className="fixed inset-[10px] rounded-[6px] overflow-hidden opacity-30">
           <Image
-            src="/coming-soon/bg-blocks.jpg"
+            src="/coming-soon/bg-photo.jpg"
             alt="Construction blocks background"
             fill
             className="object-cover object-center"
