@@ -308,7 +308,7 @@ export default function ProfilePageClient() {
         {/* Main Content Grid - Mobile: 2-col (logo+contact), Desktop: 4 columns */}
         <div className="grid grid-cols-[160px_1fr] lg:grid-cols-[210px_210px_1fr_70px] gap-4 lg:gap-5 mb-8">
           {/* Column 1: Logo */}
-          <div className="w-full">
+          <div className="w-full lg:self-start">
             <div className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
               {company.logoId ? (
                 <StorageImage storageId={company.logoId} alt={company.name} fill className="object-cover w-full h-full" />
@@ -333,7 +333,7 @@ export default function ProfilePageClient() {
           </div>
 
           {/* Column 2: Contact Info */}
-          <div className="w-full lg:max-w-[210px] flex flex-col">
+          <div className="w-full lg:max-w-[210px] flex flex-col lg:self-start lg:h-[210px]">
             <div className="h-[32px] flex items-center border-b border-[#333]/20">
               <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
                 Tel. {company.phone || "-"}
