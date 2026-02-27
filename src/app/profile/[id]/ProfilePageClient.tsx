@@ -340,18 +340,8 @@ export default function ProfilePageClient() {
               </p>
             </div>
 
-            <div className="border-b border-[#333]/20 pb-2 mb-3">
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
-                WhatsApp {company.whatsapp ? (
-                  <a href={`https://wa.me/${formatWhatsApp(company.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#f14110] transition-colors">
-                    {company.whatsapp}
-                  </a>
-                ) : "-"}
-              </p>
-            </div>
-
-            {company.website && (
-              <div className="border-b border-[#333]/20 pb-2 mb-4">
+            <div className="border-b border-[#333]/20 pb-2 mb-4">
+              {company.website ? (
                 <a
                   href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
                   target="_blank"
@@ -360,8 +350,10 @@ export default function ProfilePageClient() {
                 >
                   WEBSITE
                 </a>
-              </div>
-            )}
+              ) : (
+                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">WEBSITE -</p>
+              )}
+            </div>
 
             {/* Social Icons */}
             <div className="flex items-center gap-5 mb-6">
@@ -419,15 +411,15 @@ export default function ProfilePageClient() {
           {/* Column 3: Stats + About */}
           <div className="col-span-2 lg:col-span-1">
             <div className="mb-6 max-w-[300px]">
-              <div className="flex items-center justify-between border-b border-[#333]/20 pb-1">
+              <div className="flex items-start justify-between border-b border-[#333]/20 pb-1">
                 <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Projects</span>
                 <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.projects ?? 0}</span>
               </div>
-              <div className="flex items-center justify-between border-b border-[#333]/20 py-1">
+              <div className="flex items-start justify-between border-b border-[#333]/20 py-1">
                 <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Team</span>
                 <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.teamSize ?? 0}</span>
               </div>
-              <div className="flex items-center justify-between border-b border-[#333]/20 py-1">
+              <div className="flex items-start justify-between border-b border-[#333]/20 py-1">
                 <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Since</span>
                 <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">{company.since ?? new Date(company.createdAt).getFullYear()}</span>
               </div>
