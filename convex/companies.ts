@@ -45,6 +45,9 @@ export const list = query({
       );
     }
 
+    // Pro companies listed first
+    companies.sort((a, b) => (b.isPro ? 1 : 0) - (a.isPro ? 1 : 0));
+
     return companies;
   },
 });

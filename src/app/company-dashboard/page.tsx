@@ -150,18 +150,9 @@ export default function CompanyDashboardPage() {
             <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">
               {isPro ? "PRO ACCOUNT" : "FREE ACCOUNT"}
             </p>
-            {isPro ? (
-              <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                DELETE PROFILE
-              </button>
-            ) : (
-              <Link
-                href="/upgrade"
-                className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]"
-              >
-                UPGRADE FOR MORE
-              </Link>
-            )}
+            <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+              DELETE PROFILE
+            </button>
           </div>
         </div>
 
@@ -177,9 +168,10 @@ export default function CompanyDashboardPage() {
           ) : (
             <Link
               href="/upgrade"
-              className="h-10 px-6 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors flex items-center"
+              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center"
+              style={{ width: '140px', justifyContent: 'center' }}
             >
-              Upgrade to Pro
+              Get PRO
             </Link>
           )}
           <Link
@@ -282,12 +274,6 @@ export default function CompanyDashboardPage() {
                 </div>
               ))}
             </div>
-            <button
-              onClick={() => setShowProModal(true)}
-              className="mt-4 w-full h-8 rounded-full bg-[#333] text-white text-[10px] font-medium tracking-[0.2px] hover:bg-[#444] transition-colors"
-            >
-              See all
-            </button>
           </div>
         </div>
 
@@ -322,20 +308,31 @@ export default function CompanyDashboardPage() {
 
         {/* Reviews Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div>
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
-                Latest reviews /
-              </p>
-              <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
-                Ulasan terbaru
-              </p>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <div>
+                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
+                  Latest reviews /
+                </p>
+                <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
+                  Ulasan terbaru
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Star className="w-5 h-5 fill-[#f14110] text-[#f14110]" />
+                <span className="text-[16px] font-bold text-[#f14110]">{data.rating}</span>
+                <span className="text-[12px] text-[#333]/50">({data.reviewCount})</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Star className="w-5 h-5 fill-[#f14110] text-[#f14110]" />
-              <span className="text-[16px] font-bold text-[#f14110]">{data.rating}</span>
-              <span className="text-[12px] text-[#333]/50">({data.reviewCount})</span>
-            </div>
+            {company?._id && (
+              <Link
+                href={`/profile/${company._id}/reviews`}
+                className="rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
+                style={{ width: '140px', height: '40px' }}
+              >
+                See all
+              </Link>
+            )}
           </div>
 
           <div className="grid grid-cols-4 gap-4">

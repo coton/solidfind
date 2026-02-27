@@ -214,7 +214,7 @@ export default function EditProfilePage() {
       setUploadError("Image file must be under 2MB");
       return;
     }
-    const max = company.isPro ? 12 : 3;
+    const max = company.isPro ? 12 : 4;
     if (projectImageIds.length >= max) return;
     setUploadError(null);
     const slotIndex = projectImageIds.length;
@@ -292,7 +292,7 @@ export default function EditProfilePage() {
     }
   };
 
-  const maxImages = company?.isPro ? 12 : 3;
+  const maxImages = company?.isPro ? 12 : 4;
   const totalSlots = 12;
 
   return (
@@ -672,7 +672,7 @@ export default function EditProfilePage() {
                 })}
               </div>
               <p className="text-[8px] text-[#333]/50 mt-2 tracking-[0.16px]">
-                3 pictures for Free account / 12 pictures with PRO / 3 gambar untuk
+                4 pictures for Free account / 12 pictures with PRO / 4 gambar untuk
                 <br />
                 akun gratis / 12 gambar dengan akun PRO
               </p>
