@@ -408,60 +408,74 @@ export default function ProfilePageClient() {
             </div>
           </div>
 
-          {/* Column 3: Stats + About */}
-          <div className="col-span-2 lg:col-span-1">
-            <div className="mb-6 max-w-[300px]">
-              <div className="flex items-start justify-between border-b border-[#333]/20 pb-1">
-                <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Projects</span>
-                <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.projects ?? 0}</span>
+          {/* Column 3+4 merged: stats+save side-by-side on top, description full-width below */}
+          <div className="col-span-2 lg:col-span-2">
+
+            {/* Desktop: stats (left) + save/share/report (right) in a flex row */}
+            {/* Mobile: stats only here, save buttons appear below description */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="max-w-[300px] flex-1 mr-4">
+                <div className="flex items-start justify-between border-b border-[#333]/20 pb-1">
+                  <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Projects</span>
+                  <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.projects ?? 0}</span>
+                </div>
+                <div className="flex items-start justify-between border-b border-[#333]/20 py-1">
+                  <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Team</span>
+                  <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.teamSize ?? 0}</span>
+                </div>
+                <div className="flex items-start justify-between border-b border-[#333]/20 py-1">
+                  <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Since</span>
+                  <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">{company.since ?? new Date(company.createdAt).getFullYear()}</span>
+                </div>
               </div>
-              <div className="flex items-start justify-between border-b border-[#333]/20 py-1">
-                <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Team</span>
-                <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.teamSize ?? 0}</span>
-              </div>
-              <div className="flex items-start justify-between border-b border-[#333]/20 py-1">
-                <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Since</span>
-                <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">{company.since ?? new Date(company.createdAt).getFullYear()}</span>
+
+              {/* Desktop: Save/Share/Report beside stats */}
+              <div className="hidden lg:flex flex-col items-end gap-4 flex-shrink-0">
+                <button onClick={handleToggleSave} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
+                  <span className="text-[9px] font-mono">{company.bookmarkCount ?? 0} Saves</span>
+                  <Image src="/images/icon-bookmark.svg" alt="Save" width={15} height={20} className={isBookmarked ? 'opacity-100' : 'opacity-60'} />
+                </button>
+                <button onClick={handleShare} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors relative">
+                  <span className="text-[9px] font-mono">Share</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/images/icon-share.svg" alt="Share" width={17} height={22} className="opacity-60" />
+                  {showCopiedToast && (
+                    <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
+                  )}
+                </button>
+                <button onClick={() => setShowReportModal(true)} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
+                  <span className="text-[9px] font-mono">Report</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/images/icon-report.svg" alt="Report" width={16} height={18} className="opacity-60" />
+                </button>
               </div>
             </div>
 
-            <p className="text-[10px] text-[#333] leading-[18px] tracking-[0.2px] whitespace-pre-line">
+            {/* Description — full width of col3+col4 */}
+            <p className="text-[10px] text-[#333] leading-[18px] tracking-[0.2px] whitespace-pre-line mb-4">
               {company.description ?? ""}
             </p>
-          </div>
 
-          {/* Column 4: Save/Share/Report - Mobile: horizontal row left-aligned, Desktop: vertical */}
-          <div className="col-span-2 lg:col-span-1 flex lg:flex-col items-center lg:items-end gap-4 justify-start">
-            <button
-              onClick={handleToggleSave}
-              className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors"
-            >
-              <span className="text-[9px] font-mono">{company.bookmarkCount ?? 0} Saves</span>
-              <Image
-                src="/images/icon-bookmark.svg"
-                alt="Save"
-                width={15}
-                height={20}
-                className={isBookmarked ? 'opacity-100' : 'opacity-60'}
-              />
-            </button>
-
-            <button onClick={handleShare} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors relative">
-              <span className="text-[9px] font-mono">Share</span>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/icon-share.svg" alt="Share" width={17} height={22} className="opacity-60" />
-              {showCopiedToast && (
-                <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">
-                  Link copied!
-                </span>
-              )}
-            </button>
-
-            <button onClick={() => setShowReportModal(true)} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
-              <span className="text-[9px] font-mono">Report</span>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/icon-report.svg" alt="Report" width={16} height={18} className="opacity-60" />
-            </button>
+            {/* Mobile only: Save/Share/Report below description, left-aligned */}
+            <div className="flex lg:hidden items-center gap-4">
+              <button onClick={handleToggleSave} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
+                <span className="text-[9px] font-mono">{company.bookmarkCount ?? 0} Saves</span>
+                <Image src="/images/icon-bookmark.svg" alt="Save" width={15} height={20} className={isBookmarked ? 'opacity-100' : 'opacity-60'} />
+              </button>
+              <button onClick={handleShare} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors relative">
+                <span className="text-[9px] font-mono">Share</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/icon-share.svg" alt="Share" width={17} height={22} className="opacity-60" />
+                {showCopiedToast && (
+                  <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
+                )}
+              </button>
+              <button onClick={() => setShowReportModal(true)} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
+                <span className="text-[9px] font-mono">Report</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/icon-report.svg" alt="Report" width={16} height={18} className="opacity-60" />
+              </button>
+            </div>
           </div>
         </div>
 
