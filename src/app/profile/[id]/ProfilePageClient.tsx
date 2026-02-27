@@ -397,12 +397,12 @@ export default function ProfilePageClient() {
             </div>
 
             {/* Address */}
-            <div className="flex items-start gap-2 mt-auto">
-              <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="mt-0.5 flex-shrink-0 text-[#333]">
+            <div className="flex flex-col mt-auto">
+              <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-1 text-[#333]">
                 <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                 <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
               </svg>
-              <p className="font-bam text-[9px] text-[#333]/50 leading-[12px]">
+              <p className="font-bam text-[9px] text-[#333]/50 leading-[12px] w-full">
                 {company.address || "-"}
               </p>
             </div>
