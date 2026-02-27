@@ -104,7 +104,7 @@ export function ListingCard({
           {/* Pro Account badge — min-width 80px, decreased padding */}
           {isPro && (
             <div className="absolute top-[45px] right-[10px]">
-              <div className="bg-[#E4E4E4] rounded-[10px] h-[16px] px-[8px] flex items-center min-w-[80px] justify-center">
+              <div className="bg-[#F8F8F8] rounded-[10px] h-[16px] px-[8px] flex items-center min-w-[80px] justify-center">
                 <span className="font-bam text-[9px] text-[#333]/35 leading-[12px]">Pro Account</span>
               </div>
             </div>
