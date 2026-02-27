@@ -67,9 +67,11 @@ export default function RegisterBusinessPage() {
   const [website, setWebsite] = useState("");
   const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
+  const [instagram, setInstagram] = useState("");
 
   const canProceedStep1 = companyName.trim() && category && description.trim();
-  const canSubmit = canProceedStep1;
+  const canProceedStep2 = phone.trim() && whatsapp.trim() && address.trim();
+  const canSubmit = canProceedStep1 && canProceedStep2;
 
   const handleSubmit = async () => {
     if (!currentUser?._id || !clerkUser?.id) return;
@@ -88,6 +90,7 @@ export default function RegisterBusinessPage() {
         whatsapp: whatsapp.trim() || undefined,
         email: email.trim() || undefined,
         website: website.trim() || undefined,
+        instagram: instagram.trim() || undefined,
         since: foundingYear ? parseInt(foundingYear) : undefined,
       });
 
@@ -297,7 +300,7 @@ export default function RegisterBusinessPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Phone <span className="text-[#333]/40">(optional)</span>
+                  Phone <span className="text-[#f14110]">*</span>
                 </label>
                 <input
                   type="tel"
@@ -310,7 +313,7 @@ export default function RegisterBusinessPage() {
 
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  WhatsApp <span className="text-[#333]/40">(optional)</span>
+                  WhatsApp <span className="text-[#f14110]">*</span>
                 </label>
                 <input
                   type="tel"
@@ -370,13 +373,26 @@ export default function RegisterBusinessPage() {
 
             <div>
               <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                Full address <span className="text-[#333]/40">(optional)</span>
+                Full address <span className="text-[#f14110]">*</span>
               </label>
               <input
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Jl. Raya Seminyak No. 123, Bali"
+                className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] placeholder:text-[#333]/40 outline-none focus:border-[#f14110] transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                Instagram <span className="text-[#333]/40">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                placeholder="@username or https://instagram.com/username"
                 className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] placeholder:text-[#333]/40 outline-none focus:border-[#f14110] transition-colors"
               />
             </div>
@@ -390,7 +406,12 @@ export default function RegisterBusinessPage() {
               </button>
               <button
                 onClick={() => setStep(3)}
-                className="h-10 px-8 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
+                disabled={!canProceedStep2}
+                className={`h-10 px-8 rounded-full text-[11px] font-medium tracking-[0.22px] transition-colors ${
+                  canProceedStep2
+                    ? "bg-[#f14110] text-white hover:bg-[#d93a0e]"
+                    : "bg-[#e4e4e4] text-[#333]/40 cursor-not-allowed"
+                }`}
               >
                 Next
               </button>

@@ -35,6 +35,7 @@ export default defineSchema({
     whatsapp: v.optional(v.string()),
     facebook: v.optional(v.string()),
     linkedin: v.optional(v.string()),
+    instagram: v.optional(v.string()),
     projectSizes: v.optional(v.array(v.string())),
     constructionTypes: v.optional(v.array(v.string())),
     constructionLocations: v.optional(v.array(v.string())),

@@ -129,9 +129,9 @@ function ReportModal({ isOpen, onClose, companyId, userId }: { isOpen: boolean; 
   );
 }
 
-function ReviewCard({ name, rating = 5, text, date }: { name: string; rating?: number; text: string; date: string }) {
+function ReviewCard({ name, rating = 5, text, date, mobile }: { name: string; rating?: number; text: string; date: string; mobile?: boolean }) {
   return (
-    <div className="w-[210px]">
+    <div className={mobile ? "w-full" : "w-[210px]"}>
       <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-2">{name}</p>
       <div className="flex items-center gap-1.5 mb-2">
         {[1, 2, 3, 4, 5].map((i) => (
@@ -285,7 +285,7 @@ export default function ProfilePageClient() {
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-6 sm:py-8 flex-grow w-full">
         {/* Back Button Row */}
-        <div className="flex items-center justify-between mb-4 sm:mb-6 pb-4 border-b border-[#333]/10">
+        <div className="flex items-center justify-between mb-3 py-2 border-b border-[#333]/10">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
@@ -294,11 +294,8 @@ export default function ProfilePageClient() {
           </Link>
 
           {company.isPro && (
-            <div className="flex items-center gap-1">
-              <Image src="/images/icon-sponsored.svg" alt="" width={20} height={20} />
-              <div className="bg-[#e4e4e4] rounded-[10px] px-3 py-1">
-                <span className="text-[9px] text-[#333]/35 font-medium">Pro Account</span>
-              </div>
+            <div className="rounded-[10px] px-3 py-1 border border-[#333]/20">
+              <span className="text-[9px] text-[#333]/50 font-medium tracking-[0.18px]">Pro Account</span>
             </div>
           )}
         </div>
@@ -308,10 +305,10 @@ export default function ProfilePageClient() {
           {company.name}
         </h1>
 
-        {/* Main Content Grid - Mobile: stack, Desktop: 4 columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-[210px_210px_1fr_70px] gap-5 mb-8">
+        {/* Main Content Grid - Mobile: 2-col (logo+contact), Desktop: 4 columns */}
+        <div className="grid grid-cols-[160px_1fr] lg:grid-cols-[210px_210px_1fr_70px] gap-4 lg:gap-5 mb-8">
           {/* Column 1: Logo */}
-          <div className="w-full max-w-[210px] mx-auto lg:mx-0">
+          <div className="w-full">
             <div className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
               {company.logoId ? (
                 <StorageImage storageId={company.logoId} alt={company.name} fill className="object-cover w-full h-full" />
@@ -336,14 +333,22 @@ export default function ProfilePageClient() {
           </div>
 
           {/* Column 2: Contact Info */}
-          <div className="w-full max-w-[210px] mx-auto lg:mx-0">
-            {company.phone && (
-              <div className="border-b border-[#333]/20 pb-2 mb-3">
-                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
-                  Tel. {company.phone}
-                </p>
-              </div>
-            )}
+          <div className="w-full lg:max-w-[210px]">
+            <div className="border-b border-[#333]/20 pb-2 mb-3">
+              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
+                Tel. {company.phone || "-"}
+              </p>
+            </div>
+
+            <div className="border-b border-[#333]/20 pb-2 mb-3">
+              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
+                WhatsApp {company.whatsapp ? (
+                  <a href={`https://wa.me/${formatWhatsApp(company.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#f14110] transition-colors">
+                    {company.whatsapp}
+                  </a>
+                ) : "-"}
+              </p>
+            </div>
 
             {company.website && (
               <div className="border-b border-[#333]/20 pb-2 mb-4">
@@ -374,6 +379,15 @@ export default function ProfilePageClient() {
                   </svg>
                 </a>
               )}
+              {company.instagram && (
+                <a href={company.instagram.startsWith("http") ? company.instagram : `https://instagram.com/${company.instagram}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="1" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="1.5"/>
+                    <circle cx="11" cy="11" r="4" stroke="currentColor" strokeWidth="1.5"/>
+                    <circle cx="16.5" cy="5.5" r="1" fill="currentColor"/>
+                  </svg>
+                </a>
+              )}
               {company.facebook && (
                 <a href={company.facebook.startsWith("http") ? company.facebook : `https://${company.facebook}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -396,14 +410,14 @@ export default function ProfilePageClient() {
                 <path d="M8 0C3.58 0 0 3.58 0 8C0 14 8 20 8 20C8 20 16 14 16 8C16 3.58 12.42 0 8 0ZM8 11C6.34 11 5 9.66 5 8C5 6.34 6.34 5 8 5C9.66 5 11 6.34 11 8C11 9.66 9.66 11 8 11Z" fill="currentColor"/>
               </svg>
               <p className="text-[9px] text-[#333]/50 leading-[12px] font-mono">
-                {company.address ?? ""}
+                {company.address || "-"}
               </p>
             </div>
           </div>
 
           {/* Column 3: Stats + About */}
-          <div>
-            <div className="mb-6">
+          <div className="col-span-2 lg:col-span-1">
+            <div className="mb-6 max-w-[300px]">
               <div className="flex items-center justify-between border-b border-[#333]/20 py-1">
                 <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Projects</span>
                 <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.projects ?? 0}</span>
@@ -423,8 +437,8 @@ export default function ProfilePageClient() {
             </p>
           </div>
 
-          {/* Column 4: Save/Share/Report - Mobile: horizontal row, Desktop: vertical */}
-          <div className="flex lg:flex-col items-center lg:items-end gap-4 justify-center lg:justify-start">
+          {/* Column 4: Save/Share/Report - Mobile: horizontal row left-aligned, Desktop: vertical */}
+          <div className="col-span-2 lg:col-span-1 flex lg:flex-col items-center lg:items-end gap-4 justify-start">
             <button
               onClick={handleToggleSave}
               className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors"
@@ -466,42 +480,82 @@ export default function ProfilePageClient() {
             imageIds={company.projectImageIds ?? []}
           />
 
-          <div className="space-y-4">
-            <p className="text-[9px] text-[#333] font-mono">Services provided:</p>
-            {(company.projectSizes?.length ?? 0) > 0 && (
-              <div>
-                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">PROJECT SIZE</p>
-                <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.projectSizes!.join(", ")}</p>
-              </div>
-            )}
-            {(company.constructionTypes?.length ?? 0) > 0 && (
-              <div>
-                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">CONSTRUCTION</p>
-                <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.constructionTypes!.join(", ")}</p>
-                {(company.constructionLocations?.length ?? 0) > 0 && (
-                  <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.constructionLocations!.join(", ")}</p>
+          <div>
+            <p className="text-[9px] text-[#333] font-mono mb-4">Services provided:</p>
+            {/* Mobile: horizontal scroll cards */}
+            <div className="lg:hidden">
+              <div className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+                {(company.projectSizes?.length ?? 0) > 0 && (
+                  <div className="min-w-[160px] flex-shrink-0">
+                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">PROJECT SIZE</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.projectSizes!.join(", ")}</p>
+                  </div>
                 )}
-              </div>
-            )}
-            {(company.renovationTypes?.length ?? 0) > 0 && (
-              <div>
-                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">RENOVATION</p>
-                <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.renovationTypes!.join(", ")}</p>
-                {(company.renovationLocations?.length ?? 0) > 0 && (
-                  <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.renovationLocations!.join(", ")}</p>
+                {(company.constructionTypes?.length ?? 0) > 0 && (
+                  <div className="min-w-[160px] flex-shrink-0">
+                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">CONSTRUCTION</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.constructionTypes!.join(", ")}</p>
+                    {(company.constructionLocations?.length ?? 0) > 0 && (
+                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.constructionLocations!.join(", ")}</p>
+                    )}
+                  </div>
                 )}
+                {(company.renovationTypes?.length ?? 0) > 0 && (
+                  <div className="min-w-[160px] flex-shrink-0">
+                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">RENOVATION</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.renovationTypes!.join(", ")}</p>
+                    {(company.renovationLocations?.length ?? 0) > 0 && (
+                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.renovationLocations!.join(", ")}</p>
+                    )}
+                  </div>
+                )}
+                <div className="min-w-[160px] flex-shrink-0">
+                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">LOCATION</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.location ?? "Bali"}</p>
+                </div>
               </div>
-            )}
-            <div>
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">LOCATION</p>
-              <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.location ?? "Bali"}</p>
+              {/* Scroll indicator */}
+              <div className="flex justify-center mt-2">
+                <div className="w-[20px] h-[2px] rounded-full bg-[#f14110]" />
+              </div>
+            </div>
+            {/* Desktop: vertical list */}
+            <div className="hidden lg:block space-y-4">
+              {(company.projectSizes?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">PROJECT SIZE</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.projectSizes!.join(", ")}</p>
+                </div>
+              )}
+              {(company.constructionTypes?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">CONSTRUCTION</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.constructionTypes!.join(", ")}</p>
+                  {(company.constructionLocations?.length ?? 0) > 0 && (
+                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.constructionLocations!.join(", ")}</p>
+                  )}
+                </div>
+              )}
+              {(company.renovationTypes?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">RENOVATION</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.renovationTypes!.join(", ")}</p>
+                  {(company.renovationLocations?.length ?? 0) > 0 && (
+                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.renovationLocations!.join(", ")}</p>
+                  )}
+                </div>
+              )}
+              <div>
+                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">LOCATION</p>
+                <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.location ?? "Bali"}</p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Reviews Section */}
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3 sm:gap-4">
               <div>
                 <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Latest reviews /</p>
@@ -515,33 +569,50 @@ export default function ProfilePageClient() {
                 <span className="text-[10px] tracking-[0.2px]" style={{ color: starColor(company.rating ?? 0) + 'B3' }}>({company.reviewCount ?? 0})</span>
               </div>
             </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-3">
               {clerkUser && currentUser && (
                 <button
                   onClick={() => setShowReviewModal(true)}
-                  className="flex-1 sm:flex-none h-[40px] px-4 sm:px-6 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
+                  className="hidden sm:flex h-[40px] px-6 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors items-center"
                 >
                   Write a Review
                 </button>
               )}
               <Link
                 href={`/profile/${companyId}/reviews`}
-                className="flex-1 sm:flex-none h-[40px] px-4 sm:px-6 rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
+                className="rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
+                style={{ width: '140px', height: '40px' }}
               >
                 See all
               </Link>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 justify-items-center lg:justify-items-start">
+          {/* Mobile: 3 reviews full width */}
+          <div className="lg:hidden space-y-5">
+            {reviewsList.slice(0, 3).map((review, index) => (
+              <ReviewCard key={index} {...review} mobile />
+            ))}
+          </div>
+          {/* Desktop: 4 reviews in grid */}
+          <div className="hidden lg:grid lg:grid-cols-4 gap-5">
             {reviewsList.slice(0, 4).map((review, index) => (
               <ReviewCard key={index} {...review} />
             ))}
           </div>
+          {/* Mobile: Write a Review button */}
+          {clerkUser && currentUser && (
+            <button
+              onClick={() => setShowReviewModal(true)}
+              className="sm:hidden mt-4 h-[40px] px-6 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
+            >
+              Write a Review
+            </button>
+          )}
         </div>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 border-t border-[#333]/10 pt-4">
           {adjacentIds?.prevId ? (
             <Link
               href={`/profile/${adjacentIds.prevId}`}

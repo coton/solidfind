@@ -28,7 +28,7 @@ const companies = [
   // CONSTRUCTION
   {
     name: "Balitecture",
-    description: "Australian-owned villa developer offering end-to-end property development and management services in Bali. From design to construction to rental management.",
+    description: "I Gusti Ngurah Andri Saputra, a proud Balinese architect, founded Lumbung Architect in 2010. After earning his architecture degree from Udayana University (2004-2008), he improved his skills with local firms and gained international experience working with architects from France and Australia.\n\nThese diverse experiences shaped his design philosophy, which remains grounded in Balinese traditions. Driven by memories of his childhood home, I Gusti Ngurah Andri Saputra finds joy in creating buildings that support connections and friendships between clients. Inspired by the warmth of family, he took a career in architecture to help people find their perfect living environments.Lumbung Architect, based in Bali, now employs around 67 professionals. Lumbung Architect, based in Bali, now employs around 67 professionals.I Gusti Ngurah Andri Saputra.`These diverse experiences shaped his design philosophy.",
     category: "construction",
     subcategory: "residential",
     location: "Seminyak",

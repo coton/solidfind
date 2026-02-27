@@ -117,6 +117,7 @@ export default function EditProfilePage() {
   const [whatsapp, setWhatsapp] = useState("");
   const [facebook, setFacebook] = useState("");
   const [linkedin, setLinkedin] = useState("");
+  const [instagram, setInstagram] = useState("");
   const [description, setDescription] = useState("");
   const [projectsNumber, setProjectsNumber] = useState("");
   const [teamSize, setTeamSize] = useState("");
@@ -153,6 +154,7 @@ export default function EditProfilePage() {
       setWhatsapp(company.whatsapp ?? "");
       setFacebook(company.facebook ?? "");
       setLinkedin(company.linkedin ?? "");
+      setInstagram(company.instagram ?? "");
       setDescription(company.description ?? "");
       setProjectsNumber(company.projects?.toString() ?? "");
       setTeamSize(company.teamSize?.toString() ?? "");
@@ -257,6 +259,7 @@ export default function EditProfilePage() {
           whatsapp: whatsapp || undefined,
           facebook: facebook || undefined,
           linkedin: linkedin || undefined,
+          instagram: instagram || undefined,
           projectSizes: projectSizeEnabled ? selectedProjectSizes : [],
           constructionTypes: constructionEnabled ? selectedConstruction : [],
           constructionLocations: constructionEnabled ? selectedConstructionLocations : [],
@@ -486,6 +489,20 @@ export default function EditProfilePage() {
                   className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
                 />
               </div>
+            </div>
+
+            {/* Instagram */}
+            <div>
+              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                Instagram
+              </label>
+              <input
+                type="text"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                placeholder="@username or https://instagram.com/username"
+                className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] placeholder:text-[#333]/40 outline-none focus:border-[#f14110] transition-colors"
+              />
             </div>
 
             {/* PRO Features */}
