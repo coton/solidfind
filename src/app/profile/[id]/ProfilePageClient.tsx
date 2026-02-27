@@ -431,22 +431,41 @@ export default function ProfilePageClient() {
 
               {/* Desktop: Save/Share/Report beside stats */}
               <div className="hidden lg:flex flex-col items-end gap-4 flex-shrink-0">
-                <button onClick={handleToggleSave} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
+                {/* Bookmark: ON=orange fill, OFF=grey outline; hover swaps state preview */}
+                <button onClick={handleToggleSave} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
                   <span className="font-bam text-[9px]">{company.bookmarkCount ?? 0} Saves</span>
-                  <Image src="/images/icon-bookmark.svg" alt="Save" width={15} height={20} className={isBookmarked ? 'opacity-100' : 'opacity-60'} />
+                  <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    className={`transition-colors ${isBookmarked
+                      ? 'fill-[#f14110] stroke-[#f14110] group-hover:fill-transparent group-hover:stroke-[#D8D8D8]'
+                      : 'fill-transparent stroke-[#D8D8D8] group-hover:fill-[#f14110] group-hover:stroke-[#f14110]'
+                    }`}
+                    style={{ strokeWidth: 2, strokeLinejoin: 'round' as const }}
+                  >
+                    <path d="M1 1H14.2353V19.1985L7.61765 14.2353L1 19.1985V1Z" />
+                  </svg>
                 </button>
-                <button onClick={handleShare} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors relative">
+                {/* Share: grey outline → orange on hover, text stays grey */}
+                <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
                   <span className="font-bam text-[9px]">Share</span>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/icon-share.svg" alt="Share" width={17} height={22} className="opacity-60" />
+                  <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                    style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+                  >
+                    <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
+                  </svg>
                   {showCopiedToast && (
                     <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
                   )}
                 </button>
-                <button onClick={() => setShowReportModal(true)} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
+                {/* Report: grey outline → orange on hover, text stays grey */}
+                <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
                   <span className="font-bam text-[9px]">Report</span>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/icon-report.svg" alt="Report" width={16} height={18} className="opacity-60" />
+                  <svg width="20" height="22" viewBox="0 0 20 21.9999" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                    style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+                  >
+                    <path d="M1 20.9999V12.8746M1 12.8746C7.54525 7.81917 12.4548 17.93 19 12.8746V2.45931C12.4548 7.51473 7.54525 -2.59611 1 2.45931V12.8746Z" />
+                  </svg>
                 </button>
               </div>
             </div>
@@ -458,22 +477,39 @@ export default function ProfilePageClient() {
 
             {/* Mobile only: Save/Share/Report below description, left-aligned */}
             <div className="flex lg:hidden items-center gap-4">
-              <button onClick={handleToggleSave} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
+              <button onClick={handleToggleSave} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
                 <span className="font-bam text-[9px]">{company.bookmarkCount ?? 0} Saves</span>
-                <Image src="/images/icon-bookmark.svg" alt="Save" width={15} height={20} className={isBookmarked ? 'opacity-100' : 'opacity-60'} />
+                <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  className={`transition-colors ${isBookmarked
+                    ? 'fill-[#f14110] stroke-[#f14110] group-hover:fill-transparent group-hover:stroke-[#D8D8D8]'
+                    : 'fill-transparent stroke-[#D8D8D8] group-hover:fill-[#f14110] group-hover:stroke-[#f14110]'
+                  }`}
+                  style={{ strokeWidth: 2, strokeLinejoin: 'round' as const }}
+                >
+                  <path d="M1 1H14.2353V19.1985L7.61765 14.2353L1 19.1985V1Z" />
+                </svg>
               </button>
-              <button onClick={handleShare} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors relative">
+              <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
                 <span className="font-bam text-[9px]">Share</span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/icon-share.svg" alt="Share" width={17} height={22} className="opacity-60" />
+                <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                  style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+                >
+                  <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
+                </svg>
                 {showCopiedToast && (
                   <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
                 )}
               </button>
-              <button onClick={() => setShowReportModal(true)} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
+              <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
                 <span className="font-bam text-[9px]">Report</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/icon-report.svg" alt="Report" width={16} height={18} className="opacity-60" />
+                <svg width="20" height="22" viewBox="0 0 20 21.9999" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                  style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+                >
+                  <path d="M1 20.9999V12.8746M1 12.8746C7.54525 7.81917 12.4548 17.93 19 12.8746V2.45931C12.4548 7.51473 7.54525 -2.59611 1 2.45931V12.8746Z" />
+                </svg>
               </button>
             </div>
           </div>
