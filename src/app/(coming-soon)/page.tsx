@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 
 function ContentBlock() {
   return (
@@ -43,7 +42,6 @@ export default function ComingSoonPage() {
         </div>
 
         <div style={{ position: 'absolute', bottom: '32px', right: '32px', zIndex: 10, display: 'flex', alignItems: 'baseline', gap: '16px' }}>
-          <Link href="/terms-preview" style={{ color: '#333', fontSize: '8px', fontWeight: 700, textDecoration: 'underline' }}>Terms &amp; Conditions.</Link>
           <p style={{ color: '#333', fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', margin: 0 }}>SOLIDFIND.ID © 2026</p>
         </div>
       </div>
@@ -60,7 +58,6 @@ export default function ComingSoonPage() {
         </div>
 
         <div style={{ position: 'absolute', bottom: '24px', right: '24px', zIndex: 10, display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-          <Link href="/terms-preview" style={{ color: '#333', fontSize: '8px', fontWeight: 700, textDecoration: 'underline' }}>Terms &amp; Conditions.</Link>
           <p style={{ color: '#333', fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', margin: 0 }}>SOLIDFIND.ID © 2026</p>
         </div>
       </div>
