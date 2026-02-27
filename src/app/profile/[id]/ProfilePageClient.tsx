@@ -417,7 +417,7 @@ export default function ProfilePageClient() {
             {/* Desktop: stats (left) + save/share/report (right) in a flex row */}
             {/* Mobile: stats only here, save buttons appear below description */}
             <div className="flex items-start justify-between mb-4">
-              <div className="max-w-[300px] flex-1 mr-4">
+              <div className="flex-1 lg:max-w-[300px] lg:mr-4">
                 <div className="h-[32px] flex items-center justify-between border-b border-[#333]/20">
                   <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Projects</span>
                   <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.projects ?? 0}</span>
