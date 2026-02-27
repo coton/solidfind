@@ -61,7 +61,7 @@ export function WriteReviewModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333] transition-colors"
+          className="absolute top-4 right-4 text-[#333]/50 hover:text-[#f14110] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>

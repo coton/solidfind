@@ -92,7 +92,7 @@ function ReportModal({ isOpen, onClose, companyId, userId }: { isOpen: boolean; 
       <div className="relative bg-white w-full max-w-[440px] rounded-[6px] p-8">
         <button
           onClick={() => { onClose(); setSubmitted(false); setText(""); }}
-          className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"
+          className="absolute top-4 right-4 text-[#333]/50 hover:text-[#f14110] transition-colors"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -113,12 +113,12 @@ function ReportModal({ isOpen, onClose, companyId, userId }: { isOpen: boolean; 
               onChange={(e) => setText(e.target.value)}
               rows={4}
               placeholder="Describe the issue..."
-              className="w-full px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors resize-none mb-4"
+              className="w-full px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#e4e4e4] resize-none mb-4"
             />
             <button
               onClick={handleSubmit}
               disabled={!text.trim() || submitting}
-              className="w-full h-10 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-[140px] h-[40px] border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] rounded-[4px] hover:bg-[#f14110] hover:text-white hover:border-transparent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {submitting ? "Submitting..." : "Submit Report"}
             </button>
