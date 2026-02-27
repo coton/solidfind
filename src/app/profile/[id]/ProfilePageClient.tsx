@@ -418,7 +418,7 @@ export default function ProfilePageClient() {
           {/* Column 3: Stats + About */}
           <div className="col-span-2 lg:col-span-1">
             <div className="mb-6 max-w-[300px]">
-              <div className="flex items-center justify-between border-b border-[#333]/20 py-1">
+              <div className="flex items-center justify-between border-b border-[#333]/20 pb-1">
                 <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Projects</span>
                 <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.projects ?? 0}</span>
               </div>
