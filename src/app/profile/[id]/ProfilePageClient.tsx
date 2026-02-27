@@ -333,7 +333,7 @@ export default function ProfilePageClient() {
           </div>
 
           {/* Column 2: Contact Info */}
-          <div className="w-full lg:max-w-[210px]">
+          <div className="w-full lg:max-w-[210px] flex flex-col">
             <div className="border-b border-[#333]/20 pb-2 mb-3">
               <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
                 Tel. {company.phone || "-"}
@@ -405,7 +405,7 @@ export default function ProfilePageClient() {
             </div>
 
             {/* Address */}
-            <div className="flex items-start gap-2">
+            <div className="flex items-start gap-2 mt-auto">
               <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="mt-0.5 flex-shrink-0 text-[#333]">
                 <path d="M8 0C3.58 0 0 3.58 0 8C0 14 8 20 8 20C8 20 16 14 16 8C16 3.58 12.42 0 8 0ZM8 11C6.34 11 5 9.66 5 8C5 6.34 6.34 5 8 5C9.66 5 11 6.34 11 8C11 9.66 9.66 11 8 11Z" fill="currentColor"/>
               </svg>
