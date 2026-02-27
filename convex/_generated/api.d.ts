@@ -11,6 +11,7 @@
 import type * as auditLogs from "../auditLogs.js";
 import type * as companies from "../companies.js";
 import type * as files from "../files.js";
+import type * as migrations from "../migrations.js";
 import type * as reports from "../reports.js";
 import type * as reviews from "../reviews.js";
 import type * as savedListings from "../savedListings.js";
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   auditLogs: typeof auditLogs;
   companies: typeof companies;
   files: typeof files;
+  migrations: typeof migrations;
   reports: typeof reports;
   reviews: typeof reviews;
   savedListings: typeof savedListings;
