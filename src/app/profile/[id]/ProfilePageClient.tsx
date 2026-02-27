@@ -463,7 +463,7 @@ export default function ProfilePageClient() {
                 {/* Report: grey outline → orange on hover, text stays grey */}
                 <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
                   <span className="font-bam text-[9px]">Report</span>
-                  <svg width="20" height="22" viewBox="0 0 20 21.9999" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  <svg width="4" height="4.4" viewBox="0 0 20 21.9999" fill="none" xmlns="http://www.w3.org/2000/svg"
                     className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
                     style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
                   >
@@ -506,8 +506,7 @@ export default function ProfilePageClient() {
               </button>
               <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
                 <span className="font-bam text-[9px]">Report</span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <svg width="20" height="22" viewBox="0 0 20 21.9999" fill="none" xmlns="http://www.w3.org/2000/svg"
+                <svg width="4" height="4.4" viewBox="0 0 20 21.9999" fill="none" xmlns="http://www.w3.org/2000/svg"
                   className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
                   style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
                 >
