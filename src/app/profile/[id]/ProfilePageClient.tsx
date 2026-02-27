@@ -294,7 +294,7 @@ export default function ProfilePageClient() {
           </Link>
 
           {company.isPro && (
-            <div className="rounded-[10px] px-3 py-1 border border-[#333]/20">
+            <div className="flex items-center justify-center rounded-[10px] border border-[#333]/20" style={{ width: '90px', height: '16px' }}>
               <span className="text-[9px] text-[#333]/50 font-medium tracking-[0.18px]">Pro Account</span>
             </div>
           )}
