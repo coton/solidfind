@@ -309,7 +309,7 @@ export default function ProfilePageClient() {
         </h1>
 
         {/* Main Content Grid - Mobile: 2-col (logo+contact), Desktop: 4 columns */}
-        <div className="grid grid-cols-[160px_1fr] lg:grid-cols-[210px_210px_1fr_70px] gap-4 lg:gap-5 mb-8">
+        <div className="grid grid-cols-[160px_1fr] lg:grid-cols-[210px_210px_1fr_70px] gap-4 lg:gap-5 mb-0 lg:mb-8">
           {/* Column 1: Logo */}
           <div className="w-full lg:self-start">
             <div className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
