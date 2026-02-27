@@ -2,6 +2,18 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@font-face {
+  font-family: 'BasicallyAMono';
+  src: url('/fonts/BasicallyAMono-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-bam {
+  font-family: 'BasicallyAMono', monospace;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

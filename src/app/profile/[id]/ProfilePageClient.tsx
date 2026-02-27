@@ -139,7 +139,7 @@ function ReviewCard({ name, rating = 5, text, date, mobile }: { name: string; ra
         ))}
       </div>
       <p className="text-[10px] text-[#333] leading-[18px] tracking-[0.2px] mb-2 line-clamp-4">{text}</p>
-      <p className="text-[9px] text-[#333]/35 font-mono">{date}</p>
+      <p className="font-bam text-[9px] text-[#333]/35">{date}</p>
     </div>
   );
 }
@@ -295,7 +295,7 @@ export default function ProfilePageClient() {
 
           {company.isPro && (
             <div className="flex items-center justify-center rounded-[10px] border border-[#333]/20" style={{ width: '90px', height: '16px' }}>
-              <span className="text-[9px] text-[#333]/50 font-medium tracking-[0.18px]">Pro Account</span>
+              <span className="font-bam text-[9px] text-[#333]/50 tracking-[0.18px]">Pro Account</span>
             </div>
           )}
         </div>
@@ -402,7 +402,7 @@ export default function ProfilePageClient() {
                 <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                 <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
               </svg>
-              <p className="text-[9px] text-[#333]/50 leading-[12px] font-mono">
+              <p className="font-bam text-[9px] text-[#333]/50 leading-[12px]">
                 {company.address || "-"}
               </p>
             </div>
@@ -432,11 +432,11 @@ export default function ProfilePageClient() {
               {/* Desktop: Save/Share/Report beside stats */}
               <div className="hidden lg:flex flex-col items-end gap-4 flex-shrink-0">
                 <button onClick={handleToggleSave} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
-                  <span className="text-[9px] font-mono">{company.bookmarkCount ?? 0} Saves</span>
+                  <span className="font-bam text-[9px]">{company.bookmarkCount ?? 0} Saves</span>
                   <Image src="/images/icon-bookmark.svg" alt="Save" width={15} height={20} className={isBookmarked ? 'opacity-100' : 'opacity-60'} />
                 </button>
                 <button onClick={handleShare} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors relative">
-                  <span className="text-[9px] font-mono">Share</span>
+                  <span className="font-bam text-[9px]">Share</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/images/icon-share.svg" alt="Share" width={17} height={22} className="opacity-60" />
                   {showCopiedToast && (
@@ -444,7 +444,7 @@ export default function ProfilePageClient() {
                   )}
                 </button>
                 <button onClick={() => setShowReportModal(true)} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
-                  <span className="text-[9px] font-mono">Report</span>
+                  <span className="font-bam text-[9px]">Report</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/images/icon-report.svg" alt="Report" width={16} height={18} className="opacity-60" />
                 </button>
@@ -459,11 +459,11 @@ export default function ProfilePageClient() {
             {/* Mobile only: Save/Share/Report below description, left-aligned */}
             <div className="flex lg:hidden items-center gap-4">
               <button onClick={handleToggleSave} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
-                <span className="text-[9px] font-mono">{company.bookmarkCount ?? 0} Saves</span>
+                <span className="font-bam text-[9px]">{company.bookmarkCount ?? 0} Saves</span>
                 <Image src="/images/icon-bookmark.svg" alt="Save" width={15} height={20} className={isBookmarked ? 'opacity-100' : 'opacity-60'} />
               </button>
               <button onClick={handleShare} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors relative">
-                <span className="text-[9px] font-mono">Share</span>
+                <span className="font-bam text-[9px]">Share</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/images/icon-share.svg" alt="Share" width={17} height={22} className="opacity-60" />
                 {showCopiedToast && (
@@ -471,7 +471,7 @@ export default function ProfilePageClient() {
                 )}
               </button>
               <button onClick={() => setShowReportModal(true)} className="flex items-center gap-2 text-[#333]/35 hover:text-[#f14110] transition-colors">
-                <span className="text-[9px] font-mono">Report</span>
+                <span className="font-bam text-[9px]">Report</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/images/icon-report.svg" alt="Report" width={16} height={18} className="opacity-60" />
               </button>
@@ -488,7 +488,7 @@ export default function ProfilePageClient() {
           />
 
           <div>
-            <p className="text-[9px] text-[#333] font-mono mb-4">Services provided:</p>
+            <p className="font-bam text-[9px] text-[#333] mb-4">Services provided:</p>
             {/* Mobile: horizontal scroll cards */}
             <div className="lg:hidden">
               <div className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>

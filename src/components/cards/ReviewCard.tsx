@@ -24,7 +24,7 @@ export function ReviewCard({ userName, rating, content, date }: ReviewCardProps)
         </div>
       </div>
       <p className="text-xs text-muted-foreground line-clamp-3 mb-2">{content}</p>
-      <span className="text-xs text-zinc-400">{date}</span>
+      <span className="font-bam text-[9px] text-zinc-400">{date}</span>
     </div>
   );
 }

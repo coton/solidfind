@@ -464,7 +464,7 @@ function HeaderInner() {
               ))}
             </div>
           </div>
-          <p className="text-[#f8f8f8] text-[9px] mt-4 font-medium leading-[12px]">
+          <p className="font-bam text-[#f8f8f8] text-[9px] mt-4 leading-[12px]">
             {categorySubtitles[activeCategory] || categorySubtitles.construction}
           </p>
         </div>

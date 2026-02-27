@@ -105,7 +105,7 @@ export function ListingCard({
           {isPro && (
             <div className="absolute top-[45px] right-[10px]">
               <div className="bg-[#e4e4e4] rounded-[10px] h-[16px] px-[8px] flex items-center min-w-[80px] justify-center">
-                <span className="text-[9px] text-[#333]/35 font-medium leading-[12px]">Pro Account</span>
+                <span className="font-bam text-[9px] text-[#333]/35 leading-[12px]">Pro Account</span>
               </div>
             </div>
           )}
@@ -191,7 +191,7 @@ export function ListingCard({
 
           {/* Address — same height as description (20px gap spacing) */}
           <div className="absolute top-[152px] left-[10px] right-[10px] bottom-[20px]">
-            <p className="text-[10px] text-[#d8d8d8]/75 leading-[14px] tracking-[0.2px] line-clamp-4" style={{ fontFamily: "'Sora', sans-serif" }}>
+            <p className="font-bam text-[9px] text-[#d8d8d8]/75 leading-[14px] tracking-[0.2px] line-clamp-4">
               {address}
             </p>
           </div>
