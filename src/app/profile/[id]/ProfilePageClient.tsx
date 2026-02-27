@@ -334,13 +334,13 @@ export default function ProfilePageClient() {
 
           {/* Column 2: Contact Info */}
           <div className="w-full lg:max-w-[210px] flex flex-col">
-            <div className="border-b border-[#333]/20 pb-2 mb-3">
+            <div className="h-[32px] flex items-center border-b border-[#333]/20">
               <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
                 Tel. {company.phone || "-"}
               </p>
             </div>
 
-            <div className="border-b border-[#333]/20 pb-2 mb-4">
+            <div className="h-[32px] flex items-center border-b border-[#333]/20 mb-4">
               {company.website ? (
                 <a
                   href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
@@ -415,15 +415,15 @@ export default function ProfilePageClient() {
             {/* Mobile: stats only here, save buttons appear below description */}
             <div className="flex items-start justify-between mb-4">
               <div className="max-w-[300px] flex-1 mr-4">
-                <div className="flex items-start justify-between border-b border-[#333]/20 pb-1">
+                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/20">
                   <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Projects</span>
                   <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.projects ?? 0}</span>
                 </div>
-                <div className="flex items-start justify-between border-b border-[#333]/20 py-1">
+                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/20">
                   <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Team</span>
                   <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.teamSize ?? 0}</span>
                 </div>
-                <div className="flex items-start justify-between border-b border-[#333]/20 py-1">
+                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/20">
                   <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Since</span>
                   <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">{company.since ?? new Date(company.createdAt).getFullYear()}</span>
                 </div>
