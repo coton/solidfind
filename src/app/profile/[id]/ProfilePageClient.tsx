@@ -288,9 +288,12 @@ export default function ProfilePageClient() {
         <div className="flex items-center justify-between mb-3 py-2 border-b border-[#333]/10">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
           >
-            <span>←</span> BACK
+            <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+              <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>BACK</span>
           </Link>
 
           {company.isPro && (
@@ -659,22 +662,30 @@ export default function ProfilePageClient() {
           {adjacentIds?.prevId ? (
             <Link
               href={`/profile/${adjacentIds.prevId}`}
-              className="text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
+              className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
             >
-              ← PREVIOUS
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="flex-shrink-0"><path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <span>PREVIOUS</span>
             </Link>
           ) : (
-            <span className="text-[11px] font-semibold text-[#333]/30 tracking-[0.22px]">← PREVIOUS</span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333]/30 tracking-[0.22px]">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="flex-shrink-0"><path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <span>PREVIOUS</span>
+            </span>
           )}
           {adjacentIds?.nextId ? (
             <Link
               href={`/profile/${adjacentIds.nextId}`}
-              className="text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
+              className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
             >
-              NEXT →
+              <span>NEXT</span>
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="flex-shrink-0"><path d="M15 5H1M15 5L11 1M15 5L11 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </Link>
           ) : (
-            <span className="text-[11px] font-semibold text-[#333]/30 tracking-[0.22px]">NEXT →</span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333]/30 tracking-[0.22px]">
+              <span>NEXT</span>
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="flex-shrink-0"><path d="M15 5H1M15 5L11 1M15 5L11 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
           )}
         </div>
 
