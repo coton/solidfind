@@ -226,7 +226,7 @@ export default function AdminUI() {
       <SectionCard title="Header Background">
         <MediaUpload
           label="Header media"
-          hint="Photo or video — replaces the header background across the whole website"
+          hint="Photo or video — replaces the header background across the whole website. Recommended JPG size: 3840×1080px (supports up to 4K)"
           url={s.headerMediaUrl}
           mediaType={s.headerMediaType}
           onUrl={(v) => u({ headerMediaUrl: v })}
@@ -238,7 +238,7 @@ export default function AdminUI() {
       <SectionCard title="Footer Background">
         <MediaUpload
           label="Footer media"
-          hint="Photo or video — replaces the footer background across the whole website"
+          hint="Photo or video — replaces the footer background across the whole website. Recommended JPG size: 3840×600px (supports up to 4K)"
           url={s.footerMediaUrl}
           mediaType={s.footerMediaType}
           onUrl={(v) => u({ footerMediaUrl: v })}
