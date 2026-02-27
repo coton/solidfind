@@ -407,7 +407,8 @@ export default function ProfilePageClient() {
             {/* Address */}
             <div className="flex items-start gap-2 mt-auto">
               <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="mt-0.5 flex-shrink-0 text-[#333]">
-                <path d="M8 0C3.58 0 0 3.58 0 8C0 14 8 20 8 20C8 20 16 14 16 8C16 3.58 12.42 0 8 0ZM8 11C6.34 11 5 9.66 5 8C5 6.34 6.34 5 8 5C9.66 5 11 6.34 11 8C11 9.66 9.66 11 8 11Z" fill="currentColor"/>
+                <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
               </svg>
               <p className="text-[9px] text-[#333]/50 leading-[12px] font-mono">
                 {company.address || "-"}
