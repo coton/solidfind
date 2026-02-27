@@ -468,7 +468,7 @@ export default function EditProfilePage() {
               </div>
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Whatsapp {!company?.isPro && <span className="text-[#f14110]">(*)</span>}
+                  Whatsapp <span className="text-[#f14110]">(*)</span>
                 </label>
                 <input
                   type="tel"
