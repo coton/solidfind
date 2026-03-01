@@ -130,7 +130,7 @@ function HomeContent() {
   }, [categoryParam, locationParam, searchParam, projectSizeParam]);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundImage: 'url(/images/bg-results.jpg)', backgroundRepeat: 'repeat', backgroundSize: 'auto' }}>
+    <div className="min-h-screen bg-[#ececec] flex flex-col">
       <Header />
 
       <main className="max-w-[900px] mx-auto px-5 sm:px-0 pt-3 sm:pt-4 flex-grow w-full flex flex-col">
