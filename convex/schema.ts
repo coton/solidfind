@@ -9,6 +9,8 @@ export default defineSchema({
     accountType: v.union(v.literal("company"), v.literal("individual")),
     companyName: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
+    deletionRequestedAt: v.optional(v.number()),
+    deletionScheduledAt: v.optional(v.number()),
     createdAt: v.number(),
   }).index("by_clerkId", ["clerkId"]),
 
@@ -46,6 +48,7 @@ export default defineSchema({
     projectImageUrls: v.optional(v.array(v.string())), // External image URLs as fallback
     isFeatured: v.optional(v.boolean()),
     since: v.optional(v.number()), // Founded year
+    subscriptionId: v.optional(v.id("subscriptions")),
     createdAt: v.number(),
   })
     .index("by_ownerId", ["ownerId"])
@@ -114,4 +117,41 @@ export default defineSchema({
   })
     .index("by_email", ["email"])
     .index("by_notified", ["notified"]),
+
+  subscriptions: defineTable({
+    userId: v.id("users"),
+    companyId: v.id("companies"),
+    plan: v.union(v.literal("monthly"), v.literal("yearly")),
+    status: v.union(
+      v.literal("active"),
+      v.literal("pending"),
+      v.literal("cancelled"),
+      v.literal("expired"),
+      v.literal("frozen")
+    ),
+    xenditInvoiceId: v.optional(v.string()),
+    xenditPaymentId: v.optional(v.string()),
+    amount: v.number(),
+    currency: v.literal("IDR"),
+    startDate: v.number(),
+    endDate: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_companyId", ["companyId"])
+    .index("by_status", ["status"])
+    .index("by_xenditInvoiceId", ["xenditInvoiceId"]),
+
+  accountDeletionFeedback: defineTable({
+    userId: v.id("users"),
+    reason: v.string(),
+    createdAt: v.number(),
+  }).index("by_userId", ["userId"]),
+
+  platformSettings: defineTable({
+    key: v.string(),
+    value: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.optional(v.string()),
+  }).index("by_key", ["key"]),
 });

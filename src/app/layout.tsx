@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
+import { DeletionBannerWrapper } from "@/components/DeletionBannerWrapper";
 import { ViewTransitions } from "next-view-transitions";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
@@ -74,6 +75,7 @@ export default function RootLayout({
           >
             <NextTopLoader color="#f14110" showSpinner={false} height={3} />
             <ConvexClientProvider>
+              <DeletionBannerWrapper />
               {children}
             </ConvexClientProvider>
           </body>
