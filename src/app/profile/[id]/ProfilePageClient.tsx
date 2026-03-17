@@ -467,7 +467,7 @@ export default function ProfilePageClient() {
                     className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
                     style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
                   >
-                    <path opacity="0.35" d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
+                    <path d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
                   </svg>
                 </button>
               </div>
@@ -510,7 +510,7 @@ export default function ProfilePageClient() {
                   className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
                   style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
                 >
-                  <path opacity="0.35" d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
+                  <path d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
                 </svg>
               </button>
             </div>
