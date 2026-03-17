@@ -1,11 +1,13 @@
 "use client";
 
-import { Suspense, useState, useCallback, useRef, useEffect } from "react";
+import { Suspense, useState, useCallback, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import { AuthModal } from "@/components/AuthModal";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 const mainCategories = [
   { id: "construction", label: "01. Construction" },
@@ -249,6 +251,32 @@ function HeaderInner() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const pageConfigs = useQuery(api.pageConfigs.listVisible);
+
+  // Build dynamic categories from pageConfigs, falling back to hardcoded
+  const dynamicCategories = useMemo(() => {
+    if (!pageConfigs || pageConfigs.length === 0) return mainCategories;
+    return pageConfigs.map((p) => ({ id: p.categoryId, label: p.label }));
+  }, [pageConfigs]);
+
+  const dynamicSubtitles = useMemo(() => {
+    if (!pageConfigs || pageConfigs.length === 0) return categorySubtitles;
+    const subs: Record<string, string> = {};
+    for (const p of pageConfigs) {
+      subs[p.categoryId] = p.subtitle;
+    }
+    return subs;
+  }, [pageConfigs]);
+
+  // Build a lookup for filters by categoryId
+  const configFiltersMap = useMemo(() => {
+    if (!pageConfigs || pageConfigs.length === 0) return null;
+    const map: Record<string, typeof pageConfigs[0]["filters"]> = {};
+    for (const p of pageConfigs) {
+      map[p.categoryId] = p.filters;
+    }
+    return map;
+  }, [pageConfigs]);
 
   const [keywords, setKeywords] = useState(searchParams.get("search") ?? "");
   const [projectSize, setProjectSize] = useState(searchParams.get("projectSize") ?? "");
@@ -307,15 +335,27 @@ function HeaderInner() {
     router.push("/");
   };
 
+  // Get dynamic filter options for current category
+  const getDynamicFilter = (filterId: string) => {
+    if (configFiltersMap && configFiltersMap[activeCategory]) {
+      const filter = configFiltersMap[activeCategory].find((f) => f.id === filterId);
+      if (filter) return filter.options;
+    }
+    return null;
+  };
+
+  const currentLocationOptions = getDynamicFilter("location") ?? locationOptions;
+  const currentProjectSizeOptions = getDynamicFilter("project-size") ?? projectSizeOptions;
+
   // Handle location multi-select
   const handleLocationChange = (locationId: string) => {
     let newLocations: string[];
-    
+
     if (locationId === "bali") {
       // Toggle BALI: if currently has all regions, clear all; otherwise select all
-      const allRegions = locationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
+      const allRegions = currentLocationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
       const hasAllRegions = allRegions.every(region => locations.includes(region));
-      
+
       if (hasAllRegions || locations.includes("bali")) {
         // Turn off BALI: clear all
         newLocations = [];
@@ -333,7 +373,7 @@ function HeaderInner() {
         newLocations = [...locations.filter(loc => loc !== "bali"), locationId];
       }
     }
-    
+
     setLocations(newLocations);
     updateParams({ location: newLocations.length > 0 ? newLocations.join(",") : null });
   };
@@ -341,38 +381,33 @@ function HeaderInner() {
   // Get location display text
   const getLocationDisplayText = () => {
     if (locations.length === 0) return "LOCATION";
-    
+
     // Check if all regions are selected (BALI mode)
-    const allRegions = locationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
+    const allRegions = currentLocationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
     const hasAllRegions = allRegions.every(region => locations.includes(region));
-    
+
     if (locations.includes("bali") || hasAllRegions) return "BALI";
     if (locations.length === 1) return locations[0].toUpperCase();
     return "LOCATION"; // Multiple locations selected
   };
 
   const isLocationActive = locations.length > 0;
-  
+
   // Check if BALI toggle should appear active (all regions selected)
   const isBaliActive = () => {
-    const allRegions = locationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
+    const allRegions = currentLocationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
     return allRegions.every(region => locations.includes(region)) || locations.includes("bali");
   };
 
-  // Get categories based on active main category
+  // Get categories based on active main category (dynamic or fallback)
   const getCategoryOptions = () => {
-    if (activeCategory === "renovation") {
-      return renovationCategories;
-    }
-    if (activeCategory === "architecture") {
-      return architectureCategories;
-    }
-    if (activeCategory === "interior") {
-      return interiorCategories;
-    }
-    if (activeCategory === "real-estate") {
-      return realEstateCategories;
-    }
+    const dynamicCats = getDynamicFilter("categories");
+    if (dynamicCats) return dynamicCats;
+
+    if (activeCategory === "renovation") return renovationCategories;
+    if (activeCategory === "architecture") return architectureCategories;
+    if (activeCategory === "interior") return interiorCategories;
+    if (activeCategory === "real-estate") return realEstateCategories;
     return constructionCategories;
   };
 
@@ -449,7 +484,7 @@ function HeaderInner() {
         <div className="max-w-[900px] mx-auto mb-4">
           <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-2 min-w-max">
-              {mainCategories.map((cat) => (
+              {dynamicCategories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => handleCategoryTab(cat.id)}
@@ -465,7 +500,7 @@ function HeaderInner() {
             </div>
           </div>
           <p className="font-bam text-[#f8f8f8] text-[9px] mt-4 leading-[12px]">
-            {categorySubtitles[activeCategory] || categorySubtitles.construction}
+            {dynamicSubtitles[activeCategory] || categorySubtitles[activeCategory] || categorySubtitles.construction}
           </p>
         </div>
 
@@ -490,7 +525,7 @@ function HeaderInner() {
               {/* Project Size Dropdown */}
               <Dropdown
                 label="PROJECT SIZE"
-                options={projectSizeOptions}
+                options={currentProjectSizeOptions}
                 value={projectSize}
                 onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
                 width="w-[140px]"
@@ -509,7 +544,7 @@ function HeaderInner() {
               {/* Location Dropdown - multi-select enabled */}
               <Dropdown
                 label="LOCATION"
-                options={locationOptions}
+                options={currentLocationOptions}
                 value="" // Not used in multi-select mode
                 onChange={handleLocationChange}
                 width="w-[120px]"
@@ -566,7 +601,7 @@ function HeaderInner() {
                 <div className="flex-1">
                   <Dropdown
                     label="PROJECT SIZE"
-                    options={projectSizeOptions}
+                    options={currentProjectSizeOptions}
                     value={projectSize}
                     onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
                     width="w-full"
@@ -589,7 +624,7 @@ function HeaderInner() {
                 <div className="flex-1">
                   <Dropdown
                     label="LOCATION"
-                    options={locationOptions}
+                    options={currentLocationOptions}
                     value="" // Not used in multi-select mode
                     onChange={handleLocationChange}
                     width="w-full"

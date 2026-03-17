@@ -154,4 +154,21 @@ export default defineSchema({
     updatedAt: v.number(),
     updatedBy: v.optional(v.string()),
   }).index("by_key", ["key"]),
+
+  pageConfigs: defineTable({
+    categoryId: v.string(),
+    label: v.string(),
+    subtitle: v.string(),
+    visible: v.boolean(),
+    sortOrder: v.number(),
+    filters: v.array(v.object({
+      id: v.string(),
+      title: v.string(),
+      options: v.array(v.object({
+        id: v.string(),
+        label: v.string(),
+      })),
+    })),
+    updatedAt: v.number(),
+  }).index("by_categoryId", ["categoryId"]).index("by_sortOrder", ["sortOrder"]),
 });
