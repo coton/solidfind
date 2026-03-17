@@ -162,6 +162,43 @@ export default function AdminUI() {
   const [aboutText, setAboutText] = useState("");
   const [aboutSaved, setAboutSaved] = useState(false);
 
+  // About Page content (Convex-backed)
+  const aboutTagline = useQuery(api.platformSettings.get, { key: "aboutPageTagline" });
+  const aboutDescription = useQuery(api.platformSettings.get, { key: "aboutPageDescription" });
+  const aboutIndividual = useQuery(api.platformSettings.get, { key: "aboutPageIndividual" });
+  const aboutFreeCompany = useQuery(api.platformSettings.get, { key: "aboutPageFreeCompany" });
+  const aboutProCompany = useQuery(api.platformSettings.get, { key: "aboutPageProCompany" });
+  const aboutContact = useQuery(api.platformSettings.get, { key: "aboutPageContact" });
+  const aboutEmail = useQuery(api.platformSettings.get, { key: "aboutPageEmail" });
+
+  const [aboutPageFields, setAboutPageFields] = useState({
+    tagline: "",
+    description: "",
+    individual: "",
+    freeCompany: "",
+    proCompany: "",
+    contact: "",
+    email: "",
+  });
+  const [aboutPageSaved, setAboutPageSaved] = useState(false);
+  const aboutPageLoaded = useRef(false);
+
+  useEffect(() => {
+    if (aboutPageLoaded.current) return;
+    if (aboutTagline !== undefined) {
+      aboutPageLoaded.current = true;
+      setAboutPageFields({
+        tagline: aboutTagline ?? "",
+        description: aboutDescription ?? "",
+        individual: aboutIndividual ?? "",
+        freeCompany: aboutFreeCompany ?? "",
+        proCompany: aboutProCompany ?? "",
+        contact: aboutContact ?? "",
+        email: aboutEmail ?? "",
+      });
+    }
+  }, [aboutTagline, aboutDescription, aboutIndividual, aboutFreeCompany, aboutProCompany, aboutContact, aboutEmail]);
+
   useEffect(() => {
     if (aboutCardValue !== undefined && aboutCardValue !== null) {
       setAboutText(aboutCardValue);
@@ -227,6 +264,88 @@ export default function AdminUI() {
           className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
         >
           {aboutSaved ? "✓ Saved!" : "Save About Text"}
+        </button>
+      </SectionCard>
+
+      {/* About Page Content */}
+      <SectionCard title="About Page Content">
+        <Field label="Tagline" hint="Bold text at the top of the about page">
+          <TextInput
+            value={aboutPageFields.tagline}
+            onChange={(v) => setAboutPageFields((p) => ({ ...p, tagline: v }))}
+            placeholder="A clearer way to build and live in Indonesia."
+          />
+        </Field>
+        <Field label="Description" hint="Main paragraph below the tagline. Use line breaks for multiple paragraphs.">
+          <textarea
+            value={aboutPageFields.description}
+            onChange={(e) => setAboutPageFields((p) => ({ ...p, description: e.target.value }))}
+            placeholder="Building, renovating, or choosing a home is one of the most important decisions people make..."
+            rows={5}
+            className="w-full max-w-[500px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
+          />
+        </Field>
+        <Field label="Individual Account description">
+          <textarea
+            value={aboutPageFields.individual}
+            onChange={(e) => setAboutPageFields((p) => ({ ...p, individual: e.target.value }))}
+            placeholder="For property owners & renters — browse listings, bookmark companies..."
+            rows={3}
+            className="w-full max-w-[500px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
+          />
+        </Field>
+        <Field label="Free Company Account description">
+          <textarea
+            value={aboutPageFields.freeCompany}
+            onChange={(e) => setAboutPageFields((p) => ({ ...p, freeCompany: e.target.value }))}
+            placeholder="For construction & renovation professionals — create your company profile..."
+            rows={3}
+            className="w-full max-w-[500px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
+          />
+        </Field>
+        <Field label="Pro Company Account description">
+          <textarea
+            value={aboutPageFields.proCompany}
+            onChange={(e) => setAboutPageFields((p) => ({ ...p, proCompany: e.target.value }))}
+            placeholder="Everything in Free, plus: top search ranking, AI search optimization..."
+            rows={3}
+            className="w-full max-w-[500px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
+          />
+        </Field>
+        <Field label="Contact text" hint="Text above the email link in the contact section">
+          <TextInput
+            value={aboutPageFields.contact}
+            onChange={(v) => setAboutPageFields((p) => ({ ...p, contact: v }))}
+            placeholder="Questions, feedback, or partnership inquiries?"
+          />
+        </Field>
+        <Field label="Contact email">
+          <TextInput
+            value={aboutPageFields.email}
+            onChange={(v) => setAboutPageFields((p) => ({ ...p, email: v }))}
+            placeholder="hello@solidfind.id"
+          />
+        </Field>
+        <button
+          onClick={async () => {
+            const entries: [string, string][] = [
+              ["aboutPageTagline", aboutPageFields.tagline],
+              ["aboutPageDescription", aboutPageFields.description],
+              ["aboutPageIndividual", aboutPageFields.individual],
+              ["aboutPageFreeCompany", aboutPageFields.freeCompany],
+              ["aboutPageProCompany", aboutPageFields.proCompany],
+              ["aboutPageContact", aboutPageFields.contact],
+              ["aboutPageEmail", aboutPageFields.email],
+            ];
+            for (const [key, value] of entries) {
+              await setPlatformSetting({ key, value });
+            }
+            setAboutPageSaved(true);
+            setTimeout(() => setAboutPageSaved(false), 2000);
+          }}
+          className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+        >
+          {aboutPageSaved ? "✓ Saved!" : "Save About Page"}
         </button>
       </SectionCard>
 

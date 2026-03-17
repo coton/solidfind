@@ -4,8 +4,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 export default function AboutPage() {
+  // Dynamic content from admin UI tab
+  const tagline = useQuery(api.platformSettings.get, { key: "aboutPageTagline" });
+  const description = useQuery(api.platformSettings.get, { key: "aboutPageDescription" });
+  const individual = useQuery(api.platformSettings.get, { key: "aboutPageIndividual" });
+  const freeCompany = useQuery(api.platformSettings.get, { key: "aboutPageFreeCompany" });
+  const proCompany = useQuery(api.platformSettings.get, { key: "aboutPageProCompany" });
+  const contact = useQuery(api.platformSettings.get, { key: "aboutPageContact" });
+  const email = useQuery(api.platformSettings.get, { key: "aboutPageEmail" });
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({ title: "SOLIDFIND.ID", url: window.location.href });
@@ -76,34 +86,40 @@ export default function AboutPage() {
           <div>
             {/* Tagline */}
             <p className="text-[14px] font-semibold text-[#333] mb-4">
-              A clearer way to build and live in Indonesia.
+              {tagline || "A clearer way to build and live in Indonesia."}
             </p>
 
             {/* About Description */}
-            <div className="space-y-4 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]">
-              <p>
-                Building, renovating, or choosing a home is one of the most important
-                decisions people make — yet reliable information and trustworthy contacts are often hard to find.{" "}
-                <span className="font-semibold text-[#333]">
-                  SOLIDFIND.ID exists to bring clarity, structure, and confidence to that process.
-                </span>
-              </p>
+            <div className="space-y-4 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]" style={{ whiteSpace: "pre-wrap" }}>
+              {description ? (
+                <p>{description}</p>
+              ) : (
+                <>
+                  <p>
+                    Building, renovating, or choosing a home is one of the most important
+                    decisions people make — yet reliable information and trustworthy contacts are often hard to find.{" "}
+                    <span className="font-semibold text-[#333]">
+                      SOLIDFIND.ID exists to bring clarity, structure, and confidence to that process.
+                    </span>
+                  </p>
 
-              <p>SOLIDFIND.ID is built for people who are:</p>
-              <ul className="space-y-1 ml-4">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#333]">•</span>
-                  <span>planning to build or renovate</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#333]">•</span>
-                  <span>looking for professionals they can trust</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#333]">•</span>
-                  <span>trying to make informed decisions in a complex environment</span>
-                </li>
-              </ul>
+                  <p>SOLIDFIND.ID is built for people who are:</p>
+                  <ul className="space-y-1 ml-4">
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#333]">•</span>
+                      <span>planning to build or renovate</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#333]">•</span>
+                      <span>looking for professionals they can trust</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#333]">•</span>
+                      <span>trying to make informed decisions in a complex environment</span>
+                    </li>
+                  </ul>
+                </>
+              )}
             </div>
 
             {/* Account Types */}
@@ -117,7 +133,7 @@ export default function AboutPage() {
                   INDIVIDUAL ACCOUNT
                 </h4>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  For property owners & renters — browse listings, bookmark companies, write reviews, and find the right professionals for your project. Choose your household type: Solo / Couple, Family / Co-Hosting, or Shared / Community.
+                  {individual || "For property owners & renters — browse listings, bookmark companies, write reviews, and find the right professionals for your project. Choose your household type: Solo / Couple, Family / Co-Hosting, or Shared / Community."}
                 </p>
               </div>
 
@@ -126,7 +142,7 @@ export default function AboutPage() {
                   FREE COMPANY ACCOUNT
                 </h4>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  For construction & renovation professionals — create your company profile, showcase up to 3 project photos, receive reviews, and get discovered by potential clients across Bali.
+                  {freeCompany || "For construction & renovation professionals — create your company profile, showcase up to 3 project photos, receive reviews, and get discovered by potential clients across Bali."}
                 </p>
               </div>
 
@@ -135,7 +151,7 @@ export default function AboutPage() {
                   PRO COMPANY ACCOUNT
                 </h4>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  Everything in Free, plus: top search ranking, AI search optimization, detailed analytics, 12 project photos, and access to premium ad space. Built for companies ready to grow.
+                  {proCompany || "Everything in Free, plus: top search ranking, AI search optimization, detailed analytics, 12 project photos, and access to premium ad space. Built for companies ready to grow."}
                 </p>
               </div>
             </div>
@@ -146,11 +162,11 @@ export default function AboutPage() {
                 Get in touch
               </h3>
               <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
-                Questions, feedback, or partnership inquiries?
+                {contact || "Questions, feedback, or partnership inquiries?"}
                 <br />
                 Reach us at{" "}
-                <a href="mailto:hello@solidfind.id" className="text-[#f14110] hover:underline">
-                  hello@solidfind.id
+                <a href={`mailto:${email || "hello@solidfind.id"}`} className="text-[#f14110] hover:underline">
+                  {email || "hello@solidfind.id"}
                 </a>
               </p>
             </div>
