@@ -9,7 +9,15 @@ import { AuthModal } from "@/components/AuthModal";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
+// Fallback categories shown while DB config is loading or if empty
+// Only include the initially visible ones to prevent flash of hidden tabs
 const mainCategories = [
+  { id: "construction", label: "01. Construction" },
+  { id: "renovation", label: "02. Renovation" },
+];
+
+// All categories (kept for reference / subtitle fallback)
+const allCategories = [
   { id: "construction", label: "01. Construction" },
   { id: "renovation", label: "02. Renovation" },
   { id: "architecture", label: "03. Architecture" },
@@ -253,30 +261,34 @@ function HeaderInner() {
   const searchParams = useSearchParams();
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
 
-  // Build dynamic categories from pageConfigs, falling back to hardcoded
+  // pageConfigs is undefined while loading, [] if loaded but empty
+  const pageConfigsLoaded = pageConfigs !== undefined;
+
+  // Build dynamic categories from pageConfigs, falling back to hardcoded only when loaded empty
   const dynamicCategories = useMemo(() => {
-    if (!pageConfigs || pageConfigs.length === 0) return mainCategories;
+    if (!pageConfigsLoaded) return mainCategories; // still loading — use hardcoded as initial render
+    if (pageConfigs.length === 0) return mainCategories; // loaded but empty — fallback
     return pageConfigs.map((p) => ({ id: p.categoryId, label: p.label }));
-  }, [pageConfigs]);
+  }, [pageConfigs, pageConfigsLoaded]);
 
   const dynamicSubtitles = useMemo(() => {
-    if (!pageConfigs || pageConfigs.length === 0) return categorySubtitles;
+    if (!pageConfigsLoaded || pageConfigs.length === 0) return categorySubtitles;
     const subs: Record<string, string> = {};
     for (const p of pageConfigs) {
       subs[p.categoryId] = p.subtitle;
     }
     return subs;
-  }, [pageConfigs]);
+  }, [pageConfigs, pageConfigsLoaded]);
 
   // Build a lookup for filters by categoryId
   const configFiltersMap = useMemo(() => {
-    if (!pageConfigs || pageConfigs.length === 0) return null;
+    if (!pageConfigsLoaded || pageConfigs.length === 0) return null;
     const map: Record<string, typeof pageConfigs[0]["filters"]> = {};
     for (const p of pageConfigs) {
       map[p.categoryId] = p.filters;
     }
     return map;
-  }, [pageConfigs]);
+  }, [pageConfigs, pageConfigsLoaded]);
 
   const [keywords, setKeywords] = useState(searchParams.get("search") ?? "");
   const [projectSize, setProjectSize] = useState(searchParams.get("projectSize") ?? "");
