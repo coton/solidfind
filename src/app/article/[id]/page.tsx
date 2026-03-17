@@ -6,7 +6,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ArrowLeft, Share2 } from "lucide-react";
+import Link from "next/link";
 
 export default function ArticlePage() {
   const params = useParams();
@@ -60,25 +60,32 @@ export default function ArticlePage() {
       <Header />
 
       <main className="flex-grow">
-        {/* Article Header Bar */}
-        <div className="max-w-[900px] mx-auto px-5 sm:px-0 pt-6 pb-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.back()}
-              className="w-8 h-8 flex items-center justify-center rounded-[6px] border border-[#e4e4e4] bg-white hover:border-[#333] transition-colors flex-shrink-0"
+        {/* Back + Share Row — consistent with profile page */}
+        <div className="max-w-[900px] mx-auto px-4 sm:px-0">
+          <div className="flex items-center justify-between mb-3 py-2 border-b border-[#333]/10">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
             >
-              <ArrowLeft className="w-4 h-4 text-[#333]" />
-            </button>
-            <h1 className="flex-1 text-[16px] sm:text-[20px] font-bold text-[#333] tracking-[0.32px] uppercase" style={{ fontFamily: "'Sora', sans-serif" }}>
-              {categoryLabel}
-            </h1>
-            <button
-              onClick={handleShare}
-              className="w-8 h-8 flex items-center justify-center rounded-[6px] border border-[#e4e4e4] bg-white hover:border-[#333] transition-colors flex-shrink-0"
-            >
-              <Share2 className="w-4 h-4 text-[#333]" />
+              <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>BACK</span>
+            </Link>
+
+            <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
+              <span className="font-bam text-[9px]">Share</span>
+              <svg width="8" height="5" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:stroke-[#f14110] transition-colors">
+                <path d="M4 1L9 1L9 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="stroke-[#333]/35 group-hover:stroke-[#f14110]"/>
+                <path d="M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="stroke-[#333]/35 group-hover:stroke-[#f14110]"/>
+              </svg>
             </button>
           </div>
+
+          {/* Article Title */}
+          <h1 className="text-[16px] sm:text-[20px] font-bold text-[#333] tracking-[0.32px] uppercase mb-4" style={{ fontFamily: "'Sora', sans-serif" }}>
+            {categoryLabel}
+          </h1>
         </div>
 
         {/* Cover Image */}
