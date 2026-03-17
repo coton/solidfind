@@ -5,36 +5,43 @@ import Image from "next/image";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
-import { ArrowLeft } from "lucide-react";
-
 export default function AboutPage() {
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({ title: "SOLIDFIND.ID", url: window.location.href });
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-6 sm:py-8 flex-grow w-full">
-        {/* Back Button */}
-        <div className="mb-4 sm:mb-6">
+        {/* Back + Share Row — consistent with profile page */}
+        <div className="flex items-center justify-between mb-3 py-2 border-b border-[#333]/10">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-[11px] text-[#333]/50 hover:text-[#333] transition-colors tracking-[0.22px]"
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
-            BACK
+            <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+              <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>BACK</span>
           </Link>
-        </div>
 
-        {/* Title Row */}
-        <div className="flex items-start justify-between mb-6 sm:mb-8">
-          <h1 className="text-[24px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px]">SOLIDFIND.ID</h1>
-          {/* Share Button */}
-          <button className="hover:opacity-70 transition-opacity">
-            <svg width="17" height="22" viewBox="0 0 17 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8.5 1V14M8.5 1L4 5.5M8.5 1L13 5.5" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M1 11V19C1 19.5523 1.44772 20 2 20H15C15.5523 20 16 19.5523 16 19V11" stroke="#333" strokeWidth="1.5" strokeLinecap="round"/>
+          <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
+            <span className="font-bam text-[9px]">Share</span>
+            <svg width="8" height="5" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:stroke-[#f14110] transition-colors">
+              <path d="M4 1L9 1L9 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="stroke-[#333]/35 group-hover:stroke-[#f14110]"/>
+              <path d="M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="stroke-[#333]/35 group-hover:stroke-[#f14110]"/>
             </svg>
           </button>
         </div>
+
+        {/* Title */}
+        <h1 className="text-[24px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px] mb-6 sm:mb-8">SOLIDFIND.ID</h1>
 
         {/* About Content - Mobile: stack, Desktop: side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8 lg:gap-12 mb-8 sm:mb-12">
