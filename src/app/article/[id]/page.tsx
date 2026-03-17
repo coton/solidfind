@@ -62,7 +62,8 @@ export default function ArticlePage() {
       <main className="flex-grow">
         {/* Back + Share Row — consistent with profile page */}
         <div className="max-w-[900px] mx-auto px-4 sm:px-0">
-          <div className="flex items-center justify-between mb-3 py-2 border-b border-[#333]/10">
+          {/* Back row */}
+          <div className="flex items-center mb-3 py-2 border-b border-[#333]/10">
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
@@ -72,8 +73,14 @@ export default function ArticlePage() {
               </svg>
               <span>BACK</span>
             </Link>
+          </div>
 
-            <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
+          {/* Title + Share (same row) */}
+          <div className="flex items-start justify-between mb-4">
+            <h1 className="text-[16px] sm:text-[20px] font-bold text-[#333] tracking-[0.32px] uppercase" style={{ fontFamily: "'Sora', sans-serif" }}>
+              {categoryLabel}
+            </h1>
+            <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative flex-shrink-0 mt-1">
               <span className="font-bam text-[9px]">Share</span>
               <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
                 className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
@@ -83,11 +90,6 @@ export default function ArticlePage() {
               </svg>
             </button>
           </div>
-
-          {/* Article Title */}
-          <h1 className="text-[16px] sm:text-[20px] font-bold text-[#333] tracking-[0.32px] uppercase mb-4" style={{ fontFamily: "'Sora', sans-serif" }}>
-            {categoryLabel}
-          </h1>
         </div>
 
         {/* Cover Image */}
