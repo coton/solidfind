@@ -463,11 +463,11 @@ export default function ProfilePageClient() {
                 {/* Report: grey outline → orange on hover, text stays grey */}
                 <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
                   <span className="font-bam text-[9px]">Report</span>
-                  <svg width="4" height="4.4" viewBox="0 0 20 21.9999" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  <svg width="15" height="17" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"
                     className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
                     style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
                   >
-                    <path d="M1 20.9999V12.8746M1 12.8746C7.54525 7.81917 12.4548 17.93 19 12.8746V2.45931C12.4548 7.51473 7.54525 -2.59611 1 2.45931V12.8746Z" />
+                    <path opacity="0.35" d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
                   </svg>
                 </button>
               </div>
@@ -506,11 +506,11 @@ export default function ProfilePageClient() {
               </button>
               <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
                 <span className="font-bam text-[9px]">Report</span>
-                <svg width="4" height="4.4" viewBox="0 0 20 21.9999" fill="none" xmlns="http://www.w3.org/2000/svg"
+                <svg width="15" height="17" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"
                   className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
                   style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
                 >
-                  <path d="M1 20.9999V12.8746M1 12.8746C7.54525 7.81917 12.4548 17.93 19 12.8746V2.45931C12.4548 7.51473 7.54525 -2.59611 1 2.45931V12.8746Z" />
+                  <path opacity="0.35" d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
                 </svg>
               </button>
             </div>
