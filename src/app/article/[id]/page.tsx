@@ -75,9 +75,11 @@ export default function ArticlePage() {
 
             <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
               <span className="font-bam text-[9px]">Share</span>
-              <svg width="8" height="5" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:stroke-[#f14110] transition-colors">
-                <path d="M4 1L9 1L9 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="stroke-[#333]/35 group-hover:stroke-[#f14110]"/>
-                <path d="M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="stroke-[#333]/35 group-hover:stroke-[#f14110]"/>
+              <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+              >
+                <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
               </svg>
             </button>
           </div>
