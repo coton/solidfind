@@ -162,7 +162,7 @@ function HomeContent() {
               {/* Mobile: 2-column grid with WelcomeCard + FeaturedCard */}
               <div className="sm:hidden grid grid-cols-2 gap-5">
                 <WelcomeCard />
-                <HomeFeaturedCard article={firstArticle} />
+                <HomeFeaturedCard article={firstArticle} loading={visibleArticles === undefined} />
               </div>
 
               {/* Desktop: 4-column grid of latest profiles */}
@@ -184,11 +184,7 @@ function HomeContent() {
               <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
                 <div className="flex gap-5 pb-2">
                   <WelcomeCard />
-                  <FeaturedCard
-                    image="/images/featured-bg.png"
-                    title="FEATURED ARTICLE TITLE"
-                    description="Here goes the description of this first article, re-directing to a special page."
-                  />
+                  <HomeFeaturedCard article={firstArticle} loading={visibleArticles === undefined} />
                   {companies === undefined
                     ? Array.from({ length: 6 }).map((_, i) => <ListingCardSkeleton key={i} />)
                     : listings.slice(0, 10).map((listing) => (
@@ -208,7 +204,7 @@ function HomeContent() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                 {/* First Row: Welcome + Featured + Listing Cards */}
                 <WelcomeCard />
-                <HomeFeaturedCard article={firstArticle} />
+                <HomeFeaturedCard article={firstArticle} loading={visibleArticles === undefined} />
 
                 {/* Listing Cards - show skeletons while Convex loads */}
                 {companies === undefined
@@ -246,15 +242,22 @@ function HomeContent() {
   );
 }
 
-function HomeFeaturedCard({ article }: { article?: { _id: Id<"featuredArticles">; title: string; subtitle?: string; coverImageId?: Id<"_storage">; coverImageUrl?: string } }) {
+function HomeFeaturedCard({ article, loading }: { article?: { _id: Id<"featuredArticles">; title: string; subtitle?: string; coverImageId?: Id<"_storage">; coverImageUrl?: string }; loading?: boolean }) {
   const coverUrl = useQuery(
     api.files.getUrl,
     article?.coverImageId ? { storageId: article.coverImageId } : "skip"
   );
 
+  // While loading, show a placeholder skeleton instead of fallback text
+  if (loading) {
+    return (
+      <div className="w-[210px] h-[220px] bg-[#e4e4e4] rounded-[6px] animate-pulse" />
+    );
+  }
+
   const image = coverUrl ?? article?.coverImageUrl ?? "/images/featured-bg.png";
-  const title = article?.title ?? "FEATURED ARTICLE TITLE";
-  const description = article?.subtitle ?? "Here goes the description of this first article, re-directing to a special page.";
+  const title = article?.title ?? "FEATURED ARTICLE";
+  const description = article?.subtitle ?? "";
   const href = article ? `/article/${article._id}` : "/about";
 
   return (
