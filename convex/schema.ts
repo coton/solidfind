@@ -148,6 +148,28 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_userId", ["userId"]),
 
+  featuredArticles: defineTable({
+    title: v.string(),
+    subtitle: v.optional(v.string()),
+    category: v.optional(v.string()),
+    coverImageId: v.optional(v.id("_storage")),
+    coverImageUrl: v.optional(v.string()),
+    visible: v.boolean(),
+    sortOrder: v.number(),
+    contentBlocks: v.array(v.object({
+      type: v.union(v.literal("text"), v.literal("image"), v.literal("quote"), v.literal("heading")),
+      text: v.optional(v.string()),
+      heading: v.optional(v.string()),
+      imageId: v.optional(v.id("_storage")),
+      imageUrl: v.optional(v.string()),
+      imageCaption: v.optional(v.string()),
+      quote: v.optional(v.string()),
+      quoteAuthor: v.optional(v.string()),
+    })),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_visible", ["visible"]).index("by_sortOrder", ["sortOrder"]),
+
   platformSettings: defineTable({
     key: v.string(),
     value: v.string(),

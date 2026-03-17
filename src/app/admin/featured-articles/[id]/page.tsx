@@ -1,66 +1,144 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Upload, Eye, EyeOff } from "lucide-react";
-import type { FeaturedArticle } from "../page";
+import { ArrowLeft, Upload, Eye, EyeOff, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../../convex/_generated/api";
+import { Id } from "../../../../../convex/_generated/dataModel";
+import { uploadFile } from "@/lib/uploadFile";
 
-const STORAGE_KEY = "solidfind_featured_articles";
+type BlockType = "text" | "image" | "quote" | "heading";
+
+interface ContentBlock {
+  type: BlockType;
+  text?: string;
+  heading?: string;
+  imageId?: Id<"_storage">;
+  imageUrl?: string;
+  imageCaption?: string;
+  quote?: string;
+  quoteAuthor?: string;
+}
 
 export default function EditFeaturedArticle() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
 
-  const [article, setArticle] = useState<FeaturedArticle | null>(null);
+  const article = useQuery(
+    api.featuredArticles.getById,
+    id ? { id: id as Id<"featuredArticles"> } : "skip"
+  );
+  const updateArticle = useMutation(api.featuredArticles.update);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+
+  const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [visible, setVisible] = useState(true);
+  const [coverImageId, setCoverImageId] = useState<Id<"_storage"> | undefined>();
+  const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
   const [saved, setSaved] = useState(false);
-  const [notFound, setNotFound] = useState(false);
-  const imgRef = useRef<HTMLInputElement>(null);
+  const [initialized, setInitialized] = useState(false);
 
+  const coverImgRef = useRef<HTMLInputElement>(null);
+
+  // Initialize form from article data
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) { setNotFound(true); return; }
-    try {
-      const list = JSON.parse(stored) as FeaturedArticle[];
-      const found = list.find((a) => a.id === id);
-      if (found) setArticle(found);
-      else setNotFound(true);
-    } catch { setNotFound(true); }
-  }, [id]);
+    if (article && !initialized) {
+      setTitle(article.title);
+      setSubtitle(article.subtitle ?? "");
+      setCategory(article.category ?? "");
+      setVisible(article.visible);
+      setCoverImageId(article.coverImageId);
+      setCoverImageUrl(article.coverImageUrl ?? "");
+      setContentBlocks(article.contentBlocks as ContentBlock[]);
+      setInitialized(true);
+    }
+  }, [article, initialized]);
 
-  const u = (patch: Partial<FeaturedArticle>) => setArticle((prev) => prev ? { ...prev, ...patch } : prev);
+  const handleUpload = useCallback(async (file: File): Promise<{ storageId: Id<"_storage">; url: string }> => {
+    const url = await generateUploadUrl();
+    const storageId = await uploadFile(file, url);
+    return { storageId: storageId as Id<"_storage">, url: "" };
+  }, [generateUploadUrl]);
 
-  const save = () => {
-    if (!article) return;
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const list: FeaturedArticle[] = stored ? JSON.parse(stored) : [];
-    const updated = list.map((a) => a.id === id ? article : a);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert("File must be under 5MB"); return; }
+    const { storageId } = await handleUpload(file);
+    setCoverImageId(storageId);
+    setCoverImageUrl("");
+  };
+
+  const save = async () => {
+    await updateArticle({
+      id: id as Id<"featuredArticles">,
+      title,
+      subtitle: subtitle || undefined,
+      category: category || undefined,
+      visible,
+      coverImageId,
+      coverImageUrl: coverImageUrl || undefined,
+      contentBlocks,
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => u({ imageUrl: ev.target?.result as string });
-    reader.readAsDataURL(file);
+  // Block operations
+  const addBlock = (type: BlockType) => {
+    const block: ContentBlock = { type };
+    if (type === "text") block.text = "";
+    if (type === "heading") block.heading = "";
+    if (type === "quote") { block.quote = ""; block.quoteAuthor = ""; }
+    setContentBlocks([...contentBlocks, block]);
   };
 
-  if (notFound) return (
-    <div className="text-center py-12">
-      <p className="text-[14px] text-[#333]/50 mb-4">Article not found.</p>
-      <Link href="/admin/featured-articles" className="text-[12px] text-[#333] underline">← Back to list</Link>
-    </div>
-  );
+  const updateBlock = (index: number, patch: Partial<ContentBlock>) => {
+    setContentBlocks(contentBlocks.map((b, i) => i === index ? { ...b, ...patch } : b));
+  };
 
-  if (!article) return (
-    <div className="flex justify-center py-12">
-      <div className="w-5 h-5 border-2 border-[#333] border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  const removeBlock = (index: number) => {
+    setContentBlocks(contentBlocks.filter((_, i) => i !== index));
+  };
+
+  const moveBlock = (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= contentBlocks.length) return;
+    const updated = [...contentBlocks];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    setContentBlocks(updated);
+  };
+
+  const handleBlockImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert("File must be under 5MB"); return; }
+    const { storageId } = await handleUpload(file);
+    updateBlock(index, { imageId: storageId, imageUrl: "" });
+  };
+
+  if (article === undefined) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="w-5 h-5 border-2 border-[#333] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (article === null) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-[14px] text-[#333]/50 mb-4">Article not found.</p>
+        <Link href="/admin/featured-articles" className="text-[12px] text-[#333] underline">Back to list</Link>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -71,87 +149,212 @@ export default function EditFeaturedArticle() {
         </Link>
         <h1 className="text-[24px] font-bold text-[#333] tracking-[0.48px] flex-1">Edit Article</h1>
         <button
-          onClick={() => u({ visible: !article.visible })}
+          onClick={() => setVisible(!visible)}
           className={`flex items-center gap-2 h-9 px-3 rounded-[6px] border text-[11px] font-medium transition-colors ${
-            article.visible
+            visible
               ? "border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
               : "border-[#e4e4e4] text-[#333]/50 hover:border-[#333]"
           }`}
         >
-          {article.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-          {article.visible ? "Visible" : "Hidden"}
+          {visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+          {visible ? "Visible" : "Hidden"}
         </button>
         <button
           onClick={save}
           className="h-9 px-5 rounded-[6px] bg-[#333] text-white text-[12px] font-medium hover:bg-[#111] transition-colors"
         >
-          {saved ? "✓ Saved!" : "Save"}
+          {saved ? "Saved!" : "Save"}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Left: form */}
-        <div className="space-y-4">
-          <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-6">
-            <h2 className="text-[13px] font-semibold text-[#333] mb-4 pb-3 border-b border-[#e4e4e4]">Content</h2>
-
-            <div className="space-y-4">
-              {[
-                { label: "Title", key: "title", placeholder: "Article title" },
-                { label: "Subtitle", key: "subtitle", placeholder: "Short description" },
-                { label: "Category", key: "category", placeholder: "e.g. Architecture, Interior" },
-                { label: "Link URL", key: "linkUrl", placeholder: "https://..." },
-              ].map(({ label, key, placeholder }) => (
-                <div key={key}>
-                  <label className="block text-[11px] font-medium text-[#333]/70 mb-1">{label}</label>
-                  <input
-                    type="text"
-                    value={article[key as keyof FeaturedArticle] as string}
-                    onChange={(e) => u({ [key]: e.target.value })}
-                    placeholder={placeholder}
-                    className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
-                  />
-                </div>
-              ))}
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {/* Left: basic fields */}
+        <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-6">
+          <h2 className="text-[13px] font-semibold text-[#333] mb-4 pb-3 border-b border-[#e4e4e4]">Content</h2>
+          <div className="space-y-4">
+            {[
+              { label: "Title", value: title, setter: setTitle, placeholder: "Article title" },
+              { label: "Subtitle", value: subtitle, setter: setSubtitle, placeholder: "Short description" },
+              { label: "Category", value: category, setter: setCategory, placeholder: "e.g. Architecture, Interior" },
+            ].map(({ label, value, setter, placeholder }) => (
+              <div key={label}>
+                <label className="block text-[11px] font-medium text-[#333]/70 mb-1">{label}</label>
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => setter(e.target.value)}
+                  placeholder={placeholder}
+                  className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
+                />
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Right: image */}
-        <div>
-          <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-6">
-            <h2 className="text-[13px] font-semibold text-[#333] mb-4 pb-3 border-b border-[#e4e4e4]">Card Image</h2>
+        {/* Right: cover image */}
+        <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-6">
+          <h2 className="text-[13px] font-semibold text-[#333] mb-4 pb-3 border-b border-[#e4e4e4]">Cover Image</h2>
 
-            <div className="mb-3">
-              <label className="block text-[11px] font-medium text-[#333]/70 mb-1">Image URL</label>
-              <input
-                type="text"
-                value={article.imageUrl}
-                onChange={(e) => u({ imageUrl: e.target.value })}
-                placeholder="https://..."
-                className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={() => imgRef.current?.click()}
-              className="flex items-center gap-2 h-9 px-4 rounded-[6px] border border-[#e4e4e4] text-[11px] text-[#333]/70 hover:border-[#333] hover:text-[#333] transition-colors mb-4"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              Upload image
-            </button>
-            <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
-
-            {article.imageUrl && (
-              <div className="rounded-[8px] overflow-hidden border border-[#e4e4e4] aspect-video">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={article.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-              </div>
-            )}
+          <div className="mb-3">
+            <label className="block text-[11px] font-medium text-[#333]/70 mb-1">Image URL (fallback)</label>
+            <input
+              type="text"
+              value={coverImageUrl}
+              onChange={(e) => { setCoverImageUrl(e.target.value); setCoverImageId(undefined); }}
+              placeholder="https://..."
+              className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
+            />
           </div>
+
+          <button
+            type="button"
+            onClick={() => coverImgRef.current?.click()}
+            className="flex items-center gap-2 h-9 px-4 rounded-[6px] border border-[#e4e4e4] text-[11px] text-[#333]/70 hover:border-[#333] hover:text-[#333] transition-colors mb-4"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            Upload image
+          </button>
+          <input ref={coverImgRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+
+          <CoverImagePreview coverImageId={coverImageId} coverImageUrl={coverImageUrl} />
         </div>
       </div>
+
+      {/* Content Blocks Editor */}
+      <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-6">
+        <h2 className="text-[13px] font-semibold text-[#333] mb-4 pb-3 border-b border-[#e4e4e4]">Content Blocks</h2>
+
+        {contentBlocks.length === 0 && (
+          <p className="text-[11px] text-[#333]/40 mb-4">No content blocks yet. Add one below.</p>
+        )}
+
+        <div className="space-y-3 mb-4">
+          {contentBlocks.map((block, index) => (
+            <div key={index} className="border border-[#e4e4e4] rounded-[6px] p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-[10px] font-semibold text-[#333]/50 uppercase tracking-wider">{block.type}</span>
+                <div className="flex-1" />
+                <button onClick={() => moveBlock(index, -1)} disabled={index === 0} className="w-7 h-7 flex items-center justify-center rounded border border-[#e4e4e4] hover:border-[#333] disabled:opacity-20 transition-colors">
+                  <ChevronUp className="w-3.5 h-3.5 text-[#333]" />
+                </button>
+                <button onClick={() => moveBlock(index, 1)} disabled={index === contentBlocks.length - 1} className="w-7 h-7 flex items-center justify-center rounded border border-[#e4e4e4] hover:border-[#333] disabled:opacity-20 transition-colors">
+                  <ChevronDown className="w-3.5 h-3.5 text-[#333]" />
+                </button>
+                <button onClick={() => removeBlock(index)} className="w-7 h-7 flex items-center justify-center rounded border border-[#e4e4e4] hover:border-red-300 hover:bg-red-50 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5 text-[#333]/40" />
+                </button>
+              </div>
+
+              {block.type === "heading" && (
+                <input
+                  type="text"
+                  value={block.heading ?? ""}
+                  onChange={(e) => updateBlock(index, { heading: e.target.value })}
+                  placeholder="Heading text"
+                  className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[13px] font-semibold text-[#333] outline-none focus:border-[#333] transition-colors"
+                />
+              )}
+
+              {block.type === "text" && (
+                <textarea
+                  value={block.text ?? ""}
+                  onChange={(e) => updateBlock(index, { text: e.target.value })}
+                  placeholder="Paragraph text..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
+                />
+              )}
+
+              {block.type === "image" && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={block.imageUrl ?? ""}
+                      onChange={(e) => updateBlock(index, { imageUrl: e.target.value, imageId: undefined })}
+                      placeholder="Image URL or upload"
+                      className="flex-1 h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
+                    />
+                    <label className="flex items-center gap-1.5 h-9 px-3 rounded-[6px] border border-[#e4e4e4] text-[11px] text-[#333]/70 hover:border-[#333] hover:text-[#333] transition-colors cursor-pointer">
+                      <Upload className="w-3.5 h-3.5" />
+                      Upload
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleBlockImageUpload(index, e)} />
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    value={block.imageCaption ?? ""}
+                    onChange={(e) => updateBlock(index, { imageCaption: e.target.value })}
+                    placeholder="Caption (optional)"
+                    className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333]/70 outline-none focus:border-[#333] transition-colors"
+                  />
+                  <BlockImagePreview imageId={block.imageId} imageUrl={block.imageUrl} />
+                </div>
+              )}
+
+              {block.type === "quote" && (
+                <div className="space-y-2">
+                  <textarea
+                    value={block.quote ?? ""}
+                    onChange={(e) => updateBlock(index, { quote: e.target.value })}
+                    placeholder="Quote text..."
+                    rows={2}
+                    className="w-full px-3 py-2 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] italic outline-none focus:border-[#333] transition-colors resize-y"
+                  />
+                  <input
+                    type="text"
+                    value={block.quoteAuthor ?? ""}
+                    onChange={(e) => updateBlock(index, { quoteAuthor: e.target.value })}
+                    placeholder="Author name"
+                    className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333]/70 outline-none focus:border-[#333] transition-colors"
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Add Block */}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-[#333]/50">Add block:</span>
+          {(["heading", "text", "image", "quote"] as BlockType[]).map((type) => (
+            <button
+              key={type}
+              onClick={() => addBlock(type)}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-[6px] border border-[#e4e4e4] text-[11px] text-[#333]/70 hover:border-[#333] hover:text-[#333] transition-colors capitalize"
+            >
+              <Plus className="w-3 h-3" />
+              {type}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CoverImagePreview({ coverImageId, coverImageUrl }: { coverImageId?: Id<"_storage">; coverImageUrl: string }) {
+  const url = useQuery(api.files.getUrl, coverImageId ? { storageId: coverImageId } : "skip");
+  const displayUrl = url ?? coverImageUrl;
+
+  if (!displayUrl) return null;
+  return (
+    <div className="rounded-[8px] overflow-hidden border border-[#e4e4e4] aspect-video">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={displayUrl} alt="Cover preview" className="w-full h-full object-cover" />
+    </div>
+  );
+}
+
+function BlockImagePreview({ imageId, imageUrl }: { imageId?: Id<"_storage">; imageUrl?: string }) {
+  const url = useQuery(api.files.getUrl, imageId ? { storageId: imageId } : "skip");
+  const displayUrl = url ?? imageUrl;
+
+  if (!displayUrl) return null;
+  return (
+    <div className="rounded-[6px] overflow-hidden border border-[#e4e4e4] max-w-[300px] aspect-video">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={displayUrl} alt="Block image preview" className="w-full h-full object-cover" />
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Eye, EyeOff, Upload } from "lucide-react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
 
 const STORAGE_KEY = "solidfind_ui_settings";
 
@@ -154,6 +156,18 @@ export default function AdminUI() {
   const [termsFile, setTermsFile] = useState("");
   const termsRef = useRef<HTMLInputElement>(null);
 
+  // About Card (Convex-backed)
+  const aboutCardValue = useQuery(api.platformSettings.get, { key: "aboutCardDescription" });
+  const setPlatformSetting = useMutation(api.platformSettings.set);
+  const [aboutText, setAboutText] = useState("");
+  const [aboutSaved, setAboutSaved] = useState(false);
+
+  useEffect(() => {
+    if (aboutCardValue !== undefined && aboutCardValue !== null) {
+      setAboutText(aboutCardValue);
+    }
+  }, [aboutCardValue]);
+
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -192,6 +206,29 @@ export default function AdminUI() {
           {saved ? "✓ Saved!" : "Save All"}
         </button>
       </div>
+
+      {/* About Card */}
+      <SectionCard title="About Card">
+        <Field label="Description text" hint="Shown on the WelcomeCard on the homepage. Falls back to default if empty.">
+          <textarea
+            value={aboutText}
+            onChange={(e) => setAboutText(e.target.value)}
+            placeholder="We help you find trusted professionals to build, renovate, design and shape the places you live in."
+            rows={3}
+            className="w-full max-w-[400px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
+          />
+        </Field>
+        <button
+          onClick={async () => {
+            await setPlatformSetting({ key: "aboutCardDescription", value: aboutText });
+            setAboutSaved(true);
+            setTimeout(() => setAboutSaved(false), 2000);
+          }}
+          className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+        >
+          {aboutSaved ? "✓ Saved!" : "Save About Text"}
+        </button>
+      </SectionCard>
 
       {/* Contact URL */}
       <SectionCard title="Contact URL">

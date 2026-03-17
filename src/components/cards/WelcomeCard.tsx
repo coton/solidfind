@@ -1,7 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+
+const DEFAULT_TEXT = "We help you find trusted professionals to build, renovate, design and shape the places you live in.";
 
 export function WelcomeCard() {
+  const aboutText = useQuery(api.platformSettings.get, { key: "aboutCardDescription" });
+  const description = aboutText || DEFAULT_TEXT;
+
   return (
     <Link href="/about" className="block">
       <div className="relative w-[210px] h-[220px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
@@ -21,7 +30,7 @@ export function WelcomeCard() {
         {/* Text bottom section - 11px font size, 4 lines max, 20px from gradient */}
         <div className="absolute top-[140px] left-[10px] right-[10px] bottom-[20px]">
           <p className="text-[11px] leading-[15px] tracking-[0.22px] text-[#333] font-bold line-clamp-4" style={{ fontFamily: "'Sora', sans-serif" }}>
-            We help you find trusted professionals to build, renovate, design and shape the places you live in.
+            {description}
           </p>
         </div>
       </div>

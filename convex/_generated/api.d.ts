@@ -11,6 +11,7 @@
 import type * as accountDeletion from "../accountDeletion.js";
 import type * as auditLogs from "../auditLogs.js";
 import type * as companies from "../companies.js";
+import type * as featuredArticles from "../featuredArticles.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as migrations from "../migrations.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   accountDeletion: typeof accountDeletion;
   auditLogs: typeof auditLogs;
   companies: typeof companies;
+  featuredArticles: typeof featuredArticles;
   files: typeof files;
   http: typeof http;
   migrations: typeof migrations;

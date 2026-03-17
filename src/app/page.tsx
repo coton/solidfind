@@ -49,6 +49,8 @@ function HomeContent() {
   });
 
   const latestCompanies = useQuery(api.companies.latest);
+  const visibleArticles = useQuery(api.featuredArticles.listVisible);
+  const firstArticle = visibleArticles?.[0];
 
   // Get current user for bookmarks
   const currentUser = useQuery(
@@ -160,11 +162,7 @@ function HomeContent() {
               {/* Mobile: 2-column grid with WelcomeCard + FeaturedCard */}
               <div className="sm:hidden grid grid-cols-2 gap-5">
                 <WelcomeCard />
-                <FeaturedCard
-                  image="/images/featured-bg.png"
-                  title="FEATURED ARTICLE TITLE"
-                  description="Here goes the description of this first article, re-directing to a special page."
-                />
+                <HomeFeaturedCard article={firstArticle} />
               </div>
 
               {/* Desktop: 4-column grid of latest profiles */}
@@ -210,11 +208,7 @@ function HomeContent() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                 {/* First Row: Welcome + Featured + Listing Cards */}
                 <WelcomeCard />
-                <FeaturedCard
-                  image="/images/featured-bg.png"
-                  title="FEATURED ARTICLE TITLE"
-                  description="Here goes the description of this first article, re-directing to a special page."
-                />
+                <HomeFeaturedCard article={firstArticle} />
 
                 {/* Listing Cards - show skeletons while Convex loads */}
                 {companies === undefined
@@ -249,5 +243,26 @@ function HomeContent() {
 
       <Footer />
     </div>
+  );
+}
+
+function HomeFeaturedCard({ article }: { article?: { _id: Id<"featuredArticles">; title: string; subtitle?: string; coverImageId?: Id<"_storage">; coverImageUrl?: string } }) {
+  const coverUrl = useQuery(
+    api.files.getUrl,
+    article?.coverImageId ? { storageId: article.coverImageId } : "skip"
+  );
+
+  const image = coverUrl ?? article?.coverImageUrl ?? "/images/featured-bg.png";
+  const title = article?.title ?? "FEATURED ARTICLE TITLE";
+  const description = article?.subtitle ?? "Here goes the description of this first article, re-directing to a special page.";
+  const href = article ? `/article/${article._id}` : "/about";
+
+  return (
+    <FeaturedCard
+      image={image}
+      title={title}
+      description={description}
+      href={href}
+    />
   );
 }
