@@ -2,7 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 const contentBlockValidator = v.object({
-  type: v.union(v.literal("text"), v.literal("image"), v.literal("quote"), v.literal("heading")),
+  type: v.union(v.literal("text"), v.literal("image"), v.literal("quote"), v.literal("heading"), v.literal("video")),
   text: v.optional(v.string()),
   heading: v.optional(v.string()),
   imageId: v.optional(v.id("_storage")),
@@ -10,6 +10,8 @@ const contentBlockValidator = v.object({
   imageCaption: v.optional(v.string()),
   quote: v.optional(v.string()),
   quoteAuthor: v.optional(v.string()),
+  videoUrl: v.optional(v.string()),
+  videoStorageId: v.optional(v.id("_storage")),
 });
 
 export const list = query({

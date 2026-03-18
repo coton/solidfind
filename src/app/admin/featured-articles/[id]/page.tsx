@@ -9,7 +9,7 @@ import { api } from "../../../../../convex/_generated/api";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { uploadFile } from "@/lib/uploadFile";
 
-type BlockType = "text" | "image" | "quote" | "heading";
+type BlockType = "text" | "image" | "quote" | "heading" | "video";
 
 interface ContentBlock {
   type: BlockType;
@@ -20,6 +20,8 @@ interface ContentBlock {
   imageCaption?: string;
   quote?: string;
   quoteAuthor?: string;
+  videoUrl?: string;
+  videoStorageId?: Id<"_storage">;
 }
 
 export default function EditFeaturedArticle() {
@@ -96,6 +98,7 @@ export default function EditFeaturedArticle() {
     if (type === "text") block.text = "";
     if (type === "heading") block.heading = "";
     if (type === "quote") { block.quote = ""; block.quoteAuthor = ""; }
+    if (type === "video") { block.videoUrl = ""; }
     setContentBlocks([...contentBlocks, block]);
   };
 
@@ -121,6 +124,14 @@ export default function EditFeaturedArticle() {
     if (file.size > 5 * 1024 * 1024) { alert("File must be under 5MB"); return; }
     const { storageId } = await handleUpload(file);
     updateBlock(index, { imageId: storageId, imageUrl: "" });
+  };
+
+  const handleBlockVideoUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 50 * 1024 * 1024) { alert("File must be under 50MB"); return; }
+    const { storageId } = await handleUpload(file);
+    updateBlock(index, { videoStorageId: storageId, videoUrl: "" });
   };
 
   if (article === undefined) {
@@ -310,6 +321,26 @@ export default function EditFeaturedArticle() {
                   />
                 </div>
               )}
+
+              {block.type === "video" && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={block.videoUrl ?? ""}
+                      onChange={(e) => updateBlock(index, { videoUrl: e.target.value, videoStorageId: undefined })}
+                      placeholder="Video URL or upload"
+                      className="flex-1 h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
+                    />
+                    <label className="flex items-center gap-1.5 h-9 px-3 rounded-[6px] border border-[#e4e4e4] text-[11px] text-[#333]/70 hover:border-[#333] hover:text-[#333] transition-colors cursor-pointer">
+                      <Upload className="w-3.5 h-3.5" />
+                      Upload
+                      <input type="file" accept="video/*" className="hidden" onChange={(e) => handleBlockVideoUpload(index, e)} />
+                    </label>
+                  </div>
+                  <BlockVideoPreview videoStorageId={block.videoStorageId} videoUrl={block.videoUrl} />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -317,7 +348,7 @@ export default function EditFeaturedArticle() {
         {/* Add Block */}
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-[#333]/50">Add block:</span>
-          {(["heading", "text", "image", "quote"] as BlockType[]).map((type) => (
+          {(["heading", "text", "image", "quote", "video"] as BlockType[]).map((type) => (
             <button
               key={type}
               onClick={() => addBlock(type)}
@@ -355,6 +386,18 @@ function BlockImagePreview({ imageId, imageUrl }: { imageId?: Id<"_storage">; im
     <div className="rounded-[6px] overflow-hidden border border-[#e4e4e4] max-w-[300px] aspect-video">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={displayUrl} alt="Block image preview" className="w-full h-full object-cover" />
+    </div>
+  );
+}
+
+function BlockVideoPreview({ videoStorageId, videoUrl }: { videoStorageId?: Id<"_storage">; videoUrl?: string }) {
+  const url = useQuery(api.files.getUrl, videoStorageId ? { storageId: videoStorageId } : "skip");
+  const displayUrl = url ?? videoUrl;
+
+  if (!displayUrl) return null;
+  return (
+    <div className="rounded-[6px] overflow-hidden border border-[#e4e4e4] max-w-[300px]">
+      <video src={displayUrl} controls className="w-full" />
     </div>
   );
 }

@@ -53,17 +53,14 @@ export default function ArticlePage() {
     }
   };
 
-  const categoryLabel = article.category ? `FOCUS ON: ${article.category.toUpperCase()}` : article.title.toUpperCase();
-
   return (
     <div className="min-h-screen bg-[#ececec] flex flex-col">
       <Header />
 
       <main className="flex-grow">
-        {/* Back + Share Row — consistent with profile page */}
         <div className="max-w-[900px] mx-auto px-4 sm:px-0">
           {/* Back row */}
-          <div className="flex items-center mb-3 py-2 border-b border-[#333]/10">
+          <div className="flex items-center py-2 border-b border-[#333]/10">
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
@@ -75,10 +72,10 @@ export default function ArticlePage() {
             </Link>
           </div>
 
-          {/* Title + Share (same row) */}
-          <div className="flex items-start justify-between mb-4">
+          {/* Title + Share (same row) — equal spacing above (from border) and below (to subtitle/image) */}
+          <div className="flex items-start justify-between py-6">
             <h1 className="text-[16px] sm:text-[20px] font-bold text-[#333] tracking-[0.32px] uppercase" style={{ fontFamily: "'Sora', sans-serif" }}>
-              {categoryLabel}
+              {article.title.toUpperCase()}
             </h1>
             <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative flex-shrink-0 mt-1">
               <span className="font-bam text-[9px]">Share</span>
@@ -90,20 +87,20 @@ export default function ArticlePage() {
               </svg>
             </button>
           </div>
+
+          {/* Subtitle in legend style */}
+          {article.subtitle && (
+            <p className="font-bam text-[11px] text-[#333]/70 mb-6 text-left">
+              {article.subtitle}
+            </p>
+          )}
         </div>
 
         {/* Cover Image */}
         <ArticleCoverImage coverImageId={article.coverImageId} coverImageUrl={article.coverImageUrl} title={article.title} />
 
         {/* Article Content */}
-        <div className="max-w-[700px] mx-auto px-5 sm:px-0 py-8">
-          {/* Intro: subtitle */}
-          {article.subtitle && (
-            <p className="text-[14px] leading-[22px] text-[#333]/70 mb-8" style={{ fontFamily: "'Sora', sans-serif" }}>
-              {article.subtitle}
-            </p>
-          )}
-
+        <div className="max-w-[900px] mx-auto px-5 sm:px-0 py-8">
           {/* Content Blocks */}
           <div className="space-y-8">
             {article.contentBlocks.map((block, index) => (
@@ -133,7 +130,7 @@ function ArticleCoverImage({ coverImageId, coverImageUrl, title }: { coverImageI
   );
 }
 
-function ContentBlockRenderer({ block }: { block: { type: string; text?: string; heading?: string; imageId?: Id<"_storage">; imageUrl?: string; imageCaption?: string; quote?: string; quoteAuthor?: string } }) {
+function ContentBlockRenderer({ block }: { block: { type: string; text?: string; heading?: string; imageId?: Id<"_storage">; imageUrl?: string; imageCaption?: string; quote?: string; quoteAuthor?: string; videoUrl?: string; videoStorageId?: Id<"_storage"> } }) {
   if (block.type === "heading") {
     return (
       <h2 className="text-[20px] sm:text-[24px] font-bold text-[#333] leading-[28px] sm:leading-[32px]" style={{ fontFamily: "'Sora', sans-serif" }}>
@@ -156,8 +153,8 @@ function ContentBlockRenderer({ block }: { block: { type: string; text?: string;
 
   if (block.type === "quote") {
     return (
-      <blockquote className="border-l-[3px] border-[#f14110] pl-5 py-2">
-        <p className="text-[15px] leading-[24px] text-[#333] italic" style={{ fontFamily: "'Sora', sans-serif" }}>
+      <blockquote className="py-2">
+        <p className="text-[18px] sm:text-[20px] leading-[26px] sm:leading-[28px] text-[#333] font-bold" style={{ fontFamily: "'Sora', sans-serif" }}>
           &ldquo;{block.quote}&rdquo;
         </p>
         {block.quoteAuthor && (
@@ -167,6 +164,10 @@ function ContentBlockRenderer({ block }: { block: { type: string; text?: string;
         )}
       </blockquote>
     );
+  }
+
+  if (block.type === "video") {
+    return <BlockVideo videoStorageId={block.videoStorageId} videoUrl={block.videoUrl} />;
   }
 
   return null;
@@ -187,5 +188,17 @@ function BlockImage({ imageId, imageUrl, caption }: { imageId?: Id<"_storage">; 
         <figcaption className="text-[11px] text-[#333]/50 mt-2 italic">{caption}</figcaption>
       )}
     </figure>
+  );
+}
+
+function BlockVideo({ videoStorageId, videoUrl }: { videoStorageId?: Id<"_storage">; videoUrl?: string }) {
+  const url = useQuery(api.files.getUrl, videoStorageId ? { storageId: videoStorageId } : "skip");
+  const displayUrl = url ?? videoUrl;
+
+  if (!displayUrl) return null;
+  return (
+    <div className="rounded-[8px] overflow-hidden">
+      <video src={displayUrl} controls className="w-full" />
+    </div>
   );
 }
