@@ -74,7 +74,7 @@ export default function ArticlePage() {
 
           {/* Title + Share (same row) — equal spacing above (from border) and below (to subtitle/image) */}
           <div className="flex items-start justify-between py-6">
-            <h1 className="text-[16px] sm:text-[20px] font-bold text-[#333] tracking-[0.32px] uppercase" style={{ fontFamily: "'Sora', sans-serif" }}>
+            <h1 className="text-[20px] sm:text-[24px] font-bold text-[#333] leading-[28px] sm:leading-[32px] uppercase" style={{ fontFamily: "'Sora', sans-serif" }}>
               {article.title.toUpperCase()}
             </h1>
             <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative flex-shrink-0 mt-1">
@@ -101,9 +101,23 @@ export default function ArticlePage() {
 
         {/* Article Content */}
         <div className="max-w-[900px] mx-auto px-5 sm:px-0 py-8">
-          {/* Content Blocks */}
+          {/* Content Blocks — skip heading blocks that duplicate the page title */}
           <div className="space-y-8">
-            {article.contentBlocks.map((block, index) => (
+            {article.contentBlocks
+              .filter((block) => {
+                if (block.type === "heading" && block.heading) {
+                  const headingNorm = block.heading.toLowerCase().replace(/[^a-z0-9]/g, "");
+                  const titleNorm = article.title.toLowerCase().replace(/[^a-z0-9]/g, "");
+                  // Also check with "focus on:" prefix removed
+                  const headingClean = headingNorm.replace(/^focuson/, "");
+                  const titleClean = titleNorm.replace(/^focuson/, "");
+                  if (headingNorm === titleNorm || headingClean === titleClean || headingNorm === titleClean || headingClean === titleNorm) {
+                    return false;
+                  }
+                }
+                return true;
+              })
+              .map((block, index) => (
               <ContentBlockRenderer key={index} block={block} />
             ))}
           </div>
