@@ -73,7 +73,7 @@ export default function ArticlePage() {
           </div>
 
           {/* Title + Share (same row) — equal spacing above (from border) and below (to subtitle/image) */}
-          <div className="flex items-start justify-between py-6">
+          <div className="flex items-start justify-between pt-6 pb-8">
             <h1 className="text-[20px] sm:text-[24px] font-bold text-[#333] leading-[28px] sm:leading-[32px] uppercase" style={{ fontFamily: "'Sora', sans-serif" }}>
               {article.title.toUpperCase()}
             </h1>
