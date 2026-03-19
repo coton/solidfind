@@ -186,7 +186,6 @@ export default function EditFeaturedArticle() {
             {[
               { label: "Title", value: title, setter: setTitle, placeholder: "Article title" },
               { label: "Subtitle", value: subtitle, setter: setSubtitle, placeholder: "Short description" },
-              { label: "Category", value: category, setter: setCategory, placeholder: "e.g. Architecture, Interior" },
             ].map(({ label, value, setter, placeholder }) => (
               <div key={label}>
                 <label className="block text-[11px] font-medium text-[#333]/70 mb-1">{label}</label>
@@ -199,6 +198,21 @@ export default function EditFeaturedArticle() {
                 />
               </div>
             ))}
+            <div>
+              <label className="block text-[11px] font-medium text-[#333]/70 mb-1">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors bg-white"
+              >
+                <option value="">— Select category —</option>
+                <option value="construction">Construction</option>
+                <option value="renovation">Renovation</option>
+                <option value="architecture">Architecture</option>
+                <option value="interior">Interior</option>
+                <option value="real-estate">Real Estate</option>
+              </select>
+            </div>
           </div>
         </div>
 

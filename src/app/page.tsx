@@ -49,8 +49,9 @@ function HomeContent() {
   });
 
   const latestCompanies = useQuery(api.companies.latest);
-  const visibleArticles = useQuery(api.featuredArticles.listVisible);
-  const firstArticle = visibleArticles?.[0];
+  const visibleArticles = useQuery(api.featuredArticles.listVisibleByCategory, {
+    category: categoryParam,
+  });
 
   // Get current user for bookmarks
   const currentUser = useQuery(
@@ -159,10 +160,15 @@ function HomeContent() {
                 In the meantime, here are the latest added profiles:
               </p>
 
-              {/* Mobile: 2-column grid with WelcomeCard + FeaturedCard */}
+              {/* Mobile: 2-column grid with WelcomeCard + FeaturedCards */}
               <div className="sm:hidden grid grid-cols-2 gap-5">
                 <WelcomeCard />
-                <HomeFeaturedCard article={firstArticle} loading={visibleArticles === undefined} />
+                {visibleArticles === undefined
+                  ? <HomeFeaturedCard loading />
+                  : visibleArticles.map((article) => (
+                    <HomeFeaturedCard key={article._id} article={article} />
+                  ))
+                }
               </div>
 
               {/* Desktop: 4-column grid of latest profiles */}
@@ -184,7 +190,12 @@ function HomeContent() {
               <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
                 <div className="flex gap-5 pb-2">
                   <WelcomeCard />
-                  <HomeFeaturedCard article={firstArticle} loading={visibleArticles === undefined} />
+                  {visibleArticles === undefined
+                    ? <HomeFeaturedCard loading />
+                    : visibleArticles.map((article) => (
+                      <HomeFeaturedCard key={article._id} article={article} />
+                    ))
+                  }
                   {companies === undefined
                     ? Array.from({ length: 6 }).map((_, i) => <ListingCardSkeleton key={i} />)
                     : listings.slice(0, 10).map((listing) => (
@@ -204,7 +215,12 @@ function HomeContent() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                 {/* First Row: Welcome + Featured + Listing Cards */}
                 <WelcomeCard />
-                <HomeFeaturedCard article={firstArticle} loading={visibleArticles === undefined} />
+                {visibleArticles === undefined
+                  ? <HomeFeaturedCard loading />
+                  : visibleArticles.map((article) => (
+                    <HomeFeaturedCard key={article._id} article={article} />
+                  ))
+                }
 
                 {/* Listing Cards - show skeletons while Convex loads */}
                 {companies === undefined

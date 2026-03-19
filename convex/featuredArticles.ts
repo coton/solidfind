@@ -35,6 +35,24 @@ export const listVisible = query({
   },
 });
 
+export const listVisibleByCategory = query({
+  args: { category: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const all = await ctx.db
+      .query("featuredArticles")
+      .withIndex("by_sortOrder")
+      .collect();
+    return all.filter((a) => {
+      if (!a.visible) return false;
+      if (args.category) {
+        return a.category?.toLowerCase() === args.category.toLowerCase();
+      }
+      // No category filter — show articles without a category (homepage general)
+      return !a.category;
+    });
+  },
+});
+
 export const getById = query({
   args: { id: v.id("featuredArticles") },
   handler: async (ctx, args) => {
