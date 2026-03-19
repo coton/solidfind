@@ -49,8 +49,11 @@ function HomeContent() {
   });
 
   const latestCompanies = useQuery(api.companies.latest);
-  const visibleArticles = useQuery(api.featuredArticles.listVisibleByCategory, {
-    category: categoryParam,
+  const allVisibleArticles = useQuery(api.featuredArticles.listVisible);
+  // Filter articles by current category if one is selected, otherwise show all
+  const visibleArticles = allVisibleArticles?.filter((a) => {
+    if (!categoryParam) return true; // no filter = show all
+    return a.category?.toLowerCase() === categoryParam.toLowerCase();
   });
 
   // Get current user for bookmarks
