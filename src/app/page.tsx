@@ -36,11 +36,6 @@ function HomeContent() {
 
   const hasFilters = !!(categoryParam || locationParam || searchParam || projectSizeParam);
 
-  // Items per page: 3 rows (10 cards) default, 7 rows (26 cards) with filters/search
-  // Row 1 has WelcomeCard + FeaturedCard + 2 listings
-  // Subsequent rows have 4 listings each
-  const itemsPerPage = hasFilters ? 26 : 10;
-
   const companies = useQuery(api.companies.list, {
     category: categoryParam,
     location: locationParam,
@@ -55,6 +50,13 @@ function HomeContent() {
     if (!categoryParam) return true; // no filter = show all
     return a.category?.toLowerCase() === categoryParam.toLowerCase();
   });
+
+  // Always display exactly 12 cards total on the homepage grid (desktop).
+  // Special cards = 1 (WelcomeCard) + number of visible featured articles.
+  // With filters/search, show 26 listing cards (no special cards in grid).
+  const TOTAL_GRID_CARDS = 12;
+  const specialCardCount = 1 + (visibleArticles?.length ?? 1); // 1 for WelcomeCard + featured articles (default 1 while loading)
+  const itemsPerPage = hasFilters ? 26 : Math.max(1, TOTAL_GRID_CARDS - specialCardCount);
 
   // Get current user for bookmarks
   const currentUser = useQuery(
