@@ -13,6 +13,7 @@ import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
 import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
+import { useProEnabled } from "@/hooks/useProEnabled";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { starFillColor, starColor } from "@/lib/starColors";
@@ -150,6 +151,7 @@ export default function ProfilePageClient() {
   const companyId = params.id as string;
   const { user: clerkUser } = useUser();
   const [isSaved, setIsSaved] = useState(false);
+  const proEnabled = useProEnabled();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -301,8 +303,8 @@ export default function ProfilePageClient() {
             <span>BACK</span>
           </Link>
 
-          {company.isPro && (
-            <div className="flex items-center justify-center rounded-[10px] bg-[#D8D8D8]" style={{ width: '90px', height: '16px' }}>
+          {company.isPro && proEnabled && (
+            <div className="flex items-center justify-center rounded-[10px] bg-[#E4E4E4]" style={{ width: '90px', height: '16px' }}>
               <span className="font-bam text-[9px] text-[#333]/35 tracking-[0.18px]">Pro Account</span>
             </div>
           )}

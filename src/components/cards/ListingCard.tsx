@@ -16,6 +16,7 @@ interface ListingCardProps {
   team?: number;
   address?: string;
   isPro?: boolean;
+  proEnabled?: boolean;
   isFeatured?: boolean;
   isSaved?: boolean;
   imageUrl?: string;
@@ -33,6 +34,7 @@ export function ListingCard({
   team = 25,
   address = "Jl. Imam Bonjol No.198/249, Pemecutan Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80119",
   isPro = false,
+  proEnabled = true,
   isFeatured = false,
   isSaved = false,
   imageUrl,
@@ -102,9 +104,9 @@ export function ListingCard({
           </div>
 
           {/* Pro Account badge — min-width 80px, decreased padding */}
-          {isPro && (
+          {isPro && proEnabled && (
             <div className="absolute top-[45px] right-[10px]">
-              <div className="bg-[#F8F8F8] rounded-[10px] h-[16px] px-[8px] flex items-center min-w-[80px] justify-center">
+              <div className="bg-[#E4E4E4] rounded-[10px] h-[16px] px-[8px] flex items-center min-w-[80px] justify-center">
                 <span className="font-bam text-[9px] text-[#333]/35 leading-[12px]">Pro Account</span>
               </div>
             </div>

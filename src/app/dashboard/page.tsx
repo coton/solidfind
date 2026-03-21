@@ -9,6 +9,7 @@ import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/cards";
+import { useProEnabled } from "@/hooks/useProEnabled";
 
 export default function DashboardPage() {
   const [sortByConstruction, setSortByConstruction] = useState("latest");
@@ -20,6 +21,7 @@ export default function DashboardPage() {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const deleteAccount = useMutation(api.users.deleteAccount);
+  const proEnabled = useProEnabled();
 
   const handleDeleteAccount = async () => {
     if (!clerkUser?.id) return;
@@ -148,7 +150,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
             {constructionListings.length > 0 ? (
               constructionListings.map((listing) => (
-                <ListingCard key={listing.id} {...listing} />
+                <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} />
               ))
             ) : (
               <p className="text-[11px] text-[#333]/50 col-span-4">No saved construction listings yet.</p>
@@ -214,7 +216,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
             {renovationListings.length > 0 ? (
               renovationListings.map((listing) => (
-                <ListingCard key={listing.id} {...listing} />
+                <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} />
               ))
             ) : (
               <p className="text-[11px] text-[#333]/50 col-span-4">No saved renovation listings yet.</p>

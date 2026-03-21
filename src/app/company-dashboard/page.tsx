@@ -9,6 +9,7 @@ import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Star } from "lucide-react";
+import { useProEnabled } from "@/hooks/useProEnabled";
 
 const proFeatures = [
   { icon: "star", title: "Top search ranking", subtitle: "Peringkat pencarian teratas" },
@@ -44,6 +45,7 @@ function ReviewCard({ userName, rating, content, date }: {
 }
 
 export default function CompanyDashboardPage() {
+  const proEnabled = useProEnabled();
   const [showAdModal, setShowAdModal] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -148,7 +150,7 @@ export default function CompanyDashboardPage() {
 
           <div className="text-right">
             <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">
-              {isPro ? "PRO ACCOUNT" : "FREE ACCOUNT"}
+              {isPro && proEnabled ? "PRO ACCOUNT" : "FREE ACCOUNT"}
             </p>
             <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
               DELETE PROFILE
@@ -158,7 +160,7 @@ export default function CompanyDashboardPage() {
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
-          {isPro ? (
+          {isPro && proEnabled ? (
             <button
               onClick={() => setShowAdModal(true)}
               className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"

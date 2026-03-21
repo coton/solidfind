@@ -13,6 +13,7 @@ import { Pagination } from "@/components/Pagination";
 import { SortDropdown } from "@/components/SortDropdown";
 import { AdBanner } from "@/components/AdBanner";
 import { ListingCardSkeleton } from "@/components/ui/ListingCardSkeleton";
+import { useProEnabled } from "@/hooks/useProEnabled";
 
 export default function Home() {
   return (
@@ -29,6 +30,7 @@ function HomeContent() {
   const [sortBy, setSortBy] = useState("latest");
   const { user: clerkUser } = useUser();
 
+  const proEnabled = useProEnabled();
   const categoryParam = searchParams.get("category") || undefined;
   const locationParam = searchParams.get("location") || undefined;
   const searchParam = searchParams.get("search") || undefined;
@@ -182,6 +184,7 @@ function HomeContent() {
                   <ListingCard
                     key={listing.id}
                     {...listing}
+                    proEnabled={proEnabled}
                     onBookmark={() => handleBookmark(listing.id, listing.category)}
                   />
                 ))}
@@ -207,6 +210,7 @@ function HomeContent() {
                       <ListingCard
                         key={listing.id}
                         {...listing}
+                        proEnabled={proEnabled}
                         onBookmark={() => handleBookmark(listing.id, listing.category)}
                       />
                     ))
@@ -234,6 +238,7 @@ function HomeContent() {
                     <ListingCard
                       key={listing.id}
                       {...listing}
+                      proEnabled={proEnabled}
                       onBookmark={() => handleBookmark(listing.id, listing.category)}
                     />
                   ))

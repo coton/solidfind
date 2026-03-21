@@ -12,6 +12,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Star, X, Upload, Lock } from "lucide-react";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
+import { useProEnabled } from "@/hooks/useProEnabled";
 
 const projectSizeOptions = [
   { id: "any", label: "ANY SIZE" },
@@ -91,6 +92,7 @@ function ProjectImage({ storageId }: { storageId: Id<"_storage"> }) {
 export default function EditProfilePage() {
   const router = useRouter();
   const { user: clerkUser } = useUser();
+  const proEnabled = useProEnabled();
   const [showProModal, setShowProModal] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const projectInputRef = useRef<HTMLInputElement>(null);
@@ -328,7 +330,7 @@ export default function EditProfilePage() {
           </div>
 
           <div className="text-right">
-            {company?.isPro ? (
+            {company?.isPro && proEnabled ? (
               <>
                 <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">PRO ACCOUNT</p>
                 <Link
@@ -354,7 +356,7 @@ export default function EditProfilePage() {
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
-          {company?.isPro && (
+          {company?.isPro && proEnabled && (
             <button className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors">
               Get AD space
             </button>
@@ -520,7 +522,7 @@ export default function EditProfilePage() {
             </div>
 
             {/* PRO Features — only shown for PRO accounts */}
-            {company?.isPro && (
+            {company?.isPro && proEnabled && (
               <div className="mt-6 pt-4 border-t border-[#e4e4e4]">
                 <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-3">
                   Services included with PRO account
