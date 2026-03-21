@@ -53,6 +53,16 @@ export const listVisibleByCategory = query({
   },
 });
 
+export const listByCompany = query({
+  args: { companyId: v.id("companies") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("featuredArticles")
+      .withIndex("by_companyId", (q) => q.eq("companyId", args.companyId))
+      .collect();
+  },
+});
+
 export const getById = query({
   args: { id: v.id("featuredArticles") },
   handler: async (ctx, args) => {
@@ -65,6 +75,7 @@ export const create = mutation({
     title: v.string(),
     subtitle: v.optional(v.string()),
     category: v.optional(v.string()),
+    companyId: v.optional(v.id("companies")),
     coverImageId: v.optional(v.id("_storage")),
     coverImageUrl: v.optional(v.string()),
     visible: v.boolean(),
@@ -87,6 +98,7 @@ export const update = mutation({
     title: v.optional(v.string()),
     subtitle: v.optional(v.string()),
     category: v.optional(v.string()),
+    companyId: v.optional(v.union(v.id("companies"), v.null())),
     coverImageId: v.optional(v.id("_storage")),
     coverImageUrl: v.optional(v.string()),
     visible: v.optional(v.boolean()),
@@ -94,7 +106,7 @@ export const update = mutation({
     contentBlocks: v.optional(v.array(contentBlockValidator)),
   },
   handler: async (ctx, args) => {
-    const { id, ...fields } = args;
+    const { id, companyId, ...fields } = args;
     // Remove undefined fields
     const patch: Record<string, unknown> = { updatedAt: Date.now() };
     for (const [key, value] of Object.entries(fields)) {
@@ -102,6 +114,21 @@ export const update = mutation({
         patch[key] = value;
       }
     }
+
+    // Handle companyId: null means unset, valid ID means set, undefined means don't touch
+    if (companyId === null) {
+      // Remove companyId by reading doc, deleting field, and replacing
+      const existing = await ctx.db.get(id);
+      if (existing) {
+        const { _id, _creationTime, ...doc } = existing;
+        delete (doc as Record<string, unknown>).companyId;
+        await ctx.db.replace(id, { ...doc, ...patch });
+        return;
+      }
+    } else if (companyId !== undefined) {
+      patch.companyId = companyId;
+    }
+
     await ctx.db.patch(id, patch);
   },
 });

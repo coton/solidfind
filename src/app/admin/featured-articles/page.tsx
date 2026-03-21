@@ -8,6 +8,8 @@ import { Id } from "../../../../convex/_generated/dataModel";
 
 export default function FeaturedArticlesAdmin() {
   const articles = useQuery(api.featuredArticles.list);
+  const companies = useQuery(api.companies.list, {});
+  const companyMap = new Map(companies?.map((c) => [c._id, c.name]) ?? []);
   const createArticle = useMutation(api.featuredArticles.create);
   const removeArticle = useMutation(api.featuredArticles.remove);
   const updateVisibility = useMutation(api.featuredArticles.updateVisibility);
@@ -84,11 +86,18 @@ export default function FeaturedArticlesAdmin() {
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium text-[#333] truncate">{article.title}</p>
                 <p className="text-[10px] text-[#333]/50 truncate">{article.subtitle || "No subtitle"}</p>
-                {article.category && (
-                  <span className="inline-block text-[9px] bg-[#f5f5f5] text-[#333]/60 px-2 py-0.5 rounded-full mt-0.5">
-                    {article.category}
-                  </span>
-                )}
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  {article.category && (
+                    <span className="inline-block text-[9px] bg-[#f5f5f5] text-[#333]/60 px-2 py-0.5 rounded-full">
+                      {article.category}
+                    </span>
+                  )}
+                  {article.companyId && companyMap.get(article.companyId) && (
+                    <span className="inline-block text-[9px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
+                      {companyMap.get(article.companyId)}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <button

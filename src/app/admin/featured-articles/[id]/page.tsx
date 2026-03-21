@@ -33,6 +33,7 @@ export default function EditFeaturedArticle() {
     api.featuredArticles.getById,
     id ? { id: id as Id<"featuredArticles"> } : "skip"
   );
+  const companies = useQuery(api.companies.list, {});
   const updateArticle = useMutation(api.featuredArticles.update);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
@@ -43,6 +44,7 @@ export default function EditFeaturedArticle() {
   const [coverImageId, setCoverImageId] = useState<Id<"_storage"> | undefined>();
   const [coverImageUrl, setCoverImageUrl] = useState("");
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [companyId, setCompanyId] = useState<string>("");
   const [saved, setSaved] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
@@ -57,6 +59,7 @@ export default function EditFeaturedArticle() {
       setVisible(article.visible);
       setCoverImageId(article.coverImageId);
       setCoverImageUrl(article.coverImageUrl ?? "");
+      setCompanyId(article.companyId ?? "");
       setContentBlocks(article.contentBlocks as ContentBlock[]);
       setInitialized(true);
     }
@@ -83,6 +86,7 @@ export default function EditFeaturedArticle() {
       title,
       subtitle: subtitle || undefined,
       category: category || undefined,
+      companyId: companyId ? (companyId as Id<"companies">) : null,
       visible,
       coverImageId,
       coverImageUrl: coverImageUrl || undefined,
@@ -211,6 +215,19 @@ export default function EditFeaturedArticle() {
                 <option value="architecture">Architecture</option>
                 <option value="interior">Interior</option>
                 <option value="real-estate">Real Estate</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-[#333]/70 mb-1">Linked Company</label>
+              <select
+                value={companyId}
+                onChange={(e) => setCompanyId(e.target.value)}
+                className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors bg-white"
+              >
+                <option value="">— No company —</option>
+                {companies?.map((c) => (
+                  <option key={c._id} value={c._id}>{c.name}</option>
+                ))}
               </select>
             </div>
           </div>

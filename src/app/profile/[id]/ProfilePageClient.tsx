@@ -202,6 +202,11 @@ export default function ProfilePageClient() {
     validId ? { id: validId } : "skip"
   );
 
+  const companyArticles = useQuery(
+    api.featuredArticles.listByCompany,
+    validId ? { companyId: validId } : "skip"
+  );
+
   const toggleSave = useMutation(api.savedListings.toggle);
   const createReview = useMutation(api.reviews.create);
 
@@ -655,6 +660,41 @@ export default function ProfilePageClient() {
             </button>
           )}
         </div>
+
+        {/* Featured Articles */}
+        {companyArticles && companyArticles.length > 0 && (
+          <div className="mb-8">
+            <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-4">Featured Articles</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {companyArticles.map((article) => (
+                <Link
+                  key={article._id}
+                  href={`/article/${article._id}`}
+                  className="bg-white rounded-[8px] border border-[#e4e4e4] overflow-hidden hover:border-[#333] transition-colors"
+                >
+                  {article.coverImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={article.coverImageUrl} alt={article.title} className="w-full aspect-video object-cover" />
+                  ) : article.coverImageId ? (
+                    <div className="w-full aspect-video bg-[#d8d8d8] relative">
+                      <StorageImage storageId={article.coverImageId} alt={article.title} fill className="object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-video bg-[#f5f5f5] flex items-center justify-center">
+                      <span className="text-[10px] text-[#333]/30">No image</span>
+                    </div>
+                  )}
+                  <div className="p-3">
+                    <p className="text-[12px] font-medium text-[#333] leading-tight mb-1">{article.title}</p>
+                    {article.subtitle && (
+                      <p className="text-[10px] text-[#333]/50 line-clamp-2">{article.subtitle}</p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Navigation */}
         <div className="flex items-center justify-between mb-8 border-t border-[#333]/10 pt-4">

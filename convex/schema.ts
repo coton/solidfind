@@ -168,9 +168,10 @@ export default defineSchema({
       videoUrl: v.optional(v.string()),
       videoStorageId: v.optional(v.id("_storage")),
     })),
+    companyId: v.optional(v.id("companies")),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_visible", ["visible"]).index("by_sortOrder", ["sortOrder"]),
+  }).index("by_visible", ["visible"]).index("by_sortOrder", ["sortOrder"]).index("by_companyId", ["companyId"]),
 
   platformSettings: defineTable({
     key: v.string(),
