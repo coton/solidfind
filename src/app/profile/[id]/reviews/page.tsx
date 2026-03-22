@@ -8,13 +8,33 @@ import { Id } from "../../../../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Star } from "lucide-react";
+import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 
 export default function CompanyReviewsPage() {
   const params = useParams();
   const companyId = params.id as Id<"companies">;
 
+  const reviewsEnabled = useReviewsEnabled();
   const company = useQuery(api.companies.getById, { id: companyId });
   const reviews = useQuery(api.reviews.listByCompany, { companyId });
+
+  if (!reviewsEnabled) {
+    return (
+      <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
+        <Header />
+        <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
+          <Link
+            href={`/profile/${companyId}`}
+            className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors mb-6"
+          >
+            <span>←</span> BACK TO PROFILE
+          </Link>
+          <p className="text-[14px] text-[#333]/70 mt-8">Reviews are currently unavailable.</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#e4e4e4] flex flex-col">

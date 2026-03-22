@@ -7,8 +7,10 @@ import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Star } from "lucide-react";
+import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 
 export default function UserReviewsPage() {
+  const reviewsEnabled = useReviewsEnabled();
   const { user: clerkUser, isLoaded } = useUser();
 
   const currentUser = useQuery(
@@ -20,6 +22,24 @@ export default function UserReviewsPage() {
     api.reviews.listByUser,
     currentUser?._id ? { userId: currentUser._id } : "skip"
   );
+
+  if (!reviewsEnabled) {
+    return (
+      <div className="min-h-screen bg-[#f8f8f8]">
+        <Header />
+        <main className="max-w-[900px] mx-auto px-6 py-8">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors mb-4"
+          >
+            <span>←</span> BACK
+          </Link>
+          <p className="text-[14px] text-[#333]/70 mt-8">Reviews are currently unavailable.</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f8f8]">

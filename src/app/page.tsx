@@ -14,6 +14,7 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { AdBanner } from "@/components/AdBanner";
 import { ListingCardSkeleton } from "@/components/ui/ListingCardSkeleton";
 import { useProEnabled } from "@/hooks/useProEnabled";
+import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 
 export default function Home() {
   return (
@@ -31,6 +32,7 @@ function HomeContent() {
   const { user: clerkUser } = useUser();
 
   const proEnabled = useProEnabled();
+  const reviewsEnabled = useReviewsEnabled();
   const categoryParam = searchParams.get("category") || undefined;
   const locationParam = searchParams.get("location") || undefined;
   const searchParam = searchParams.get("search") || undefined;
@@ -185,6 +187,7 @@ function HomeContent() {
                     key={listing.id}
                     {...listing}
                     proEnabled={proEnabled}
+                    reviewsEnabled={reviewsEnabled}
                     onBookmark={() => handleBookmark(listing.id, listing.category)}
                   />
                 ))}

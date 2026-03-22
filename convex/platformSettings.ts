@@ -54,6 +54,7 @@ export const seedDefaults = internalMutation({
   handler: async (ctx) => {
     const defaults: Record<string, string> = {
       pro_enabled: "false",
+      reviews_enabled: "false",
       monthly_price_launch: "450000",
       yearly_price_launch: "5000000",
       monthly_price_standard: "650000",

@@ -10,6 +10,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Star } from "lucide-react";
 import { useProEnabled } from "@/hooks/useProEnabled";
+import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 
 const proFeatures = [
   { icon: "star", title: "Top search ranking", subtitle: "Peringkat pencarian teratas" },
@@ -46,6 +47,7 @@ function ReviewCard({ userName, rating, content, date }: {
 
 export default function CompanyDashboardPage() {
   const proEnabled = useProEnabled();
+  const reviewsEnabled = useReviewsEnabled();
   const [showAdModal, setShowAdModal] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -309,7 +311,7 @@ export default function CompanyDashboardPage() {
         </div>}
 
         {/* Reviews Section */}
-        <div className="mb-8">
+        {reviewsEnabled && <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <div>
@@ -342,7 +344,7 @@ export default function CompanyDashboardPage() {
               <ReviewCard key={index} {...review} />
             ))}
           </div>
-        </div>
+        </div>}
       </main>
 
       <Footer />

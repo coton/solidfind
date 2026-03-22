@@ -39,6 +39,7 @@ export default function AdminSettings() {
   }
 
   const proEnabled = platformMap["pro_enabled"] === "true";
+  const reviewsEnabled = platformMap["reviews_enabled"] === "true";
   const pricingPhase = platformMap["pricing_phase"] ?? "launch";
   const monthlyLaunch = platformMap["monthly_price_launch"] ?? "450000";
   const yearlyLaunch = platformMap["yearly_price_launch"] ?? "5000000";
@@ -91,6 +92,14 @@ export default function AdminSettings() {
     await setSetting({
       key: "pro_enabled",
       value: proEnabled ? "false" : "true",
+      updatedBy: "admin",
+    });
+  };
+
+  const handleToggleReviews = async () => {
+    await setSetting({
+      key: "reviews_enabled",
+      value: reviewsEnabled ? "false" : "true",
       updatedBy: "admin",
     });
   };
@@ -188,6 +197,44 @@ export default function AdminSettings() {
           </button>
           <span style={{ fontSize: 13, color: "#333" }}>
             Pro subscriptions {proEnabled ? "enabled" : "disabled"}
+          </span>
+        </div>
+      </div>
+
+      {/* Review System Toggle */}
+      <div style={sectionStyle}>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: "#333", marginBottom: 16 }}>
+          Review System
+        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            onClick={handleToggleReviews}
+            style={{
+              width: 44,
+              height: 24,
+              borderRadius: 12,
+              border: "none",
+              backgroundColor: reviewsEnabled ? "#f14110" : "#ccc",
+              cursor: "pointer",
+              position: "relative",
+              transition: "background-color 0.2s",
+            }}
+          >
+            <div
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: "50%",
+                backgroundColor: "#fff",
+                position: "absolute",
+                top: 3,
+                left: reviewsEnabled ? 23 : 3,
+                transition: "left 0.2s",
+              }}
+            />
+          </button>
+          <span style={{ fontSize: 13, color: "#333" }}>
+            Review system {reviewsEnabled ? "enabled" : "disabled"}
           </span>
         </div>
       </div>

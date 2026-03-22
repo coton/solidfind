@@ -14,6 +14,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
 import { useProEnabled } from "@/hooks/useProEnabled";
+import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { starFillColor, starColor } from "@/lib/starColors";
@@ -152,6 +153,7 @@ export default function ProfilePageClient() {
   const { user: clerkUser } = useUser();
   const [isSaved, setIsSaved] = useState(false);
   const proEnabled = useProEnabled();
+  const reviewsEnabled = useReviewsEnabled();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -606,7 +608,7 @@ export default function ProfilePageClient() {
         </div>
 
         {/* Reviews Section */}
-        <div className="mb-8">
+        {reviewsEnabled && <div className="mb-8">
           <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3 sm:gap-4">
               <div>
@@ -661,7 +663,7 @@ export default function ProfilePageClient() {
               Write a Review
             </button>
           )}
-        </div>
+        </div>}
 
         {/* Featured Articles */}
         {companyArticles && companyArticles.length > 0 && (
@@ -739,7 +741,7 @@ export default function ProfilePageClient() {
       <Footer />
 
       {/* Review Modals */}
-      {validId && currentUser && (
+      {reviewsEnabled && validId && currentUser && (
         <WriteReviewModal
           isOpen={showReviewModal}
           onClose={() => setShowReviewModal(false)}
