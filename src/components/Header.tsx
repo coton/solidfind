@@ -260,6 +260,8 @@ function HeaderInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
+  const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
+  const igVisible = useQuery(api.platformSettings.get, { key: "ig_visible" });
 
   // pageConfigs is undefined while loading, [] if loaded but empty
   const pageConfigsLoaded = pageConfigs !== undefined;
@@ -451,9 +453,11 @@ function HeaderInner() {
           {/* Right Side Buttons */}
           <div className="flex items-center gap-3 sm:gap-5">
             {/* Desktop: IG (first) */}
-            <button className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity">
-              <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
-            </button>
+            {igVisible !== "false" && (
+              <a href={igUrl || "#"} target="_blank" rel="noopener noreferrer" className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity">
+                <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
+              </a>
+            )}
 
             <SignedIn>
               {/* Desktop: Account icon (second) */}

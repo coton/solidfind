@@ -1,7 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 export function Footer() {
+  const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
+  const igVisible = useQuery(api.platformSettings.get, { key: "ig_visible" });
+  const contactUrl = useQuery(api.platformSettings.get, { key: "contact_url" });
+
+  const igHref = igUrl || "#";
+  const mailHref = contactUrl || "#";
+  const showIg = igVisible !== "false";
   return (
     <footer className="relative h-[150px] sm:h-[190px] rounded-t-[6px] overflow-hidden z-0">
       {/* Gradient: E9A28E → F14110 (both mobile & desktop) */}
@@ -26,15 +37,17 @@ export function Footer() {
 
           {/* Social Icons & About */}
           <div className="flex items-center gap-5">
-            <Link href="#" className="hover:opacity-80 transition-opacity">
-              <Image src="/images/footer-ig.svg" alt="Instagram" width={20} height={20} />
-            </Link>
-            <Link href="#" className="hover:opacity-80 transition-opacity">
+            {showIg && (
+              <a href={igHref} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                <Image src="/images/footer-ig.svg" alt="Instagram" width={20} height={20} />
+              </a>
+            )}
+            <Link href="/dashboard" className="hover:opacity-80 transition-opacity">
               <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
             </Link>
-            <Link href="#" className="hover:opacity-80 transition-opacity">
+            <a href={mailHref} className="hover:opacity-80 transition-opacity">
               <Image src="/images/footer-mail.svg" alt="Email" width={25} height={20} />
-            </Link>
+            </a>
             <Link
               href="/about"
               className="text-[#E4E4E4] font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
@@ -69,15 +82,17 @@ export function Footer() {
 
           {/* Social Icons & About */}
           <div className="flex items-center gap-5">
-            <Link href="#" className="hover:opacity-80 transition-opacity">
-              <Image src="/images/footer-ig.svg" alt="Instagram" width={20} height={20} />
-            </Link>
-            <Link href="#" className="hover:opacity-80 transition-opacity">
+            {showIg && (
+              <a href={igHref} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                <Image src="/images/footer-ig.svg" alt="Instagram" width={20} height={20} />
+              </a>
+            )}
+            <Link href="/dashboard" className="hover:opacity-80 transition-opacity">
               <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
             </Link>
-            <Link href="#" className="hover:opacity-80 transition-opacity">
+            <a href={mailHref} className="hover:opacity-80 transition-opacity">
               <Image src="/images/footer-mail.svg" alt="Email" width={25} height={20} />
-            </Link>
+            </a>
             <Link
               href="/about"
               className="text-[#E4E4E4] font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"

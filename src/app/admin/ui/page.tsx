@@ -162,6 +162,26 @@ export default function AdminUI() {
   const [aboutText, setAboutText] = useState("");
   const [aboutSaved, setAboutSaved] = useState(false);
 
+  // Site-wide links (Convex-backed)
+  const igUrlValue = useQuery(api.platformSettings.get, { key: "ig_url" });
+  const igVisibleValue = useQuery(api.platformSettings.get, { key: "ig_visible" });
+  const contactUrlValue = useQuery(api.platformSettings.get, { key: "contact_url" });
+  const [igUrl, setIgUrl] = useState("");
+  const [igVisible, setIgVisible] = useState(true);
+  const [contactUrl, setContactUrl] = useState("");
+  const [linksSaved, setLinksSaved] = useState(false);
+  const linksLoaded = useRef(false);
+
+  useEffect(() => {
+    if (linksLoaded.current) return;
+    if (igUrlValue !== undefined) {
+      linksLoaded.current = true;
+      setIgUrl(igUrlValue ?? "");
+      setIgVisible(igVisibleValue !== "false");
+      setContactUrl(contactUrlValue ?? "");
+    }
+  }, [igUrlValue, igVisibleValue, contactUrlValue]);
+
   // About Page content (Convex-backed)
   const aboutTagline = useQuery(api.platformSettings.get, { key: "aboutPageTagline" });
   const aboutDescription = useQuery(api.platformSettings.get, { key: "aboutPageDescription" });
@@ -351,22 +371,38 @@ export default function AdminUI() {
 
       {/* Contact URL */}
       <SectionCard title="Contact URL">
-        <Field label="Mail icon URL (email or link)" hint="Used for the mail icon across the entire website">
-          <TextInput value={s.contactUrl} onChange={(v) => u({ contactUrl: v })} placeholder="mailto:hello@solidfind.id" />
+        <Field label="Mail icon URL (email or link)" hint="Used for the mail icon in header & footer (e.g. mailto:hello@solidfind.id)">
+          <TextInput value={contactUrl} onChange={setContactUrl} placeholder="mailto:hello@solidfind.id" />
         </Field>
       </SectionCard>
 
       {/* IG Button */}
       <SectionCard title="Instagram Button">
-        <Field label="Instagram URL">
-          <TextInput value={s.igUrl} onChange={(v) => u({ igUrl: v })} placeholder="https://instagram.com/solidfind" />
+        <Field label="Instagram URL" hint="Used for the Instagram icon in header & footer">
+          <TextInput value={igUrl} onChange={setIgUrl} placeholder="https://instagram.com/solidfind" />
         </Field>
         <Toggle
-          checked={s.igVisible}
-          onChange={() => u({ igVisible: !s.igVisible })}
-          label={s.igVisible ? "Visible on website" : "Hidden on website"}
+          checked={igVisible}
+          onChange={() => setIgVisible(!igVisible)}
+          label={igVisible ? "Visible on website" : "Hidden on website"}
         />
       </SectionCard>
+
+      {/* Save Links */}
+      <div className="mb-4">
+        <button
+          onClick={async () => {
+            await setPlatformSetting({ key: "ig_url", value: igUrl, updatedBy: "admin" });
+            await setPlatformSetting({ key: "ig_visible", value: igVisible ? "true" : "false", updatedBy: "admin" });
+            await setPlatformSetting({ key: "contact_url", value: contactUrl, updatedBy: "admin" });
+            setLinksSaved(true);
+            setTimeout(() => setLinksSaved(false), 2000);
+          }}
+          className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+        >
+          {linksSaved ? "✓ Links Saved!" : "Save Contact & Instagram"}
+        </button>
+      </div>
 
       {/* Ads */}
       <SectionCard title="Ad Spaces">
