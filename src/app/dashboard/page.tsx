@@ -102,7 +102,7 @@ export default function DashboardPage() {
             {reviewsEnabled && (
               <Link
                 href="/reviews"
-                className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center"
+                className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center justify-center"
               >
                 Your reviews
               </Link>
