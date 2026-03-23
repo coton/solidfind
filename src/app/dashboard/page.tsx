@@ -115,7 +115,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-baseline gap-4">
               <h2 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">CONSTRUCTION</h2>
-              <span className="text-[11px] text-[#333]/50 tracking-[0.22px]">
+              <span className={`text-[11px] tracking-[0.22px] ${constructionListings.length > 0 ? 'text-[#f14110]' : 'text-[#333]/50'}`}>
                 {constructionListings.length.toString().padStart(2, '0')} Listings Saved
               </span>
             </div>
@@ -182,7 +182,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-baseline gap-4">
               <h2 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">RENOVATION</h2>
-              <span className="text-[11px] text-[#333]/50 tracking-[0.22px]">
+              <span className={`text-[11px] tracking-[0.22px] ${renovationListings.length > 0 ? 'text-[#f14110]' : 'text-[#333]/50'}`}>
                 {renovationListings.length.toString().padStart(2, '0')} Listings Saved
               </span>
             </div>
