@@ -151,29 +151,30 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
-            {constructionListings.length > 0 ? (
-              constructionListings.map((listing) => (
-                <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} />
-              ))
-            ) : (
-              <p className="text-[11px] text-[#333]/50 col-span-4">No saved construction listings yet.</p>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-6">
-              <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
-                ← PREVIOUS
-              </button>
-              <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-                NEXT →
-              </button>
-            </div>
-            <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-              SEE ALL
-            </button>
-          </div>
+          {constructionListings.length > 0 ? (
+            <>
+              <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
+                {constructionListings.map((listing) => (
+                  <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} />
+                ))}
+              </div>
+              <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center gap-6">
+                  <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
+                    ← PREVIOUS
+                  </button>
+                  <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
+                    NEXT →
+                  </button>
+                </div>
+                <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
+                  SEE ALL
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved construction listings yet. Start bookmarking company profiles you would be interested to work with.</p>
+          )}
         </section>
 
         {/* Renovation Section */}
@@ -217,29 +218,30 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
-            {renovationListings.length > 0 ? (
-              renovationListings.map((listing) => (
-                <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} />
-              ))
-            ) : (
-              <p className="text-[11px] text-[#333]/50 col-span-4">No saved renovation listings yet.</p>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-6">
-              <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
-                ← PREVIOUS
-              </button>
-              <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-                NEXT →
-              </button>
-            </div>
-            <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-              SEE ALL
-            </button>
-          </div>
+          {renovationListings.length > 0 ? (
+            <>
+              <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
+                {renovationListings.map((listing) => (
+                  <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} />
+                ))}
+              </div>
+              <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center gap-6">
+                  <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
+                    ← PREVIOUS
+                  </button>
+                  <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
+                    NEXT →
+                  </button>
+                </div>
+                <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
+                  SEE ALL
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved renovation listings yet. Start bookmarking company profiles you would be interested to work with.</p>
+          )}
         </section>
       </main>
 
