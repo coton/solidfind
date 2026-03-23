@@ -173,7 +173,7 @@ export default function DashboardPage() {
               </div>
             </>
           ) : (
-            <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved construction listings yet. Start bookmarking company profiles you would be interested to work with.</p>
+            <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved construction listings yet.<br className="hidden lg:block" /> Start bookmarking company profiles you would be interested to work with.</p>
           )}
         </section>
 
@@ -240,7 +240,7 @@ export default function DashboardPage() {
               </div>
             </>
           ) : (
-            <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved renovation listings yet. Start bookmarking company profiles you would be interested to work with.</p>
+            <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved renovation listings yet.<br className="hidden lg:block" /> Start bookmarking company profiles you would be interested to work with.</p>
           )}
         </section>
       </main>
