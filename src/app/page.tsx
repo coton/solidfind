@@ -40,14 +40,26 @@ function HomeContent() {
 
   const hasFilters = !!(categoryParam || locationParam || searchParam || projectSizeParam);
 
-  const companies = useQuery(api.companies.list, {
+  // Get visible page categories to filter out hidden ones
+  const pageConfigs = useQuery(api.pageConfigs.listVisible);
+  const visibleCategoryIds = pageConfigs?.map((p) => p.categoryId) ?? null;
+
+  const allCompanies = useQuery(api.companies.list, {
     category: categoryParam,
     location: locationParam,
     search: searchParam,
     projectSize: projectSizeParam,
   });
 
-  const latestCompanies = useQuery(api.companies.latest);
+  // Filter companies: only show those in visible categories
+  const companies = allCompanies && visibleCategoryIds
+    ? allCompanies.filter((c) => visibleCategoryIds.includes(c.category))
+    : allCompanies;
+
+  const allLatestCompanies = useQuery(api.companies.latest);
+  const latestCompanies = allLatestCompanies && visibleCategoryIds
+    ? allLatestCompanies.filter((c) => visibleCategoryIds.includes(c.category))
+    : allLatestCompanies;
   const allVisibleArticles = useQuery(api.featuredArticles.listVisible);
   // Filter articles by current category if one is selected, otherwise show all
   const visibleArticles = allVisibleArticles?.filter((a) => {
