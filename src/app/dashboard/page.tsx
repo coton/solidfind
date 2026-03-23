@@ -10,6 +10,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/cards";
 import { useProEnabled } from "@/hooks/useProEnabled";
+import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 
 export default function DashboardPage() {
   const [sortByConstruction, setSortByConstruction] = useState("latest");
@@ -22,6 +23,7 @@ export default function DashboardPage() {
   const { signOut } = useClerk();
   const deleteAccount = useMutation(api.users.deleteAccount);
   const proEnabled = useProEnabled();
+  const reviewsEnabled = useReviewsEnabled();
 
   const handleDeleteAccount = async () => {
     if (!clerkUser?.id) return;
@@ -97,12 +99,14 @@ export default function DashboardPage() {
                 </button>
               </SignOutButton>
             </div>
-            <Link
-              href="/reviews"
-              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center"
-            >
-              Your reviews
-            </Link>
+            {reviewsEnabled && (
+              <Link
+                href="/reviews"
+                className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center"
+              >
+                Your reviews
+              </Link>
+            )}
           </div>
         </div>
 
