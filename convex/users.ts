@@ -17,6 +17,14 @@ export const createOrGetUser = mutation({
       .unique();
 
     if (existing) {
+      // Update fields that may have changed (e.g. accountType after publicMetadata refresh)
+      await ctx.db.patch(existing._id, {
+        email: args.email,
+        name: args.name,
+        accountType: args.accountType,
+        companyName: args.companyName,
+        imageUrl: args.imageUrl,
+      });
       return existing._id;
     }
 

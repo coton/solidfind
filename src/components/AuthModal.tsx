@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSignIn, useSignUp } from "@clerk/nextjs";
 
 type AuthMode = "login" | "register";
 type AccountType = "company" | "individual";
@@ -55,6 +56,9 @@ export function AuthModal({
   onAuthSuccess,
 }: AuthModalProps) {
   const router = useRouter();
+  const { signIn, setActive: setSignInActive, isLoaded: isSignInLoaded } = useSignIn();
+  const { signUp, setActive: setSignUpActive, isLoaded: isSignUpLoaded } = useSignUp();
+
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [accountType, setAccountType] = useState<AccountType>(initialAccountType);
   const [closeHovered, setCloseHovered] = useState(false);
@@ -62,27 +66,467 @@ export function AuthModal({
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
-  const [validationError, setValidationError] = useState(false);
   const [submitHovered, setSubmitHovered] = useState(false);
+
+  // Clerk flow states
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [pendingReset, setPendingReset] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
 
   // Sync when props change (e.g. re-opening with different defaults)
   useEffect(() => { setMode(initialMode); }, [initialMode]);
   useEffect(() => { setAccountType(initialAccountType); }, [initialAccountType]);
 
+  // Reset state when modal opens/closes or mode changes
+  useEffect(() => {
+    if (!isOpen) {
+      setError("");
+      setPendingVerification(false);
+      setPendingReset(false);
+      setVerificationCode("");
+      setNewPassword("");
+      setIsLoading(false);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    setError("");
+    setPendingVerification(false);
+    setPendingReset(false);
+    setVerificationCode("");
+    setNewPassword("");
+  }, [mode]);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) { setValidationError(true); return; }
-    setValidationError(false);
-    localStorage.setItem("userType", accountType);
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("userEmail", email);
-    if (onAuthSuccess) onAuthSuccess(accountType);
-    onClose();
-    router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
+    if (!isSignInLoaded || !signIn) return;
+    if (!email || !password) { setError("Please fill in all fields / Mohon isi semua kolom"); return; }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const result = await signIn.create({
+        identifier: email,
+        password,
+      });
+
+      if (result.status === "complete" && setSignInActive) {
+        await setSignInActive({ session: result.createdSessionId });
+        if (onAuthSuccess) onAuthSuccess(accountType);
+        onClose();
+        router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
+      }
+    } catch (err: unknown) {
+      const clerkError = err as { errors?: Array<{ message: string }> };
+      setError(clerkError.errors?.[0]?.message || "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isSignUpLoaded || !signUp) return;
+    if (!email || !password) { setError("Please fill in all fields / Mohon isi semua kolom"); return; }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await signUp.create({
+        emailAddress: email,
+        password,
+        firstName: name || undefined,
+        unsafeMetadata: {
+          accountType,
+          companyName: accountType === "company" ? name : undefined,
+        },
+      });
+
+      // Send email verification code
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setPendingVerification(true);
+    } catch (err: unknown) {
+      const clerkError = err as { errors?: Array<{ message: string }> };
+      setError(clerkError.errors?.[0]?.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyEmail = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!isSignUpLoaded || !signUp) return;
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const result = await signUp.attemptEmailAddressVerification({
+        code: verificationCode,
+      });
+
+      if (result.status === "complete" && setSignUpActive) {
+        await setSignUpActive({ session: result.createdSessionId });
+
+        // Write accountType to publicMetadata via server API route
+        await fetch("/api/set-account-type", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accountType,
+            companyName: accountType === "company" ? name : undefined,
+          }),
+        });
+
+        if (onAuthSuccess) onAuthSuccess(accountType);
+        onClose();
+        router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
+      }
+    } catch (err: unknown) {
+      const clerkError = err as { errors?: Array<{ message: string }> };
+      setError(clerkError.errors?.[0]?.message || "Invalid verification code.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!isSignInLoaded || !signIn) return;
+    if (!email) { setError("Please enter your email first / Mohon masukkan email terlebih dahulu"); return; }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await signIn.create({
+        strategy: "reset_password_email_code",
+        identifier: email,
+      });
+      setPendingReset(true);
+    } catch (err: unknown) {
+      const clerkError = err as { errors?: Array<{ message: string }> };
+      setError(clerkError.errors?.[0]?.message || "Failed to send reset code.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isSignInLoaded || !signIn) return;
+    if (!verificationCode || !newPassword) { setError("Please fill in all fields / Mohon isi semua kolom"); return; }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const result = await signIn.attemptFirstFactor({
+        strategy: "reset_password_email_code",
+        code: verificationCode,
+        password: newPassword,
+      });
+
+      if (result.status === "complete" && setSignInActive) {
+        await setSignInActive({ session: result.createdSessionId });
+        if (onAuthSuccess) onAuthSuccess(accountType);
+        onClose();
+        router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
+      }
+    } catch (err: unknown) {
+      const clerkError = err as { errors?: Array<{ message: string }> };
+      setError(clerkError.errors?.[0]?.message || "Failed to reset password.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ── Email verification view ──
+  if (pendingVerification) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(51, 51, 51, 0.85)',
+        }}
+        onClick={onClose}
+      >
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            width: '100%',
+            maxWidth: '500px',
+            height: '500px',
+            borderRadius: '6px',
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            margin: '0 16px',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* ── LEFT: Ad space — hidden on mobile ── */}
+          <div className="hidden sm:flex" style={{
+            width: '150px',
+            flexShrink: 0,
+            backgroundColor: '#D9D9D9',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <span style={{ color: '#999', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
+              AD SPACE
+            </span>
+          </div>
+
+          {/* ── RIGHT: Verification Form ── */}
+          <div style={{
+            flex: 1,
+            backgroundColor: '#F8F8F8',
+            padding: '20px 28px',
+            position: 'relative',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}>
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              onMouseEnter={() => setCloseHovered(true)}
+              onMouseLeave={() => setCloseHovered(false)}
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: closeHovered ? '#F14110' : '#999', lineHeight: 1, transition: 'color 0.15s ease', zIndex: 1 }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+
+            <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
+              VERIFY EMAIL
+            </h2>
+
+            <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '20px', marginTop: 0 }}>
+              We sent a verification code to<br /><strong style={{ color: '#333' }}>{email}</strong>
+            </p>
+
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
+                Verification Code
+              </label>
+              <input
+                type="text"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                placeholder="Enter 6-digit code"
+                style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '4px' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '28px', marginBottom: '12px' }}>
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={handleVerifyEmail}
+                onMouseEnter={() => setSubmitHovered(true)}
+                onMouseLeave={() => setSubmitHovered(false)}
+                style={{
+                  width: '145px',
+                  height: '40px',
+                  borderRadius: '20px',
+                  border: submitHovered ? 'none' : '1px solid #F14110',
+                  background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
+                  color: submitHovered ? 'white' : '#F14110',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  letterSpacing: '0.5px',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  opacity: isLoading ? 0.6 : 1,
+                }}
+              >
+                {isLoading ? "Verifying..." : "Verify"}
+              </button>
+            </div>
+
+            {error && (
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*{error}</p>
+              </div>
+            )}
+
+            <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: 0 }}>
+              <button
+                onClick={() => { setPendingVerification(false); setError(""); }}
+                style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}
+              >
+                Back
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Reset password view ──
+  if (pendingReset) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(51, 51, 51, 0.85)',
+        }}
+        onClick={onClose}
+      >
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            width: '100%',
+            maxWidth: '500px',
+            height: '500px',
+            borderRadius: '6px',
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            margin: '0 16px',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* ── LEFT: Ad space — hidden on mobile ── */}
+          <div className="hidden sm:flex" style={{
+            width: '150px',
+            flexShrink: 0,
+            backgroundColor: '#D9D9D9',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <span style={{ color: '#999', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
+              AD SPACE
+            </span>
+          </div>
+
+          {/* ── RIGHT: Reset Password Form ── */}
+          <div style={{
+            flex: 1,
+            backgroundColor: '#F8F8F8',
+            padding: '20px 28px',
+            position: 'relative',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}>
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              onMouseEnter={() => setCloseHovered(true)}
+              onMouseLeave={() => setCloseHovered(false)}
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: closeHovered ? '#F14110' : '#999', lineHeight: 1, transition: 'color 0.15s ease' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+
+            <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
+              RESET PASSWORD
+            </h2>
+
+            <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
+              Enter the code sent to<br /><strong style={{ color: '#333' }}>{email}</strong><br />and your new password.
+            </p>
+
+            <form onSubmit={handleResetPassword}>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
+                  Verification Code
+                </label>
+                <input
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  placeholder="Enter 6-digit code"
+                  required
+                  style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '4px' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '28px', marginBottom: '12px' }}>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  onMouseEnter={() => setSubmitHovered(true)}
+                  onMouseLeave={() => setSubmitHovered(false)}
+                  style={{
+                    width: '145px',
+                    height: '40px',
+                    borderRadius: '20px',
+                    border: submitHovered ? 'none' : '1px solid #F14110',
+                    background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
+                    color: submitHovered ? 'white' : '#F14110',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    letterSpacing: '0.5px',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease',
+                    opacity: isLoading ? 0.6 : 1,
+                  }}
+                >
+                  {isLoading ? "Resetting..." : "Reset Password"}
+                </button>
+              </div>
+            </form>
+
+            {error && (
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*{error}</p>
+              </div>
+            )}
+
+            <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: '8px 0 0 0' }}>
+              <button
+                onClick={() => { setPendingReset(false); setError(""); setVerificationCode(""); setNewPassword(""); }}
+                style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}
+              >
+                Back to Login
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main login/register view ──
   return (
     // Overlay: #333 at 85% opacity
     <div
@@ -163,7 +607,10 @@ export function AuthModal({
             )}
           </p>
 
-          <form onSubmit={handleSubmit} style={{ marginBottom: 0 }}>
+          <form onSubmit={mode === "login" ? handleSignIn : handleSignUp} style={{ marginBottom: 0 }}>
+
+            {/* Clerk CAPTCHA widget container (required for bot protection in Custom Flows) */}
+            {mode === "register" && <div id="clerk-captcha" />}
 
             {/* E-mail */}
             <div style={{ marginBottom: '14px' }}>
@@ -257,6 +704,7 @@ export function AuthModal({
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: mode === 'login' ? '28px' : '14px', marginBottom: '12px' }}>
             <button
               type="submit"
+              disabled={isLoading}
               onMouseEnter={() => setSubmitHovered(true)}
               onMouseLeave={() => setSubmitHovered(false)}
               style={{
@@ -269,17 +717,26 @@ export function AuthModal({
                 fontSize: '13px',
                 fontWeight: 600,
                 letterSpacing: '0.5px',
-                cursor: 'pointer',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s ease',
+                opacity: isLoading ? 0.6 : 1,
               }}
             >
-              {mode === "login" ? "Login" : "Register"}
+              {isLoading
+                ? "Loading..."
+                : mode === "login" ? "Login" : "Register"
+              }
             </button>
             </div>
 
             {/* Forgot password (login only) */}
             {mode === "login" && (
-              <button type="button" style={{ display: 'block', width: '100%', textAlign: 'center', fontSize: '11px', color: '#F14110', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', marginBottom: '8px' }}>
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={isLoading}
+                style={{ display: 'block', width: '100%', textAlign: 'center', fontSize: '11px', color: '#F14110', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', marginBottom: '8px' }}
+              >
                 Forgot Password
               </button>
             )}
@@ -290,25 +747,24 @@ export function AuthModal({
             {mode === "login" ? (
               <>
                 Don&apos;t have an account?{" "}
-                <button onClick={() => { setMode("register"); setValidationError(false); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
+                <button onClick={() => { setMode("register"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
                   Sign up!
                 </button>
               </>
             ) : (
               <>
                 Already have an account?{" "}
-                <button onClick={() => { setMode("login"); setValidationError(false); }} style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
+                <button onClick={() => { setMode("login"); setError(""); }} style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
                   Log in
                 </button>
               </>
             )}
           </p>
 
-          {/* Validation error */}
-          {validationError && (
+          {/* Error message */}
+          {error && (
             <div style={{ textAlign: 'center' }}>
-              <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*Please fill in all fields</p>
-              <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*Mohon isi semua kolom teks</p>
+              <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*{error}</p>
             </div>
           )}
         </div>
