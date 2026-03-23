@@ -445,7 +445,7 @@ export default function ProfilePageClient() {
               <div className="hidden lg:flex flex-col items-end gap-4 flex-shrink-0">
                 {/* Bookmark: ON=orange fill, OFF=grey outline; hover swaps state preview */}
                 <button onClick={handleToggleSave} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
-                  <span className="font-bam text-[9px]">{company.bookmarkCount ?? 0} Saves</span>
+                  <span className={`font-bam text-[9px] ${(company.bookmarkCount ?? 0) > 0 ? 'text-[#F14110]' : ''}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
                   <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
                     className={`transition-colors ${isBookmarked
                       ? 'fill-[#f14110] stroke-[#f14110] group-hover:fill-transparent group-hover:stroke-[#D8D8D8]'
@@ -490,7 +490,7 @@ export default function ProfilePageClient() {
             {/* Mobile only: Save/Share/Report below description, left-aligned */}
             <div className="flex lg:hidden items-center gap-4">
               <button onClick={handleToggleSave} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
-                <span className="font-bam text-[9px]">{company.bookmarkCount ?? 0} Saves</span>
+                <span className={`font-bam text-[9px] ${(company.bookmarkCount ?? 0) > 0 ? 'text-[#F14110]' : ''}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
                 <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
                   className={`transition-colors ${isBookmarked
                     ? 'fill-[#f14110] stroke-[#f14110] group-hover:fill-transparent group-hover:stroke-[#D8D8D8]'
