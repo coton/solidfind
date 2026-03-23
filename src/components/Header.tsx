@@ -346,7 +346,12 @@ function HeaderInner() {
     setProjectSize("");
     setCategory("");
     setLocations([]);
-    router.push("/");
+    // Keep the current category tab, only reset filters
+    const params = new URLSearchParams();
+    if (activeCategory && activeCategory !== "construction") {
+      params.set("category", activeCategory);
+    }
+    router.push(params.toString() ? `/?${params.toString()}` : "/");
   };
 
   // Get dynamic filter options for current category
