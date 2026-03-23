@@ -13,8 +13,7 @@ import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 
 export default function DashboardPage() {
-  const [sortByConstruction, setSortByConstruction] = useState("latest");
-  const [sortByRenovation, setSortByRenovation] = useState("latest");
+  const [sortByCategory, setSortByCategory] = useState<Record<string, string>>({});
   const [sortDropdownOpen, setSortDropdownOpen] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -47,28 +46,34 @@ export default function DashboardPage() {
     email: clerkUser?.primaryEmailAddress?.emailAddress || "user@gmail.com",
   };
 
-  // Split saved listings by category
-  const constructionListings = (savedListings ?? [])
-    .filter((s) => s.category === "construction" && s.company)
-    .map((s) => ({
-      id: s.company!._id,
-      name: s.company!.name,
-      description: s.company!.description ?? "",
-      rating: s.company!.rating ?? 4.5,
-      isPro: s.company!.isPro,
-      isSaved: true,
-    }));
+  // All category definitions (order matters for display)
+  const allCategories = [
+    { id: "construction", label: "CONSTRUCTION" },
+    { id: "renovation", label: "RENOVATION" },
+    { id: "architecture", label: "ARCHITECTURE" },
+    { id: "interior", label: "INTERIOR" },
+    { id: "real-estate", label: "REAL ESTATE" },
+  ];
 
-  const renovationListings = (savedListings ?? [])
-    .filter((s) => s.category === "renovation" && s.company)
-    .map((s) => ({
-      id: s.company!._id,
-      name: s.company!.name,
-      description: s.company!.description ?? "",
-      rating: s.company!.rating ?? 4.5,
-      isPro: s.company!.isPro,
-      isSaved: true,
-    }));
+  // Group saved listings by category
+  const listingsByCategory = allCategories.map((cat) => ({
+    ...cat,
+    listings: (savedListings ?? [])
+      .filter((s) => s.category === cat.id && s.company)
+      .map((s) => ({
+        id: s.company!._id,
+        name: s.company!.name,
+        description: s.company!.description ?? "",
+        rating: s.company!.rating ?? 4.5,
+        isPro: s.company!.isPro,
+        isSaved: true,
+      })),
+  }));
+
+  // Show construction & renovation always, plus any other category that has bookmarks
+  const visibleCategories = listingsByCategory.filter(
+    (cat) => cat.id === "construction" || cat.id === "renovation" || cat.listings.length > 0
+  );
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -110,139 +115,79 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Construction Section */}
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-baseline gap-4">
-              <h2 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">CONSTRUCTION</h2>
-              <span className={`text-[11px] tracking-[0.22px] ${constructionListings.length > 0 ? 'text-[#f14110]' : 'text-[#333]/50'}`}>
-                {constructionListings.length.toString().padStart(2, '0')} Listings Saved
-              </span>
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setSortDropdownOpen(sortDropdownOpen === 'construction' ? null : 'construction')}
-                className="flex items-center gap-2 text-[11px] text-[#333]/70 tracking-[0.22px]"
-              >
-                Sort by: <span className="text-[#f14110] font-medium">{sortByConstruction === 'latest' ? 'Latest' : 'Favorite'}</span>
-                <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              {sortDropdownOpen === 'construction' && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
-                  <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
+        {/* Bookmark sections — dynamic per category */}
+        {visibleCategories.map((cat) => {
+          const sortVal = sortByCategory[cat.id] ?? "latest";
+          return (
+            <section key={cat.id} className="mb-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-baseline gap-4">
+                  <h2 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">{cat.label}</h2>
+                  <span className={`text-[11px] tracking-[0.22px] ${cat.listings.length > 0 ? 'text-[#f14110]' : 'text-[#333]/50'}`}>
+                    {cat.listings.length.toString().padStart(2, '0')} Listings Saved
+                  </span>
+                </div>
+                {cat.listings.length > 0 && (
+                  <div className="relative">
                     <button
-                      onClick={() => { setSortByConstruction('latest'); setSortDropdownOpen(null); }}
-                      className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortByConstruction === 'latest' ? 'text-[#f14110]' : 'text-[#333]'}`}
+                      onClick={() => setSortDropdownOpen(sortDropdownOpen === cat.id ? null : cat.id)}
+                      className="flex items-center gap-2 text-[11px] text-[#333]/70 tracking-[0.22px]"
                     >
-                      Latest
+                      Sort by: <span className="text-[#f14110] font-medium">{sortVal === 'latest' ? 'Latest' : 'Favorite'}</span>
+                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </button>
-                    <button
-                      onClick={() => { setSortByConstruction('favorite'); setSortDropdownOpen(null); }}
-                      className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortByConstruction === 'favorite' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                    >
-                      Favorite
+                    {sortDropdownOpen === cat.id && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
+                        <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
+                          <button
+                            onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: 'latest' })); setSortDropdownOpen(null); }}
+                            className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === 'latest' ? 'text-[#f14110]' : 'text-[#333]'}`}
+                          >
+                            Latest
+                          </button>
+                          <button
+                            onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: 'favorite' })); setSortDropdownOpen(null); }}
+                            className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === 'favorite' ? 'text-[#f14110]' : 'text-[#333]'}`}
+                          >
+                            Favorite
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {cat.listings.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
+                    {cat.listings.map((listing) => (
+                      <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} />
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-6">
+                      <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
+                        ← PREVIOUS
+                      </button>
+                      <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
+                        NEXT →
+                      </button>
+                    </div>
+                    <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
+                      SEE ALL
                     </button>
                   </div>
                 </>
+              ) : (
+                <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved {cat.label.toLowerCase()} listings yet. Start bookmarking company profiles you would be interested to work with.</p>
               )}
-            </div>
-          </div>
-
-          {constructionListings.length > 0 ? (
-            <>
-              <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
-                {constructionListings.map((listing) => (
-                  <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} />
-                ))}
-              </div>
-              <div className="flex items-center justify-between mt-4">
-                <div className="flex items-center gap-6">
-                  <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
-                    ← PREVIOUS
-                  </button>
-                  <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-                    NEXT →
-                  </button>
-                </div>
-                <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-                  SEE ALL
-                </button>
-              </div>
-            </>
-          ) : (
-            <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved construction listings yet.<br className="hidden lg:block" /> Start bookmarking company profiles you would be interested to work with.</p>
-          )}
-        </section>
-
-        {/* Renovation Section */}
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-baseline gap-4">
-              <h2 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">RENOVATION</h2>
-              <span className={`text-[11px] tracking-[0.22px] ${renovationListings.length > 0 ? 'text-[#f14110]' : 'text-[#333]/50'}`}>
-                {renovationListings.length.toString().padStart(2, '0')} Listings Saved
-              </span>
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setSortDropdownOpen(sortDropdownOpen === 'renovation' ? null : 'renovation')}
-                className="flex items-center gap-2 text-[11px] text-[#333]/70 tracking-[0.22px]"
-              >
-                Sort by: <span className="text-[#f14110] font-medium">{sortByRenovation === 'latest' ? 'Latest' : 'Favorite'}</span>
-                <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              {sortDropdownOpen === 'renovation' && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
-                  <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
-                    <button
-                      onClick={() => { setSortByRenovation('latest'); setSortDropdownOpen(null); }}
-                      className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortByRenovation === 'latest' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                    >
-                      Latest
-                    </button>
-                    <button
-                      onClick={() => { setSortByRenovation('favorite'); setSortDropdownOpen(null); }}
-                      className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortByRenovation === 'favorite' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                    >
-                      Favorite
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {renovationListings.length > 0 ? (
-            <>
-              <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
-                {renovationListings.map((listing) => (
-                  <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} />
-                ))}
-              </div>
-              <div className="flex items-center justify-between mt-4">
-                <div className="flex items-center gap-6">
-                  <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
-                    ← PREVIOUS
-                  </button>
-                  <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-                    NEXT →
-                  </button>
-                </div>
-                <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-                  SEE ALL
-                </button>
-              </div>
-            </>
-          ) : (
-            <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved renovation listings yet.<br className="hidden lg:block" /> Start bookmarking company profiles you would be interested to work with.</p>
-          )}
-        </section>
+            </section>
+          );
+        })}
       </main>
 
       <Footer />
