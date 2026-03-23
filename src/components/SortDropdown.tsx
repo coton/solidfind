@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 
-const sortOptions = [
+const allSortOptions = [
   { value: "latest", label: "Sort by: Latest" },
-  { value: "ranking", label: "Sort by Ranking" },
+  { value: "ranking", label: "Sort by Ranking", requiresReviews: true },
   { value: "favorites", label: "Sort by: Favorites" },
   { value: "team-smallest", label: "Team size: Smallest first" },
   { value: "team-largest", label: "Team size: Largest first" },
@@ -15,11 +15,13 @@ const sortOptions = [
 interface SortDropdownProps {
   value: string;
   onChange: (value: string) => void;
+  reviewsEnabled?: boolean;
 }
 
-export function SortDropdown({ value, onChange }: SortDropdownProps) {
+export function SortDropdown({ value, onChange, reviewsEnabled = false }: SortDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const sortOptions = allSortOptions.filter((opt) => !opt.requiresReviews || reviewsEnabled);
   const selectedOption = sortOptions.find((opt) => opt.value === value) || sortOptions[0];
 
   useEffect(() => {
