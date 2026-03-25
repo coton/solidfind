@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUser, SignOutButton, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
@@ -87,7 +88,7 @@ export default function DashboardPage() {
           <div>
             <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
             <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">{user.name}</h1>
-            <p className="text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 max-w-full max-w-[440px]">
+            <p className="font-bam text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 max-w-full max-w-[440px]">
               Find your list of saved profiles here. Add-remove profiles by clicking bookmark icon.
               <br />
               Temukan daftar profil yang Anda simpan di sini. Tambah-hapus profil dengan mengklik ikon bookmark.
@@ -115,6 +116,18 @@ export default function DashboardPage() {
               </Link>
             )}
           </div>
+        </div>
+
+        {/* Banner Image */}
+        <div className="mb-8 rounded-[6px] overflow-hidden relative" style={{ width: '100%', aspectRatio: '900 / 200' }}>
+          <Image
+            src="/images/bg-individual-page.png"
+            alt="SolidFind"
+            fill
+            sizes="(max-width: 900px) 100vw, 900px"
+            className="object-cover object-right-bottom sm:object-center"
+            priority
+          />
         </div>
 
         {/* Bookmark sections — dynamic per category */}

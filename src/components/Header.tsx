@@ -713,7 +713,7 @@ function HeaderInner() {
           </p>
           <button
             onClick={() => setShowLogoutPrompt(false)}
-            className="h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors"
+            className="h-10 min-w-[140px] px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors"
           >
             OK
           </button>
