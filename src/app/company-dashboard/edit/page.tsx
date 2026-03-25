@@ -142,6 +142,7 @@ export default function EditProfilePage() {
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const logoUrl = useStorageUrl(logoId);
 
@@ -245,6 +246,16 @@ export default function EditProfilePage() {
 
   const handleSave = async () => {
     if (!currentUser || saving) return;
+    setSaveError("");
+
+    // Validate: at least 1 category must be enabled with active filters
+    const hasConstruction = constructionEnabled && (selectedConstruction.length > 0 || selectedConstructionLocations.length > 0);
+    const hasRenovation = renovationEnabled && (selectedRenovation.length > 0 || selectedRenovationLocations.length > 0);
+    if (!hasConstruction && !hasRenovation) {
+      setSaveError("At least 1 category must be completed with active filters / Minimal 1 kategori harus diisi dengan filter aktif");
+      return;
+    }
+
     setSaving(true);
     try {
       if (company) {
@@ -846,6 +857,9 @@ export default function EditProfilePage() {
             <br />
             *Pilih &apos;LOKASI&apos; untuk &apos;RENOVASI&apos; sebelum mengirimkan
           </p>
+          {saveError && (
+            <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px] mb-2">{saveError}</p>
+          )}
           <button
             onClick={handleSave}
             disabled={saving}
