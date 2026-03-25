@@ -300,6 +300,7 @@ function HeaderInner() {
   );
 
   // Auth modal state
+  const [showLogoutPrompt, setShowLogoutPrompt] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalAccountType, setAuthModalAccountType] = useState<"company" | "individual">("individual");
   const [authModalMode, setAuthModalMode] = useState<"login" | "register">("register");
@@ -481,12 +482,21 @@ function HeaderInner() {
                 <Image src="/images/icon-account.svg" alt="Dashboard" width={19} height={20} />
               </Link>
               {/* List your business button (third) */}
-              <Link
-                href="/register-business"
-                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
-              >
-                List your business
-              </Link>
+              {userType === "company" ? (
+                <Link
+                  href="/register-business"
+                  className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
+                >
+                  List your business
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setShowLogoutPrompt(true)}
+                  className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
+                >
+                  List your business
+                </button>
+              )}
             </SignedIn>
 
             <SignedOut>
@@ -691,6 +701,25 @@ function HeaderInner() {
       initialMode={authModalMode}
       initialAccountType={authModalAccountType}
     />
+
+    {/* Logout prompt for individuals clicking "List your business" */}
+    {showLogoutPrompt && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/50" onClick={() => setShowLogoutPrompt(false)} />
+        <div className="relative bg-white w-full max-w-[380px] rounded-[6px] p-8 text-center">
+          <h3 className="text-[18px] font-bold text-[#333] mb-3">Register Your Company</h3>
+          <p className="text-[12px] text-[#333]/70 mb-6 leading-[18px]">
+            Log out first to register your company profile.
+          </p>
+          <button
+            onClick={() => setShowLogoutPrompt(false)}
+            className="h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    )}
     </>
   );
 }

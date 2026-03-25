@@ -615,7 +615,7 @@ export function AuthModal({
             {/* E-mail */}
             <div style={{ marginBottom: '14px' }}>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-                E-mail
+                E-mail <span style={{ color: '#F14110' }}>(*)</span>
               </label>
               <input
                 type="email"
@@ -663,7 +663,7 @@ export function AuthModal({
             {mode === "register" && (
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-                  Name or Company Name
+                  {accountType === "company" ? "Company Name" : "Name"} <span style={{ color: '#F14110' }}>(*)</span>
                 </label>
                 <input
                   type="text"
@@ -678,7 +678,7 @@ export function AuthModal({
             {/* Password */}
             <div style={{ marginBottom: '14px' }}>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-                Password
+                Password <span style={{ color: '#F14110' }}>(*)</span>
               </label>
               <input
                 type="password"
