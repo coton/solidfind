@@ -33,12 +33,12 @@ function HomeContent() {
 
   const proEnabled = useProEnabled();
   const reviewsEnabled = useReviewsEnabled();
-  const categoryParam = searchParams.get("category") || undefined;
+  const categoryParam = searchParams.get("category") || "construction";
   const locationParam = searchParams.get("location") || undefined;
   const searchParam = searchParams.get("search") || undefined;
   const projectSizeParam = searchParams.get("projectSize") || undefined;
 
-  const hasFilters = !!(categoryParam || locationParam || searchParam || projectSizeParam);
+  const hasFilters = !!(locationParam || searchParam || projectSizeParam);
 
   // Get visible page categories to filter out hidden ones
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
@@ -82,28 +82,29 @@ function HomeContent() {
 
   const savedIds = useQuery(
     api.savedListings.listSavedIds,
-    currentUser?._id ? { userId: currentUser._id } : "skip"
+    currentUser?._id ? { userId: currentUser._id, category: categoryParam } : "skip"
   );
 
   const toggleSave = useMutation(api.savedListings.toggle);
 
   const handleBookmark = useCallback(
-    async (companyId: string, category: string) => {
+    async (companyId: string) => {
       if (!currentUser?._id) {
-        // Redirect to sign-in if not logged in
         router.push("/sign-in");
         return;
       }
       await toggleSave({
         userId: currentUser._id,
         companyId: companyId as Id<"companies">,
-        category,
+        category: categoryParam,
       });
     },
-    [currentUser, toggleSave, router]
+    [currentUser, toggleSave, router, categoryParam]
   );
 
-  const savedIdSet = new Set(savedIds ?? []);
+  const savedIdSet = new Set(
+    (savedIds ?? []).map((s) => `${s.companyId}:${s.category}`)
+  );
 
   // Map Convex companies to the format ListingCard expects
   const listings = (companies ?? []).map((c) => ({
@@ -118,7 +119,7 @@ function HomeContent() {
     address: c.address ?? "",
     isPro: c.isPro,
     isFeatured: false,
-    isSaved: savedIdSet.has(c._id),
+    isSaved: savedIdSet.has(`${c._id}:${categoryParam}`),
     imageUrl: c.imageUrl,
     projectImageIds: c.projectImageIds ?? [],
   }));
@@ -135,7 +136,7 @@ function HomeContent() {
     address: c.address ?? "",
     isPro: c.isPro,
     isFeatured: false,
-    isSaved: savedIdSet.has(c._id),
+    isSaved: savedIdSet.has(`${c._id}:${categoryParam}`),
     imageUrl: c.imageUrl,
     projectImageIds: c.projectImageIds ?? [],
   }));
@@ -200,7 +201,8 @@ function HomeContent() {
                     {...listing}
                     proEnabled={proEnabled}
                     reviewsEnabled={reviewsEnabled}
-                    onBookmark={() => handleBookmark(listing.id, listing.category)}
+                    categoryContext={categoryParam}
+                    onBookmark={() => handleBookmark(listing.id)}
                   />
                 ))}
               </div>
@@ -227,7 +229,8 @@ function HomeContent() {
                         {...listing}
                         proEnabled={proEnabled}
                         reviewsEnabled={reviewsEnabled}
-                        onBookmark={() => handleBookmark(listing.id, listing.category)}
+                        categoryContext={categoryParam}
+                        onBookmark={() => handleBookmark(listing.id)}
                       />
                     ))
                   }
@@ -256,7 +259,8 @@ function HomeContent() {
                       {...listing}
                       proEnabled={proEnabled}
                       reviewsEnabled={reviewsEnabled}
-                      onBookmark={() => handleBookmark(listing.id, listing.category)}
+                      categoryContext={categoryParam}
+                      onBookmark={() => handleBookmark(listing.id)}
                     />
                   ))
                 }

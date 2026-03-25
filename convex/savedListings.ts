@@ -22,13 +22,21 @@ export const listByUser = query({
 });
 
 export const listSavedIds = query({
-  args: { userId: v.id("users") },
+  args: {
+    userId: v.id("users"),
+    category: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     const saved = await ctx.db
       .query("savedListings")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .collect();
-    return saved.map((s) => s.companyId);
+
+    const filtered = args.category
+      ? saved.filter((s) => s.category === args.category)
+      : saved;
+
+    return filtered.map((s) => ({ companyId: s.companyId, category: s.category }));
   },
 });
 
@@ -41,8 +49,8 @@ export const toggle = mutation({
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("savedListings")
-      .withIndex("by_userId_companyId", (q) =>
-        q.eq("userId", args.userId).eq("companyId", args.companyId)
+      .withIndex("by_userId_companyId_category", (q) =>
+        q.eq("userId", args.userId).eq("companyId", args.companyId).eq("category", args.category)
       )
       .unique();
 
@@ -78,12 +86,13 @@ export const isSaved = query({
   args: {
     userId: v.id("users"),
     companyId: v.id("companies"),
+    category: v.string(),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("savedListings")
-      .withIndex("by_userId_companyId", (q) =>
-        q.eq("userId", args.userId).eq("companyId", args.companyId)
+      .withIndex("by_userId_companyId_category", (q) =>
+        q.eq("userId", args.userId).eq("companyId", args.companyId).eq("category", args.category)
       )
       .unique();
 

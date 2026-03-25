@@ -10,6 +10,7 @@ interface ListingCardProps {
   name: string;
   description: string;
   category?: string;
+  categoryContext?: string;
   rating?: number;
   reviewCount?: number;
   projects?: number;
@@ -29,6 +30,7 @@ export function ListingCard({
   id,
   name,
   description,
+  categoryContext,
   rating = 4.5,
   reviewCount = 23,
   projects = 75,
@@ -79,7 +81,7 @@ export function ListingCard({
   };
 
   return (
-    <Link href={`/profile/${id}`} className="block">
+    <Link href={categoryContext ? `/profile/${id}?from=${categoryContext}` : `/profile/${id}`} className="block">
       <div
         className={`relative w-[210px] h-[220px] rounded-[6px] overflow-hidden cursor-pointer transition-all ${
           isHovered ? 'bg-[#333]' : 'bg-[#f8f8f8]'

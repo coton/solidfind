@@ -97,7 +97,8 @@ export default defineSchema({
     savedAt: v.number(),
   })
     .index("by_userId", ["userId"])
-    .index("by_userId_companyId", ["userId", "companyId"]),
+    .index("by_userId_companyId", ["userId", "companyId"])
+    .index("by_userId_companyId_category", ["userId", "companyId", "category"]),
 
   auditLogs: defineTable({
     adminEmail: v.string(),

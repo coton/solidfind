@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useQuery, useMutation } from "convex/react";
@@ -149,7 +149,9 @@ function ReviewCard({ name, rating = 5, text, date, mobile }: { name: string; ra
 export default function ProfilePageClient() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const companyId = params.id as string;
+  const fromCategory = searchParams.get("from");
   const { user: clerkUser } = useUser();
   const [isSaved, setIsSaved] = useState(false);
   const proEnabled = useProEnabled();
@@ -160,12 +162,13 @@ export default function ProfilePageClient() {
   const [showCopiedToast, setShowCopiedToast] = useState(false);
 
   const handleShare = async () => {
+    const shareUrl = window.location.href;
     if (navigator.share) {
       try {
-        await navigator.share({ title: company?.name ?? "SolidFind", url: window.location.href });
+        await navigator.share({ title: company?.name ?? "SolidFind", url: shareUrl });
       } catch { /* user cancelled */ }
     } else {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(shareUrl);
       setShowCopiedToast(true);
       setTimeout(() => setShowCopiedToast(false), 2000);
     }
@@ -194,10 +197,12 @@ export default function ProfilePageClient() {
     clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
   );
 
+  const categoryContext = fromCategory || company?.category || "construction";
+
   const savedStatus = useQuery(
     api.savedListings.isSaved,
-    currentUser && validId
-      ? { userId: currentUser._id, companyId: validId }
+    currentUser && validId && categoryContext
+      ? { userId: currentUser._id, companyId: validId, category: categoryContext }
       : "skip"
   );
 
@@ -220,7 +225,6 @@ export default function ProfilePageClient() {
   const handleToggleSave = async () => {
     if (!currentUser || !validId || !company) {
       if (!currentUser) {
-        // Redirect to sign-in if not logged in
         router.push("/sign-in");
       }
       return;
@@ -229,7 +233,7 @@ export default function ProfilePageClient() {
     await toggleSave({
       userId: currentUser._id,
       companyId: validId,
-      category: company.category,
+      category: categoryContext,
     });
   };
 

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { fetchQuery } from "convex/nextjs";
 import { api } from "../../../../convex/_generated/api";
@@ -51,5 +52,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function ProfilePage() {
-  return <ProfilePageClient />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#e4e4e4]" />}>
+      <ProfilePageClient />
+    </Suspense>
+  );
 }
