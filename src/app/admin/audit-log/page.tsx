@@ -7,9 +7,9 @@ import Pagination, { PAGE_SIZE } from "../components/Pagination";
 
 const ACTION_LABELS: Record<string, string> = {
   delete_company: "Delete Company",
-  delete_review: "Delete Review",
-  flag_review_spam: "Flag Review as Spam",
-  unflag_review: "Unflag Review",
+  delete_review: "Delete Testimonial",
+  flag_review_spam: "Flag Testimonial as Spam",
+  unflag_review: "Unflag Testimonial",
   report_reviewed: "Mark Report Reviewed",
   report_dismissed: "Dismiss Report",
 };

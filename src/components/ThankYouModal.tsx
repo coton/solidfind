@@ -24,7 +24,7 @@ export function ThankYouModal({ isOpen, onClose }: ThankYouModalProps) {
         <div className="text-[48px] mb-4">🎉</div>
         <h2 className="text-[20px] font-semibold text-[#333] mb-2">Thank You!</h2>
         <p className="text-[11px] text-[#333]/50 mb-6 tracking-[0.22px]">
-          Thank you for your review! Your feedback helps the community make better decisions.
+          Thank you for your testimonial! Your feedback helps the community make better decisions.
         </p>
 
         <button

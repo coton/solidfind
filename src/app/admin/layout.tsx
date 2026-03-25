@@ -8,7 +8,7 @@ import { LayoutDashboard, Building2, Flag, MessageSquare, Users, Menu, X, LogOut
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/companies", label: "Companies", icon: Building2 },
-  { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
+  { href: "/admin/reviews", label: "Testimonials", icon: MessageSquare },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/waitlist", label: "Waitlist", icon: Mail },
   { href: "/admin/reports", label: "Reports", icon: Flag },

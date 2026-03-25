@@ -83,7 +83,7 @@ export default function TermsPage() {
             <ul className="space-y-1 ml-4 mb-2">
               <li className="flex items-start gap-2">
                 <span className="text-[#333]">•</span>
-                <span>Provide accurate and truthful information in your profile and reviews</span>
+                <span>Provide accurate and truthful information in your profile and testimonials</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#333]">•</span>
@@ -95,7 +95,7 @@ export default function TermsPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#333]">•</span>
-                <span>Not attempt to manipulate ratings or reviews</span>
+                <span>Not attempt to manipulate ratings or testimonials</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#333]">•</span>

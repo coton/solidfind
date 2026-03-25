@@ -48,7 +48,7 @@ export function WriteReviewModal({
       setContent("");
       onSuccess();
     } catch (error) {
-      console.error("Failed to submit review:", error);
+      console.error("Failed to submit testimonial:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -66,7 +66,7 @@ export function WriteReviewModal({
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-[20px] font-semibold text-[#333] mb-2">Write a Review</h2>
+        <h2 className="text-[20px] font-semibold text-[#333] mb-2">Write a Testimonial</h2>
         <p className="text-[11px] text-[#333]/50 mb-6 tracking-[0.22px]">
           Share your experience to help others make better decisions.
         </p>
@@ -113,7 +113,7 @@ export function WriteReviewModal({
           disabled={rating === 0 || !content.trim() || isSubmitting}
           className="w-full h-[44px] rounded-full bg-[#f14110] text-white text-[12px] font-medium tracking-[0.24px] hover:bg-[#d93a0e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? "Submitting..." : "Submit Review"}
+          {isSubmitting ? "Submitting..." : "Submit Testimonial"}
         </button>
       </div>
     </div>

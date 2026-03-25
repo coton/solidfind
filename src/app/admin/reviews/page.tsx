@@ -88,7 +88,7 @@ export default function AdminReviews() {
           type="text"
           value={search}
           onChange={(e) => { setSearch(e.target.value); handleFilterChange(); }}
-          placeholder="Search reviews..."
+          placeholder="Search testimonials..."
           className="w-full max-w-[300px] h-9 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
         />
       </div>

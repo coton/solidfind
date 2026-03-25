@@ -146,7 +146,7 @@ export default function CompanyDashboardPage() {
               Company profile
             </h1>
             <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
-              Here are the latest statistics about your company page. Check the latest reviews.
+              Here are the latest statistics about your company page. Check the latest testimonials.
             </p>
           </div>
 
@@ -316,7 +316,7 @@ export default function CompanyDashboardPage() {
             <div className="flex items-center gap-4">
               <div>
                 <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
-                  Latest reviews /
+                  Latest testimonials /
                 </p>
                 <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
                   Ulasan terbaru

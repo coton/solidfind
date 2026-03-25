@@ -136,7 +136,7 @@ export default function AboutPage() {
                   INDIVIDUAL ACCOUNT
                 </h4>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  {individual || "For property owners & renters — browse listings, bookmark companies, write reviews, and find the right professionals for your project. Choose your household type: Solo / Couple, Family / Co-Hosting, or Shared / Community."}
+                  {individual || "For property owners & renters — browse listings, bookmark companies, write testimonials, and find the right professionals for your project. Choose your household type: Solo / Couple, Family / Co-Hosting, or Shared / Community."}
                 </p>
               </div>
 
@@ -145,7 +145,7 @@ export default function AboutPage() {
                   FREE COMPANY ACCOUNT
                 </h4>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  {freeCompany || "For construction & renovation professionals — create your company profile, showcase up to 3 project photos, receive reviews, and get discovered by potential clients across Bali."}
+                  {freeCompany || "For construction & renovation professionals — create your company profile, showcase up to 3 project photos, receive testimonials, and get discovered by potential clients across Bali."}
                 </p>
               </div>
 

@@ -54,7 +54,7 @@ export default function UserReviewsPage() {
             <span>←</span> BACK
           </Link>
           <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">
-            Your reviews
+            Your testimonials
           </h1>
           <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
             Ulasan Anda

@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const title = company.name;
     const description = company.description
       ? company.description.slice(0, 160)
-      : `${company.name} — ${company.category} professional on SOLIDFIND.ID. View projects, reviews, and contact information.`;
+      : `${company.name} — ${company.category} professional on SOLIDFIND.ID. View projects, testimonials, and contact information.`;
 
     return {
       title,

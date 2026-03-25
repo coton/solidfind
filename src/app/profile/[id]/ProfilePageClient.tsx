@@ -611,7 +611,7 @@ export default function ProfilePageClient() {
           </div>
         </div>
 
-        {/* Reviews Section */}
+        {/* Testimonials Section */}
         {reviewsEnabled && <div className="mb-8">
           <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3 sm:gap-4">
@@ -633,7 +633,7 @@ export default function ProfilePageClient() {
                   onClick={() => setShowReviewModal(true)}
                   className="hidden sm:flex h-[40px] px-6 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors items-center"
                 >
-                  Write a Review
+                  Write a Testimonial
                 </button>
               )}
               <Link
@@ -646,25 +646,25 @@ export default function ProfilePageClient() {
             </div>
           </div>
 
-          {/* Mobile: 3 reviews full width */}
+          {/* Mobile: 3 testimonials full width */}
           <div className="lg:hidden space-y-5">
             {reviewsList.slice(0, 3).map((review, index) => (
               <ReviewCard key={index} {...review} mobile />
             ))}
           </div>
-          {/* Desktop: 4 reviews in grid */}
+          {/* Desktop: 4 testimonials in grid */}
           <div className="hidden lg:grid lg:grid-cols-4 gap-5">
             {reviewsList.slice(0, 4).map((review, index) => (
               <ReviewCard key={index} {...review} />
             ))}
           </div>
-          {/* Mobile: Write a Review button */}
+          {/* Mobile: Write a Testimonial button */}
           {clerkUser && currentUser && (
             <button
               onClick={() => setShowReviewModal(true)}
               className="sm:hidden mt-4 h-[40px] px-6 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
             >
-              Write a Review
+              Write a Testimonial
             </button>
           )}
         </div>}
@@ -744,7 +744,7 @@ export default function ProfilePageClient() {
 
       <Footer />
 
-      {/* Review Modals */}
+      {/* Testimonial Modals */}
       {reviewsEnabled && validId && currentUser && (
         <WriteReviewModal
           isOpen={showReviewModal}
