@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSignIn, useSignUp } from "@clerk/nextjs";
+import { useConvex } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 type AuthMode = "login" | "register";
 type AccountType = "company" | "individual";
@@ -58,6 +60,7 @@ export function AuthModal({
   const router = useRouter();
   const { signIn, setActive: setSignInActive, isLoaded: isSignInLoaded } = useSignIn();
   const { signUp, setActive: setSignUpActive, isLoaded: isSignUpLoaded } = useSignUp();
+  const convex = useConvex();
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [accountType, setAccountType] = useState<AccountType>(initialAccountType);
@@ -139,6 +142,17 @@ export function AuthModal({
     setError("");
 
     try {
+      // Check if email is already used with a different account type
+      const emailCheck = await convex.query(api.users.checkEmailAccountType, {
+        email: email.toLowerCase().trim(),
+        accountType,
+      });
+      if (!emailCheck.available) {
+        setError(emailCheck.message || "This email is already registered with a different account type.");
+        setIsLoading(false);
+        return;
+      }
+
       await signUp.create({
         emailAddress: email,
         password,

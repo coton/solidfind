@@ -12,7 +12,8 @@ export default defineSchema({
     deletionRequestedAt: v.optional(v.number()),
     deletionScheduledAt: v.optional(v.number()),
     createdAt: v.number(),
-  }).index("by_clerkId", ["clerkId"]),
+  }).index("by_clerkId", ["clerkId"])
+    .index("by_email", ["email"]),
 
   companies: defineTable({
     ownerId: v.id("users"),
