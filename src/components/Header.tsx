@@ -310,8 +310,14 @@ function HeaderInner() {
     setAuthModalOpen(true);
   };
 
-  const isNonCategoryPage = pathname.startsWith("/dashboard") || pathname.startsWith("/profile") || pathname.startsWith("/company-dashboard");
-  const activeCategory = isNonCategoryPage ? null : (searchParams.get("category") ?? "construction");
+  const isDashboardPage = pathname.startsWith("/dashboard") || pathname.startsWith("/company-dashboard");
+  const isProfilePage = pathname.startsWith("/profile");
+  const fromCategory = searchParams.get("from");
+  const activeCategory = isDashboardPage
+    ? null
+    : isProfilePage
+      ? (fromCategory || null)
+      : (searchParams.get("category") ?? "construction");
 
   // Determine user type from Clerk metadata (default to "individual")
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
