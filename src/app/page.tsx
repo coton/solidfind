@@ -103,7 +103,9 @@ function HomeContent() {
   );
 
   const savedIdSet = new Set(
-    (savedIds ?? []).map((s) => `${s.companyId}:${s.category}`)
+    (savedIds ?? []).map((s: any) =>
+      typeof s === "string" ? `${s}:${categoryParam}` : `${s.companyId}:${s.category}`
+    )
   );
 
   // Map Convex companies to the format ListingCard expects
