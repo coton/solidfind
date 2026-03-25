@@ -168,19 +168,21 @@ export default function DashboardPage() {
                       <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} categoryContext={cat.id} />
                     ))}
                   </div>
-                  <div className="flex items-center justify-center mt-4 gap-6">
-                    <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
-                      ← PREVIOUS
-                    </button>
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-6">
+                      <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
+                        ← PREVIOUS
+                      </button>
+                      <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
+                        NEXT →
+                      </button>
+                    </div>
                     <Link
                       href={`/dashboard/${cat.id}`}
-                      className="h-[32px] px-5 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center justify-center"
+                      className="h-[32px] px-5 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
                     >
                       See all
                     </Link>
-                    <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-                      NEXT →
-                    </button>
                   </div>
                 </>
               ) : (
