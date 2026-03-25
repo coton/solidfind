@@ -616,7 +616,7 @@ export default function ProfilePageClient() {
           <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3 sm:gap-4">
               <div>
-                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Latest reviews /</p>
+                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Latest testimonials /</p>
                 <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Ulasan terbaru</p>
               </div>
               <div className="flex items-center gap-1">
