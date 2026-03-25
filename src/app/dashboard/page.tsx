@@ -46,14 +46,18 @@ export default function DashboardPage() {
     email: clerkUser?.primaryEmailAddress?.emailAddress || "user@gmail.com",
   };
 
-  // All category definitions (order matters for display)
-  const allCategories = [
+  // Get visible page categories from admin config
+  const pageConfigs = useQuery(api.pageConfigs.listVisible);
+
+  // All category definitions — fallback while loading
+  const fallbackCategories = [
     { id: "construction", label: "CONSTRUCTION" },
     { id: "renovation", label: "RENOVATION" },
-    { id: "architecture", label: "ARCHITECTURE" },
-    { id: "interior", label: "INTERIOR" },
-    { id: "real-estate", label: "REAL ESTATE" },
   ];
+
+  const allCategories = pageConfigs
+    ? pageConfigs.map((p) => ({ id: p.categoryId, label: p.label.replace(/^\d+\.\s*/, "").toUpperCase() }))
+    : fallbackCategories;
 
   // Group saved listings by category
   const listingsByCategory = allCategories.map((cat) => ({
@@ -70,10 +74,8 @@ export default function DashboardPage() {
       })),
   }));
 
-  // Show construction & renovation always, plus any other category that has bookmarks
-  const visibleCategories = listingsByCategory.filter(
-    (cat) => cat.id === "construction" || cat.id === "renovation" || cat.listings.length > 0
-  );
+  // Show ALL visible categories (from pageConfigs)
+  const visibleCategories = listingsByCategory;
 
   return (
     <div className="min-h-screen bg-[#ececec] flex flex-col">
@@ -168,22 +170,24 @@ export default function DashboardPage() {
                       <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} categoryContext={cat.id} />
                     ))}
                   </div>
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center gap-6">
-                      <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
-                        ← PREVIOUS
-                      </button>
-                      <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-                        NEXT →
-                      </button>
+                  {cat.listings.length > 4 && (
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex items-center gap-6">
+                        <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
+                          ← PREVIOUS
+                        </button>
+                        <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
+                          NEXT →
+                        </button>
+                      </div>
+                      <Link
+                        href={`/dashboard/${cat.id}`}
+                        className="h-[32px] px-5 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
+                      >
+                        See all
+                      </Link>
                     </div>
-                    <Link
-                      href={`/dashboard/${cat.id}`}
-                      className="h-[32px] px-5 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
-                    >
-                      See all
-                    </Link>
-                  </div>
+                  )}
                 </>
               ) : (
                 <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved {cat.label.toLowerCase()} listings yet. Start bookmarking company profiles you would be interested to work with.</p>
