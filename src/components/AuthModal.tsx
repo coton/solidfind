@@ -746,8 +746,9 @@ export function AuthModal({
           <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: 0 }}>
             {mode === "login" ? (
               <>
-                Don&apos;t have an account?{" "}
-                <button onClick={() => { setMode("register"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
+                Don&apos;t have an account?
+                <br />
+                <button onClick={() => { setMode("register"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'none' }}>
                   Sign up!
                 </button>
               </>
