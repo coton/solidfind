@@ -74,8 +74,8 @@ export default function DashboardPage() {
       })),
   }));
 
-  // Show ALL visible categories (from pageConfigs)
-  const visibleCategories = listingsByCategory;
+  // Only show categories that have at least one bookmark
+  const visibleCategories = listingsByCategory.filter((cat) => cat.listings.length > 0);
 
   return (
     <div className="min-h-screen bg-[#ececec] flex flex-col">
