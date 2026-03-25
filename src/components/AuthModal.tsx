@@ -642,8 +642,8 @@ export function AuthModal({
 
             {/* COMPANY / INDIVIDUAL toggles (register only) */}
             {mode === "register" && (
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '14px', alignItems: 'flex-start' }}>
-                {/* Company */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px', alignItems: 'flex-start' }}>
+                {/* Company — left aligned */}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <span style={{ fontSize: '11px', fontWeight: 500, color: '#333', letterSpacing: '0.22px', fontFamily: 'var(--font-sora), sans-serif' }}>COMPANY</span>
@@ -657,9 +657,9 @@ export function AuthModal({
                   </p>
                 </div>
 
-                {/* Individual */}
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                {/* Individual — right aligned */}
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', justifyContent: 'flex-end' }}>
                     <span style={{ fontSize: '11px', fontWeight: 500, color: '#333', letterSpacing: '0.22px', fontFamily: 'var(--font-sora), sans-serif' }}>INDIVIDUAL</span>
                     <Toggle
                       checked={accountType === "individual"}
@@ -768,9 +768,10 @@ export function AuthModal({
               </>
             ) : (
               <>
-                Already have an account?{" "}
-                <button onClick={() => { setMode("login"); setError(""); }} style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}>
-                  Log in
+                Already have an account?
+                <br />
+                <button onClick={() => { setMode("login"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'underline' }}>
+                  Log in.
                 </button>
               </>
             )}

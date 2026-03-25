@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
@@ -87,30 +88,10 @@ export default function CompanyDashboardPage() {
 
   const isPro = company?.isPro ?? false;
 
-  // If user has no company yet, show onboarding prompt
+  // If user has no company yet, redirect directly to register-business
   if (currentUser && company === null) {
-    return (
-      <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
-        <Header />
-        <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
-          <div className="text-center py-20">
-            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-4">
-              Welcome!
-            </h1>
-            <p className="text-[14px] text-[#333]/70 mb-8 max-w-[400px] mx-auto">
-              {"You haven't listed your business yet. Register your company to get discovered on SolidFind."}
-            </p>
-            <Link
-              href="/register-business"
-              className="inline-flex items-center h-10 px-8 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
-            >
-              Register your business
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+    router.push("/register-business");
+    return null;
   }
 
   const data = {
@@ -187,23 +168,23 @@ export default function CompanyDashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className={`grid ${isPro ? 'grid-cols-4' : 'grid-cols-1 justify-items-end'} gap-6 mb-8`}>
+        <div className={`grid ${isPro ? 'grid-cols-4' : 'grid-cols-2'} gap-6 mb-8`}>
+          {/* Bookmarked — always visible */}
+          <div>
+            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+              Company bookmarked /
+            </p>
+            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
+              Perusahaan favorit sebanyak
+            </p>
+            <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px]">
+              {data.stats.bookmarked}
+              <span className="text-[14px] font-normal ml-1">Times</span>
+            </p>
+          </div>
+
           {isPro && (
             <>
-              {/* Bookmarked */}
-              <div>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Company bookmarked /
-                </p>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-                  Perusahaan favorit sebanyak
-                </p>
-                <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px]">
-                  {data.stats.bookmarked}
-                  <span className="text-[14px] font-normal ml-1">Times</span>
-                </p>
-              </div>
-
               {/* Views Last Month */}
               <div>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
@@ -309,6 +290,20 @@ export default function CompanyDashboardPage() {
             </div>
           </div>
         </div>}
+
+        {/* Banner Image */}
+        {!isPro && (
+          <div className="mb-8 rounded-[6px] overflow-hidden">
+            {/* Desktop: full width */}
+            <div className="hidden sm:block relative w-full" style={{ aspectRatio: '900/200' }}>
+              <Image src="/images/bg-individual-page.png" alt="" fill className="object-cover" />
+            </div>
+            {/* Mobile: cropped from bottom-right */}
+            <div className="sm:hidden relative w-full" style={{ aspectRatio: '2/1' }}>
+              <Image src="/images/bg-individual-page.png" alt="" fill className="object-cover object-right-bottom" />
+            </div>
+          </div>
+        )}
 
         {/* Reviews Section */}
         {reviewsEnabled && <div className="mb-8">
