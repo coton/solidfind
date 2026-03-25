@@ -357,7 +357,7 @@ function HeaderInner() {
 
   // Get dynamic filter options for current category
   const getDynamicFilter = (filterId: string) => {
-    if (configFiltersMap && configFiltersMap[activeCategory]) {
+    if (activeCategory && configFiltersMap && configFiltersMap[activeCategory]) {
       const filter = configFiltersMap[activeCategory].find((f) => f.id === filterId);
       if (filter) return filter.options;
     }
@@ -522,7 +522,7 @@ function HeaderInner() {
             </div>
           </div>
           <p className="font-bam text-[#f8f8f8] text-[9px] mt-4 leading-[12px]">
-            {dynamicSubtitles[activeCategory] || categorySubtitles[activeCategory] || categorySubtitles.construction}
+            {(activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction}
           </p>
         </div>
 
