@@ -140,14 +140,14 @@ export default function CompanyDashboardPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
+        <div className="flex items-start justify-between mb-6">
+          <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
             Here are the latest statistics about your company page. Check the latest testimonials.
             <br />
             Berikut adalah statistik terbaru tentang halaman perusahaan Anda. Periksa testimonial terbaru.
           </p>
 
-          <div className="flex items-center gap-4 shrink-0 ml-4">
+          <div className="flex items-center gap-4 shrink-0 ml-4 mt-[1px]">
             <button onClick={() => signOut()} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
               LOG OUT
             </button>
