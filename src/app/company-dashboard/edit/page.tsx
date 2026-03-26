@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -92,8 +92,11 @@ function ProjectImage({ storageId }: { storageId: Id<"_storage"> }) {
 export default function EditProfilePage() {
   const router = useRouter();
   const { user: clerkUser } = useUser();
+  const { signOut } = useClerk();
   const proEnabled = useProEnabled();
   const [showProModal, setShowProModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDirty, setIsDirty] = useState(true);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const projectInputRef = useRef<HTMLInputElement>(null);
 
@@ -109,6 +112,14 @@ export default function EditProfilePage() {
 
   const updateCompany = useMutation(api.companies.update);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const deleteAccount = useMutation(api.users.deleteAccount);
+
+  const handleDeleteAccount = async () => {
+    if (!clerkUser?.id) return;
+    await deleteAccount({ clerkId: clerkUser.id });
+    await signOut();
+    router.push("/");
+  };
 
   // Form state
   const [companyName, setCompanyName] = useState("");
@@ -176,6 +187,7 @@ export default function EditProfilePage() {
   }, [company]);
 
   const toggleService = (list: string[], setList: (val: string[]) => void, id: string) => {
+    setIsDirty(true);
     if (list.includes(id)) {
       setList(list.filter(item => item !== id));
     } else {
@@ -299,6 +311,7 @@ export default function EditProfilePage() {
           whatsapp: whatsapp || undefined,
         });
       }
+      setIsDirty(false);
       router.push("/company-dashboard");
     } finally {
       setSaving(false);
@@ -306,7 +319,7 @@ export default function EditProfilePage() {
   };
 
   const maxImages = company?.isPro ? 12 : 4;
-  const totalSlots = 12;
+  const totalSlots = proEnabled ? 12 : 4;
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -330,13 +343,19 @@ export default function EditProfilePage() {
         {/* Header Row */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2">
-              Company profile
-            </h1>
+            {company ? (
+              <Link href={`/profile/${company._id}`} className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2 block hover:text-[#f14110] transition-colors">
+                Company profile
+              </Link>
+            ) : (
+              <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2">
+                Company profile
+              </h1>
+            )}
             <p className="text-[10px] text-[#333]/70 tracking-[0.2px] max-w-[400px]">
-              (*) Only informations filled in here will be displayed on your profile page.
+              Only informations filled in here will be displayed on your profile page. Keep in mind if you activate different categories you will only have a limited amount of pictures available. SolidFind encourages specialists : )
               <br />
-              Hanya informasi yang diisi di sini yang akan ditampilan di halaman profil Anda. (*)
+              Hanya informasi yang diisi di sini yang akan ditampilan di halaman profil Anda. Perlu diingat jika Anda mengaktifkan kategori yang berbeda, jumlah gambar yang tersedia hanya terbatas. SolidFind mendorong para spesialis : )
             </p>
           </div>
 
@@ -344,45 +363,51 @@ export default function EditProfilePage() {
             {company?.isPro && proEnabled ? (
               <>
                 <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">PRO ACCOUNT</p>
-                <Link
-                  href="/company-dashboard"
-                  className="text-[11px] text-[#333] tracking-[0.22px] hover:text-[#f14110]"
-                >
-                  CANCEL
-                </Link>
               </>
             ) : (
               <>
                 <p className="text-[11px] text-[#333]/60 font-medium tracking-[0.22px] mb-1">FREE ACCOUNT</p>
-                <Link
-                  href="/upgrade"
-                  className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] hover:underline"
-                >
-                  UPGRADE FOR MORE
-                </Link>
               </>
             )}
+            {clerkUser?.emailAddresses?.[0]?.emailAddress && (
+              <p className="text-[10px] text-[#333]/60 tracking-[0.2px] mb-2">
+                {clerkUser.emailAddresses[0].emailAddress}
+              </p>
+            )}
+            <div className="flex items-center gap-4 justify-end">
+              <button onClick={() => signOut()} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+                LOG OUT
+              </button>
+              <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+                DELETE PROFILE
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
-          {company?.isPro && proEnabled && (
-            <button className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors">
-              Get AD space
-            </button>
+          {company && (
+            <Link
+              href="/company-dashboard"
+              className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
+              style={{ minWidth: '140px' }}
+            >
+              ← Back
+            </Link>
           )}
           <button
-            onClick={handleSave}
+            onClick={() => { setIsDirty(false); handleSave(); }}
             disabled={saving}
-            className="h-10 px-8 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ml-auto ${!isDirty ? 'opacity-50' : ''}`}
+            style={{ minWidth: '140px' }}
           >
             {saving ? "Saving..." : "Save"}
           </button>
         </div>
 
         {/* Form Grid */}
-        <div className="grid grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-2 gap-8 mb-8" onChangeCapture={() => setIsDirty(true)}>
           {/* Left Column */}
           <div className="space-y-4">
             {/* Logo Upload */}
@@ -694,11 +719,17 @@ export default function EditProfilePage() {
                   );
                 })}
               </div>
-              <p className="text-[8px] text-[#333]/50 mt-2 tracking-[0.16px]">
-                4 pictures for Free account / 12 pictures with PRO / 4 gambar untuk
-                <br />
-                akun gratis / 12 gambar dengan akun PRO
-              </p>
+              {proEnabled ? (
+                <p className="text-[8px] text-[#333]/50 mt-2 tracking-[0.16px]">
+                  4 pictures for Free account / 12 pictures with PRO / 4 gambar untuk
+                  <br />
+                  akun gratis / 12 gambar dengan akun PRO
+                </p>
+              ) : (
+                <p className="text-[8px] text-[#333]/50 mt-2 tracking-[0.16px]">
+                  4 pictures / 4 gambar
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -717,17 +748,36 @@ export default function EditProfilePage() {
           </div>
           {projectSizeEnabled && (
             <div className="space-y-1">
-              {projectSizeOptions.map((size) => (
-                <div key={size.id} className="flex items-center justify-between py-1 max-w-[300px]">
-                  <span className={`text-[10px] tracking-[0.2px] ${selectedProjectSizes.includes(size.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                    {size.label}
-                  </span>
-                  <Toggle
-                    checked={selectedProjectSizes.includes(size.id)}
-                    onChange={() => toggleService(selectedProjectSizes, setSelectedProjectSizes, size.id)}
-                  />
-                </div>
-              ))}
+              {projectSizeOptions.map((size) => {
+                const anyActive = selectedProjectSizes.includes("any");
+                const isAny = size.id === "any";
+                const isDisabled = anyActive && !isAny;
+                return (
+                  <div key={size.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <span className={`text-[10px] tracking-[0.2px] ${selectedProjectSizes.includes(size.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                      {size.label}
+                    </span>
+                    <Toggle
+                      checked={selectedProjectSizes.includes(size.id)}
+                      onChange={() => {
+                        setIsDirty(true);
+                        if (isAny) {
+                          if (selectedProjectSizes.includes("any")) {
+                            setSelectedProjectSizes(selectedProjectSizes.filter(s => s !== "any"));
+                          } else {
+                            setSelectedProjectSizes(["any"]);
+                          }
+                        } else {
+                          const next = selectedProjectSizes.includes(size.id)
+                            ? selectedProjectSizes.filter(s => s !== size.id)
+                            : [...selectedProjectSizes.filter(s => s !== "any"), size.id];
+                          setSelectedProjectSizes(next);
+                        }
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -757,17 +807,36 @@ export default function EditProfilePage() {
                     <br />
                     Layanan yang Disediakan
                   </p>
-                  {constructionServices.map((service) => (
-                    <div key={service.id} className="flex items-center justify-between py-1">
-                      <span className={`text-[10px] tracking-[0.2px] ${selectedConstruction.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                        {service.label}
-                      </span>
-                      <Toggle
-                        checked={selectedConstruction.includes(service.id)}
-                        onChange={() => toggleService(selectedConstruction, setSelectedConstruction, service.id)}
-                      />
-                    </div>
-                  ))}
+                  {constructionServices.map((service) => {
+                    const allActive = selectedConstruction.includes("all");
+                    const isAll = service.id === "all";
+                    const isDisabled = allActive && !isAll;
+                    return (
+                      <div key={service.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className={`text-[10px] tracking-[0.2px] ${selectedConstruction.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                          {service.label}
+                        </span>
+                        <Toggle
+                          checked={selectedConstruction.includes(service.id)}
+                          onChange={() => {
+                            setIsDirty(true);
+                            if (isAll) {
+                              if (selectedConstruction.includes("all")) {
+                                setSelectedConstruction(selectedConstruction.filter(s => s !== "all"));
+                              } else {
+                                setSelectedConstruction(["all"]);
+                              }
+                            } else {
+                              const next = selectedConstruction.includes(service.id)
+                                ? selectedConstruction.filter(s => s !== service.id)
+                                : [...selectedConstruction.filter(s => s !== "all"), service.id];
+                              setSelectedConstruction(next);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
                 <div>
                   <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
@@ -775,17 +844,36 @@ export default function EditProfilePage() {
                     <br />
                     Lokasi Layanan
                   </p>
-                  {locationOptions.map((loc) => (
-                    <div key={loc.id} className="flex items-center justify-between py-1">
-                      <span className={`text-[10px] tracking-[0.2px] ${selectedConstructionLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
-                        {loc.label}
-                      </span>
-                      <Toggle
-                        checked={selectedConstructionLocations.includes(loc.id)}
-                        onChange={() => toggleService(selectedConstructionLocations, setSelectedConstructionLocations, loc.id)}
-                      />
-                    </div>
-                  ))}
+                  {locationOptions.map((loc) => {
+                    const baliActive = selectedConstructionLocations.includes("bali");
+                    const isBali = loc.id === "bali";
+                    const isDisabled = baliActive && !isBali;
+                    return (
+                      <div key={loc.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className={`text-[10px] tracking-[0.2px] ${selectedConstructionLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
+                          {loc.label}
+                        </span>
+                        <Toggle
+                          checked={selectedConstructionLocations.includes(loc.id)}
+                          onChange={() => {
+                            setIsDirty(true);
+                            if (isBali) {
+                              if (selectedConstructionLocations.includes("bali")) {
+                                setSelectedConstructionLocations(selectedConstructionLocations.filter(s => s !== "bali"));
+                              } else {
+                                setSelectedConstructionLocations(["bali"]);
+                              }
+                            } else {
+                              const next = selectedConstructionLocations.includes(loc.id)
+                                ? selectedConstructionLocations.filter(s => s !== loc.id)
+                                : [...selectedConstructionLocations.filter(s => s !== "bali"), loc.id];
+                              setSelectedConstructionLocations(next);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -815,17 +903,36 @@ export default function EditProfilePage() {
                     <br />
                     Layanan yang Disediakan
                   </p>
-                  {renovationServices.map((service) => (
-                    <div key={service.id} className="flex items-center justify-between py-1">
-                      <span className={`text-[10px] tracking-[0.2px] ${selectedRenovation.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                        {service.label}
-                      </span>
-                      <Toggle
-                        checked={selectedRenovation.includes(service.id)}
-                        onChange={() => toggleService(selectedRenovation, setSelectedRenovation, service.id)}
-                      />
-                    </div>
-                  ))}
+                  {renovationServices.map((service) => {
+                    const everyActive = selectedRenovation.includes("every");
+                    const isEvery = service.id === "every";
+                    const isDisabled = everyActive && !isEvery;
+                    return (
+                      <div key={service.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className={`text-[10px] tracking-[0.2px] ${selectedRenovation.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                          {service.label}
+                        </span>
+                        <Toggle
+                          checked={selectedRenovation.includes(service.id)}
+                          onChange={() => {
+                            setIsDirty(true);
+                            if (isEvery) {
+                              if (selectedRenovation.includes("every")) {
+                                setSelectedRenovation(selectedRenovation.filter(s => s !== "every"));
+                              } else {
+                                setSelectedRenovation(["every"]);
+                              }
+                            } else {
+                              const next = selectedRenovation.includes(service.id)
+                                ? selectedRenovation.filter(s => s !== service.id)
+                                : [...selectedRenovation.filter(s => s !== "every"), service.id];
+                              setSelectedRenovation(next);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
                 <div>
                   <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
@@ -833,17 +940,36 @@ export default function EditProfilePage() {
                     <br />
                     Lokasi Layanan
                   </p>
-                  {locationOptions.map((loc) => (
-                    <div key={loc.id} className="flex items-center justify-between py-1">
-                      <span className={`text-[10px] tracking-[0.2px] ${selectedRenovationLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
-                        {loc.label}
-                      </span>
-                      <Toggle
-                        checked={selectedRenovationLocations.includes(loc.id)}
-                        onChange={() => toggleService(selectedRenovationLocations, setSelectedRenovationLocations, loc.id)}
-                      />
-                    </div>
-                  ))}
+                  {locationOptions.map((loc) => {
+                    const baliActive = selectedRenovationLocations.includes("bali");
+                    const isBali = loc.id === "bali";
+                    const isDisabled = baliActive && !isBali;
+                    return (
+                      <div key={loc.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className={`text-[10px] tracking-[0.2px] ${selectedRenovationLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
+                          {loc.label}
+                        </span>
+                        <Toggle
+                          checked={selectedRenovationLocations.includes(loc.id)}
+                          onChange={() => {
+                            setIsDirty(true);
+                            if (isBali) {
+                              if (selectedRenovationLocations.includes("bali")) {
+                                setSelectedRenovationLocations(selectedRenovationLocations.filter(s => s !== "bali"));
+                              } else {
+                                setSelectedRenovationLocations(["bali"]);
+                              }
+                            } else {
+                              const next = selectedRenovationLocations.includes(loc.id)
+                                ? selectedRenovationLocations.filter(s => s !== loc.id)
+                                : [...selectedRenovationLocations.filter(s => s !== "bali"), loc.id];
+                              setSelectedRenovationLocations(next);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -851,7 +977,7 @@ export default function EditProfilePage() {
         </div>
 
         {/* Bottom Save */}
-        <div className="flex items-center justify-center gap-4 py-8 border-t border-[#e4e4e4]">
+        <div className="flex items-center gap-4 py-8 border-t border-[#e4e4e4]">
           <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
             *Select &apos;LOCATION&apos; for &apos;RENOVATION&apos; before submitting /
             <br />
@@ -861,9 +987,10 @@ export default function EditProfilePage() {
             <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px] mb-2">{saveError}</p>
           )}
           <button
-            onClick={handleSave}
+            onClick={() => { setIsDirty(false); handleSave(); }}
             disabled={saving}
-            className="h-10 px-8 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ml-auto ${!isDirty ? 'opacity-50' : ''}`}
+            style={{ minWidth: '140px' }}
           >
             {saving ? "Saving..." : "Save"}
           </button>
@@ -871,6 +998,33 @@ export default function EditProfilePage() {
       </main>
 
       <Footer />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowDeleteModal(false)} />
+          <div className="relative bg-white w-full max-w-[440px] rounded-[6px] p-8 text-center">
+            <h3 className="text-[20px] font-bold text-[#333] mb-4">Delete Profile</h3>
+            <p className="text-[12px] text-[#333]/70 mb-6">
+              Are you sure you want to delete your profile? This action cannot be undone.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                className="h-10 px-6 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* PRO Features Modal */}
       {showProModal && (

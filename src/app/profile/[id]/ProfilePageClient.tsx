@@ -487,7 +487,7 @@ export default function ProfilePageClient() {
             </div>
 
             {/* Description — full width of col3+col4 */}
-            <p className="text-[10px] text-[#333] leading-[18px] tracking-[0.2px] whitespace-pre-line mb-4">
+            <p className="text-[10px] text-[#333] leading-[18px] tracking-[0.2px] whitespace-pre-line mb-4" style={{ wordBreak: "break-word", overflowWrap: "break-word" }}>
               {company.description ?? ""}
             </p>
 

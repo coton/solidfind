@@ -135,22 +135,33 @@ export default function CompanyDashboardPage() {
             <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">
               {isPro && proEnabled ? "PRO ACCOUNT" : "FREE ACCOUNT"}
             </p>
-            <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-              DELETE PROFILE
-            </button>
+            {clerkUser?.emailAddresses?.[0]?.emailAddress && (
+              <p className="text-[10px] text-[#333]/60 tracking-[0.2px] mb-2">
+                {clerkUser.emailAddresses[0].emailAddress}
+              </p>
+            )}
+            <div className="flex items-center gap-4 justify-end">
+              <button onClick={() => signOut()} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+                LOG OUT
+              </button>
+              <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+                DELETE PROFILE
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
-          {isPro && proEnabled ? (
+          {isPro && proEnabled && (
             <button
               onClick={() => setShowAdModal(true)}
               className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"
             >
               Get AD space
             </button>
-          ) : (
+          )}
+          {!isPro && proEnabled && (
             <Link
               href="/upgrade"
               className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center"
@@ -161,14 +172,15 @@ export default function CompanyDashboardPage() {
           )}
           <Link
             href="/company-dashboard/edit"
-            className="h-10 px-6 rounded-full bg-[#333] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#444] transition-colors flex items-center"
+            className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center ml-auto"
+            style={{ minWidth: '140px' }}
           >
             Edit profile
           </Link>
         </div>
 
         {/* Stats Grid */}
-        <div className={`grid ${isPro ? 'grid-cols-4' : 'grid-cols-2'} gap-6 mb-8`}>
+        <div className={`grid ${isPro && proEnabled ? 'grid-cols-4' : proEnabled ? 'grid-cols-2' : 'grid-cols-1'} gap-6 mb-8`}>
           {/* Bookmarked — always visible */}
           <div>
             <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
@@ -183,7 +195,7 @@ export default function CompanyDashboardPage() {
             </p>
           </div>
 
-          {isPro && (
+          {isPro && proEnabled && (
             <>
               {/* Views Last Month */}
               <div>
@@ -214,52 +226,54 @@ export default function CompanyDashboardPage() {
             </>
           )}
 
-          {/* PRO Features */}
-          <div className="bg-white rounded-[6px] p-4">
-            <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-3">
-              Services included with PRO account
-              <br />
-              Layanan dengan akun PRO
-            </p>
-            <div className="space-y-2">
-              {proFeatures.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-4 h-4 flex items-center justify-center text-[#f14110]">
-                    {feature.icon === "star" && <Star className="w-4 h-4" />}
-                    {feature.icon === "ai" && (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
-                      </svg>
-                    )}
-                    {feature.icon === "stats" && (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <rect x="1" y="8" width="3" height="7"/>
-                        <rect x="6" y="4" width="3" height="11"/>
-                        <rect x="11" y="1" width="3" height="14"/>
-                      </svg>
-                    )}
-                    {feature.icon === "photos" && (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <rect x="1" y="3" width="14" height="10" rx="1"/>
-                        <circle cx="5" cy="7" r="1.5"/>
-                        <path d="M4 11L7 8L9 10L12 7L14 9V12H2V11H4Z"/>
-                      </svg>
-                    )}
-                    {feature.icon === "ad" && (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <rect x="1" y="1" width="14" height="14" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M4 11L8 5L12 11H4Z"/>
-                      </svg>
-                    )}
+          {/* PRO Features — only when proEnabled */}
+          {proEnabled && (
+            <div className="bg-white rounded-[6px] p-4">
+              <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-3">
+                Services included with PRO account
+                <br />
+                Layanan dengan akun PRO
+              </p>
+              <div className="space-y-2">
+                {proFeatures.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="w-4 h-4 flex items-center justify-center text-[#f14110]">
+                      {feature.icon === "star" && <Star className="w-4 h-4" />}
+                      {feature.icon === "ai" && (
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
+                        </svg>
+                      )}
+                      {feature.icon === "stats" && (
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <rect x="1" y="8" width="3" height="7"/>
+                          <rect x="6" y="4" width="3" height="11"/>
+                          <rect x="11" y="1" width="3" height="14"/>
+                        </svg>
+                      )}
+                      {feature.icon === "photos" && (
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <rect x="1" y="3" width="14" height="10" rx="1"/>
+                          <circle cx="5" cy="7" r="1.5"/>
+                          <path d="M4 11L7 8L9 10L12 7L14 9V12H2V11H4Z"/>
+                        </svg>
+                      )}
+                      {feature.icon === "ad" && (
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <rect x="1" y="1" width="14" height="14" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                          <path d="M4 11L8 5L12 11H4Z"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-medium text-[#333] tracking-[0.18px]">{feature.title}</p>
+                      <p className="text-[8px] text-[#333]/50 tracking-[0.16px]">{feature.subtitle}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[9px] font-medium text-[#333] tracking-[0.18px]">{feature.title}</p>
-                    <p className="text-[8px] text-[#333]/50 tracking-[0.16px]">{feature.subtitle}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Monthly Views Chart */}
