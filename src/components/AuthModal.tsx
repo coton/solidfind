@@ -657,9 +657,9 @@ export function AuthModal({
                   </p>
                 </div>
 
-                {/* Individual — right aligned */}
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', justifyContent: 'flex-end' }}>
+                {/* Individual — left-aligned text, sticking to right side */}
+                <div style={{ textAlign: 'left', marginLeft: 'auto' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <span style={{ fontSize: '11px', fontWeight: 500, color: '#333', letterSpacing: '0.22px', fontFamily: 'var(--font-sora), sans-serif' }}>INDIVIDUAL</span>
                     <Toggle
                       checked={accountType === "individual"}
@@ -771,7 +771,7 @@ export function AuthModal({
                 Already have an account?
                 <br />
                 <button onClick={() => { setMode("login"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'underline' }}>
-                  Log in.
+                  Log in
                 </button>
               </>
             )}
