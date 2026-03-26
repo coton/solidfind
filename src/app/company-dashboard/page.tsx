@@ -126,9 +126,6 @@ export default function CompanyDashboardPage() {
             <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2">
               Company profile
             </h1>
-            <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
-              Here are the latest statistics about your company page. Check the latest testimonials.
-            </p>
           </div>
 
           <div className="text-right">
@@ -140,14 +137,23 @@ export default function CompanyDashboardPage() {
                 {clerkUser.emailAddresses[0].emailAddress}
               </p>
             )}
-            <div className="flex items-center gap-4 justify-end">
-              <button onClick={() => signOut()} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                LOG OUT
-              </button>
-              <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                DELETE PROFILE
-              </button>
-            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
+            Here are the latest statistics about your company page. Check the latest testimonials.
+            <br />
+            Berikut adalah statistik terbaru tentang halaman perusahaan Anda. Periksa testimonial terbaru.
+          </p>
+
+          <div className="flex items-center gap-4 shrink-0 ml-4">
+            <button onClick={() => signOut()} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+              LOG OUT
+            </button>
+            <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+              DELETE PROFILE
+            </button>
           </div>
         </div>
 
