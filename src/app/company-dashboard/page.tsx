@@ -121,9 +121,9 @@ export default function CompanyDashboardPage() {
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         {/* Header Row */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start justify-between mb-[5px]">
           <div>
-            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2">
+            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-0">
               Company profile
             </h1>
           </div>
