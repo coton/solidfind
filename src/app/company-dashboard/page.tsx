@@ -176,12 +176,6 @@ export default function CompanyDashboardPage() {
               Get PRO
             </button>
           )}
-          <button
-            onClick={() => signOut()}
-            className="h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors ml-auto"
-          >
-            Log out
-          </button>
         </div>
 
         {/* Stats Grid */}
