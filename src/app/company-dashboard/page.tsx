@@ -171,7 +171,7 @@ export default function CompanyDashboardPage() {
           {!isPro && proEnabled && (
             <button
               onClick={() => setShowProModal(true)}
-              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"
+              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors ml-auto"
             >
               Get PRO
             </button>
