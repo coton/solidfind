@@ -133,10 +133,13 @@ export default function CompanyDashboardPage() {
               {isPro && proEnabled ? "PRO ACCOUNT" : "FREE ACCOUNT"}
             </p>
             {clerkUser?.emailAddresses?.[0]?.emailAddress && (
-              <p className="text-[10px] text-[#333]/60 tracking-[0.2px] mb-2">
+              <p className="text-[10px] text-[#333]/60 tracking-[0.2px] mb-1">
                 {clerkUser.emailAddresses[0].emailAddress}
               </p>
             )}
+            <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+              DELETE PROFILE
+            </button>
           </div>
         </div>
 
@@ -146,19 +149,17 @@ export default function CompanyDashboardPage() {
             <br />
             Berikut adalah statistik terbaru tentang halaman perusahaan Anda. Periksa testimonial terbaru.
           </p>
-
-          <div className="flex items-center gap-4 shrink-0 ml-4 mt-[1px]">
-            <button onClick={() => signOut()} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-              LOG OUT
-            </button>
-            <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-              DELETE PROFILE
-            </button>
-          </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
+          <Link
+            href="/company-dashboard/edit"
+            className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
+            style={{ minWidth: '140px' }}
+          >
+            Edit profile
+          </Link>
           {isPro && proEnabled && (
             <button
               onClick={() => setShowAdModal(true)}
@@ -176,13 +177,12 @@ export default function CompanyDashboardPage() {
               Get PRO
             </Link>
           )}
-          <Link
-            href="/company-dashboard/edit"
-            className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center ml-auto"
-            style={{ minWidth: '140px' }}
+          <button
+            onClick={() => signOut()}
+            className="h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors ml-auto"
           >
-            Edit profile
-          </Link>
+            Log out
+          </button>
         </div>
 
         {/* Stats Grid */}
