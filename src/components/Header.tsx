@@ -4,7 +4,7 @@ import { Suspense, useState, useCallback, useRef, useEffect, useMemo } from "rea
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useUser, useClerk } from "@clerk/nextjs";
 import { AuthModal } from "@/components/AuthModal";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -255,7 +255,7 @@ export function Header() {
 }
 
 function HeaderInner() {
-  const { user } = useUser();
+  const { user, signOut } = useClerk();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -483,18 +483,18 @@ function HeaderInner() {
               </Link>
               {/* List your business button (third) */}
               {userType === "company" ? (
-                <Link
-                  href="/register-business"
+                <button
+                  onClick={() => signOut()}
                   className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
                 >
-                  List your business
-                </Link>
+                  Log out
+                </button>
               ) : (
                 <button
                   onClick={() => setShowLogoutPrompt(true)}
                   className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
                 >
-                  List your business
+                  Log out
                 </button>
               )}
             </SignedIn>
