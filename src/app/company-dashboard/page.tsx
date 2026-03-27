@@ -169,13 +169,12 @@ export default function CompanyDashboardPage() {
             </button>
           )}
           {!isPro && proEnabled && (
-            <Link
-              href="/upgrade"
-              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center"
-              style={{ width: '140px', justifyContent: 'center' }}
+            <button
+              onClick={() => setShowProModal(true)}
+              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"
             >
               Get PRO
-            </Link>
+            </button>
           )}
           <button
             onClick={() => signOut()}
