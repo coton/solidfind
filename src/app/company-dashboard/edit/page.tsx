@@ -411,21 +411,18 @@ export default function EditProfilePage() {
             )}
             <p className="text-[10px] text-[#333]/70 tracking-[0.2px] max-w-[600px]">
               Only informations filled in here will be displayed on your profile page. Keep in mind if you activate different categories you will only have a limited amount of pictures available. SolidFind encourages specialists : )
-              <br />
+            </p>
+            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] max-w-[600px] mt-2">
               Hanya informasi yang diisi di sini yang akan ditampilan di halaman profil Anda. Perlu diingat jika Anda mengaktifkan kategori yang berbeda, jumlah gambar yang tersedia hanya terbatas. SolidFind mendorong para spesialis : )
             </p>
           </div>
 
           <div className="text-right">
             {company?.isPro && proEnabled ? (
-              <>
-                <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">PRO ACCOUNT</p>
-              </>
-            ) : (
-              <>
-                <p className="text-[11px] text-[#333]/60 font-medium tracking-[0.22px] mb-1">FREE ACCOUNT</p>
-              </>
-            )}
+              <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">PRO ACCOUNT</p>
+            ) : proEnabled ? (
+              <p className="text-[11px] text-[#333]/60 font-medium tracking-[0.22px] mb-1">FREE ACCOUNT</p>
+            ) : null}
             {clerkUser?.emailAddresses?.[0]?.emailAddress && (
               <p className="text-[10px] text-[#333]/60 tracking-[0.2px] mb-2">
                 {clerkUser.emailAddresses[0].emailAddress}

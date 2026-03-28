@@ -129,9 +129,11 @@ export default function CompanyDashboardPage() {
           </div>
 
           <div className="text-right">
-            <p className={`text-[11px] font-medium tracking-[0.22px] mb-1 ${isPro && proEnabled ? 'text-[#f14110]' : 'text-[#333]/60'}`}>
-              {isPro && proEnabled ? "PRO ACCOUNT" : "FREE ACCOUNT"}
-            </p>
+            {isPro && proEnabled ? (
+              <p className="text-[11px] font-medium tracking-[0.22px] mb-1 text-[#f14110]">PRO ACCOUNT</p>
+            ) : proEnabled ? (
+              <p className="text-[11px] font-medium tracking-[0.22px] mb-1 text-[#333]/60">FREE ACCOUNT</p>
+            ) : null}
             {clerkUser?.emailAddresses?.[0]?.emailAddress && (
               <p className="text-[10px] text-[#333]/60 tracking-[0.2px] mb-1">
                 {clerkUser.emailAddresses[0].emailAddress}
