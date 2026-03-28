@@ -165,7 +165,7 @@ export default function CompanyDashboardPage() {
           {isPro && proEnabled && (
             <button
               onClick={() => setShowAdModal(true)}
-              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"
+              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors ml-auto"
             >
               Get AD space
             </button>
@@ -417,7 +417,7 @@ export default function CompanyDashboardPage() {
             </div>
 
             <p className="text-[11px] text-[#333]/70 text-center mb-6 leading-[18px]">
-              Your Ads will be visible throughout the website, in essential pages offering instant visibility across the entirety of Struct.id / Iklan Anda akan terlihat di seluruh situs web, di halaman-halaman penting yang menawarkan visibilitas instan di seluruh Struct.id.
+              Your Ads will be visible throughout the website, in essential pages offering instant visibility across the entirety of Solidfind.id / Iklan Anda akan terlihat di seluruh situs web, di halaman-halaman penting yang menawarkan visibilitas instan di seluruh Solidfind.id.
             </p>
 
             <p className="text-[12px] text-[#f14110] text-center mb-4">
@@ -426,12 +426,12 @@ export default function CompanyDashboardPage() {
               Hubungi kami untuk mengetahui pilihan harga.
             </p>
 
-            <button
-              onClick={() => setShowAdModal(false)}
-              className="mx-auto block h-10 px-10 rounded-full border-2 border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors"
+            <a
+              href={`mailto:getadspace@solidfind.id?subject=${encodeURIComponent(`"${company?.name || 'Company'}" wants ad space`)}&body=${encodeURIComponent(`Company: ${company?.name || 'N/A'}\nEmail: ${company?.email || clerkUser?.emailAddresses?.[0]?.emailAddress || 'N/A'}\nDate: ${new Date().toLocaleString('en-GB', { timeZone: 'Asia/Jakarta' })}`)}`}
+              className="mx-auto block h-10 px-10 rounded-full border border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors text-center leading-[40px]"
             >
               Get in touch
-            </button>
+            </a>
           </div>
         </div>
       )}
