@@ -409,7 +409,7 @@ export default function EditProfilePage() {
                 Company profile
               </h1>
             )}
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] max-w-[400px]">
+            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] max-w-[600px]">
               Only informations filled in here will be displayed on your profile page. Keep in mind if you activate different categories you will only have a limited amount of pictures available. SolidFind encourages specialists : )
               <br />
               Hanya informasi yang diisi di sini yang akan ditampilan di halaman profil Anda. Perlu diingat jika Anda mengaktifkan kategori yang berbeda, jumlah gambar yang tersedia hanya terbatas. SolidFind mendorong para spesialis : )
@@ -432,9 +432,6 @@ export default function EditProfilePage() {
               </p>
             )}
             <div className="flex items-center gap-4 justify-end">
-              <button onClick={() => signOut()} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                LOG OUT
-              </button>
               <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
                 DELETE PROFILE
               </button>
@@ -884,9 +881,13 @@ export default function EditProfilePage() {
                                 setSelectedConstruction(["all"]);
                               }
                             } else {
-                              const next = selectedConstruction.includes(service.id)
+                              let next = selectedConstruction.includes(service.id)
                                 ? selectedConstruction.filter(s => s !== service.id)
                                 : [...selectedConstruction.filter(s => s !== "all"), service.id];
+                              const allIndividual = constructionServices.filter(s => s.id !== "all").map(s => s.id);
+                              if (allIndividual.every(id => next.includes(id))) {
+                                next = ["all"];
+                              }
                               setSelectedConstruction(next);
                             }
                           }}
@@ -921,9 +922,13 @@ export default function EditProfilePage() {
                                 setSelectedConstructionLocations(["bali"]);
                               }
                             } else {
-                              const next = selectedConstructionLocations.includes(loc.id)
+                              let next = selectedConstructionLocations.includes(loc.id)
                                 ? selectedConstructionLocations.filter(s => s !== loc.id)
                                 : [...selectedConstructionLocations.filter(s => s !== "bali"), loc.id];
+                              const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
+                              if (allIndividual.every(id => next.includes(id))) {
+                                next = ["bali"];
+                              }
                               setSelectedConstructionLocations(next);
                             }
                           }}
@@ -980,9 +985,13 @@ export default function EditProfilePage() {
                                 setSelectedRenovation(["every"]);
                               }
                             } else {
-                              const next = selectedRenovation.includes(service.id)
+                              let next = selectedRenovation.includes(service.id)
                                 ? selectedRenovation.filter(s => s !== service.id)
                                 : [...selectedRenovation.filter(s => s !== "every"), service.id];
+                              const allIndividual = renovationServices.filter(s => s.id !== "every").map(s => s.id);
+                              if (allIndividual.every(id => next.includes(id))) {
+                                next = ["every"];
+                              }
                               setSelectedRenovation(next);
                             }
                           }}
@@ -1017,9 +1026,13 @@ export default function EditProfilePage() {
                                 setSelectedRenovationLocations(["bali"]);
                               }
                             } else {
-                              const next = selectedRenovationLocations.includes(loc.id)
+                              let next = selectedRenovationLocations.includes(loc.id)
                                 ? selectedRenovationLocations.filter(s => s !== loc.id)
                                 : [...selectedRenovationLocations.filter(s => s !== "bali"), loc.id];
+                              const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
+                              if (allIndividual.every(id => next.includes(id))) {
+                                next = ["bali"];
+                              }
                               setSelectedRenovationLocations(next);
                             }
                           }}
@@ -1079,9 +1092,13 @@ export default function EditProfilePage() {
                                 setSelectedArchitecture(["all"]);
                               }
                             } else {
-                              const next = selectedArchitecture.includes(service.id)
+                              let next = selectedArchitecture.includes(service.id)
                                 ? selectedArchitecture.filter(s => s !== service.id)
                                 : [...selectedArchitecture.filter(s => s !== "all"), service.id];
+                              const allIndividual = architectureServices.filter(s => s.id !== "all").map(s => s.id);
+                              if (allIndividual.every(id => next.includes(id))) {
+                                next = ["all"];
+                              }
                               setSelectedArchitecture(next);
                             }
                           }}
@@ -1116,9 +1133,13 @@ export default function EditProfilePage() {
                                 setSelectedArchitectureLocations(["bali"]);
                               }
                             } else {
-                              const next = selectedArchitectureLocations.includes(loc.id)
+                              let next = selectedArchitectureLocations.includes(loc.id)
                                 ? selectedArchitectureLocations.filter(s => s !== loc.id)
                                 : [...selectedArchitectureLocations.filter(s => s !== "bali"), loc.id];
+                              const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
+                              if (allIndividual.every(id => next.includes(id))) {
+                                next = ["bali"];
+                              }
                               setSelectedArchitectureLocations(next);
                             }
                           }}
@@ -1176,9 +1197,13 @@ export default function EditProfilePage() {
                                 setSelectedInterior(["all"]);
                               }
                             } else {
-                              const next = selectedInterior.includes(service.id)
+                              let next = selectedInterior.includes(service.id)
                                 ? selectedInterior.filter(s => s !== service.id)
                                 : [...selectedInterior.filter(s => s !== "all"), service.id];
+                              const allIndividual = interiorServices.filter(s => s.id !== "all").map(s => s.id);
+                              if (allIndividual.every(id => next.includes(id))) {
+                                next = ["all"];
+                              }
                               setSelectedInterior(next);
                             }
                           }}
@@ -1213,9 +1238,13 @@ export default function EditProfilePage() {
                                 setSelectedInteriorLocations(["bali"]);
                               }
                             } else {
-                              const next = selectedInteriorLocations.includes(loc.id)
+                              let next = selectedInteriorLocations.includes(loc.id)
                                 ? selectedInteriorLocations.filter(s => s !== loc.id)
                                 : [...selectedInteriorLocations.filter(s => s !== "bali"), loc.id];
+                              const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
+                              if (allIndividual.every(id => next.includes(id))) {
+                                next = ["bali"];
+                              }
                               setSelectedInteriorLocations(next);
                             }
                           }}
@@ -1273,9 +1302,13 @@ export default function EditProfilePage() {
                                 setSelectedRealEstate(["all"]);
                               }
                             } else {
-                              const next = selectedRealEstate.includes(service.id)
+                              let next = selectedRealEstate.includes(service.id)
                                 ? selectedRealEstate.filter(s => s !== service.id)
                                 : [...selectedRealEstate.filter(s => s !== "all"), service.id];
+                              const allIndividual = realEstateServices.filter(s => s.id !== "all").map(s => s.id);
+                              if (allIndividual.every(id => next.includes(id))) {
+                                next = ["all"];
+                              }
                               setSelectedRealEstate(next);
                             }
                           }}
@@ -1310,9 +1343,13 @@ export default function EditProfilePage() {
                                 setSelectedRealEstateLocations(["bali"]);
                               }
                             } else {
-                              const next = selectedRealEstateLocations.includes(loc.id)
+                              let next = selectedRealEstateLocations.includes(loc.id)
                                 ? selectedRealEstateLocations.filter(s => s !== loc.id)
                                 : [...selectedRealEstateLocations.filter(s => s !== "bali"), loc.id];
+                              const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
+                              if (allIndividual.every(id => next.includes(id))) {
+                                next = ["bali"];
+                              }
                               setSelectedRealEstateLocations(next);
                             }
                           }}
