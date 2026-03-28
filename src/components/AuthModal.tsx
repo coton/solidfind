@@ -743,6 +743,13 @@ export function AuthModal({
             </button>
             </div>
 
+            {/* Error message — right below button for visibility */}
+            {error && (
+              <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+                <p style={{ color: '#F14110', fontSize: '11px', fontWeight: 500, margin: '4px 0' }}>*{error}</p>
+              </div>
+            )}
+
             {/* Forgot password (login only) */}
             {mode === "login" && (
               <button
@@ -777,12 +784,6 @@ export function AuthModal({
             )}
           </p>
 
-          {/* Error message */}
-          {error && (
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*{error}</p>
-            </div>
-          )}
         </div>
       </div>
     </div>
