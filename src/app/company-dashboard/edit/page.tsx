@@ -717,9 +717,11 @@ export default function EditProfilePage() {
             {/* Project Pictures Upload */}
             <div>
               <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-                Upload project pictures /
-                <br />
-                Unggah gambar proyek <span className="text-[#f14110]">(*)</span>
+                {company?.isPro && proEnabled ? (
+                  <>Upload project pictures or videos<br />Unggah gambar proyek atau Video</>
+                ) : (
+                  <>Upload project pictures /<br />Unggah gambar proyek <span className="text-[#f14110]">(*)</span></>
+                )}
               </label>
               <div className="grid grid-cols-4 gap-2">
                 {Array(totalSlots).fill(null).map((_, index) => {
