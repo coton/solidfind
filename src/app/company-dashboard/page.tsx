@@ -428,7 +428,8 @@ export default function CompanyDashboardPage() {
 
             <a
               href={`mailto:getadspace@solidfind.id?subject=${encodeURIComponent(`"${company?.name || 'Company'}" wants ad space`)}&body=${encodeURIComponent(`Company: ${company?.name || 'N/A'}\nEmail: ${company?.email || clerkUser?.emailAddresses?.[0]?.emailAddress || 'N/A'}\nDate: ${new Date().toLocaleString('en-GB', { timeZone: 'Asia/Jakarta' })}`)}`}
-              className="mx-auto block h-10 px-10 rounded-full border border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors text-center leading-[40px]"
+              className="mx-auto block h-10 rounded-full border border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors text-center leading-[40px]"
+              style={{ width: '140px' }}
             >
               Get in touch
             </a>
