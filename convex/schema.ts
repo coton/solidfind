@@ -44,6 +44,12 @@ export default defineSchema({
     constructionLocations: v.optional(v.array(v.string())),
     renovationTypes: v.optional(v.array(v.string())),
     renovationLocations: v.optional(v.array(v.string())),
+    architectureTypes: v.optional(v.array(v.string())),
+    architectureLocations: v.optional(v.array(v.string())),
+    interiorTypes: v.optional(v.array(v.string())),
+    interiorLocations: v.optional(v.array(v.string())),
+    realEstateTypes: v.optional(v.array(v.string())),
+    realEstateLocations: v.optional(v.array(v.string())),
     logoId: v.optional(v.id("_storage")),
     projectImageIds: v.optional(v.array(v.id("_storage"))),
     projectImageUrls: v.optional(v.array(v.string())), // External image URLs as fallback

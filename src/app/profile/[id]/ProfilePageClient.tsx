@@ -570,6 +570,33 @@ export default function ProfilePageClient() {
                     )}
                   </div>
                 )}
+                {(company.architectureTypes?.length ?? 0) > 0 && (
+                  <div className="min-w-[160px] flex-shrink-0">
+                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">ARCHITECTURE</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.architectureTypes!.join(", ")}</p>
+                    {(company.architectureLocations?.length ?? 0) > 0 && (
+                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.architectureLocations!.join(", ")}</p>
+                    )}
+                  </div>
+                )}
+                {(company.interiorTypes?.length ?? 0) > 0 && (
+                  <div className="min-w-[160px] flex-shrink-0">
+                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">INTERIOR</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.interiorTypes!.join(", ")}</p>
+                    {(company.interiorLocations?.length ?? 0) > 0 && (
+                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.interiorLocations!.join(", ")}</p>
+                    )}
+                  </div>
+                )}
+                {(company.realEstateTypes?.length ?? 0) > 0 && (
+                  <div className="min-w-[160px] flex-shrink-0">
+                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">REAL ESTATE</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.realEstateTypes!.join(", ")}</p>
+                    {(company.realEstateLocations?.length ?? 0) > 0 && (
+                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.realEstateLocations!.join(", ")}</p>
+                    )}
+                  </div>
+                )}
                 <div className="min-w-[160px] flex-shrink-0">
                   <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">LOCATION</p>
                   <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.location ?? "Bali"}</p>
@@ -603,6 +630,33 @@ export default function ProfilePageClient() {
                   <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.renovationTypes!.join(", ")}</p>
                   {(company.renovationLocations?.length ?? 0) > 0 && (
                     <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.renovationLocations!.join(", ")}</p>
+                  )}
+                </div>
+              )}
+              {(company.architectureTypes?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">ARCHITECTURE</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.architectureTypes!.join(", ")}</p>
+                  {(company.architectureLocations?.length ?? 0) > 0 && (
+                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.architectureLocations!.join(", ")}</p>
+                  )}
+                </div>
+              )}
+              {(company.interiorTypes?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">INTERIOR</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.interiorTypes!.join(", ")}</p>
+                  {(company.interiorLocations?.length ?? 0) > 0 && (
+                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.interiorLocations!.join(", ")}</p>
+                  )}
+                </div>
+              )}
+              {(company.realEstateTypes?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">REAL ESTATE</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.realEstateTypes!.join(", ")}</p>
+                  {(company.realEstateLocations?.length ?? 0) > 0 && (
+                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.realEstateLocations!.join(", ")}</p>
                   )}
                 </div>
               )}

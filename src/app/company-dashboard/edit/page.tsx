@@ -46,6 +46,33 @@ const renovationServices = [
   { id: "fencing", label: "FENCING" },
 ];
 
+const architectureServices = [
+  { id: "all", label: "ALL TYPES" },
+  { id: "residential", label: "RESIDENTIAL" },
+  { id: "commercial", label: "COMMERCIAL" },
+  { id: "renovations-extensions", label: "RENOVATIONS & EXTENSIONS" },
+  { id: "sustainable-eco", label: "SUSTAINABLE / ECO-ARCHI." },
+];
+
+const interiorServices = [
+  { id: "all", label: "ALL TYPES" },
+  { id: "residential", label: "RESIDENTIAL" },
+  { id: "commercial", label: "COMMERCIAL" },
+  { id: "hospitality", label: "HOSPITALITY" },
+  { id: "furnitures", label: "FURNITURES" },
+  { id: "lighting", label: "LIGHTING" },
+  { id: "styling-decoration", label: "STYLING & DECORATION" },
+];
+
+const realEstateServices = [
+  { id: "all", label: "ALL TYPES" },
+  { id: "residential", label: "RESIDENTIAL" },
+  { id: "commercial", label: "COMMERCIAL" },
+  { id: "land-development", label: "LAND & DEVELOPMENT PLOTS" },
+  { id: "property-management", label: "PROPERTY MANAGEMENT" },
+  { id: "legal-notary", label: "LEGAL & NOTARY SERVICES" },
+];
+
 const locationOptions = [
   { id: "bali", label: "BALI" },
   { id: "badung", label: "BADUNG" },
@@ -110,6 +137,9 @@ export default function EditProfilePage() {
     currentUser?._id ? { ownerId: currentUser._id } : "skip"
   );
 
+  const pageConfigs = useQuery(api.pageConfigs.listVisible);
+  const isCategoryVisible = (catId: string) => pageConfigs?.some(p => p.categoryId === catId) ?? false;
+
   const updateCompany = useMutation(api.companies.update);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const deleteAccount = useMutation(api.users.deleteAccount);
@@ -145,6 +175,15 @@ export default function EditProfilePage() {
   const [selectedRenovation, setSelectedRenovation] = useState<string[]>([]);
   const [renovationEnabled, setRenovationEnabled] = useState(false);
   const [selectedRenovationLocations, setSelectedRenovationLocations] = useState<string[]>([]);
+  const [selectedArchitecture, setSelectedArchitecture] = useState<string[]>([]);
+  const [architectureEnabled, setArchitectureEnabled] = useState(false);
+  const [selectedArchitectureLocations, setSelectedArchitectureLocations] = useState<string[]>([]);
+  const [selectedInterior, setSelectedInterior] = useState<string[]>([]);
+  const [interiorEnabled, setInteriorEnabled] = useState(false);
+  const [selectedInteriorLocations, setSelectedInteriorLocations] = useState<string[]>([]);
+  const [selectedRealEstate, setSelectedRealEstate] = useState<string[]>([]);
+  const [realEstateEnabled, setRealEstateEnabled] = useState(false);
+  const [selectedRealEstateLocations, setSelectedRealEstateLocations] = useState<string[]>([]);
 
   // Image state
   const [logoId, setLogoId] = useState<Id<"_storage"> | undefined>();
@@ -180,6 +219,15 @@ export default function EditProfilePage() {
       setSelectedRenovation(company.renovationTypes ?? []);
       setRenovationEnabled((company.renovationTypes ?? []).length > 0);
       setSelectedRenovationLocations(company.renovationLocations ?? []);
+      setSelectedArchitecture(company.architectureTypes ?? []);
+      setArchitectureEnabled((company.architectureTypes ?? []).length > 0);
+      setSelectedArchitectureLocations(company.architectureLocations ?? []);
+      setSelectedInterior(company.interiorTypes ?? []);
+      setInteriorEnabled((company.interiorTypes ?? []).length > 0);
+      setSelectedInteriorLocations(company.interiorLocations ?? []);
+      setSelectedRealEstate(company.realEstateTypes ?? []);
+      setRealEstateEnabled((company.realEstateTypes ?? []).length > 0);
+      setSelectedRealEstateLocations(company.realEstateLocations ?? []);
       setLogoId(company.logoId ?? undefined);
       setProjectImageIds(company.projectImageIds ?? []);
       setFoundedYear(company.since?.toString() ?? "");
@@ -263,7 +311,10 @@ export default function EditProfilePage() {
     // Validate: at least 1 category must be enabled with active filters
     const hasConstruction = constructionEnabled && (selectedConstruction.length > 0 || selectedConstructionLocations.length > 0);
     const hasRenovation = renovationEnabled && (selectedRenovation.length > 0 || selectedRenovationLocations.length > 0);
-    if (!hasConstruction && !hasRenovation) {
+    const hasArchitecture = architectureEnabled && (selectedArchitecture.length > 0 || selectedArchitectureLocations.length > 0);
+    const hasInterior = interiorEnabled && (selectedInterior.length > 0 || selectedInteriorLocations.length > 0);
+    const hasRealEstate = realEstateEnabled && (selectedRealEstate.length > 0 || selectedRealEstateLocations.length > 0);
+    if (!hasConstruction && !hasRenovation && !hasArchitecture && !hasInterior && !hasRealEstate) {
       setSaveError("At least 1 category must be completed with active filters / Minimal 1 kategori harus diisi dengan filter aktif");
       return;
     }
@@ -290,6 +341,12 @@ export default function EditProfilePage() {
           constructionLocations: constructionEnabled ? selectedConstructionLocations : [],
           renovationTypes: renovationEnabled ? selectedRenovation : [],
           renovationLocations: renovationEnabled ? selectedRenovationLocations : [],
+          architectureTypes: architectureEnabled ? selectedArchitecture : [],
+          architectureLocations: architectureEnabled ? selectedArchitectureLocations : [],
+          interiorTypes: interiorEnabled ? selectedInterior : [],
+          interiorLocations: interiorEnabled ? selectedInteriorLocations : [],
+          realEstateTypes: realEstateEnabled ? selectedRealEstate : [],
+          realEstateLocations: realEstateEnabled ? selectedRealEstateLocations : [],
           logoId: logoId ?? undefined,
           projectImageIds,
           since: foundedYear ? parseInt(foundedYear) : undefined,
@@ -974,6 +1031,300 @@ export default function EditProfilePage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Architecture, Interior & Real Estate Sections */}
+        <div className="grid grid-cols-2 gap-8 mb-8">
+          {isCategoryVisible("architecture") && (
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Architecture</h2>
+              <Toggle
+                checked={architectureEnabled}
+                onChange={(val) => {
+                  setArchitectureEnabled(val);
+                  if (!val) {
+                    setSelectedArchitecture([]);
+                    setSelectedArchitectureLocations([]);
+                  }
+                }}
+              />
+            </div>
+
+            {architectureEnabled && (
+              <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                <div>
+                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                    Services Provided /
+                    <br />
+                    Layanan yang Disediakan
+                  </p>
+                  {architectureServices.map((service) => {
+                    const allActive = selectedArchitecture.includes("all");
+                    const isAll = service.id === "all";
+                    const isDisabled = allActive && !isAll;
+                    return (
+                      <div key={service.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className={`text-[10px] tracking-[0.2px] ${selectedArchitecture.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                          {service.label}
+                        </span>
+                        <Toggle
+                          checked={selectedArchitecture.includes(service.id)}
+                          onChange={() => {
+                            setIsDirty(true);
+                            if (isAll) {
+                              if (selectedArchitecture.includes("all")) {
+                                setSelectedArchitecture(selectedArchitecture.filter(s => s !== "all"));
+                              } else {
+                                setSelectedArchitecture(["all"]);
+                              }
+                            } else {
+                              const next = selectedArchitecture.includes(service.id)
+                                ? selectedArchitecture.filter(s => s !== service.id)
+                                : [...selectedArchitecture.filter(s => s !== "all"), service.id];
+                              setSelectedArchitecture(next);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div>
+                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                    Services Location /
+                    <br />
+                    Lokasi Layanan
+                  </p>
+                  {locationOptions.map((loc) => {
+                    const baliActive = selectedArchitectureLocations.includes("bali");
+                    const isBali = loc.id === "bali";
+                    const isDisabled = baliActive && !isBali;
+                    return (
+                      <div key={loc.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className={`text-[10px] tracking-[0.2px] ${selectedArchitectureLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
+                          {loc.label}
+                        </span>
+                        <Toggle
+                          checked={selectedArchitectureLocations.includes(loc.id)}
+                          onChange={() => {
+                            setIsDirty(true);
+                            if (isBali) {
+                              if (selectedArchitectureLocations.includes("bali")) {
+                                setSelectedArchitectureLocations(selectedArchitectureLocations.filter(s => s !== "bali"));
+                              } else {
+                                setSelectedArchitectureLocations(["bali"]);
+                              }
+                            } else {
+                              const next = selectedArchitectureLocations.includes(loc.id)
+                                ? selectedArchitectureLocations.filter(s => s !== loc.id)
+                                : [...selectedArchitectureLocations.filter(s => s !== "bali"), loc.id];
+                              setSelectedArchitectureLocations(next);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+          )}
+
+          {isCategoryVisible("interior") && (
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Interior</h2>
+              <Toggle
+                checked={interiorEnabled}
+                onChange={(val) => {
+                  setInteriorEnabled(val);
+                  if (!val) {
+                    setSelectedInterior([]);
+                    setSelectedInteriorLocations([]);
+                  }
+                }}
+              />
+            </div>
+
+            {interiorEnabled && (
+              <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                <div>
+                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                    Services Provided /
+                    <br />
+                    Layanan yang Disediakan
+                  </p>
+                  {interiorServices.map((service) => {
+                    const allActive = selectedInterior.includes("all");
+                    const isAll = service.id === "all";
+                    const isDisabled = allActive && !isAll;
+                    return (
+                      <div key={service.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className={`text-[10px] tracking-[0.2px] ${selectedInterior.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                          {service.label}
+                        </span>
+                        <Toggle
+                          checked={selectedInterior.includes(service.id)}
+                          onChange={() => {
+                            setIsDirty(true);
+                            if (isAll) {
+                              if (selectedInterior.includes("all")) {
+                                setSelectedInterior(selectedInterior.filter(s => s !== "all"));
+                              } else {
+                                setSelectedInterior(["all"]);
+                              }
+                            } else {
+                              const next = selectedInterior.includes(service.id)
+                                ? selectedInterior.filter(s => s !== service.id)
+                                : [...selectedInterior.filter(s => s !== "all"), service.id];
+                              setSelectedInterior(next);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div>
+                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                    Services Location /
+                    <br />
+                    Lokasi Layanan
+                  </p>
+                  {locationOptions.map((loc) => {
+                    const baliActive = selectedInteriorLocations.includes("bali");
+                    const isBali = loc.id === "bali";
+                    const isDisabled = baliActive && !isBali;
+                    return (
+                      <div key={loc.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className={`text-[10px] tracking-[0.2px] ${selectedInteriorLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
+                          {loc.label}
+                        </span>
+                        <Toggle
+                          checked={selectedInteriorLocations.includes(loc.id)}
+                          onChange={() => {
+                            setIsDirty(true);
+                            if (isBali) {
+                              if (selectedInteriorLocations.includes("bali")) {
+                                setSelectedInteriorLocations(selectedInteriorLocations.filter(s => s !== "bali"));
+                              } else {
+                                setSelectedInteriorLocations(["bali"]);
+                              }
+                            } else {
+                              const next = selectedInteriorLocations.includes(loc.id)
+                                ? selectedInteriorLocations.filter(s => s !== loc.id)
+                                : [...selectedInteriorLocations.filter(s => s !== "bali"), loc.id];
+                              setSelectedInteriorLocations(next);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+          )}
+
+          {isCategoryVisible("real-estate") && (
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Real Estate</h2>
+              <Toggle
+                checked={realEstateEnabled}
+                onChange={(val) => {
+                  setRealEstateEnabled(val);
+                  if (!val) {
+                    setSelectedRealEstate([]);
+                    setSelectedRealEstateLocations([]);
+                  }
+                }}
+              />
+            </div>
+
+            {realEstateEnabled && (
+              <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                <div>
+                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                    Services Provided /
+                    <br />
+                    Layanan yang Disediakan
+                  </p>
+                  {realEstateServices.map((service) => {
+                    const allActive = selectedRealEstate.includes("all");
+                    const isAll = service.id === "all";
+                    const isDisabled = allActive && !isAll;
+                    return (
+                      <div key={service.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className={`text-[10px] tracking-[0.2px] ${selectedRealEstate.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                          {service.label}
+                        </span>
+                        <Toggle
+                          checked={selectedRealEstate.includes(service.id)}
+                          onChange={() => {
+                            setIsDirty(true);
+                            if (isAll) {
+                              if (selectedRealEstate.includes("all")) {
+                                setSelectedRealEstate(selectedRealEstate.filter(s => s !== "all"));
+                              } else {
+                                setSelectedRealEstate(["all"]);
+                              }
+                            } else {
+                              const next = selectedRealEstate.includes(service.id)
+                                ? selectedRealEstate.filter(s => s !== service.id)
+                                : [...selectedRealEstate.filter(s => s !== "all"), service.id];
+                              setSelectedRealEstate(next);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div>
+                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                    Services Location /
+                    <br />
+                    Lokasi Layanan
+                  </p>
+                  {locationOptions.map((loc) => {
+                    const baliActive = selectedRealEstateLocations.includes("bali");
+                    const isBali = loc.id === "bali";
+                    const isDisabled = baliActive && !isBali;
+                    return (
+                      <div key={loc.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className={`text-[10px] tracking-[0.2px] ${selectedRealEstateLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
+                          {loc.label}
+                        </span>
+                        <Toggle
+                          checked={selectedRealEstateLocations.includes(loc.id)}
+                          onChange={() => {
+                            setIsDirty(true);
+                            if (isBali) {
+                              if (selectedRealEstateLocations.includes("bali")) {
+                                setSelectedRealEstateLocations(selectedRealEstateLocations.filter(s => s !== "bali"));
+                              } else {
+                                setSelectedRealEstateLocations(["bali"]);
+                              }
+                            } else {
+                              const next = selectedRealEstateLocations.includes(loc.id)
+                                ? selectedRealEstateLocations.filter(s => s !== loc.id)
+                                : [...selectedRealEstateLocations.filter(s => s !== "bali"), loc.id];
+                              setSelectedRealEstateLocations(next);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+          )}
         </div>
 
         {/* Bottom Save */}
