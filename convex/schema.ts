@@ -188,6 +188,12 @@ export default defineSchema({
     updatedBy: v.optional(v.string()),
   }).index("by_key", ["key"]),
 
+  profileViews: defineTable({
+    companyId: v.id("companies"),
+    viewedAt: v.number(),
+  }).index("by_companyId", ["companyId"])
+    .index("by_companyId_viewedAt", ["companyId", "viewedAt"]),
+
   pageConfigs: defineTable({
     categoryId: v.string(),
     label: v.string(),

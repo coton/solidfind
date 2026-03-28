@@ -79,12 +79,15 @@ export default function CompanyDashboardPage() {
     company?._id ? { companyId: company._id } : "skip"
   );
 
-  const monthlyViews = [
-    { month: "January", views: 32 },
-    { month: "February", views: 36 },
-    { month: "March", views: 48 },
-    { month: "April", views: 32 },
-  ];
+  const monthlyViews = useQuery(
+    api.profileViews.getMonthlyStats,
+    company?._id ? { companyId: company._id } : "skip"
+  ) ?? [];
+
+  const viewsLastMonth = useQuery(
+    api.profileViews.getViewsLastMonth,
+    company?._id ? { companyId: company._id } : "skip"
+  ) ?? 0;
 
   const isPro = company?.isPro ?? false;
 
@@ -99,7 +102,7 @@ export default function CompanyDashboardPage() {
     accountType: isPro ? "PRO" : "FREE",
     stats: {
       bookmarked: company?.bookmarkCount ?? 0,
-      viewsLastMonth: company?.viewsLastMonth ?? 0,
+      viewsLastMonth,
       mostSearchedLocation: "KARANGASEM",
     },
     monthlyViews,
@@ -113,7 +116,7 @@ export default function CompanyDashboardPage() {
     })),
   };
 
-  const maxViews = Math.max(...data.monthlyViews.map(m => m.views));
+  const maxViews = Math.max(1, ...data.monthlyViews.map(m => m.views));
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -287,7 +290,7 @@ export default function CompanyDashboardPage() {
             <div className="space-y-3">
               {data.monthlyViews.map((item) => (
                 <div key={item.month} className="flex items-center gap-4">
-                  <span className="text-[10px] text-[#333]/70 w-16 tracking-[0.2px]">{item.month}</span>
+                  <span className="text-[10px] text-[#333]/70 w-20 shrink-0 tracking-[0.2px]">{item.month}</span>
                   <div className="flex-1 h-4 bg-[#f8f8f8] rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full"

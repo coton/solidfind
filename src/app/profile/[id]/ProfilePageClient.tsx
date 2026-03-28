@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -218,6 +218,18 @@ export default function ProfilePageClient() {
 
   const toggleSave = useMutation(api.savedListings.toggle);
   const createReview = useMutation(api.reviews.create);
+  const recordView = useMutation(api.profileViews.record);
+
+  const viewRecorded = useRef(false);
+  useEffect(() => {
+    if (!validId || !company || viewRecorded.current) return;
+    // Don't count the company owner viewing their own profile
+    const isOwner = currentUser && currentUser._id === company.ownerId;
+    if (!isOwner) {
+      viewRecorded.current = true;
+      recordView({ companyId: validId });
+    }
+  }, [validId, recordView, company, currentUser]);
 
   // Use saved status from server
   const isBookmarked = savedStatus ?? isSaved;

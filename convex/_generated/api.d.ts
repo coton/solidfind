@@ -17,6 +17,7 @@ import type * as http from "../http.js";
 import type * as migrations from "../migrations.js";
 import type * as pageConfigs from "../pageConfigs.js";
 import type * as platformSettings from "../platformSettings.js";
+import type * as profileViews from "../profileViews.js";
 import type * as reports from "../reports.js";
 import type * as reviews from "../reviews.js";
 import type * as savedListings from "../savedListings.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   pageConfigs: typeof pageConfigs;
   platformSettings: typeof platformSettings;
+  profileViews: typeof profileViews;
   reports: typeof reports;
   reviews: typeof reviews;
   savedListings: typeof savedListings;
