@@ -520,6 +520,7 @@ function HeaderInner() {
 
         {/* Category Tabs - Horizontal scroll on mobile */}
         <div className="max-w-[900px] mx-auto mb-4">
+          <div className="relative">
           <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-2 min-w-max">
               {dynamicCategories.map((cat) => (
@@ -536,6 +537,9 @@ function HeaderInner() {
                 </button>
               ))}
             </div>
+          </div>
+          {/* Gradient fade on right edge — mobile only */}
+          <div className="sm:hidden pointer-events-none absolute right-0 top-0 bottom-0 w-16" style={{ background: 'linear-gradient(to right, transparent, #F14110)' }} />
           </div>
           <p className="font-bam text-[#f8f8f8] text-[9px] mt-4 leading-[12px]">
             {(activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction}
