@@ -145,9 +145,9 @@ export default function CompanyDashboardPage() {
 
         <div className="flex items-start justify-between mb-6">
           <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
-            Here are the latest statistics about your company page. Check the latest testimonials.
+            Your profile is live on SolidFind. As the platform grows, so does your visibility. Make sure you are showing your best profile : )
             <br />
-            Berikut adalah statistik terbaru tentang halaman perusahaan Anda. Periksa testimonial terbaru.
+            Profil Anda sudah aktif di SolidFind. Seiring platform berkembang, begitu pula jangkauan Anda. Pastikan kamu menampilkan profil terbaikmu : )
           </p>
         </div>
 

@@ -531,13 +531,16 @@ export default function ProfilePageClient() {
         </div>
 
         {/* Photos Grid + Services - Mobile: stack, Desktop: side by side */}
-        <div className="grid grid-cols-1 lg:grid-cols-[440px_1fr] gap-6 lg:gap-5 mb-8">
-          {/* Only render grid if there are actual images */}
-          <ProjectImagesGrid
-            imageUrls={company.projectImageUrls ?? []}
-            imageIds={company.projectImageIds ?? []}
-          />
+        <div className={`grid grid-cols-1 ${!reviewsEnabled ? 'lg:grid-cols-[440px_1fr]' : ''} gap-6 lg:gap-5 mb-8`}>
+          {/* Only render grid if there are actual images and reviews are not enabled */}
+          {!reviewsEnabled && (
+            <ProjectImagesGrid
+              imageUrls={company.projectImageUrls ?? []}
+              imageIds={company.projectImageIds ?? []}
+            />
+          )}
 
+          {proEnabled && (
           <div>
             <p className="font-bam text-[9px] text-[#333] mb-4">Services provided:</p>
             {/* Mobile: horizontal scroll cards */}
@@ -609,6 +612,7 @@ export default function ProfilePageClient() {
               </div>
             </div>
           </div>
+          )}
         </div>
 
         {/* Testimonials Section */}
