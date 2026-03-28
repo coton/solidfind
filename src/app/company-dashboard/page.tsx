@@ -302,8 +302,8 @@ export default function CompanyDashboardPage() {
           </div>
         </div>}
 
-        {/* Banner Image */}
-        {!isPro && (
+        {/* Banner Image — hidden when reviews are enabled */}
+        {!isPro && !reviewsEnabled && (
           <div className="mb-8 rounded-[6px] overflow-hidden">
             {/* Desktop: full width */}
             <div className="hidden sm:block relative w-full" style={{ aspectRatio: '900/200' }}>
