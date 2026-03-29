@@ -127,7 +127,13 @@ export default function CompanyDashboardPage() {
         <div className="flex items-start justify-between mb-[5px]">
           <div>
             <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-0">
-              Company profile
+              {company?._id ? (
+                <Link href={`/profile/${company._id}`} className="hover:text-[#f14110] transition-colors">
+                  Company profile
+                </Link>
+              ) : (
+                "Company profile"
+              )}
             </h1>
           </div>
 
