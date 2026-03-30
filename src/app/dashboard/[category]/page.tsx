@@ -9,7 +9,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ListingCard } from "@/components/cards";
+import { ListingCard, FeaturedCard } from "@/components/cards";
 import { Pagination } from "@/components/Pagination";
 import { SortDropdown } from "@/components/SortDropdown";
 import { useProEnabled } from "@/hooks/useProEnabled";
@@ -47,6 +47,13 @@ export default function DashboardCategoryPage() {
     api.savedListings.listByUser,
     currentUser?._id ? { userId: currentUser._id } : "skip"
   );
+
+  // Get visible featured articles for this category
+  const allVisibleArticles = useQuery(api.featuredArticles.listVisible);
+  const visibleArticles = allVisibleArticles?.filter((a) => {
+    if (!a.category) return true; // no category = show on all
+    return a.category.toLowerCase() === category.toLowerCase();
+  });
 
   const toggleSave = useMutation(api.savedListings.toggle);
 
@@ -115,6 +122,19 @@ export default function DashboardCategoryPage() {
         <h1 className="text-[24px] font-bold text-[#333] tracking-[0.48px] mb-6">
           {categoryLabel}
         </h1>
+
+        {/* Featured Articles */}
+        {visibleArticles && visibleArticles.length > 0 && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8" style={{ gridTemplateColumns: "repeat(4, 210px)" }}>
+            {visibleArticles.map((article) => (
+              <FeaturedCard
+                key={article._id}
+                article={article}
+                fromCategory={category}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Grid */}
         {paginatedListings.length > 0 ? (
