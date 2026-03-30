@@ -12,7 +12,9 @@ interface UISettings {
   igUrl: string;
   igVisible: boolean;
   adVerticalUrl: string;
+  adVerticalMediaType: "image" | "video" | "";
   adHorizontalUrl: string;
+  adHorizontalMediaType: "image" | "video" | "";
   headerMediaUrl: string;
   headerMediaType: "image" | "video" | "";
   footerMediaUrl: string;
@@ -25,7 +27,9 @@ const DEFAULT: UISettings = {
   igUrl: "",
   igVisible: true,
   adVerticalUrl: "",
+  adVerticalMediaType: "",
   adHorizontalUrl: "",
+  adHorizontalMediaType: "",
   headerMediaUrl: "",
   headerMediaType: "",
   footerMediaUrl: "",
@@ -407,10 +411,22 @@ export default function AdminUI() {
       {/* Ads */}
       <SectionCard title="Ad Spaces">
         <Field label="Vertical Ad" hint="Appears on the left panel of popups (150×500px)">
-          <TextInput value={s.adVerticalUrl} onChange={(v) => u({ adVerticalUrl: v })} placeholder="https://..." />
+          <MediaUpload
+            label="Vertical Ad Image"
+            url={s.adVerticalUrl}
+            mediaType={s.adVerticalMediaType}
+            onUrl={(v) => u({ adVerticalUrl: v })}
+            onFile={(dataUrl, type) => u({ adVerticalUrl: dataUrl, adVerticalMediaType: type })}
+          />
         </Field>
         <Field label="Horizontal Ad" hint="Appears below search results — 700×150px (scales proportionally on mobile)">
-          <TextInput value={s.adHorizontalUrl} onChange={(v) => u({ adHorizontalUrl: v })} placeholder="https://..." />
+          <MediaUpload
+            label="Horizontal Ad Image"
+            url={s.adHorizontalUrl}
+            mediaType={s.adHorizontalMediaType}
+            onUrl={(v) => u({ adHorizontalUrl: v })}
+            onFile={(dataUrl, type) => u({ adHorizontalUrl: dataUrl, adHorizontalMediaType: type })}
+          />
         </Field>
       </SectionCard>
 
