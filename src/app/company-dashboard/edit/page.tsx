@@ -197,15 +197,33 @@ export default function EditProfilePage() {
     || (architectureEnabled && selectedArchitecture.length > 0)
     || (interiorEnabled && selectedInterior.length > 0)
     || (realEstateEnabled && selectedRealEstate.length > 0);
-  const mandatoryWarnings: string[] = [];
-  if (selectedProjectSizes.length === 0) mandatoryWarnings.push("Project Size / Ukuran Proyek");
-  if (selectedLocations.length === 0) mandatoryWarnings.push("Location / Lokasi");
-  if (!hasCategory) mandatoryWarnings.push("at least 1 category / minimal 1 kategori");
-  if (!description.trim()) mandatoryWarnings.push("Company Description / Deskripsi Perusahaan");
-  const mandatoryWarning = mandatoryWarnings.length > 0
-    ? `Required: ${mandatoryWarnings.join(", ")} / Wajib diisi: ${mandatoryWarnings.join(", ")}`
-    : "";
-  const canSave = mandatoryWarnings.length === 0;
+  const missingProjectSize = selectedProjectSizes.length === 0;
+  const missingLocation = selectedLocations.length === 0;
+  const missingDescription = !description.trim();
+
+  // Determine the bottom hint text and whether it's a warning (orange)
+  let bottomHintText = "*Select at least 1 category before saving\n*Pilih setidaknya 1 kategori sebelum menyimpan";
+  let bottomHintIsWarning = false;
+
+  if (!hasCategory) {
+    // Category missing — show default text, orange only if other fields are filled
+    bottomHintText = "*Select at least 1 category before saving\n*Pilih setidaknya 1 kategori sebelum menyimpan";
+    bottomHintIsWarning = !missingProjectSize && !missingLocation; // turn orange when user tried but no category
+  } else if (missingLocation && !missingProjectSize) {
+    bottomHintText = "*Location needs to be activated\n*Lokasi perlu diaktifkan";
+    bottomHintIsWarning = true;
+  } else if (missingProjectSize && !missingLocation) {
+    bottomHintText = "*Project size needs to be selected\n*Ukuran proyek perlu dipilih";
+    bottomHintIsWarning = true;
+  } else if (missingProjectSize && missingLocation) {
+    bottomHintText = "*Project size and Location need to be selected\n*Ukuran proyek dan Lokasi perlu dipilih";
+    bottomHintIsWarning = true;
+  } else if (missingDescription) {
+    bottomHintText = "*Company description is required\n*Deskripsi perusahaan wajib diisi";
+    bottomHintIsWarning = true;
+  }
+
+  const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription;
 
   const logoUrl = useStorageUrl(logoId);
 
@@ -322,7 +340,7 @@ export default function EditProfilePage() {
 
     // Validate all mandatory fields
     if (!canSave) {
-      setSaveError(mandatoryWarning);
+      setSaveError(bottomHintText);
       return;
     }
 
@@ -454,9 +472,9 @@ export default function EditProfilePage() {
               ← Back
             </Link>
           )}
-                    <div className="ml-auto flex items-center gap-3">
-            {mandatoryWarning && (
-              <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px]">{mandatoryWarning}</p>
+          <div className="ml-auto flex items-center gap-3">
+            {!canSave && (
+              <p className="text-[9px] text-[#f14110] font-medium tracking-[0.18px] whitespace-pre-line">{bottomHintText}</p>
             )}
             <button
               onClick={() => { setIsDirty(false); handleSave(); }}
@@ -1197,14 +1215,12 @@ export default function EditProfilePage() {
 
         {/* Bottom Save */}
         <div className="flex items-center gap-4 py-8 border-t border-[#e4e4e4]">
-          <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
-            *Select at least 1 category before submitting /
-            <br />
-            *Pilih minimal 1 kategori sebelum mengirimkan
+          <p className={`text-[9px] tracking-[0.18px] whitespace-pre-line ${bottomHintIsWarning ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
+            {bottomHintText}
           </p>
           <div className="ml-auto flex items-center gap-3">
-            {(saveError || mandatoryWarning) && (
-              <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px]">{saveError || mandatoryWarning}</p>
+            {saveError && (
+              <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px]">{saveError}</p>
             )}
             <button
               onClick={() => { setIsDirty(false); handleSave(); }}
