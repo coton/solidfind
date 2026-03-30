@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -12,7 +12,9 @@ import Link from "next/link";
 export default function ArticlePage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const id = params?.id as string;
+  const fromCategory = searchParams?.get("from");
 
   const article = useQuery(
     api.featuredArticles.getById,
@@ -60,6 +62,21 @@ export default function ArticlePage() {
 
       <main className="flex-grow">
         <div className="max-w-[900px] mx-auto px-4 sm:px-0">
+          {/* Back row - only show when opened from a category page */}
+          {fromCategory && (
+            <div className="flex items-center py-2 border-b border-[#333]/10">
+              <Link
+                href={`/dashboard/${fromCategory}`}
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
+              >
+                <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                  <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>BACK</span>
+              </Link>
+            </div>
+          )}
+          
           {/* Title + Share (same row) — equal spacing above (from border) and below (to subtitle/image) */}
           <div className="flex items-start justify-between pt-6 pb-8">
             <h1 className="text-[20px] sm:text-[24px] font-bold text-[#333] leading-[28px] sm:leading-[32px] uppercase" style={{ fontFamily: "'Sora', sans-serif" }}>

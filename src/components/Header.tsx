@@ -315,7 +315,11 @@ function HeaderInner() {
   const isProfilePage = pathname.startsWith("/profile");
   const isArticlePage = pathname.startsWith("/article");
   const fromCategory = searchParams.get("from");
-  const activeCategory = isDashboardPage || isArticlePage
+  
+  // Deactivate category highlighting only for:
+  // - Dashboard pages
+  // - Article pages opened from shared link (no fromCategory)
+  const activeCategory = isDashboardPage || (isArticlePage && !fromCategory)
     ? null
     : isProfilePage
       ? (fromCategory || null)
