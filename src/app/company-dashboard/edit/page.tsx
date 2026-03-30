@@ -463,7 +463,7 @@ export default function EditProfilePage() {
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-8 mb-8 items-center">
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             {company && (
               <Link
                 href="/company-dashboard"
@@ -476,7 +476,7 @@ export default function EditProfilePage() {
             <button
               onClick={() => { setIsDirty(false); handleSave(); }}
               disabled={saving || !canSave}
-              className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
+              className={`ml-auto h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
               style={{ minWidth: '140px' }}
             >
               {saving ? "Saving..." : "Save"}
