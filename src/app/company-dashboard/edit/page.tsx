@@ -168,7 +168,7 @@ export default function EditProfilePage() {
 
   // Toggles
   const [selectedProjectSizes, setSelectedProjectSizes] = useState<string[]>([]);
-  const [projectSizeEnabled, setProjectSizeEnabled] = useState(false);
+  const [projectSizeEnabled, setProjectSizeEnabled] = useState(true);
   const [selectedConstruction, setSelectedConstruction] = useState<string[]>([]);
   const [constructionEnabled, setConstructionEnabled] = useState(false);
   const [selectedRenovation, setSelectedRenovation] = useState<string[]>([]);
@@ -180,7 +180,7 @@ export default function EditProfilePage() {
   const [selectedRealEstate, setSelectedRealEstate] = useState<string[]>([]);
   const [realEstateEnabled, setRealEstateEnabled] = useState(false);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [locationEnabled, setLocationEnabled] = useState(true);
 
   // Image state
   const [logoId, setLogoId] = useState<Id<"_storage"> | undefined>();
@@ -190,6 +190,16 @@ export default function EditProfilePage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+
+  // Mandatory fields validation
+  const mandatoryWarning = selectedProjectSizes.length === 0 && selectedLocations.length === 0
+    ? "Please select at least 1 project size and 1 location / Pilih minimal 1 ukuran proyek dan 1 lokasi"
+    : selectedProjectSizes.length === 0
+    ? "Please select at least 1 project size / Pilih minimal 1 ukuran proyek"
+    : selectedLocations.length === 0
+    ? "Please select at least 1 location / Pilih minimal 1 lokasi"
+    : "";
+  const canSave = mandatoryWarning === "";
 
   const logoUrl = useStorageUrl(logoId);
 
@@ -304,6 +314,16 @@ export default function EditProfilePage() {
     if (!currentUser || saving) return;
     setSaveError("");
 
+    // Validate mandatory fields: Project Size and Location
+    if (selectedProjectSizes.length === 0) {
+      setSaveError("Please select at least 1 project size / Pilih minimal 1 ukuran proyek");
+      return;
+    }
+    if (selectedLocations.length === 0) {
+      setSaveError("Please select at least 1 location / Pilih minimal 1 lokasi");
+      return;
+    }
+
     // Validate: at least 1 category must be enabled with active filters
     const hasConstruction = constructionEnabled && selectedConstruction.length > 0;
     const hasRenovation = renovationEnabled && selectedRenovation.length > 0;
@@ -332,17 +352,17 @@ export default function EditProfilePage() {
           facebook: facebook || undefined,
           linkedin: linkedin || undefined,
           instagram: instagram || undefined,
-          projectSizes: projectSizeEnabled ? selectedProjectSizes : [],
+          projectSizes: selectedProjectSizes,
           constructionTypes: constructionEnabled ? selectedConstruction : [],
-          constructionLocations: locationEnabled ? selectedLocations : [],
+          constructionLocations: selectedLocations,
           renovationTypes: renovationEnabled ? selectedRenovation : [],
-          renovationLocations: locationEnabled ? selectedLocations : [],
+          renovationLocations: selectedLocations,
           architectureTypes: architectureEnabled ? selectedArchitecture : [],
-          architectureLocations: locationEnabled ? selectedLocations : [],
+          architectureLocations: selectedLocations,
           interiorTypes: interiorEnabled ? selectedInterior : [],
-          interiorLocations: locationEnabled ? selectedLocations : [],
+          interiorLocations: selectedLocations,
           realEstateTypes: realEstateEnabled ? selectedRealEstate : [],
-          realEstateLocations: locationEnabled ? selectedLocations : [],
+          realEstateLocations: selectedLocations,
           logoId: logoId ?? undefined,
           projectImageIds,
           since: foundedYear ? parseInt(foundedYear) : undefined,
@@ -443,14 +463,19 @@ export default function EditProfilePage() {
               ← Back
             </Link>
           )}
-          <button
-            onClick={() => { setIsDirty(false); handleSave(); }}
-            disabled={saving}
-            className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ml-auto ${!isDirty ? 'opacity-50' : ''}`}
-            style={{ minWidth: '140px' }}
-          >
-            {saving ? "Saving..." : "Save"}
-          </button>
+                    <div className="ml-auto flex items-center gap-3">
+            {mandatoryWarning && (
+              <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px]">{mandatoryWarning}</p>
+            )}
+            <button
+              onClick={() => { setIsDirty(false); handleSave(); }}
+              disabled={saving || !canSave}
+              className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
+              style={{ minWidth: '140px' }}
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+          </div>
         </div>
 
         {/* Form Grid */}
@@ -745,16 +770,8 @@ export default function EditProfilePage() {
           {/* Project Size */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Project Size</h2>
-              <Toggle
-                checked={projectSizeEnabled}
-                onChange={(val) => {
-                  setProjectSizeEnabled(val);
-                  if (!val) setSelectedProjectSizes([]);
-                }}
-              />
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Project Size <span className="text-[#f14110]">(*)</span></h2>
             </div>
-            {projectSizeEnabled && (
               <div className="space-y-1">
                 {projectSizeOptions.map((size) => {
                   const anyActive = selectedProjectSizes.includes("any");
@@ -787,22 +804,13 @@ export default function EditProfilePage() {
                   );
                 })}
               </div>
-            )}
           </div>
 
           {/* Location (single global) */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Location</h2>
-              <Toggle
-                checked={locationEnabled}
-                onChange={(val) => {
-                  setLocationEnabled(val);
-                  if (!val) setSelectedLocations([]);
-                }}
-              />
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Location <span className="text-[#f14110]">(*)</span></h2>
             </div>
-            {locationEnabled && (
               <div className="space-y-1">
                 {locationOptions.map((loc) => {
                   const baliActive = selectedLocations.includes("bali");
@@ -839,7 +847,6 @@ export default function EditProfilePage() {
                   );
                 })}
               </div>
-            )}
           </div>
         </div>
 
@@ -1204,17 +1211,19 @@ export default function EditProfilePage() {
             <br />
             *Pilih minimal 1 kategori sebelum mengirimkan
           </p>
-          {saveError && (
-            <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px] mb-2">{saveError}</p>
-          )}
-          <button
-            onClick={() => { setIsDirty(false); handleSave(); }}
-            disabled={saving}
-            className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ml-auto ${!isDirty ? 'opacity-50' : ''}`}
-            style={{ minWidth: '140px' }}
-          >
-            {saving ? "Saving..." : "Save"}
-          </button>
+          <div className="ml-auto flex items-center gap-3">
+            {(saveError || mandatoryWarning) && (
+              <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px]">{saveError || mandatoryWarning}</p>
+            )}
+            <button
+              onClick={() => { setIsDirty(false); handleSave(); }}
+              disabled={saving || !canSave}
+              className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
+              style={{ minWidth: '140px' }}
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+          </div>
         </div>
       </main>
 
