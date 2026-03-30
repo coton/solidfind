@@ -790,7 +790,7 @@ export default function ProfilePageClient() {
 
         {/* Ad Banner */}
         <div className="mb-8">
-          <AdBanner imageSrc="/images/ad-kini-resort.png" alt="Kini Resort" />
+          <AdBanner alt="Advertisement" />
         </div>
       </main>
 

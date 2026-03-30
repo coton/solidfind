@@ -146,7 +146,7 @@ export default function ArticlePage() {
 
           {/* Bottom Ad Space */}
           <div className="mt-8 mb-8">
-            <AdBanner imageSrc="/images/ad-kini-resort.png" alt="Kini Resort" />
+            <AdBanner alt="Advertisement" />
           </div>
         </div>
       </main>

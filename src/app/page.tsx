@@ -282,7 +282,7 @@ function HomeContent() {
 
             {/* Ad Banner — only shown when there are results */}
             <div className="mb-[32px] sm:mb-[52px]">
-              <AdBanner imageSrc="/images/ad-kini-resort.png" alt="Kini Resort" />
+              <AdBanner alt="Advertisement" />
             </div>
           </>
         )}

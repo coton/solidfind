@@ -166,6 +166,28 @@ export default function AdminUI() {
   const [aboutText, setAboutText] = useState("");
   const [aboutSaved, setAboutSaved] = useState(false);
 
+  // Ad Spaces (Convex-backed)
+  const adVerticalValue = useQuery(api.platformSettings.get, { key: "adVertical" });
+  const adHorizontalValue = useQuery(api.platformSettings.get, { key: "adHorizontal" });
+  const [adVerticalUrl, setAdVerticalUrl] = useState("");
+  const [adVerticalMediaType, setAdVerticalMediaType] = useState<"image" | "video" | "">("");
+  const [adHorizontalUrl, setAdHorizontalUrl] = useState("");
+  const [adHorizontalMediaType, setAdHorizontalMediaType] = useState<"image" | "video" | "">("");
+  const [adSpacesSaved, setAdSpacesSaved] = useState(false);
+
+  useEffect(() => {
+    if (adVerticalValue !== undefined && adVerticalValue !== null) {
+      const parsed = JSON.parse(adVerticalValue);
+      setAdVerticalUrl(parsed.url ?? "");
+      setAdVerticalMediaType(parsed.type ?? "");
+    }
+    if (adHorizontalValue !== undefined && adHorizontalValue !== null) {
+      const parsed = JSON.parse(adHorizontalValue);
+      setAdHorizontalUrl(parsed.url ?? "");
+      setAdHorizontalMediaType(parsed.type ?? "");
+    }
+  }, [adVerticalValue, adHorizontalValue]);
+
   // Site-wide links (Convex-backed)
   const igUrlValue = useQuery(api.platformSettings.get, { key: "ig_url" });
   const igVisibleValue = useQuery(api.platformSettings.get, { key: "ig_visible" });
@@ -413,21 +435,38 @@ export default function AdminUI() {
         <Field label="Vertical Ad" hint="Appears on the left panel of popups (150×500px)">
           <MediaUpload
             label="Vertical Ad Image"
-            url={s.adVerticalUrl}
-            mediaType={s.adVerticalMediaType}
-            onUrl={(v) => u({ adVerticalUrl: v })}
-            onFile={(dataUrl, type) => u({ adVerticalUrl: dataUrl, adVerticalMediaType: type })}
+            url={adVerticalUrl}
+            mediaType={adVerticalMediaType}
+            onUrl={(v) => setAdVerticalUrl(v)}
+            onFile={(dataUrl, type) => { setAdVerticalUrl(dataUrl); setAdVerticalMediaType(type); }}
           />
         </Field>
         <Field label="Horizontal Ad" hint="Appears below search results — 700×150px (scales proportionally on mobile)">
           <MediaUpload
             label="Horizontal Ad Image"
-            url={s.adHorizontalUrl}
-            mediaType={s.adHorizontalMediaType}
-            onUrl={(v) => u({ adHorizontalUrl: v })}
-            onFile={(dataUrl, type) => u({ adHorizontalUrl: dataUrl, adHorizontalMediaType: type })}
+            url={adHorizontalUrl}
+            mediaType={adHorizontalMediaType}
+            onUrl={(v) => setAdHorizontalUrl(v)}
+            onFile={(dataUrl, type) => { setAdHorizontalUrl(dataUrl); setAdHorizontalMediaType(type); }}
           />
         </Field>
+        <div className="flex items-center gap-4 mt-2">
+          <button
+            type="button"
+            onClick={() => {
+              setAdSpacesSaved(false);
+              const promiseVertical = setPlatformSetting({ key: "adVertical", value: JSON.stringify({ url: adVerticalUrl, type: adVerticalMediaType }) });
+              const promiseHorizontal = setPlatformSetting({ key: "adHorizontal", value: JSON.stringify({ url: adHorizontalUrl, type: adHorizontalMediaType }) });
+              Promise.all([promiseVertical, promiseHorizontal]).then(() => {
+                setAdSpacesSaved(true);
+                setTimeout(() => setAdSpacesSaved(false), 2000);
+              });
+            }}
+            className={`h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center ${adSpacesSaved ? 'border-[#f14110] text-[#f14110]' : ''}`}
+          >
+            {adSpacesSaved ? "Saved" : "Save Ad Spaces"}
+          </button>
+        </div>
       </SectionCard>
 
       {/* Header */}

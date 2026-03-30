@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 interface AdBannerProps {
   imageSrc?: string;
@@ -10,7 +12,13 @@ interface AdBannerProps {
  * On narrower viewports the banner scales down proportionally
  * (aspect-ratio: 700/150 keeps height relative to width).
  */
-export function AdBanner({ imageSrc, alt = "Advertisement" }: AdBannerProps) {
+export function AdBanner({ imageSrc: propImageSrc, alt = "Advertisement" }: AdBannerProps) {
+  // Fetch ad image from platform settings
+  const horizontalAdValue = useQuery(api.platformSettings.get, { key: "adHorizontal" });
+  const horizontalAdData = horizontalAdValue ? JSON.parse(horizontalAdValue) : null;
+  const defaultValue = propImageSrc || "/images/ad-kini-resort.png";
+  const displayUrl = horizontalAdData?.url || propImageSrc || defaultValue;
+
   return (
     <div
       style={{
@@ -24,9 +32,9 @@ export function AdBanner({ imageSrc, alt = "Advertisement" }: AdBannerProps) {
         backgroundColor: "#d8d8d8",
       }}
     >
-      {imageSrc ? (
+      {displayUrl ? (
         <Image
-          src={imageSrc}
+          src={displayUrl}
           alt={alt}
           fill
           sizes="(max-width: 700px) 100vw, 700px"
