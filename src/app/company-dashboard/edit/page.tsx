@@ -1140,8 +1140,9 @@ export default function EditProfilePage() {
 
         {/* Real Estate - Bottom Row */}
         {isCategoryVisible("real-estate") && (
-        <div className="mb-8 max-w-[25%]">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="grid grid-cols-4 gap-6 mb-8">
+          <div>
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Real Estate</h2>
             <Toggle
               checked={realEstateEnabled}
@@ -1206,6 +1207,7 @@ export default function EditProfilePage() {
               })}
             </div>
           )}
+          </div>
         </div>
         )}
 
