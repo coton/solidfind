@@ -171,19 +171,16 @@ export default function EditProfilePage() {
   const [projectSizeEnabled, setProjectSizeEnabled] = useState(false);
   const [selectedConstruction, setSelectedConstruction] = useState<string[]>([]);
   const [constructionEnabled, setConstructionEnabled] = useState(false);
-  const [selectedConstructionLocations, setSelectedConstructionLocations] = useState<string[]>([]);
   const [selectedRenovation, setSelectedRenovation] = useState<string[]>([]);
   const [renovationEnabled, setRenovationEnabled] = useState(false);
-  const [selectedRenovationLocations, setSelectedRenovationLocations] = useState<string[]>([]);
   const [selectedArchitecture, setSelectedArchitecture] = useState<string[]>([]);
   const [architectureEnabled, setArchitectureEnabled] = useState(false);
-  const [selectedArchitectureLocations, setSelectedArchitectureLocations] = useState<string[]>([]);
   const [selectedInterior, setSelectedInterior] = useState<string[]>([]);
   const [interiorEnabled, setInteriorEnabled] = useState(false);
-  const [selectedInteriorLocations, setSelectedInteriorLocations] = useState<string[]>([]);
   const [selectedRealEstate, setSelectedRealEstate] = useState<string[]>([]);
   const [realEstateEnabled, setRealEstateEnabled] = useState(false);
-  const [selectedRealEstateLocations, setSelectedRealEstateLocations] = useState<string[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [locationEnabled, setLocationEnabled] = useState(false);
 
   // Image state
   const [logoId, setLogoId] = useState<Id<"_storage"> | undefined>();
@@ -215,19 +212,18 @@ export default function EditProfilePage() {
       setProjectSizeEnabled((company.projectSizes ?? []).length > 0);
       setSelectedConstruction(company.constructionTypes ?? []);
       setConstructionEnabled((company.constructionTypes ?? []).length > 0);
-      setSelectedConstructionLocations(company.constructionLocations ?? []);
       setSelectedRenovation(company.renovationTypes ?? []);
       setRenovationEnabled((company.renovationTypes ?? []).length > 0);
-      setSelectedRenovationLocations(company.renovationLocations ?? []);
       setSelectedArchitecture(company.architectureTypes ?? []);
       setArchitectureEnabled((company.architectureTypes ?? []).length > 0);
-      setSelectedArchitectureLocations(company.architectureLocations ?? []);
       setSelectedInterior(company.interiorTypes ?? []);
       setInteriorEnabled((company.interiorTypes ?? []).length > 0);
-      setSelectedInteriorLocations(company.interiorLocations ?? []);
       setSelectedRealEstate(company.realEstateTypes ?? []);
       setRealEstateEnabled((company.realEstateTypes ?? []).length > 0);
-      setSelectedRealEstateLocations(company.realEstateLocations ?? []);
+      // Load global location from first non-empty per-category location
+      const existingLocs = company.constructionLocations ?? company.renovationLocations ?? company.architectureLocations ?? company.interiorLocations ?? company.realEstateLocations ?? [];
+      setSelectedLocations(existingLocs);
+      setLocationEnabled(existingLocs.length > 0);
       setLogoId(company.logoId ?? undefined);
       setProjectImageIds(company.projectImageIds ?? []);
       setFoundedYear(company.since?.toString() ?? "");
@@ -309,11 +305,11 @@ export default function EditProfilePage() {
     setSaveError("");
 
     // Validate: at least 1 category must be enabled with active filters
-    const hasConstruction = constructionEnabled && (selectedConstruction.length > 0 || selectedConstructionLocations.length > 0);
-    const hasRenovation = renovationEnabled && (selectedRenovation.length > 0 || selectedRenovationLocations.length > 0);
-    const hasArchitecture = architectureEnabled && (selectedArchitecture.length > 0 || selectedArchitectureLocations.length > 0);
-    const hasInterior = interiorEnabled && (selectedInterior.length > 0 || selectedInteriorLocations.length > 0);
-    const hasRealEstate = realEstateEnabled && (selectedRealEstate.length > 0 || selectedRealEstateLocations.length > 0);
+    const hasConstruction = constructionEnabled && selectedConstruction.length > 0;
+    const hasRenovation = renovationEnabled && selectedRenovation.length > 0;
+    const hasArchitecture = architectureEnabled && selectedArchitecture.length > 0;
+    const hasInterior = interiorEnabled && selectedInterior.length > 0;
+    const hasRealEstate = realEstateEnabled && selectedRealEstate.length > 0;
     if (!hasConstruction && !hasRenovation && !hasArchitecture && !hasInterior && !hasRealEstate) {
       setSaveError("At least 1 category must be completed with active filters / Minimal 1 kategori harus diisi dengan filter aktif");
       return;
@@ -338,15 +334,15 @@ export default function EditProfilePage() {
           instagram: instagram || undefined,
           projectSizes: projectSizeEnabled ? selectedProjectSizes : [],
           constructionTypes: constructionEnabled ? selectedConstruction : [],
-          constructionLocations: constructionEnabled ? selectedConstructionLocations : [],
+          constructionLocations: locationEnabled ? selectedLocations : [],
           renovationTypes: renovationEnabled ? selectedRenovation : [],
-          renovationLocations: renovationEnabled ? selectedRenovationLocations : [],
+          renovationLocations: locationEnabled ? selectedLocations : [],
           architectureTypes: architectureEnabled ? selectedArchitecture : [],
-          architectureLocations: architectureEnabled ? selectedArchitectureLocations : [],
+          architectureLocations: locationEnabled ? selectedLocations : [],
           interiorTypes: interiorEnabled ? selectedInterior : [],
-          interiorLocations: interiorEnabled ? selectedInteriorLocations : [],
+          interiorLocations: locationEnabled ? selectedLocations : [],
           realEstateTypes: realEstateEnabled ? selectedRealEstate : [],
-          realEstateLocations: realEstateEnabled ? selectedRealEstateLocations : [],
+          realEstateLocations: locationEnabled ? selectedLocations : [],
           logoId: logoId ?? undefined,
           projectImageIds,
           since: foundedYear ? parseInt(foundedYear) : undefined,
@@ -357,7 +353,7 @@ export default function EditProfilePage() {
           name: companyName || currentUser.companyName || "My Company",
           description: description || undefined,
           category: selectedConstruction.length > 0 ? "construction" : "renovation",
-          location: selectedConstructionLocations[0] || selectedRenovationLocations[0] || "bali",
+          location: selectedLocations[0] || "bali",
           address: address || undefined,
           isPro: false,
           projects: projectsNumber ? parseInt(projectsNumber) : undefined,
@@ -787,44 +783,393 @@ export default function EditProfilePage() {
           </div>
         </div>
 
-        {/* Project Size Section */}
+
+        {/* Project Size & Location - Top Row */}
+        <div className="grid grid-cols-2 gap-8 mb-8">
+          {/* Project Size */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Project Size</h2>
+              <Toggle
+                checked={projectSizeEnabled}
+                onChange={(val) => {
+                  setProjectSizeEnabled(val);
+                  if (!val) setSelectedProjectSizes([]);
+                }}
+              />
+            </div>
+            {projectSizeEnabled && (
+              <div className="space-y-1">
+                {projectSizeOptions.map((size) => {
+                  const anyActive = selectedProjectSizes.includes("any");
+                  const isAny = size.id === "any";
+                  const isDisabled = anyActive && !isAny;
+                  return (
+                    <div key={size.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <span className={`text-[10px] tracking-[0.2px] ${selectedProjectSizes.includes(size.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                        {size.label}
+                      </span>
+                      <Toggle
+                        checked={selectedProjectSizes.includes(size.id)}
+                        onChange={() => {
+                          setIsDirty(true);
+                          if (isAny) {
+                            if (selectedProjectSizes.includes("any")) {
+                              setSelectedProjectSizes(selectedProjectSizes.filter(s => s !== "any"));
+                            } else {
+                              setSelectedProjectSizes(["any"]);
+                            }
+                          } else {
+                            const next = selectedProjectSizes.includes(size.id)
+                              ? selectedProjectSizes.filter(s => s !== size.id)
+                              : [...selectedProjectSizes.filter(s => s !== "any"), size.id];
+                            setSelectedProjectSizes(next);
+                          }
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Location (single global) */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Location</h2>
+              <Toggle
+                checked={locationEnabled}
+                onChange={(val) => {
+                  setLocationEnabled(val);
+                  if (!val) setSelectedLocations([]);
+                }}
+              />
+            </div>
+            {locationEnabled && (
+              <div className="space-y-1">
+                {locationOptions.map((loc) => {
+                  const baliActive = selectedLocations.includes("bali");
+                  const isBali = loc.id === "bali";
+                  const isDisabled = baliActive && !isBali;
+                  return (
+                    <div key={loc.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <span className={`text-[10px] tracking-[0.2px] ${selectedLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
+                        {loc.label}
+                      </span>
+                      <Toggle
+                        checked={selectedLocations.includes(loc.id)}
+                        onChange={() => {
+                          setIsDirty(true);
+                          if (isBali) {
+                            if (selectedLocations.includes("bali")) {
+                              setSelectedLocations(selectedLocations.filter(s => s !== "bali"));
+                            } else {
+                              setSelectedLocations(["bali"]);
+                            }
+                          } else {
+                            let next = selectedLocations.includes(loc.id)
+                              ? selectedLocations.filter(s => s !== loc.id)
+                              : [...selectedLocations.filter(s => s !== "bali"), loc.id];
+                            const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
+                            if (allIndividual.every(id => next.includes(id))) {
+                              next = ["bali"];
+                            }
+                            setSelectedLocations(next);
+                          }
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Construction / Renovation / Architecture / Interior - 4 Categories */}
+        <div className="grid grid-cols-2 gap-8 mb-8">
+          {/* Construction */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Construction</h2>
+              <Toggle
+                checked={constructionEnabled}
+                onChange={(val) => {
+                  setConstructionEnabled(val);
+                  if (!val) setSelectedConstruction([]);
+                }}
+              />
+            </div>
+            {constructionEnabled && (
+              <div>
+                <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                  Services Provided /
+                  <br />
+                  Layanan yang Disediakan
+                </p>
+                {constructionServices.map((service) => {
+                  const allActive = selectedConstruction.includes("all");
+                  const isAll = service.id === "all";
+                  const isDisabled = allActive && !isAll;
+                  return (
+                    <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <span className={`text-[10px] tracking-[0.2px] ${selectedConstruction.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                        {service.label}
+                      </span>
+                      <Toggle
+                        checked={selectedConstruction.includes(service.id)}
+                        onChange={() => {
+                          setIsDirty(true);
+                          if (isAll) {
+                            if (selectedConstruction.includes("all")) {
+                              setSelectedConstruction(selectedConstruction.filter(s => s !== "all"));
+                            } else {
+                              setSelectedConstruction(["all"]);
+                            }
+                          } else {
+                            let next = selectedConstruction.includes(service.id)
+                              ? selectedConstruction.filter(s => s !== service.id)
+                              : [...selectedConstruction.filter(s => s !== "all"), service.id];
+                            const allIndividual = constructionServices.filter(s => s.id !== "all").map(s => s.id);
+                            if (allIndividual.every(id => next.includes(id))) {
+                              next = ["all"];
+                            }
+                            setSelectedConstruction(next);
+                          }
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Renovation */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Renovation</h2>
+              <Toggle
+                checked={renovationEnabled}
+                onChange={(val) => {
+                  setRenovationEnabled(val);
+                  if (!val) setSelectedRenovation([]);
+                }}
+              />
+            </div>
+            {renovationEnabled && (
+              <div>
+                <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                  Services Provided /
+                  <br />
+                  Layanan yang Disediakan
+                </p>
+                {renovationServices.map((service) => {
+                  const everyActive = selectedRenovation.includes("every");
+                  const isEvery = service.id === "every";
+                  const isDisabled = everyActive && !isEvery;
+                  return (
+                    <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <span className={`text-[10px] tracking-[0.2px] ${selectedRenovation.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                        {service.label}
+                      </span>
+                      <Toggle
+                        checked={selectedRenovation.includes(service.id)}
+                        onChange={() => {
+                          setIsDirty(true);
+                          if (isEvery) {
+                            if (selectedRenovation.includes("every")) {
+                              setSelectedRenovation(selectedRenovation.filter(s => s !== "every"));
+                            } else {
+                              setSelectedRenovation(["every"]);
+                            }
+                          } else {
+                            let next = selectedRenovation.includes(service.id)
+                              ? selectedRenovation.filter(s => s !== service.id)
+                              : [...selectedRenovation.filter(s => s !== "every"), service.id];
+                            const allIndividual = renovationServices.filter(s => s.id !== "every").map(s => s.id);
+                            if (allIndividual.every(id => next.includes(id))) {
+                              next = ["every"];
+                            }
+                            setSelectedRenovation(next);
+                          }
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Architecture */}
+          {isCategoryVisible("architecture") && (
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Architecture</h2>
+              <Toggle
+                checked={architectureEnabled}
+                onChange={(val) => {
+                  setArchitectureEnabled(val);
+                  if (!val) setSelectedArchitecture([]);
+                }}
+              />
+            </div>
+            {architectureEnabled && (
+              <div>
+                <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                  Services Provided /
+                  <br />
+                  Layanan yang Disediakan
+                </p>
+                {architectureServices.map((service) => {
+                  const allActive = selectedArchitecture.includes("all");
+                  const isAll = service.id === "all";
+                  const isDisabled = allActive && !isAll;
+                  return (
+                    <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <span className={`text-[10px] tracking-[0.2px] ${selectedArchitecture.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                        {service.label}
+                      </span>
+                      <Toggle
+                        checked={selectedArchitecture.includes(service.id)}
+                        onChange={() => {
+                          setIsDirty(true);
+                          if (isAll) {
+                            if (selectedArchitecture.includes("all")) {
+                              setSelectedArchitecture(selectedArchitecture.filter(s => s !== "all"));
+                            } else {
+                              setSelectedArchitecture(["all"]);
+                            }
+                          } else {
+                            let next = selectedArchitecture.includes(service.id)
+                              ? selectedArchitecture.filter(s => s !== service.id)
+                              : [...selectedArchitecture.filter(s => s !== "all"), service.id];
+                            const allIndividual = architectureServices.filter(s => s.id !== "all").map(s => s.id);
+                            if (allIndividual.every(id => next.includes(id))) {
+                              next = ["all"];
+                            }
+                            setSelectedArchitecture(next);
+                          }
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          )}
+
+          {/* Interior Design */}
+          {isCategoryVisible("interior") && (
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Interior</h2>
+              <Toggle
+                checked={interiorEnabled}
+                onChange={(val) => {
+                  setInteriorEnabled(val);
+                  if (!val) setSelectedInterior([]);
+                }}
+              />
+            </div>
+            {interiorEnabled && (
+              <div>
+                <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                  Services Provided /
+                  <br />
+                  Layanan yang Disediakan
+                </p>
+                {interiorServices.map((service) => {
+                  const allActive = selectedInterior.includes("all");
+                  const isAll = service.id === "all";
+                  const isDisabled = allActive && !isAll;
+                  return (
+                    <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <span className={`text-[10px] tracking-[0.2px] ${selectedInterior.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                        {service.label}
+                      </span>
+                      <Toggle
+                        checked={selectedInterior.includes(service.id)}
+                        onChange={() => {
+                          setIsDirty(true);
+                          if (isAll) {
+                            if (selectedInterior.includes("all")) {
+                              setSelectedInterior(selectedInterior.filter(s => s !== "all"));
+                            } else {
+                              setSelectedInterior(["all"]);
+                            }
+                          } else {
+                            let next = selectedInterior.includes(service.id)
+                              ? selectedInterior.filter(s => s !== service.id)
+                              : [...selectedInterior.filter(s => s !== "all"), service.id];
+                            const allIndividual = interiorServices.filter(s => s.id !== "all").map(s => s.id);
+                            if (allIndividual.every(id => next.includes(id))) {
+                              next = ["all"];
+                            }
+                            setSelectedInterior(next);
+                          }
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          )}
+        </div>
+
+        {/* Real Estate - Bottom Row */}
+        {isCategoryVisible("real-estate") && (
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Project Size</h2>
+            <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Real Estate</h2>
             <Toggle
-              checked={projectSizeEnabled}
+              checked={realEstateEnabled}
               onChange={(val) => {
-                setProjectSizeEnabled(val);
-                if (!val) setSelectedProjectSizes([]);
+                setRealEstateEnabled(val);
+                if (!val) setSelectedRealEstate([]);
               }}
             />
           </div>
-          {projectSizeEnabled && (
-            <div className="space-y-1">
-              {projectSizeOptions.map((size) => {
-                const anyActive = selectedProjectSizes.includes("any");
-                const isAny = size.id === "any";
-                const isDisabled = anyActive && !isAny;
+          {realEstateEnabled && (
+            <div>
+              <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
+                Services Provided /
+                <br />
+                Layanan yang Disediakan
+              </p>
+              {realEstateServices.map((service) => {
+                const allActive = selectedRealEstate.includes("all");
+                const isAll = service.id === "all";
+                const isDisabled = allActive && !isAll;
                 return (
-                  <div key={size.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <span className={`text-[10px] tracking-[0.2px] ${selectedProjectSizes.includes(size.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                      {size.label}
+                  <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <span className={`text-[10px] tracking-[0.2px] ${selectedRealEstate.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                      {service.label}
                     </span>
                     <Toggle
-                      checked={selectedProjectSizes.includes(size.id)}
+                      checked={selectedRealEstate.includes(service.id)}
                       onChange={() => {
                         setIsDirty(true);
-                        if (isAny) {
-                          if (selectedProjectSizes.includes("any")) {
-                            setSelectedProjectSizes(selectedProjectSizes.filter(s => s !== "any"));
+                        if (isAll) {
+                          if (selectedRealEstate.includes("all")) {
+                            setSelectedRealEstate(selectedRealEstate.filter(s => s !== "all"));
                           } else {
-                            setSelectedProjectSizes(["any"]);
+                            setSelectedRealEstate(["all"]);
                           }
                         } else {
-                          const next = selectedProjectSizes.includes(size.id)
-                            ? selectedProjectSizes.filter(s => s !== size.id)
-                            : [...selectedProjectSizes.filter(s => s !== "any"), size.id];
-                          setSelectedProjectSizes(next);
+                          let next = selectedRealEstate.includes(service.id)
+                            ? selectedRealEstate.filter(s => s !== service.id)
+                            : [...selectedRealEstate.filter(s => s !== "all"), service.id];
+                          const allIndividual = realEstateServices.filter(s => s.id !== "all").map(s => s.id);
+                          if (allIndividual.every(id => next.includes(id))) {
+                            next = ["all"];
+                          }
+                          setSelectedRealEstate(next);
                         }
                       }}
                     />
@@ -834,541 +1179,14 @@ export default function EditProfilePage() {
             </div>
           )}
         </div>
-
-        {/* Construction & Renovation Sections */}
-        <div className="grid grid-cols-2 gap-8 mb-8">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Construction</h2>
-              <Toggle
-                checked={constructionEnabled}
-                onChange={(val) => {
-                  setConstructionEnabled(val);
-                  if (!val) {
-                    setSelectedConstruction([]);
-                    setSelectedConstructionLocations([]);
-                  }
-                }}
-              />
-            </div>
-
-            {constructionEnabled && (
-              <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                <div>
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                    Services Provided /
-                    <br />
-                    Layanan yang Disediakan
-                  </p>
-                  {constructionServices.map((service) => {
-                    const allActive = selectedConstruction.includes("all");
-                    const isAll = service.id === "all";
-                    const isDisabled = allActive && !isAll;
-                    return (
-                      <div key={service.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <span className={`text-[10px] tracking-[0.2px] ${selectedConstruction.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                          {service.label}
-                        </span>
-                        <Toggle
-                          checked={selectedConstruction.includes(service.id)}
-                          onChange={() => {
-                            setIsDirty(true);
-                            if (isAll) {
-                              if (selectedConstruction.includes("all")) {
-                                setSelectedConstruction(selectedConstruction.filter(s => s !== "all"));
-                              } else {
-                                setSelectedConstruction(["all"]);
-                              }
-                            } else {
-                              let next = selectedConstruction.includes(service.id)
-                                ? selectedConstruction.filter(s => s !== service.id)
-                                : [...selectedConstruction.filter(s => s !== "all"), service.id];
-                              const allIndividual = constructionServices.filter(s => s.id !== "all").map(s => s.id);
-                              if (allIndividual.every(id => next.includes(id))) {
-                                next = ["all"];
-                              }
-                              setSelectedConstruction(next);
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-                <div>
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                    Services Location /
-                    <br />
-                    Lokasi Layanan
-                  </p>
-                  {locationOptions.map((loc) => {
-                    const baliActive = selectedConstructionLocations.includes("bali");
-                    const isBali = loc.id === "bali";
-                    const isDisabled = baliActive && !isBali;
-                    return (
-                      <div key={loc.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <span className={`text-[10px] tracking-[0.2px] ${selectedConstructionLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
-                          {loc.label}
-                        </span>
-                        <Toggle
-                          checked={selectedConstructionLocations.includes(loc.id)}
-                          onChange={() => {
-                            setIsDirty(true);
-                            if (isBali) {
-                              if (selectedConstructionLocations.includes("bali")) {
-                                setSelectedConstructionLocations(selectedConstructionLocations.filter(s => s !== "bali"));
-                              } else {
-                                setSelectedConstructionLocations(["bali"]);
-                              }
-                            } else {
-                              let next = selectedConstructionLocations.includes(loc.id)
-                                ? selectedConstructionLocations.filter(s => s !== loc.id)
-                                : [...selectedConstructionLocations.filter(s => s !== "bali"), loc.id];
-                              const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
-                              if (allIndividual.every(id => next.includes(id))) {
-                                next = ["bali"];
-                              }
-                              setSelectedConstructionLocations(next);
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Renovation Section */}
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Renovation</h2>
-              <Toggle
-                checked={renovationEnabled}
-                onChange={(val) => {
-                  setRenovationEnabled(val);
-                  if (!val) {
-                    setSelectedRenovation([]);
-                    setSelectedRenovationLocations([]);
-                  }
-                }}
-              />
-            </div>
-
-            {renovationEnabled && (
-              <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                <div>
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                    Services Provided /
-                    <br />
-                    Layanan yang Disediakan
-                  </p>
-                  {renovationServices.map((service) => {
-                    const everyActive = selectedRenovation.includes("every");
-                    const isEvery = service.id === "every";
-                    const isDisabled = everyActive && !isEvery;
-                    return (
-                      <div key={service.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <span className={`text-[10px] tracking-[0.2px] ${selectedRenovation.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                          {service.label}
-                        </span>
-                        <Toggle
-                          checked={selectedRenovation.includes(service.id)}
-                          onChange={() => {
-                            setIsDirty(true);
-                            if (isEvery) {
-                              if (selectedRenovation.includes("every")) {
-                                setSelectedRenovation(selectedRenovation.filter(s => s !== "every"));
-                              } else {
-                                setSelectedRenovation(["every"]);
-                              }
-                            } else {
-                              let next = selectedRenovation.includes(service.id)
-                                ? selectedRenovation.filter(s => s !== service.id)
-                                : [...selectedRenovation.filter(s => s !== "every"), service.id];
-                              const allIndividual = renovationServices.filter(s => s.id !== "every").map(s => s.id);
-                              if (allIndividual.every(id => next.includes(id))) {
-                                next = ["every"];
-                              }
-                              setSelectedRenovation(next);
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-                <div>
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                    Services Location /
-                    <br />
-                    Lokasi Layanan
-                  </p>
-                  {locationOptions.map((loc) => {
-                    const baliActive = selectedRenovationLocations.includes("bali");
-                    const isBali = loc.id === "bali";
-                    const isDisabled = baliActive && !isBali;
-                    return (
-                      <div key={loc.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <span className={`text-[10px] tracking-[0.2px] ${selectedRenovationLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
-                          {loc.label}
-                        </span>
-                        <Toggle
-                          checked={selectedRenovationLocations.includes(loc.id)}
-                          onChange={() => {
-                            setIsDirty(true);
-                            if (isBali) {
-                              if (selectedRenovationLocations.includes("bali")) {
-                                setSelectedRenovationLocations(selectedRenovationLocations.filter(s => s !== "bali"));
-                              } else {
-                                setSelectedRenovationLocations(["bali"]);
-                              }
-                            } else {
-                              let next = selectedRenovationLocations.includes(loc.id)
-                                ? selectedRenovationLocations.filter(s => s !== loc.id)
-                                : [...selectedRenovationLocations.filter(s => s !== "bali"), loc.id];
-                              const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
-                              if (allIndividual.every(id => next.includes(id))) {
-                                next = ["bali"];
-                              }
-                              setSelectedRenovationLocations(next);
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Architecture, Interior & Real Estate Sections */}
-        <div className="grid grid-cols-2 gap-8 mb-8">
-          {isCategoryVisible("architecture") && (
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Architecture</h2>
-              <Toggle
-                checked={architectureEnabled}
-                onChange={(val) => {
-                  setArchitectureEnabled(val);
-                  if (!val) {
-                    setSelectedArchitecture([]);
-                    setSelectedArchitectureLocations([]);
-                  }
-                }}
-              />
-            </div>
-
-            {architectureEnabled && (
-              <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                <div>
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                    Services Provided /
-                    <br />
-                    Layanan yang Disediakan
-                  </p>
-                  {architectureServices.map((service) => {
-                    const allActive = selectedArchitecture.includes("all");
-                    const isAll = service.id === "all";
-                    const isDisabled = allActive && !isAll;
-                    return (
-                      <div key={service.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <span className={`text-[10px] tracking-[0.2px] ${selectedArchitecture.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                          {service.label}
-                        </span>
-                        <Toggle
-                          checked={selectedArchitecture.includes(service.id)}
-                          onChange={() => {
-                            setIsDirty(true);
-                            if (isAll) {
-                              if (selectedArchitecture.includes("all")) {
-                                setSelectedArchitecture(selectedArchitecture.filter(s => s !== "all"));
-                              } else {
-                                setSelectedArchitecture(["all"]);
-                              }
-                            } else {
-                              let next = selectedArchitecture.includes(service.id)
-                                ? selectedArchitecture.filter(s => s !== service.id)
-                                : [...selectedArchitecture.filter(s => s !== "all"), service.id];
-                              const allIndividual = architectureServices.filter(s => s.id !== "all").map(s => s.id);
-                              if (allIndividual.every(id => next.includes(id))) {
-                                next = ["all"];
-                              }
-                              setSelectedArchitecture(next);
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-                <div>
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                    Services Location /
-                    <br />
-                    Lokasi Layanan
-                  </p>
-                  {locationOptions.map((loc) => {
-                    const baliActive = selectedArchitectureLocations.includes("bali");
-                    const isBali = loc.id === "bali";
-                    const isDisabled = baliActive && !isBali;
-                    return (
-                      <div key={loc.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <span className={`text-[10px] tracking-[0.2px] ${selectedArchitectureLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
-                          {loc.label}
-                        </span>
-                        <Toggle
-                          checked={selectedArchitectureLocations.includes(loc.id)}
-                          onChange={() => {
-                            setIsDirty(true);
-                            if (isBali) {
-                              if (selectedArchitectureLocations.includes("bali")) {
-                                setSelectedArchitectureLocations(selectedArchitectureLocations.filter(s => s !== "bali"));
-                              } else {
-                                setSelectedArchitectureLocations(["bali"]);
-                              }
-                            } else {
-                              let next = selectedArchitectureLocations.includes(loc.id)
-                                ? selectedArchitectureLocations.filter(s => s !== loc.id)
-                                : [...selectedArchitectureLocations.filter(s => s !== "bali"), loc.id];
-                              const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
-                              if (allIndividual.every(id => next.includes(id))) {
-                                next = ["bali"];
-                              }
-                              setSelectedArchitectureLocations(next);
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-          )}
-
-          {isCategoryVisible("interior") && (
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Interior</h2>
-              <Toggle
-                checked={interiorEnabled}
-                onChange={(val) => {
-                  setInteriorEnabled(val);
-                  if (!val) {
-                    setSelectedInterior([]);
-                    setSelectedInteriorLocations([]);
-                  }
-                }}
-              />
-            </div>
-
-            {interiorEnabled && (
-              <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                <div>
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                    Services Provided /
-                    <br />
-                    Layanan yang Disediakan
-                  </p>
-                  {interiorServices.map((service) => {
-                    const allActive = selectedInterior.includes("all");
-                    const isAll = service.id === "all";
-                    const isDisabled = allActive && !isAll;
-                    return (
-                      <div key={service.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <span className={`text-[10px] tracking-[0.2px] ${selectedInterior.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                          {service.label}
-                        </span>
-                        <Toggle
-                          checked={selectedInterior.includes(service.id)}
-                          onChange={() => {
-                            setIsDirty(true);
-                            if (isAll) {
-                              if (selectedInterior.includes("all")) {
-                                setSelectedInterior(selectedInterior.filter(s => s !== "all"));
-                              } else {
-                                setSelectedInterior(["all"]);
-                              }
-                            } else {
-                              let next = selectedInterior.includes(service.id)
-                                ? selectedInterior.filter(s => s !== service.id)
-                                : [...selectedInterior.filter(s => s !== "all"), service.id];
-                              const allIndividual = interiorServices.filter(s => s.id !== "all").map(s => s.id);
-                              if (allIndividual.every(id => next.includes(id))) {
-                                next = ["all"];
-                              }
-                              setSelectedInterior(next);
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-                <div>
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                    Services Location /
-                    <br />
-                    Lokasi Layanan
-                  </p>
-                  {locationOptions.map((loc) => {
-                    const baliActive = selectedInteriorLocations.includes("bali");
-                    const isBali = loc.id === "bali";
-                    const isDisabled = baliActive && !isBali;
-                    return (
-                      <div key={loc.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <span className={`text-[10px] tracking-[0.2px] ${selectedInteriorLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
-                          {loc.label}
-                        </span>
-                        <Toggle
-                          checked={selectedInteriorLocations.includes(loc.id)}
-                          onChange={() => {
-                            setIsDirty(true);
-                            if (isBali) {
-                              if (selectedInteriorLocations.includes("bali")) {
-                                setSelectedInteriorLocations(selectedInteriorLocations.filter(s => s !== "bali"));
-                              } else {
-                                setSelectedInteriorLocations(["bali"]);
-                              }
-                            } else {
-                              let next = selectedInteriorLocations.includes(loc.id)
-                                ? selectedInteriorLocations.filter(s => s !== loc.id)
-                                : [...selectedInteriorLocations.filter(s => s !== "bali"), loc.id];
-                              const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
-                              if (allIndividual.every(id => next.includes(id))) {
-                                next = ["bali"];
-                              }
-                              setSelectedInteriorLocations(next);
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-          )}
-
-          {isCategoryVisible("real-estate") && (
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Real Estate</h2>
-              <Toggle
-                checked={realEstateEnabled}
-                onChange={(val) => {
-                  setRealEstateEnabled(val);
-                  if (!val) {
-                    setSelectedRealEstate([]);
-                    setSelectedRealEstateLocations([]);
-                  }
-                }}
-              />
-            </div>
-
-            {realEstateEnabled && (
-              <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                <div>
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                    Services Provided /
-                    <br />
-                    Layanan yang Disediakan
-                  </p>
-                  {realEstateServices.map((service) => {
-                    const allActive = selectedRealEstate.includes("all");
-                    const isAll = service.id === "all";
-                    const isDisabled = allActive && !isAll;
-                    return (
-                      <div key={service.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <span className={`text-[10px] tracking-[0.2px] ${selectedRealEstate.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                          {service.label}
-                        </span>
-                        <Toggle
-                          checked={selectedRealEstate.includes(service.id)}
-                          onChange={() => {
-                            setIsDirty(true);
-                            if (isAll) {
-                              if (selectedRealEstate.includes("all")) {
-                                setSelectedRealEstate(selectedRealEstate.filter(s => s !== "all"));
-                              } else {
-                                setSelectedRealEstate(["all"]);
-                              }
-                            } else {
-                              let next = selectedRealEstate.includes(service.id)
-                                ? selectedRealEstate.filter(s => s !== service.id)
-                                : [...selectedRealEstate.filter(s => s !== "all"), service.id];
-                              const allIndividual = realEstateServices.filter(s => s.id !== "all").map(s => s.id);
-                              if (allIndividual.every(id => next.includes(id))) {
-                                next = ["all"];
-                              }
-                              setSelectedRealEstate(next);
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-                <div>
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                    Services Location /
-                    <br />
-                    Lokasi Layanan
-                  </p>
-                  {locationOptions.map((loc) => {
-                    const baliActive = selectedRealEstateLocations.includes("bali");
-                    const isBali = loc.id === "bali";
-                    const isDisabled = baliActive && !isBali;
-                    return (
-                      <div key={loc.id} className={`flex items-center justify-between py-1 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <span className={`text-[10px] tracking-[0.2px] ${selectedRealEstateLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
-                          {loc.label}
-                        </span>
-                        <Toggle
-                          checked={selectedRealEstateLocations.includes(loc.id)}
-                          onChange={() => {
-                            setIsDirty(true);
-                            if (isBali) {
-                              if (selectedRealEstateLocations.includes("bali")) {
-                                setSelectedRealEstateLocations(selectedRealEstateLocations.filter(s => s !== "bali"));
-                              } else {
-                                setSelectedRealEstateLocations(["bali"]);
-                              }
-                            } else {
-                              let next = selectedRealEstateLocations.includes(loc.id)
-                                ? selectedRealEstateLocations.filter(s => s !== loc.id)
-                                : [...selectedRealEstateLocations.filter(s => s !== "bali"), loc.id];
-                              const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
-                              if (allIndividual.every(id => next.includes(id))) {
-                                next = ["bali"];
-                              }
-                              setSelectedRealEstateLocations(next);
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-          )}
-        </div>
+        )}
 
         {/* Bottom Save */}
         <div className="flex items-center gap-4 py-8 border-t border-[#e4e4e4]">
           <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
-            *Select &apos;LOCATION&apos; for &apos;RENOVATION&apos; before submitting /
+            *Select at least 1 category before submitting /
             <br />
-            *Pilih &apos;LOKASI&apos; untuk &apos;RENOVASI&apos; sebelum mengirimkan
+            *Pilih minimal 1 kategori sebelum mengirimkan
           </p>
           {saveError && (
             <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px] mb-2">{saveError}</p>
