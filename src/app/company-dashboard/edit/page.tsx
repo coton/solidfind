@@ -469,6 +469,11 @@ export default function EditProfilePage() {
                 ← Back
               </Link>
             )}
+          </div>
+          <div className="flex items-center justify-between">
+            {!canSave && (
+              <p className="text-[9px] text-[#f14110] font-medium tracking-[0.18px] whitespace-pre-line">{bottomHintText}</p>
+            )}
             <button
               onClick={() => { setIsDirty(false); handleSave(); }}
               disabled={saving || !canSave}
@@ -477,11 +482,6 @@ export default function EditProfilePage() {
             >
               {saving ? "Saving..." : "Save"}
             </button>
-          </div>
-          <div>
-            {!canSave && (
-              <p className="text-[9px] text-[#f14110] font-medium tracking-[0.18px] whitespace-pre-line">{bottomHintText}</p>
-            )}
           </div>
         </div>
 
@@ -1160,22 +1160,25 @@ export default function EditProfilePage() {
         )}
 
         {/* Bottom Save */}
-        <div className="flex items-center gap-4 py-8 border-t border-[#e4e4e4]">
-          <p className={`text-[9px] tracking-[0.18px] whitespace-pre-line ${bottomHintIsWarning ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
-            {bottomHintText}
-          </p>
-          <div className="ml-auto flex items-center gap-3">
-            {saveError && (
-              <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px]">{saveError}</p>
-            )}
-            <button
-              onClick={() => { setIsDirty(false); handleSave(); }}
-              disabled={saving || !canSave}
-              className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
-              style={{ minWidth: '140px' }}
-            >
-              {saving ? "Saving..." : "Save"}
-            </button>
+        <div className="grid grid-cols-2 gap-8 py-8 border-t border-[#e4e4e4] items-center">
+          <div />
+          <div className="flex items-center justify-between">
+            <p className={`text-[9px] tracking-[0.18px] whitespace-pre-line ${bottomHintIsWarning ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
+              {bottomHintText}
+            </p>
+            <div className="flex items-center gap-3">
+              {saveError && (
+                <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px]">{saveError}</p>
+              )}
+              <button
+                onClick={() => { setIsDirty(false); handleSave(); }}
+                disabled={saving || !canSave}
+                className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
+                style={{ minWidth: '140px' }}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
           </div>
         </div>
       </main>
