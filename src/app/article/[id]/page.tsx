@@ -6,6 +6,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AdBanner } from "@/components/AdBanner";
 import Link from "next/link";
 
 export default function ArticlePage() {
@@ -120,6 +121,32 @@ export default function ArticlePage() {
               .map((block, index) => (
               <ContentBlockRenderer key={index} block={block} />
             ))}
+          </div>
+
+          {/* Bottom divider + Back to top / Share */}
+          <div className="border-t border-[#333]/10 mt-8 pt-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
+              >
+                Back to top
+              </button>
+              <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
+                <span className="font-bam text-[9px]">Share</span>
+                <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                  style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+                >
+                  <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Ad Space */}
+          <div className="mt-8 mb-8">
+            <AdBanner />
           </div>
         </div>
       </main>
