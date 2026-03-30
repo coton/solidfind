@@ -123,6 +123,7 @@ function HomeContent() {
     isFeatured: false,
     isSaved: savedIdSet.has(`${c._id}:${categoryParam}`),
     imageUrl: c.imageUrl,
+    logoId: c.logoId,
     projectImageIds: c.projectImageIds ?? [],
   }));
 
@@ -140,6 +141,7 @@ function HomeContent() {
     isFeatured: false,
     isSaved: savedIdSet.has(`${c._id}:${categoryParam}`),
     imageUrl: c.imageUrl,
+    logoId: c.logoId,
     projectImageIds: c.projectImageIds ?? [],
   }));
 

@@ -81,6 +81,7 @@ export default function DashboardCategoryPage() {
       isPro: s.company!.isPro,
       isSaved: true,
       imageUrl: s.company!.imageUrl,
+      logoId: s.company!.logoId,
       projectImageIds: s.company!.projectImageIds ?? [],
     }));
 

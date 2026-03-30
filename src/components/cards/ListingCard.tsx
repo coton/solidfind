@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
 import { starColor } from "@/lib/starColors";
 
 interface ListingCardProps {
@@ -22,6 +25,7 @@ interface ListingCardProps {
   isFeatured?: boolean;
   isSaved?: boolean;
   imageUrl?: string;
+  logoId?: string;
   projectImageIds?: string[];
   onBookmark?: () => void;
 }
@@ -42,15 +46,18 @@ export function ListingCard({
   isFeatured = false,
   isSaved = false,
   imageUrl,
+  logoId,
   projectImageIds = [],
   onBookmark,
 }: ListingCardProps) {
+  const logoUrl = useQuery(api.files.getUrl, logoId ? { storageId: logoId as Id<"_storage"> } : "skip");
+  const resolvedImageUrl = logoUrl ?? imageUrl;
   const [isHovered, setIsHovered] = useState(false);
   const [imageError, setImageError] = useState(false);
   
   // Debug logging
-  if (typeof window !== 'undefined' && imageUrl) {
-    console.log(`[ListingCard] ${name} imageUrl:`, imageUrl);
+  if (typeof window !== 'undefined' && resolvedImageUrl) {
+    console.log(`[ListingCard] ${name} imageUrl:`, resolvedImageUrl);
   }
 
   const getInitials = (companyName: string) => {
@@ -93,10 +100,10 @@ export function ListingCard({
         <div className={`absolute inset-0 transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
           {/* Logo — 70x70 at (10, 10) */}
           <div className="absolute top-[10px] left-[10px] w-[70px] h-[70px] bg-[#d8d8d8] rounded-[6px] overflow-hidden">
-            {imageUrl ? (
+            {resolvedImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={imageUrl}
+                src={resolvedImageUrl}
                 alt={name}
                 className="object-cover w-full h-full"
               />

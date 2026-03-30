@@ -72,6 +72,8 @@ export default function DashboardPage() {
         rating: s.company!.rating ?? 4.5,
         isPro: s.company!.isPro,
         isSaved: true,
+        imageUrl: s.company!.imageUrl,
+        logoId: s.company!.logoId,
       })),
   }));
 
