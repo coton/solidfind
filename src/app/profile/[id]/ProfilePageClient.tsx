@@ -391,17 +391,17 @@ export default function ProfilePageClient() {
             </div>
 
             {/* Social Icons */}
-            <div className="flex items-center gap-5 mb-6">
+            <div className="flex items-center gap-5 mb-6" style={{ height: 20 }}>
               {company.email && (
-                <a href={`mailto:${company.email}`} className="text-[#333] hover:text-[#f14110] transition-colors">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1" y="3" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M1 5L10 11L19 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <a href={`mailto:${company.email}`} className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
+                  <svg height="20" viewBox="0 0 24 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="1" width="22" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M1 3L12 10L23 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </a>
               )}
               {company.whatsapp && (
-                <a href={`https://wa.me/${formatWhatsApp(company.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors">
+                <a href={`https://wa.me/${formatWhatsApp(company.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M9.99023 1H9.99316C11.1636 0.996123 12.3233 1.2251 13.4043 1.67383C14.485 2.12248 15.4656 2.7819 16.2891 3.61328L16.293 3.61719C17.9749 5.29915 18.9004 7.53456 18.9004 9.91992C18.9004 14.8276 14.8978 18.83 9.99023 18.8301C8.49894 18.8301 7.03299 18.4529 5.72852 17.7422L5.37988 17.5518L4.99609 17.6533L1.41895 18.5928L2.36523 15.123L2.47363 14.7227L2.26758 14.3623C1.49363 13.0123 1.0801 11.4838 1.08008 9.91016C1.08008 5.00244 5.08252 1 9.99023 1Z" stroke="currentColor" strokeWidth="2"/>
                     <path d="M12.82 11.1801C13.04 11.2701 14.26 11.8701 14.51 11.9901C14.76 12.1101 14.91 12.1601 14.98 12.2701C15.05 12.3801 15.05 12.8701 14.84 13.4501C14.64 14.0301 13.65 14.5601 13.17 14.6301C12.74 14.6901 12.2 14.7201 11.61 14.5301C11.25 14.4201 10.79 14.2701 10.2 14.0101C7.72002 12.9401 6.09002 10.4401 5.97002 10.2701L5.96808 10.2675C5.84074 10.0977 4.96002 8.9237 4.96002 7.71008C4.96002 6.49008 5.60002 5.89008 5.82002 5.64008C6.05002 5.39008 6.31002 5.33008 6.48002 5.33008H6.96002C7.11002 5.34008 7.32002 5.28008 7.52002 5.76008C7.72002 6.26008 8.22002 7.48008 8.28002 7.60008C8.34002 7.72008 8.38002 7.86008 8.30002 8.03008C8.22002 8.19008 8.17002 8.30008 8.05002 8.44008C7.93002 8.58008 7.79002 8.76008 7.68002 8.87008C7.55002 9.00008 7.43002 9.13008 7.57002 9.38008C7.72002 9.63008 8.21002 10.4401 8.95002 11.1001C9.89002 11.9401 10.69 12.2101 10.94 12.3301C11.19 12.4601 11.34 12.4401 11.48 12.2701C11.62 12.1101 12.09 11.5501 12.26 11.3001C12.43 11.0601 12.59 11.1001 12.82 11.1801Z" fill="currentColor"/>
@@ -409,7 +409,7 @@ export default function ProfilePageClient() {
                 </a>
               )}
               {company.instagram && (
-                <a href={company.instagram.startsWith("http") ? company.instagram : `https://instagram.com/${company.instagram}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors">
+                <a href={company.instagram.startsWith("http") ? company.instagram : `https://instagram.com/${company.instagram}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5.7998 1H14.2002C16.8478 1.00011 18.9999 3.15224 19 5.7998V14.2002C18.9999 15.4732 17.4939 16.6936 16.5938 17.5938C15.6936 18.4939 14.4732 18.9999 13.2002 19H5.7998C3.15224 18.9999 1.00011 16.8478 1 14.2002V5.7998C1.00005 4.52684 1.50612 3.30638 2.40625 2.40625C3.30638 1.50612 4.52684 1.00005 5.7998 1Z" stroke="currentColor" strokeWidth="2"/>
                     <circle cx="10" cy="10" r="4" stroke="currentColor" strokeWidth="2"/>
@@ -418,7 +418,7 @@ export default function ProfilePageClient() {
                 </a>
               )}
               {company.facebook && (
-                <a href={company.facebook.startsWith("http") ? company.facebook : `https://${company.facebook}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors">
+                <a href={company.facebook.startsWith("http") ? company.facebook : `https://${company.facebook}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="1" y="1" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2"/>
                     <path d="M8 11.0793H10.2866V18H12.5731V11.0793L14.6465 11.0735L14.9733 8.71666H12.5745V7.70884C12.5731 7.553 12.5839 7.3973 12.6068 7.24325C12.7022 6.65186 13.0164 6.35833 13.6814 6.35833H15V4.10266L14.986 4.10122C14.7545 4.06796 14.2663 4 13.3587 4C11.42 4 10.2866 5.05554 10.2866 7.4558V8.72245H8V11.0793Z" fill="currentColor"/>
@@ -426,7 +426,7 @@ export default function ProfilePageClient() {
                 </a>
               )}
               {company.linkedin && (
-                <a href={company.linkedin.startsWith("http") ? company.linkedin : `https://${company.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors">
+                <a href={company.linkedin.startsWith("http") ? company.linkedin : `https://${company.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="1" y="1" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2"/>
                     <path fillRule="evenodd" clipRule="evenodd" d="M4 11.1942H6.31836V19H4V11.1942ZM11.4785 13.1344C10.2734 13.1344 10.0879 14.1199 10.0879 15.138V19H7.77148V11.1942H9.99609V12.2614H10.0273C10.3379 11.6481 11.0938 11 12.2207 11C14.5664 11 15 12.6172 15 14.7189V19H12.6836V15.2034C12.6836 14.2977 12.666 13.1344 11.4785 13.1344Z" fill="currentColor"/>
