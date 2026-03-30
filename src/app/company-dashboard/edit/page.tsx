@@ -462,19 +462,16 @@ export default function EditProfilePage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 mb-8">
-          {company && (
-            <Link
-              href="/company-dashboard"
-              className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
-              style={{ minWidth: '140px' }}
-            >
-              ← Back
-            </Link>
-          )}
-          <div className="ml-auto flex items-center gap-3">
-            {!canSave && (
-              <p className="text-[9px] text-[#f14110] font-medium tracking-[0.18px] whitespace-pre-line">{bottomHintText}</p>
+        <div className="grid grid-cols-2 gap-8 mb-8 items-center">
+          <div className="flex gap-4">
+            {company && (
+              <Link
+                href="/company-dashboard"
+                className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
+                style={{ minWidth: '140px' }}
+              >
+                ← Back
+              </Link>
             )}
             <button
               onClick={() => { setIsDirty(false); handleSave(); }}
@@ -484,6 +481,11 @@ export default function EditProfilePage() {
             >
               {saving ? "Saving..." : "Save"}
             </button>
+          </div>
+          <div>
+            {!canSave && (
+              <p className="text-[9px] text-[#f14110] font-medium tracking-[0.18px] whitespace-pre-line">{bottomHintText}</p>
+            )}
           </div>
         </div>
 
