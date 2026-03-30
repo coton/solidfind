@@ -313,8 +313,9 @@ function HeaderInner() {
 
   const isDashboardPage = pathname.startsWith("/dashboard") || pathname.startsWith("/company-dashboard");
   const isProfilePage = pathname.startsWith("/profile");
+  const isArticlePage = pathname.startsWith("/article");
   const fromCategory = searchParams.get("from");
-  const activeCategory = isDashboardPage
+  const activeCategory = isDashboardPage || isArticlePage
     ? null
     : isProfilePage
       ? (fromCategory || null)
