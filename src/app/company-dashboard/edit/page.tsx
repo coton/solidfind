@@ -847,7 +847,7 @@ export default function EditProfilePage() {
         <div className="grid grid-cols-4 gap-6 mb-8">
           {/* Construction */}
           <div>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Construction</h2>
               <Toggle
                 checked={constructionEnabled}
@@ -904,7 +904,7 @@ export default function EditProfilePage() {
 
           {/* Renovation */}
           <div>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Renovation</h2>
               <Toggle
                 checked={renovationEnabled}
@@ -962,7 +962,7 @@ export default function EditProfilePage() {
           {/* Architecture */}
           {isCategoryVisible("architecture") && (
           <div>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Architecture</h2>
               <Toggle
                 checked={architectureEnabled}
@@ -1021,7 +1021,7 @@ export default function EditProfilePage() {
           {/* Interior Design */}
           {isCategoryVisible("interior") && (
           <div>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Interior</h2>
               <Toggle
                 checked={interiorEnabled}
@@ -1081,7 +1081,7 @@ export default function EditProfilePage() {
         {/* Real Estate - Bottom Row */}
         {isCategoryVisible("real-estate") && (
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Real Estate</h2>
             <Toggle
               checked={realEstateEnabled}
