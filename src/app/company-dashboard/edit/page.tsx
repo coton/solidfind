@@ -758,15 +758,11 @@ export default function EditProfilePage() {
                   );
                 })}
               </div>
-              {proEnabled ? (
+              {!company?.isPro && proEnabled && (
                 <p className="text-[8px] text-[#333]/50 mt-2 tracking-[0.16px]">
-                  4 pictures for Free account / 12 pictures with PRO / 4 gambar untuk
+                  *4 pictures for Free account / 12 pictures or video with PRO
                   <br />
-                  akun gratis / 12 gambar dengan akun PRO
-                </p>
-              ) : (
-                <p className="text-[8px] text-[#333]/50 mt-2 tracking-[0.16px]">
-                  4 pictures / 4 gambar
+                  *4 gambar untuk akun gratis / 12 gambar atau video dengan akun PRO
                 </p>
               )}
             </div>
