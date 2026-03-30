@@ -604,51 +604,7 @@ export default function EditProfilePage() {
               />
             </div>
 
-            {/* PRO Features — only shown for PRO accounts */}
-            {company?.isPro && proEnabled && (
-              <div className="mt-6 pt-4 border-t border-[#e4e4e4]">
-                <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-3">
-                  Services included with PRO account
-                  <br />
-                  Layanan dengan akun PRO
-                </p>
-                <div className="space-y-2">
-                  {proFeatures.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <div className="w-4 h-4 flex items-center justify-center text-[#f14110]">
-                        {feature.icon === "star" && <Star className="w-4 h-4" />}
-                        {feature.icon === "ai" && (
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
-                          </svg>
-                        )}
-                        {feature.icon === "stats" && (
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <rect x="1" y="8" width="3" height="7"/>
-                            <rect x="6" y="4" width="3" height="11"/>
-                            <rect x="11" y="1" width="3" height="14"/>
-                          </svg>
-                        )}
-                        {feature.icon === "photos" && (
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <rect x="1" y="3" width="14" height="10" rx="1"/>
-                          </svg>
-                        )}
-                        {feature.icon === "ad" && (
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <rect x="1" y="1" width="14" height="14" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-                          </svg>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-[9px] font-medium text-[#333] tracking-[0.18px]">{feature.title}</p>
-                        <p className="text-[8px] text-[#333]/50 tracking-[0.16px]">{feature.subtitle}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+
           </div>
 
           {/* Right Column */}
@@ -888,7 +844,7 @@ export default function EditProfilePage() {
         </div>
 
         {/* Construction / Renovation / Architecture / Interior - 4 Categories */}
-        <div className="grid grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-4 gap-6 mb-8">
           {/* Construction */}
           <div>
             <div className="flex items-center gap-3 mb-4">
