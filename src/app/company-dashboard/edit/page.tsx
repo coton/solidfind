@@ -192,14 +192,20 @@ export default function EditProfilePage() {
   const [saveError, setSaveError] = useState("");
 
   // Mandatory fields validation
-  const mandatoryWarning = selectedProjectSizes.length === 0 && selectedLocations.length === 0
-    ? "Please select at least 1 project size and 1 location / Pilih minimal 1 ukuran proyek dan 1 lokasi"
-    : selectedProjectSizes.length === 0
-    ? "Please select at least 1 project size / Pilih minimal 1 ukuran proyek"
-    : selectedLocations.length === 0
-    ? "Please select at least 1 location / Pilih minimal 1 lokasi"
+  const hasCategory = (constructionEnabled && selectedConstruction.length > 0)
+    || (renovationEnabled && selectedRenovation.length > 0)
+    || (architectureEnabled && selectedArchitecture.length > 0)
+    || (interiorEnabled && selectedInterior.length > 0)
+    || (realEstateEnabled && selectedRealEstate.length > 0);
+  const mandatoryWarnings: string[] = [];
+  if (selectedProjectSizes.length === 0) mandatoryWarnings.push("Project Size / Ukuran Proyek");
+  if (selectedLocations.length === 0) mandatoryWarnings.push("Location / Lokasi");
+  if (!hasCategory) mandatoryWarnings.push("at least 1 category / minimal 1 kategori");
+  if (!description.trim()) mandatoryWarnings.push("Company Description / Deskripsi Perusahaan");
+  const mandatoryWarning = mandatoryWarnings.length > 0
+    ? `Required: ${mandatoryWarnings.join(", ")} / Wajib diisi: ${mandatoryWarnings.join(", ")}`
     : "";
-  const canSave = mandatoryWarning === "";
+  const canSave = mandatoryWarnings.length === 0;
 
   const logoUrl = useStorageUrl(logoId);
 
@@ -314,24 +320,9 @@ export default function EditProfilePage() {
     if (!currentUser || saving) return;
     setSaveError("");
 
-    // Validate mandatory fields: Project Size and Location
-    if (selectedProjectSizes.length === 0) {
-      setSaveError("Please select at least 1 project size / Pilih minimal 1 ukuran proyek");
-      return;
-    }
-    if (selectedLocations.length === 0) {
-      setSaveError("Please select at least 1 location / Pilih minimal 1 lokasi");
-      return;
-    }
-
-    // Validate: at least 1 category must be enabled with active filters
-    const hasConstruction = constructionEnabled && selectedConstruction.length > 0;
-    const hasRenovation = renovationEnabled && selectedRenovation.length > 0;
-    const hasArchitecture = architectureEnabled && selectedArchitecture.length > 0;
-    const hasInterior = interiorEnabled && selectedInterior.length > 0;
-    const hasRealEstate = realEstateEnabled && selectedRealEstate.length > 0;
-    if (!hasConstruction && !hasRenovation && !hasArchitecture && !hasInterior && !hasRealEstate) {
-      setSaveError("At least 1 category must be completed with active filters / Minimal 1 kategori harus diisi dengan filter aktif");
+    // Validate all mandatory fields
+    if (!canSave) {
+      setSaveError(mandatoryWarning);
       return;
     }
 
@@ -639,7 +630,7 @@ export default function EditProfilePage() {
               <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                 Description of your company and range of work / Deskripsi perusahaan
                 <br />
-                Anda dan lingkup pekerjaan
+                Anda dan lingkup pekerjaan <span className="text-[#f14110]">(*)</span>
               </label>
               <textarea
                 value={description}
