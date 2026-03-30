@@ -859,11 +859,21 @@ export default function EditProfilePage() {
             </div>
             {constructionEnabled && (
               <div>
-                <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                  Services Provided /
-                  <br />
-                  Layanan yang Disediakan
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
+                    Services Provided /
+                    <br />
+                    Layanan yang Disediakan
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedConstruction([]); setIsDirty(true); }}
+                    className="hover:opacity-70 transition-opacity"
+                    title="Reset filters"
+                  >
+                    <img src="/icons/btn-reset.svg" alt="Reset" width={16} height={16} />
+                  </button>
+                </div>
                 {constructionServices.map((service) => {
                   const allActive = selectedConstruction.includes("all");
                   const isAll = service.id === "all";
@@ -916,11 +926,21 @@ export default function EditProfilePage() {
             </div>
             {renovationEnabled && (
               <div>
-                <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                  Services Provided /
-                  <br />
-                  Layanan yang Disediakan
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
+                    Services Provided /
+                    <br />
+                    Layanan yang Disediakan
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedRenovation([]); setIsDirty(true); }}
+                    className="hover:opacity-70 transition-opacity"
+                    title="Reset filters"
+                  >
+                    <img src="/icons/btn-reset.svg" alt="Reset" width={16} height={16} />
+                  </button>
+                </div>
                 {renovationServices.map((service) => {
                   const everyActive = selectedRenovation.includes("every");
                   const isEvery = service.id === "every";
@@ -974,11 +994,21 @@ export default function EditProfilePage() {
             </div>
             {architectureEnabled && (
               <div>
-                <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                  Services Provided /
-                  <br />
-                  Layanan yang Disediakan
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
+                    Services Provided /
+                    <br />
+                    Layanan yang Disediakan
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedArchitecture([]); setIsDirty(true); }}
+                    className="hover:opacity-70 transition-opacity"
+                    title="Reset filters"
+                  >
+                    <img src="/icons/btn-reset.svg" alt="Reset" width={16} height={16} />
+                  </button>
+                </div>
                 {architectureServices.map((service) => {
                   const allActive = selectedArchitecture.includes("all");
                   const isAll = service.id === "all";
@@ -1033,11 +1063,21 @@ export default function EditProfilePage() {
             </div>
             {interiorEnabled && (
               <div>
-                <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                  Services Provided /
-                  <br />
-                  Layanan yang Disediakan
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
+                    Services Provided /
+                    <br />
+                    Layanan yang Disediakan
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedInterior([]); setIsDirty(true); }}
+                    className="hover:opacity-70 transition-opacity"
+                    title="Reset filters"
+                  >
+                    <img src="/icons/btn-reset.svg" alt="Reset" width={16} height={16} />
+                  </button>
+                </div>
                 {interiorServices.map((service) => {
                   const allActive = selectedInterior.includes("all");
                   const isAll = service.id === "all";
@@ -1093,11 +1133,21 @@ export default function EditProfilePage() {
           </div>
           {realEstateEnabled && (
             <div>
-              <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-                Services Provided /
-                <br />
-                Layanan yang Disediakan
-              </p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
+                  Services Provided /
+                  <br />
+                  Layanan yang Disediakan
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedRealEstate([]); setIsDirty(true); }}
+                  className="hover:opacity-70 transition-opacity"
+                  title="Reset filters"
+                >
+                  <img src="/icons/btn-reset.svg" alt="Reset" width={16} height={16} />
+                </button>
+              </div>
               {realEstateServices.map((service) => {
                 const allActive = selectedRealEstate.includes("all");
                 const isAll = service.id === "all";
