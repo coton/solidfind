@@ -148,9 +148,7 @@ export default function CompanyDashboardPage() {
                 {clerkUser.emailAddresses[0].emailAddress}
               </p>
             )}
-            <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-              DELETE PROFILE
-            </button>
+
           </div>
         </div>
 

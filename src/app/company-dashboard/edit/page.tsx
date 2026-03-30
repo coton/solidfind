@@ -448,11 +448,7 @@ export default function EditProfilePage() {
             ) : proEnabled ? (
               <p className="text-[11px] text-[#333]/60 font-medium tracking-[0.22px] mb-1">FREE ACCOUNT</p>
             ) : null}
-            {clerkUser?.emailAddresses?.[0]?.emailAddress && (
-              <p className="text-[10px] text-[#333]/60 tracking-[0.2px] mb-2">
-                {clerkUser.emailAddresses[0].emailAddress}
-              </p>
-            )}
+
             <div className="flex items-center gap-4 justify-end">
               <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
                 DELETE PROFILE
