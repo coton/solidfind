@@ -19,6 +19,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { starFillColor, starColor } from "@/lib/starColors";
 
+/** Capitalize first letter of each word in every array element, then join */
+function capitalizeJoin(arr: string[]): string {
+  return arr
+    .map((s) => s.replace(/\b\w/g, (c) => c.toUpperCase()))
+    .join(", ");
+}
+
 function useStorageUrl(storageId: Id<"_storage"> | undefined) {
   return useQuery(api.files.getUrl, storageId ? { storageId } : "skip");
 }
@@ -561,51 +568,51 @@ export default function ProfilePageClient() {
                 {(company.projectSizes?.length ?? 0) > 0 && (
                   <div className="min-w-[160px] flex-shrink-0">
                     <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">PROJECT SIZE</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.projectSizes!.join(", ")}</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.projectSizes!)}</p>
                   </div>
                 )}
                 {(company.constructionTypes?.length ?? 0) > 0 && (
                   <div className="min-w-[160px] flex-shrink-0">
                     <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">CONSTRUCTION</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.constructionTypes!.join(", ")}</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.constructionTypes!)}</p>
                     {(company.constructionLocations?.length ?? 0) > 0 && (
-                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.constructionLocations!.join(", ")}</p>
+                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {capitalizeJoin(company.constructionLocations!)}</p>
                     )}
                   </div>
                 )}
                 {(company.renovationTypes?.length ?? 0) > 0 && (
                   <div className="min-w-[160px] flex-shrink-0">
                     <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">RENOVATION</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.renovationTypes!.join(", ")}</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.renovationTypes!)}</p>
                     {(company.renovationLocations?.length ?? 0) > 0 && (
-                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.renovationLocations!.join(", ")}</p>
+                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {capitalizeJoin(company.renovationLocations!)}</p>
                     )}
                   </div>
                 )}
                 {(company.architectureTypes?.length ?? 0) > 0 && (
                   <div className="min-w-[160px] flex-shrink-0">
                     <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">ARCHITECTURE</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.architectureTypes!.join(", ")}</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.architectureTypes!)}</p>
                     {(company.architectureLocations?.length ?? 0) > 0 && (
-                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.architectureLocations!.join(", ")}</p>
+                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {capitalizeJoin(company.architectureLocations!)}</p>
                     )}
                   </div>
                 )}
                 {(company.interiorTypes?.length ?? 0) > 0 && (
                   <div className="min-w-[160px] flex-shrink-0">
                     <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">INTERIOR</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.interiorTypes!.join(", ")}</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.interiorTypes!)}</p>
                     {(company.interiorLocations?.length ?? 0) > 0 && (
-                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.interiorLocations!.join(", ")}</p>
+                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {capitalizeJoin(company.interiorLocations!)}</p>
                     )}
                   </div>
                 )}
                 {(company.realEstateTypes?.length ?? 0) > 0 && (
                   <div className="min-w-[160px] flex-shrink-0">
                     <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">REAL ESTATE</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.realEstateTypes!.join(", ")}</p>
+                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.realEstateTypes!)}</p>
                     {(company.realEstateLocations?.length ?? 0) > 0 && (
-                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.realEstateLocations!.join(", ")}</p>
+                      <p className="text-[9px] text-[#333]/40 mt-1">Location: {capitalizeJoin(company.realEstateLocations!)}</p>
                     )}
                   </div>
                 )}
@@ -624,51 +631,51 @@ export default function ProfilePageClient() {
               {(company.projectSizes?.length ?? 0) > 0 && (
                 <div>
                   <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">PROJECT SIZE</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.projectSizes!.join(", ")}</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.projectSizes!)}</p>
                 </div>
               )}
               {(company.constructionTypes?.length ?? 0) > 0 && (
                 <div>
                   <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">CONSTRUCTION</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.constructionTypes!.join(", ")}</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.constructionTypes!)}</p>
                   {(company.constructionLocations?.length ?? 0) > 0 && (
-                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.constructionLocations!.join(", ")}</p>
+                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {capitalizeJoin(company.constructionLocations!)}</p>
                   )}
                 </div>
               )}
               {(company.renovationTypes?.length ?? 0) > 0 && (
                 <div>
                   <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">RENOVATION</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.renovationTypes!.join(", ")}</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.renovationTypes!)}</p>
                   {(company.renovationLocations?.length ?? 0) > 0 && (
-                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.renovationLocations!.join(", ")}</p>
+                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {capitalizeJoin(company.renovationLocations!)}</p>
                   )}
                 </div>
               )}
               {(company.architectureTypes?.length ?? 0) > 0 && (
                 <div>
                   <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">ARCHITECTURE</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.architectureTypes!.join(", ")}</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.architectureTypes!)}</p>
                   {(company.architectureLocations?.length ?? 0) > 0 && (
-                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.architectureLocations!.join(", ")}</p>
+                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {capitalizeJoin(company.architectureLocations!)}</p>
                   )}
                 </div>
               )}
               {(company.interiorTypes?.length ?? 0) > 0 && (
                 <div>
                   <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">INTERIOR</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.interiorTypes!.join(", ")}</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.interiorTypes!)}</p>
                   {(company.interiorLocations?.length ?? 0) > 0 && (
-                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.interiorLocations!.join(", ")}</p>
+                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {capitalizeJoin(company.interiorLocations!)}</p>
                   )}
                 </div>
               )}
               {(company.realEstateTypes?.length ?? 0) > 0 && (
                 <div>
                   <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">REAL ESTATE</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.realEstateTypes!.join(", ")}</p>
+                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.realEstateTypes!)}</p>
                   {(company.realEstateLocations?.length ?? 0) > 0 && (
-                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {company.realEstateLocations!.join(", ")}</p>
+                    <p className="text-[9px] text-[#333]/40 mt-1">Location: {capitalizeJoin(company.realEstateLocations!)}</p>
                   )}
                 </div>
               )}
