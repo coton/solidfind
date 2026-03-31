@@ -42,7 +42,7 @@ export function Footer() {
                 <Image src="/images/footer-ig.svg" alt="Instagram" width={20} height={20} />
               </a>
             )}
-            <Link href="/dashboard" className="hover:opacity-80 transition-opacity">
+            <Link href="/company-dashboard" className="hover:opacity-80 transition-opacity">
               <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
             </Link>
             <a href={mailHref} className="hover:opacity-80 transition-opacity">
@@ -87,7 +87,7 @@ export function Footer() {
                 <Image src="/images/footer-ig.svg" alt="Instagram" width={20} height={20} />
               </a>
             )}
-            <Link href="/dashboard" className="hover:opacity-80 transition-opacity">
+            <Link href="/company-dashboard" className="hover:opacity-80 transition-opacity">
               <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
             </Link>
             <a href={mailHref} className="hover:opacity-80 transition-opacity">

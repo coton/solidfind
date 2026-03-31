@@ -478,15 +478,15 @@ function HeaderInner() {
             )}
 
             <SignedIn>
-              {/* Desktop: Account icon (second) */}
+              {/* Account icon (mobile + desktop) */}
               <Link
                 href={userType === "company" ? "/company-dashboard" : "/dashboard"}
-                className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity"
+                className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
                 title="Dashboard"
               >
                 <Image src="/images/icon-account.svg" alt="Dashboard" width={19} height={20} />
               </Link>
-              {/* List your business button (third) */}
+              {/* Log out button */}
               {userType === "company" ? (
                 <button
                   onClick={() => signOut()}
