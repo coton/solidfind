@@ -55,7 +55,7 @@ export default function EditFeaturedArticle() {
     if (article && !initialized) {
       setTitle(article.title);
       setSubtitle(article.subtitle ?? "");
-      setCategory(article.categories ?? []);
+      setCategory(article.categories ?? (article.category ? [article.category] : []));
       setVisible(article.visible);
       setCoverImageId(article.coverImageId);
       setCoverImageUrl(article.coverImageUrl ?? "");

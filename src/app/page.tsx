@@ -64,9 +64,10 @@ function HomeContent() {
   // Filter articles by current category if one is selected, otherwise show all
   const visibleArticles = allVisibleArticles?.filter((a) => {
     if (!categoryParam) return true; // no filter = show all
-    // Check if article has no categories (show on all) OR matches current category
-    if (!a.categories || a.categories.length === 0) return true;
-    return a.categories.some((cat) => cat.toLowerCase() === categoryParam.toLowerCase());
+    // Support both old `category` (string) and new `categories` (array)
+    const cats = a.categories ?? (a.category ? [a.category] : []);
+    if (cats.length === 0) return true; // no categories = show on all
+    return cats.some((cat) => cat.toLowerCase() === categoryParam.toLowerCase());
   });
 
   // Always display exactly 12 cards total on the homepage grid (desktop).

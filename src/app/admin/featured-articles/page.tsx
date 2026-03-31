@@ -18,6 +18,7 @@ export default function FeaturedArticlesAdmin() {
     const maxSort = articles?.reduce((max, a) => Math.max(max, a.sortOrder), 0) ?? 0;
     await createArticle({
       title: "New Article",
+      categories: [],
       visible: true,
       sortOrder: maxSort + 1,
       contentBlocks: [],
@@ -87,11 +88,11 @@ export default function FeaturedArticlesAdmin() {
                 <p className="text-[13px] font-medium text-[#333] truncate">{article.title}</p>
                 <p className="text-[10px] text-[#333]/50 truncate">{article.subtitle || "No subtitle"}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  {article.category && (
-                    <span className="inline-block text-[9px] bg-[#f5f5f5] text-[#333]/60 px-2 py-0.5 rounded-full">
-                      {article.category}
+                  {(article.categories ?? (article.category ? [article.category] : [])).map((cat) => (
+                    <span key={cat} className="inline-block text-[9px] bg-[#f5f5f5] text-[#333]/60 px-2 py-0.5 rounded-full">
+                      {cat}
                     </span>
-                  )}
+                  ))}
                   {article.companyId && companyMap.get(article.companyId) && (
                     <span className="inline-block text-[9px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
                       {companyMap.get(article.companyId)}

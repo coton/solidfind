@@ -44,11 +44,13 @@ export const listVisibleByCategory = query({
       .collect();
     return all.filter((a) => {
       if (!a.visible) return false;
+      // Support both old `category` (string) and new `categories` (array)
+      const cats = a.categories ?? (a.category ? [a.category] : []);
       if (args.category) {
-        return a.category?.toLowerCase() === args.category.toLowerCase();
+        if (cats.length === 0) return true; // no categories = show on all
+        return cats.some((cat) => cat.toLowerCase() === args.category!.toLowerCase());
       }
-      // No category filter — show articles without a category (homepage general)
-      return !a.category;
+      return cats.length === 0;
     });
   },
 });
@@ -74,7 +76,7 @@ export const create = mutation({
   args: {
     title: v.string(),
     subtitle: v.optional(v.string()),
-    categories: v.array(v.string()),
+    categories: v.optional(v.array(v.string())),
     coverImageId: v.optional(v.id("_storage")),
     coverImageUrl: v.optional(v.string()),
     visible: v.boolean(),
@@ -85,7 +87,7 @@ export const create = mutation({
     const now = Date.now();
     return await ctx.db.insert("featuredArticles", {
       ...args,
-      categories: args.categories,
+      categories: args.categories ?? [],
       createdAt: now,
       updatedAt: now,
     });
@@ -99,6 +101,7 @@ export const update = mutation({
     subtitle: v.optional(v.string()),
     categories: v.optional(v.array(v.string())),
     companyId: v.optional(v.union(v.id("companies"), v.null())),
+    category: v.optional(v.string()), // DEPRECATED: kept for backwards compat
     coverImageId: v.optional(v.id("_storage")),
     coverImageUrl: v.optional(v.string()),
     visible: v.optional(v.boolean()),
