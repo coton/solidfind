@@ -74,8 +74,7 @@ export const create = mutation({
   args: {
     title: v.string(),
     subtitle: v.optional(v.string()),
-    category: v.optional(v.string()),
-    companyId: v.optional(v.id("companies")),
+    categories: v.array(v.string()),
     coverImageId: v.optional(v.id("_storage")),
     coverImageUrl: v.optional(v.string()),
     visible: v.boolean(),
@@ -86,6 +85,7 @@ export const create = mutation({
     const now = Date.now();
     return await ctx.db.insert("featuredArticles", {
       ...args,
+      categories: args.categories,
       createdAt: now,
       updatedAt: now,
     });
@@ -97,7 +97,7 @@ export const update = mutation({
     id: v.id("featuredArticles"),
     title: v.optional(v.string()),
     subtitle: v.optional(v.string()),
-    category: v.optional(v.string()),
+    categories: v.optional(v.array(v.string())),
     companyId: v.optional(v.union(v.id("companies"), v.null())),
     coverImageId: v.optional(v.id("_storage")),
     coverImageUrl: v.optional(v.string()),

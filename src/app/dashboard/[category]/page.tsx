@@ -51,8 +51,10 @@ export default function DashboardCategoryPage() {
   // Get visible featured articles for this category
   const allVisibleArticles = useQuery(api.featuredArticles.listVisible);
   const visibleArticles = allVisibleArticles?.filter((a) => {
-    if (!a.category) return true; // no category = show on all
-    return a.category.toLowerCase() === category.toLowerCase();
+    // No categories = show on all pages
+    if (!a.categories || a.categories.length === 0) return true;
+    // Check if article is assigned to this category
+    return a.categories.some((cat) => cat.toLowerCase() === category.toLowerCase());
   });
 
   const toggleSave = useMutation(api.savedListings.toggle);

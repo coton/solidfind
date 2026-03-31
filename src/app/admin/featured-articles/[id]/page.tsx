@@ -39,7 +39,7 @@ export default function EditFeaturedArticle() {
 
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<string[]>([]);
   const [visible, setVisible] = useState(true);
   const [coverImageId, setCoverImageId] = useState<Id<"_storage"> | undefined>();
   const [coverImageUrl, setCoverImageUrl] = useState("");
@@ -55,7 +55,7 @@ export default function EditFeaturedArticle() {
     if (article && !initialized) {
       setTitle(article.title);
       setSubtitle(article.subtitle ?? "");
-      setCategory(article.category ?? "");
+      setCategory(article.categories ?? []);
       setVisible(article.visible);
       setCoverImageId(article.coverImageId);
       setCoverImageUrl(article.coverImageUrl ?? "");
@@ -85,7 +85,7 @@ export default function EditFeaturedArticle() {
       id: id as Id<"featuredArticles">,
       title,
       subtitle: subtitle || undefined,
-      category: category || undefined,
+      categories: category,
       companyId: companyId ? (companyId as Id<"companies">) : null,
       visible,
       coverImageId,
@@ -203,19 +203,32 @@ export default function EditFeaturedArticle() {
               </div>
             ))}
             <div>
-              <label className="block text-[11px] font-medium text-[#333]/70 mb-1">Category</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors bg-white"
-              >
-                <option value="">— Select category —</option>
-                <option value="construction">Construction</option>
-                <option value="renovation">Renovation</option>
-                <option value="architecture">Architecture</option>
-                <option value="interior">Interior</option>
-                <option value="real-estate">Real Estate</option>
-              </select>
+              <label className="block text-[11px] font-medium text-[#333]/70 mb-1">Categories (select all that apply)</label>
+              <div className="space-y-2">
+                {[
+                  { value: "construction", label: "Construction" },
+                  { value: "renovation", label: "Renovation" },
+                  { value: "architecture", label: "Architecture" },
+                  { value: "interior", label: "Interior" },
+                  { value: "real-estate", label: "Real Estate" },
+                ].map((opt) => (
+                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={category.includes(opt.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCategory([...category, opt.value]);
+                        } else {
+                          setCategory(category.filter((c) => c !== opt.value));
+                        }
+                      }}
+                      className="w-4 h-4 rounded border-[#333] text-[#f14110] focus:ring-[#f14110]"
+                    />
+                    <span className="text-[12px] text-[#333]">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
             <div>
               <label className="block text-[11px] font-medium text-[#333]/70 mb-1">Linked Company</label>

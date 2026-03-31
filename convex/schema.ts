@@ -159,7 +159,7 @@ export default defineSchema({
   featuredArticles: defineTable({
     title: v.string(),
     subtitle: v.optional(v.string()),
-    category: v.optional(v.string()),
+    categories: v.array(v.string()), // Multiple categories
     coverImageId: v.optional(v.id("_storage")),
     coverImageUrl: v.optional(v.string()),
     visible: v.boolean(),
@@ -179,7 +179,7 @@ export default defineSchema({
     companyId: v.optional(v.id("companies")),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_visible", ["visible"]).index("by_sortOrder", ["sortOrder"]).index("by_companyId", ["companyId"]),
+  }).index("by_visible", ["visible"]).index("by_sortOrder", ["sortOrder"]).index("by_companyId", ["companyId"]).index("by_categories", ["categories"]),
 
   platformSettings: defineTable({
     key: v.string(),
