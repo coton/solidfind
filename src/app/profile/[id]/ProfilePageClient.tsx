@@ -42,49 +42,30 @@ function formatWhatsApp(num: string): string {
 
 function ProjectImagesGrid({
   imageUrls,
-  imageIds,
+  allProjectImageUrls,
   onImageClick,
-  getImageUrl,
 }: {
   imageUrls: string[];
-  imageIds: Id<"_storage">[];
+  allProjectImageUrls: string[];
   onImageClick: (src: string, alt: string) => void;
-  getImageUrl: (storageId: Id<"_storage">) => string | undefined;
 }) {
   const urlImages = imageUrls.filter(Boolean);
-  const idImages = imageIds.filter(Boolean);
-  const totalCount = urlImages.length + idImages.length;
+  const totalCount = allProjectImageUrls.length;
 
   if (totalCount === 0) return <div />;
 
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5">
-      {urlImages.map((src, i) => (
+      {allProjectImageUrls.map((src, i) => (
         <div 
-          key={`url-${i}`} 
+          key={`img-${i}`} 
           className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative cursor-pointer hover:opacity-90 transition-opacity"
           onClick={() => onImageClick(src, `Project ${i + 1}`)}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt={`Project ${i + 1}`} className="object-cover w-full h-full absolute inset-0" />
+          <img src={src} alt={`Project ${i + 1}`} className="object-cover w-full h-full absolute inset-0" loading="lazy" />
         </div>
       ))}
-      {idImages.map((id, i) => {
-        const imgSrc = getImageUrl(id);
-        return (
-          <div 
-            key={`id-${i}`} 
-            className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative cursor-pointer hover:opacity-90 transition-opacity"
-            onClick={() => imgSrc && onImageClick(imgSrc, `Project ${urlImages.length + i + 1}`)}
-          >
-            {imgSrc ? (
-              <img src={imgSrc} alt={`Project ${urlImages.length + i + 1}`} className="object-cover w-full h-full absolute inset-0" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-[#999] text-[10px]">Loading...</div>
-            )}
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -211,20 +192,11 @@ export default function ProfilePageClient() {
   }
 
   // Helper function to get image URL from storage ID
+  // Note: This should only be used inside the component body, not in useCallback/useMemo
   const getImageUrl = (storageId: Id<"_storage">) => {
     const result = useQuery(api.files.getUrl, storageId ? { storageId } : "skip");
     return result as string | undefined;
   };
-
-  // Get all project image URLs (both external and Convex storage)
-  const allProjectImageUrls = useMemo(() => {
-    const urls = [...(company?.projectImageUrls ?? [])];
-    for (const id of company?.projectImageIds ?? []) {
-      const url = useQuery(api.files.getUrl, id ? { storageId: id } : "skip");
-      if (url) urls.push(url);
-    }
-    return urls;
-  }, [company, validId]);
 
   const handleImageClick = (src: string, alt: string) => {
     setCurrentImage({ src, alt });
@@ -235,6 +207,16 @@ export default function ProfilePageClient() {
     api.companies.getById,
     validId ? { id: validId } : "skip"
   );
+
+  // Get all project image URLs (both external and Convex storage)
+  const allProjectImageUrls = useMemo(() => {
+    const urls = [...(company?.projectImageUrls ?? [])];
+    for (const id of company?.projectImageIds ?? []) {
+      const url = useQuery(api.files.getUrl, id ? { storageId: id } : "skip");
+      if (url) urls.push(url);
+    }
+    return urls;
+  }, [company]);
 
   const reviews = useQuery(
     api.reviews.listByCompany,
@@ -609,9 +591,8 @@ export default function ProfilePageClient() {
           {!reviewsEnabled && (
             <ProjectImagesGrid
               imageUrls={company.projectImageUrls ?? []}
-              imageIds={company.projectImageIds ?? []}
+              allProjectImageUrls={allProjectImageUrls}
               onImageClick={handleImageClick}
-              getImageUrl={getImageUrl}
             />
           )}
 
