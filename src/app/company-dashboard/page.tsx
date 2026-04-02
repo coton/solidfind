@@ -52,18 +52,24 @@ export default function CompanyDashboardPage() {
   const [showAdModal, setShowAdModal] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [redirected, setRedirected] = useState(false);
   const router = useRouter();
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const deleteAccount = useMutation(api.users.deleteAccount);
 
-  const handleDeleteAccount = async () => {
-    if (!clerkUser?.id) return;
-    await deleteAccount({ clerkId: clerkUser.id });
-    await signOut();
+  const handleSignOut = async () => {
+    await signOut({ navigateTo: "/" });
     router.push("/");
   };
 
+  const handleDeleteAccount = async () => {
+    if (!clerkUser?.id) return;
+    await deleteAccount({ clerkId: clerkUser.id });
+    await handleSignOut();
+  };
+
+  // Check if user has a company and redirect if needed
   const currentUser = useQuery(
     api.users.getCurrentUser,
     clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
@@ -73,6 +79,19 @@ export default function CompanyDashboardPage() {
     api.companies.getByOwner,
     currentUser?._id ? { ownerId: currentUser._id } : "skip"
   );
+
+  // If user has no company, redirect to individual dashboard
+  if (currentUser && company === null && !redirected) {
+    setRedirected(true);
+    router.push("/dashboard");
+    return null;
+  }
+
+  // If user has no company yet, redirect to register-business
+  if (currentUser && company === null) {
+    router.push("/register-business");
+    return null;
+  }
 
   const reviews = useQuery(
     api.reviews.listByCompany,

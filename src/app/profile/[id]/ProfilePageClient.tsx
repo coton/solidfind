@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -43,9 +43,13 @@ function formatWhatsApp(num: string): string {
 function ProjectImagesGrid({
   imageUrls,
   imageIds,
+  onImageClick,
+  getImageUrl,
 }: {
   imageUrls: string[];
   imageIds: Id<"_storage">[];
+  onImageClick: (src: string, alt: string) => void;
+  getImageUrl: (storageId: Id<"_storage">) => string | undefined;
 }) {
   const urlImages = imageUrls.filter(Boolean);
   const idImages = imageIds.filter(Boolean);
@@ -56,16 +60,31 @@ function ProjectImagesGrid({
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5">
       {urlImages.map((src, i) => (
-        <div key={`url-${i}`} className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
+        <div 
+          key={`url-${i}`} 
+          className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative cursor-pointer hover:opacity-90 transition-opacity"
+          onClick={() => onImageClick(src, `Project ${i + 1}`)}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={src} alt={`Project ${i + 1}`} className="object-cover w-full h-full absolute inset-0" />
         </div>
       ))}
-      {idImages.map((id, i) => (
-        <div key={`id-${i}`} className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
-          <StorageImage storageId={id} alt={`Project ${urlImages.length + i + 1}`} fill className="object-cover" />
-        </div>
-      ))}
+      {idImages.map((id, i) => {
+        const imgSrc = getImageUrl(id);
+        return (
+          <div 
+            key={`id-${i}`} 
+            className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={() => imgSrc && onImageClick(imgSrc, `Project ${urlImages.length + i + 1}`)}
+          >
+            {imgSrc ? (
+              <img src={imgSrc} alt={`Project ${urlImages.length + i + 1}`} className="object-cover w-full h-full absolute inset-0" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[#999] text-[10px]">Loading...</div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -167,6 +186,8 @@ export default function ProfilePageClient() {
   const [showThankYou, setShowThankYou] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCopiedToast, setShowCopiedToast] = useState(false);
+  const [showImageViewer, setShowImageViewer] = useState(false);
+  const [currentImage, setCurrentImage] = useState<{ src: string; alt: string } | null>(null);
 
   const handleShare = async () => {
     const shareUrl = window.location.href;
@@ -188,6 +209,27 @@ export default function ProfilePageClient() {
   } catch {
     validId = undefined;
   }
+
+  // Helper function to get image URL from storage ID
+  const getImageUrl = (storageId: Id<"_storage">) => {
+    const result = useQuery(api.files.getUrl, storageId ? { storageId } : "skip");
+    return result as string | undefined;
+  };
+
+  // Get all project image URLs (both external and Convex storage)
+  const allProjectImageUrls = useMemo(() => {
+    const urls = [...(company?.projectImageUrls ?? [])];
+    for (const id of company?.projectImageIds ?? []) {
+      const url = useQuery(api.files.getUrl, id ? { storageId: id } : "skip");
+      if (url) urls.push(url);
+    }
+    return urls;
+  }, [company, validId]);
+
+  const handleImageClick = (src: string, alt: string) => {
+    setCurrentImage({ src, alt });
+    setShowImageViewer(true);
+  };
 
   const company = useQuery(
     api.companies.getById,
@@ -438,13 +480,20 @@ export default function ProfilePageClient() {
 
             {/* Address */}
             <div className="flex flex-col mt-auto">
-              <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333]">
-                <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-              <p className="font-bam text-[9px] text-[#333]/50 leading-[12px] w-full mb-0">
-                {company.address || "-"}
-              </p>
+              <a 
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company.address || "")}`}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-start gap-[5px]"
+              >
+                <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333] flex-shrink-0">
+                  <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+                <p className="font-bam text-[9px] text-[#333]/50 leading-[12px] w-full mb-0 break-words">
+                  {company.address || "-"}
+                </p>
+              </a>
             </div>
           </div>
 
@@ -561,6 +610,8 @@ export default function ProfilePageClient() {
             <ProjectImagesGrid
               imageUrls={company.projectImageUrls ?? []}
               imageIds={company.projectImageIds ?? []}
+              onImageClick={handleImageClick}
+              getImageUrl={getImageUrl}
             />
           )}
 
@@ -821,6 +872,28 @@ export default function ProfilePageClient() {
           companyId={validId}
           userId={currentUser?._id}
         />
+      )}
+
+      {/* Image Viewer Modal */}
+      {showImageViewer && currentImage && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90">
+          <div className="absolute inset-0" onClick={() => { setShowImageViewer(false); setCurrentImage(null); }} />
+          <div className="relative z-10 max-w-[90vw] max-h-[90vh] flex items-center justify-center p-4">
+            <button
+              onClick={() => { setShowImageViewer(false); setCurrentImage(null); }}
+              className="absolute -top-10 right-0 text-white hover:text-gray-300"
+            >
+              <svg width="32" height="32" viewBox="0 0 16 16" fill="none">
+                <path d="M1 1L15 15M1 15L15 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <img 
+              src={currentImage.src} 
+              alt={currentImage.alt} 
+              className="max-w-full max-h-[85vh] object-contain rounded-[6px]"
+            />
+          </div>
+        </div>
       )}
     </div>
   );

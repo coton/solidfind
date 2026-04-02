@@ -263,6 +263,11 @@ function HeaderInner() {
   const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
   const igVisible = useQuery(api.platformSettings.get, { key: "ig_visible" });
 
+  const handleSignOut = async () => {
+    await signOut({ navigateTo: "/" });
+    router.push("/");
+  };
+
   // pageConfigs is undefined while loading, [] if loaded but empty
   const pageConfigsLoaded = pageConfigs !== undefined;
 
@@ -489,14 +494,14 @@ function HeaderInner() {
               {/* Log out button */}
               {userType === "company" ? (
                 <button
-                  onClick={() => signOut()}
+                  onClick={handleSignOut}
                   className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
                 >
                   Log out
                 </button>
               ) : (
                 <button
-                  onClick={() => setShowLogoutPrompt(true)}
+                  onClick={handleSignOut}
                   className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
                 >
                   Log out

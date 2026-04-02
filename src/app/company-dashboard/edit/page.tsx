@@ -123,6 +123,7 @@ export default function EditProfilePage() {
   const proEnabled = useProEnabled();
   const [showProModal, setShowProModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [redirected, setRedirected] = useState(false);
   const [isDirty, setIsDirty] = useState(true);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const projectInputRef = useRef<HTMLInputElement>(null);
@@ -137,6 +138,18 @@ export default function EditProfilePage() {
     currentUser?._id ? { ownerId: currentUser._id } : "skip"
   );
 
+  // If user has no company, redirect to individual dashboard
+  if (currentUser && company === null && !redirected) {
+    setRedirected(true);
+    router.push("/dashboard");
+    return null;
+  }
+
+  const handleSignOut = async () => {
+    await signOut({ navigateTo: "/" });
+    router.push("/");
+  };
+
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
   const isCategoryVisible = (catId: string) => pageConfigs?.some(p => p.categoryId === catId) ?? false;
 
@@ -147,8 +160,7 @@ export default function EditProfilePage() {
   const handleDeleteAccount = async () => {
     if (!clerkUser?.id) return;
     await deleteAccount({ clerkId: clerkUser.id });
-    await signOut();
-    router.push("/");
+    await handleSignOut();
   };
 
   // Form state

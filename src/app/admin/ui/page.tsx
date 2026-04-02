@@ -20,6 +20,8 @@ interface UISettings {
   footerMediaUrl: string;
   footerMediaType: "image" | "video" | "";
   termsText: string;
+  aboutProfilePictureUrl: string;
+  aboutProfilePictureType: "image" | "video" | "";
 }
 
 const DEFAULT: UISettings = {
@@ -35,6 +37,8 @@ const DEFAULT: UISettings = {
   footerMediaUrl: "",
   footerMediaType: "",
   termsText: "",
+  aboutProfilePictureUrl: "",
+  aboutProfilePictureType: "",
 };
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -160,6 +164,12 @@ export default function AdminUI() {
   const [termsFile, setTermsFile] = useState("");
   const termsRef = useRef<HTMLInputElement>(null);
 
+  // About profile picture (Convex-backed)
+  const aboutProfilePictureUrlValue = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
+  const [aboutProfilePictureUrl, setAboutProfilePictureUrl] = useState("");
+  const [aboutProfilePictureType, setAboutProfilePictureType] = useState<"image" | "video" | "">("");
+  const [aboutProfilePictureSaved, setAboutProfilePictureSaved] = useState(false);
+
   // About Card (Convex-backed)
   const aboutCardValue = useQuery(api.platformSettings.get, { key: "aboutCardDescription" });
   const setPlatformSetting = useMutation(api.platformSettings.set);
@@ -250,6 +260,19 @@ export default function AdminUI() {
       setAboutText(aboutCardValue);
     }
   }, [aboutCardValue]);
+
+  useEffect(() => {
+    if (aboutProfilePictureUrlValue !== undefined && aboutProfilePictureUrlValue !== null) {
+      try {
+        const parsed = JSON.parse(aboutProfilePictureUrlValue);
+        setAboutProfilePictureUrl(parsed.url ?? "");
+        setAboutProfilePictureType(parsed.type ?? "");
+      } catch {
+        setAboutProfilePictureUrl(aboutProfilePictureUrlValue ?? "");
+        setAboutProfilePictureType("image");
+      }
+    }
+  }, [aboutProfilePictureUrlValue]);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -491,6 +514,32 @@ export default function AdminUI() {
           onUrl={(v) => u({ footerMediaUrl: v })}
           onFile={(dataUrl, type) => u({ footerMediaUrl: dataUrl, footerMediaType: type })}
         />
+      </SectionCard>
+
+      {/* About Profile Picture */}
+      <SectionCard title="About Page Profile Picture">
+        <Field label="Profile picture" hint="Upload a profile picture for the About page (1:1 ratio recommended)">
+          <MediaUpload
+            label="About Profile Picture"
+            url={aboutProfilePictureUrl}
+            mediaType={aboutProfilePictureType}
+            onUrl={(v) => setAboutProfilePictureUrl(v)}
+            onFile={(dataUrl, type) => { setAboutProfilePictureUrl(dataUrl); setAboutProfilePictureType(type); }}
+          />
+        </Field>
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={async () => {
+              await setPlatformSetting({ key: "aboutProfilePictureUrl", value: JSON.stringify({ url: aboutProfilePictureUrl, type: aboutProfilePictureType }), updatedBy: "admin" });
+              setAboutProfilePictureSaved(true);
+              setTimeout(() => setAboutProfilePictureSaved(false), 2000);
+            }}
+            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+          >
+            {aboutProfilePictureSaved ? "✓ Saved!" : "Save Profile Picture"}
+          </button>
+        </div>
       </SectionCard>
 
       {/* Terms & Conditions */}

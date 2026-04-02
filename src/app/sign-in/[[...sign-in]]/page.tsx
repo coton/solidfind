@@ -1,15 +1,28 @@
-import { SignIn } from "@clerk/nextjs";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
+import { AuthModal } from "@/components/AuthModal";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
+  const [isOpen, setIsOpen] = useState(true);
+  const { user } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
+
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center">
-      <SignIn
-        appearance={{
-          elements: {
-            formButtonPrimary: "bg-[#f14110] hover:bg-[#d93a0e]",
-            footerActionLink: "text-[#f14110] hover:text-[#d93a0e]",
-          },
-        }}
+      <AuthModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        initialMode="login"
+        initialAccountType="individual"
       />
     </div>
   );

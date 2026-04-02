@@ -16,6 +16,7 @@ export default function AboutPage() {
   const proCompany = useQuery(api.platformSettings.get, { key: "aboutPageProCompany" });
   const contact = useQuery(api.platformSettings.get, { key: "aboutPageContact" });
   const email = useQuery(api.platformSettings.get, { key: "aboutPageEmail" });
+  const aboutProfilePicture = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({ title: "SOLIDFIND.ID", url: window.location.href });
@@ -61,27 +62,43 @@ export default function AboutPage() {
           {/* Left Column */}
           <div className="flex flex-col items-center lg:items-start">
             {/* Logo */}
-            <div className="w-[180px] sm:w-[200px] h-[180px] sm:h-[200px] rounded-[6px] mb-4 bg-[#f8f8f8] flex items-center justify-center p-6 sm:p-8">
-              <Image 
-                src="/images/logo-full.svg" 
-                alt="SOLIDFIND.ID Logo" 
-                width={175} 
-                height={19}
-                className="w-full h-auto"
-              />
+            <div className="w-[180px] sm:w-[200px] h-[180px] sm:h-[200px] rounded-[6px] mb-4 bg-[#f8f8f8] flex items-center justify-center p-6 sm:p-8 overflow-hidden">
+              {aboutProfilePicture ? (
+                (() => {
+                  try {
+                    const parsed = JSON.parse(aboutProfilePicture);
+                    if (parsed.type === "video") {
+                      return <video src={parsed.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />;
+                    }
+                    return <Image src={parsed.url} alt="SOLIDFIND.ID Logo" fill className="object-cover" />;
+                  } catch {
+                    return <Image src={aboutProfilePicture} alt="SOLIDFIND.ID Logo" fill className="object-cover" />;
+                  }
+                })()
+              ) : (
+                <Image 
+                  src="/images/logo-full.svg" 
+                  alt="SOLIDFIND.ID Logo" 
+                  width={175} 
+                  height={19}
+                  className="w-full h-auto"
+                />
+              )}
             </div>
 
             {/* Social Links */}
             <div className="flex items-center gap-4">
-              <button className="text-[#333] hover:opacity-70 transition-opacity">
-                <svg width="24" height="19" viewBox="0 0 24 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 1H2C1.44772 1 1 1.44772 1 2V17C1 17.5523 1.44772 18 2 18H22C22.5523 18 23 17.5523 23 17V2C23 1.44772 22.5523 1 22 1Z" stroke="#333" strokeWidth="1.5"/>
-                  <path d="M1 2L12 11L23 2" stroke="#333" strokeWidth="1.5"/>
+              {/* Mail icon - same as footer (25×20, stroke 1.5) */}
+              <a href={`mailto:${email || "hello@solidfind.id"}`} className="text-[#333] hover:opacity-70 transition-opacity">
+                <svg width="25" height="20" viewBox="0 0 25 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M24 2H1C0.447715 2 0 2.44772 0 3V17C0 17.5523 0.447715 18 1 18H24C24.5523 18 25 17.5523 25 17V3C25 2.44772 24.5523 2 24 2Z" fill="none" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M1 3L12.5 11L24 3" fill="none" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              </button>
-              <button className="text-[#333] hover:opacity-70 transition-opacity">
-                <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} className="invert" />
-              </button>
+              </a>
+              {/* IG icon - same as header (20×20, stroke 1.5) */}
+              <a href={igUrl || "#"} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:opacity-70 transition-opacity">
+                <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
+              </a>
             </div>
           </div>
 

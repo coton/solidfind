@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const [sortByCategory, setSortByCategory] = useState<Record<string, string>>({});
   const [sortDropdownOpen, setSortDropdownOpen] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [redirected, setRedirected] = useState(false);
 
   const router = useRouter();
   const { user: clerkUser } = useUser();
@@ -25,11 +26,33 @@ export default function DashboardPage() {
   const proEnabled = useProEnabled();
   const reviewsEnabled = useReviewsEnabled();
 
+  // Check if user has a company and redirect if needed
+  const currentUser = useQuery(
+    api.users.getCurrentUser,
+    clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
+  );
+
+  const company = useQuery(
+    api.companies.getByOwner,
+    currentUser?._id ? { ownerId: currentUser._id } : "skip"
+  );
+
+  // If user has a company, redirect to company dashboard
+  if (currentUser && company !== null && !redirected) {
+    setRedirected(true);
+    router.push("/company-dashboard");
+    return null;
+  }
+
+  const handleSignOut = async () => {
+    await signOut({ navigateTo: "/" });
+    router.push("/");
+  };
+
   const handleDeleteAccount = async () => {
     if (!clerkUser?.id) return;
     await deleteAccount({ clerkId: clerkUser.id });
-    await signOut();
-    router.push("/");
+    await handleSignOut();
   };
 
   const currentUser = useQuery(
@@ -99,16 +122,6 @@ export default function DashboardPage() {
 
           <div className="text-right">
             <p className="text-[11px] text-[#333] tracking-[0.22px] mb-1">{user.email}</p>
-            <div className="flex items-center gap-2 justify-end mb-3">
-              <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                DELETE PROFILE
-              </button>
-              <SignOutButton>
-                <button className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                  LOG OUT
-                </button>
-              </SignOutButton>
-            </div>
             {reviewsEnabled && (
               <Link
                 href="/reviews"
