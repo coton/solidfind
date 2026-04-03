@@ -466,15 +466,15 @@ export default function ProfilePageClient() {
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company.address || "")}`}
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-start gap-[5px]"
+                className="flex items-center gap-2 hover:text-[#f14110] transition-colors cursor-pointer"
               >
-                <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333] flex-shrink-0">
-                  <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="2"/>
+                <svg width="14" height="14" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333] flex-shrink-0">
+                  <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
                 </svg>
-                <p className="font-bam text-[9px] text-[#333]/50 leading-[12px] w-full mb-0 break-words">
+                <span className="font-bam text-[9px] text-[#333] leading-[14px] w-full break-words">
                   {company.address || "-"}
-                </p>
+                </span>
               </a>
             </div>
           </div>
