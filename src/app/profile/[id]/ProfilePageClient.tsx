@@ -466,13 +466,13 @@ export default function ProfilePageClient() {
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company.address || "")}`}
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:text-[#f14110] transition-colors cursor-pointer"
+                className="flex items-start gap-2.5 group cursor-pointer"
               >
-                <svg width="14" height="14" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333] flex-shrink-0">
+                <svg width="14" height="17" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333] group-hover:text-[#f14110] transition-colors flex-shrink-0 mt-[1px]">
                   <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
                 </svg>
-                <span className="font-bam text-[9px] text-[#333] leading-[14px] w-full break-words">
+                <span className="font-bam text-[9px] text-[#333]/50 group-hover:text-[#f14110] transition-colors leading-[14px] w-full break-words">
                   {company.address || "-"}
                 </span>
               </a>
