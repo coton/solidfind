@@ -97,16 +97,16 @@ export default function CompanyDashboardPage() {
 
   const isPro = company?.isPro ?? false;
 
-  // If user has no company, redirect to individual dashboard
+    // Redirect based on account type when no company exists
   if (currentUser && company === null && !redirected) {
     setRedirected(true);
-    router.push("/dashboard");
-    return null;
-  }
-
-  // If user has no company yet, redirect to register-business
-  if (currentUser && company === null) {
-    router.push("/register-business");
+    if (currentUser.accountType === "company") {
+      // Company user with no company record yet → create one
+      router.push("/register-business");
+    } else {
+      // Individual user somehow landed here → send to individual dashboard
+      router.push("/dashboard");
+    }
     return null;
   }
 

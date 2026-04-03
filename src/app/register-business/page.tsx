@@ -27,6 +27,12 @@ export default function RegisterBusinessPage() {
   useEffect(() => {
     if (!isClerkLoaded || !currentUser) return;
 
+    // Only company accounts can register a business
+    if (currentUser.accountType !== "company") {
+      router.replace("/dashboard");
+      return;
+    }
+
     // If company already exists, go to edit page
     if (existingCompany) {
       router.replace("/company-dashboard/edit");
