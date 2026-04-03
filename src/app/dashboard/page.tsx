@@ -38,7 +38,8 @@ export default function DashboardPage() {
   );
 
   // If user has a company, redirect to company dashboard
-  if (currentUser && company !== null && !redirected) {
+  // company is undefined while loading, null if no company exists — only redirect when it's a real object
+  if (currentUser && company && !redirected) {
     setRedirected(true);
     router.push("/company-dashboard");
     return null;
