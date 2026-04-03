@@ -17,6 +17,7 @@ export default function AboutPage() {
   const contact = useQuery(api.platformSettings.get, { key: "aboutPageContact" });
   const email = useQuery(api.platformSettings.get, { key: "aboutPageEmail" });
   const aboutProfilePicture = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
+  const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({ title: "SOLIDFIND.ID", url: window.location.href });

@@ -146,7 +146,7 @@ export default function EditProfilePage() {
   }
 
   const handleSignOut = async () => {
-    await signOut({ navigateTo: "/" });
+    await signOut({ redirectUrl: "/" });
     router.push("/");
   };
 

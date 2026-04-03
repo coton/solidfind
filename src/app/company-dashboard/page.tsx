@@ -59,7 +59,7 @@ export default function CompanyDashboardPage() {
   const deleteAccount = useMutation(api.users.deleteAccount);
 
   const handleSignOut = async () => {
-    await signOut({ navigateTo: "/" });
+    await signOut({ redirectUrl: "/" });
     router.push("/");
   };
 

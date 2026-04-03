@@ -264,7 +264,7 @@ function HeaderInner() {
   const igVisible = useQuery(api.platformSettings.get, { key: "ig_visible" });
 
   const handleSignOut = async () => {
-    await signOut({ navigateTo: "/" });
+    await signOut({ redirectUrl: "/" });
     router.push("/");
   };
 

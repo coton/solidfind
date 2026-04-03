@@ -45,7 +45,7 @@ export default function DashboardPage() {
   }
 
   const handleSignOut = async () => {
-    await signOut({ navigateTo: "/" });
+    await signOut({ redirectUrl: "/" });
     router.push("/");
   };
 
