@@ -55,11 +55,6 @@ export default function DashboardPage() {
     await handleSignOut();
   };
 
-  const currentUser = useQuery(
-    api.users.getCurrentUser,
-    clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
-  );
-
   const savedListings = useQuery(
     api.savedListings.listByUser,
     currentUser?._id ? { userId: currentUser._id } : "skip"
