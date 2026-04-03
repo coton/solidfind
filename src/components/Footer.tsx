@@ -18,11 +18,10 @@ export function Footer() {
   const showIg = igVisible !== "false";
   const { user } = useUser();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const userType = (user?.publicMetadata?.accountType as string) || "individual";
+  const accountDashboardHref = userType === "company" ? "/company-dashboard" : "/dashboard";
 
-  // If user is logged in, they should be redirected based on account type
-  // If not logged in, open AuthModal for sign-in
-
-  // Footer Account button behavior:
+  // Footer Account button behavior (same as Header):
   // - If logged in as individual: link to /dashboard
   // - If logged in as company: link to /company-dashboard
   // - If not logged in: open AuthModal
@@ -66,7 +65,7 @@ export function Footer() {
             )}
             {/* Footer Account button - same behavior as header */}
             {user ? (
-              <Link href="/dashboard" className="hover:opacity-80 transition-opacity">
+              <Link href={accountDashboardHref} className="hover:opacity-80 transition-opacity">
                 <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
               </Link>
             ) : (
@@ -121,7 +120,7 @@ export function Footer() {
             )}
             {/* Footer Account button - same behavior as header */}
             {user ? (
-              <Link href="/dashboard" className="hover:opacity-80 transition-opacity">
+              <Link href={accountDashboardHref} className="hover:opacity-80 transition-opacity">
                 <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
               </Link>
             ) : (
