@@ -80,19 +80,6 @@ export default function CompanyDashboardPage() {
     currentUser?._id ? { ownerId: currentUser._id } : "skip"
   );
 
-  // If user has no company, redirect to individual dashboard
-  if (currentUser && company === null && !redirected) {
-    setRedirected(true);
-    router.push("/dashboard");
-    return null;
-  }
-
-  // If user has no company yet, redirect to register-business
-  if (currentUser && company === null) {
-    router.push("/register-business");
-    return null;
-  }
-
   const reviews = useQuery(
     api.reviews.listByCompany,
     company?._id ? { companyId: company._id } : "skip"
@@ -110,7 +97,14 @@ export default function CompanyDashboardPage() {
 
   const isPro = company?.isPro ?? false;
 
-  // If user has no company yet, redirect directly to register-business
+  // If user has no company, redirect to individual dashboard
+  if (currentUser && company === null && !redirected) {
+    setRedirected(true);
+    router.push("/dashboard");
+    return null;
+  }
+
+  // If user has no company yet, redirect to register-business
   if (currentUser && company === null) {
     router.push("/register-business");
     return null;
