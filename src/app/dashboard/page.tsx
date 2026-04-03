@@ -32,14 +32,8 @@ export default function DashboardPage() {
     clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
   );
 
-  const company = useQuery(
-    api.companies.getByOwner,
-    currentUser?._id ? { ownerId: currentUser._id } : "skip"
-  );
-
-  // If user has a company, redirect to company dashboard
-  // company is undefined while loading, null if no company exists — only redirect when it's a real object
-  if (currentUser && company && !redirected) {
+  // Redirect company users to company dashboard based on accountType, not DB company record
+  if (currentUser && currentUser.accountType === "company" && !redirected) {
     setRedirected(true);
     router.push("/company-dashboard");
     return null;
