@@ -8,6 +8,7 @@ interface AccountTypeSelectionCardProps {
   name: string;
   email: string;
   initialAccountType?: AccountType;
+  initialCompanyName?: string;
   onSubmit: (accountType: AccountType, companyName?: string) => Promise<void> | void;
   isSubmitting?: boolean;
 }
@@ -49,11 +50,12 @@ export function AccountTypeSelectionCard({
   name,
   email,
   initialAccountType = "individual",
+  initialCompanyName,
   onSubmit,
   isSubmitting = false,
 }: AccountTypeSelectionCardProps) {
   const [accountType, setAccountType] = useState<AccountType>(initialAccountType);
-  const [companyName, setCompanyName] = useState("");
+  const [companyName, setCompanyName] = useState(initialCompanyName || "");
   const [submitHovered, setSubmitHovered] = useState(false);
 
   return (

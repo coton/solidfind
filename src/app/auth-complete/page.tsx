@@ -23,6 +23,7 @@ export default function AuthCompletePage() {
   useEffect(() => {
     if (!isLoaded || !user) return;
 
+    // Returning user with established accountType — redirect immediately
     if (existingAccountType === "company") {
       sessionStorage.removeItem("solidfind_accountType");
       sessionStorage.removeItem("solidfind_companyName");
@@ -37,10 +38,11 @@ export default function AuthCompletePage() {
       return;
     }
 
-    if (pendingAccountType === "company" || pendingAccountType === "individual") {
-      void persistAccountType(pendingAccountType, pendingCompanyName);
-    }
-  }, [isLoaded, user, existingAccountType, pendingAccountType, pendingCompanyName, router]);
+    // NEW user (no existingAccountType in publicMetadata):
+    // Don't auto-redirect based on sessionStorage — show the AccountTypeSelectionCard
+    // so the user can confirm or change their choice.
+    // pendingAccountType from sessionStorage is passed as initialAccountType below.
+  }, [isLoaded, user, existingAccountType, router]);
 
   const persistAccountType = async (accountType: AccountType, companyName?: string) => {
     setIsSaving(true);
@@ -58,6 +60,7 @@ export default function AuthCompletePage() {
     }
   };
 
+  // Loading state
   if (!isLoaded || !user) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8f8f8", fontFamily: "var(--font-sora), sans-serif", color: "#333", fontSize: "14px" }}>
@@ -66,7 +69,8 @@ export default function AuthCompletePage() {
     );
   }
 
-  if (existingAccountType || pendingAccountType) {
+  // Returning user — useEffect will redirect, show brief loading state
+  if (existingAccountType) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8f8f8", fontFamily: "var(--font-sora), sans-serif", color: "#333", fontSize: "14px" }}>
         Completing sign in...
@@ -74,11 +78,15 @@ export default function AuthCompletePage() {
     );
   }
 
+  // NEW user — show account type selection card
+  // Pre-select based on what they chose in the AuthModal, but let them confirm or change
   return (
     <div className="min-h-screen bg-[#ececec] flex items-center justify-center px-4 py-8">
       <AccountTypeSelectionCard
         name={user.fullName || user.firstName || "User"}
         email={user.primaryEmailAddress?.emailAddress || "user@gmail.com"}
+        initialAccountType={pendingAccountType || "individual"}
+        initialCompanyName={pendingCompanyName}
         onSubmit={persistAccountType}
         isSubmitting={isSaving}
       />
