@@ -3,13 +3,16 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
 import { AccountTypeSelectionCard } from "@/components/AccountTypeSelectionCard";
+import { api } from "../../../convex/_generated/api";
 
 type AccountType = "company" | "individual";
 
 export default function AuthCompletePage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const createOrGetUser = useMutation(api.users.createOrGetUser);
   const [isSaving, setIsSaving] = useState(false);
 
   const existingAccountType = user?.publicMetadata?.accountType as AccountType | undefined;
@@ -45,13 +48,29 @@ export default function AuthCompletePage() {
   }, [isLoaded, user, existingAccountType, router]);
 
   const persistAccountType = async (accountType: AccountType, companyName?: string) => {
+    if (!user) return;
+
     setIsSaving(true);
     try {
-      await fetch("/api/set-account-type", {
+      const response = await fetch("/api/set-account-type", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ accountType, companyName }),
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to persist account type");
+      }
+
+      await createOrGetUser({
+        clerkId: user.id,
+        email: user.primaryEmailAddress?.emailAddress ?? "",
+        name: user.fullName ?? user.firstName ?? undefined,
+        accountType,
+        companyName,
+        imageUrl: user.imageUrl,
+      });
+
       sessionStorage.removeItem("solidfind_accountType");
       sessionStorage.removeItem("solidfind_companyName");
       router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
