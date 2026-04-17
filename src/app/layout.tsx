@@ -69,10 +69,10 @@ export default function RootLayout({
         dynamic
         signInUrl="/sign-in"
         signUpUrl="/sign-up"
-        signInFallbackRedirectUrl="/dashboard"
-        signUpFallbackRedirectUrl="/dashboard"
-        signInForceRedirectUrl="/dashboard"
-        signUpForceRedirectUrl="/dashboard"
+        signInFallbackRedirectUrl="/auth-complete"
+        signUpFallbackRedirectUrl="/auth-complete"
+        signInForceRedirectUrl="/auth-complete"
+        signUpForceRedirectUrl="/auth-complete"
       >
         <html lang="en">
           <body

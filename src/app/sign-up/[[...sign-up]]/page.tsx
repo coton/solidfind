@@ -12,7 +12,7 @@ export default function SignUpPage() {
 
   useEffect(() => {
     if (user) {
-      router.push("/dashboard");
+      router.push("/auth-complete");
     }
   }, [user, router]);
 
