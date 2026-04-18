@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -118,6 +118,7 @@ function ProjectImage({ storageId }: { storageId: Id<"_storage"> }) {
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const proEnabled = useProEnabled();
@@ -236,6 +237,7 @@ export default function EditProfilePage() {
   }
 
   const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription;
+  const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
 
   const logoUrl = useStorageUrl(logoId);
 
@@ -472,7 +474,7 @@ export default function EditProfilePage() {
         {/* Action Buttons */}
         <div className="mb-8 space-y-3">
           <div className="flex items-center gap-4">
-            {company && (
+            {company && !isFirstCompanyConnection && (
               <Link
                 href="/company-dashboard"
                 className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"

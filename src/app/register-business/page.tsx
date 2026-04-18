@@ -61,7 +61,7 @@ export default function RegisterBusinessPage() {
             accountType: "company",
           });
         }
-        router.replace("/company-dashboard/edit");
+        router.replace("/company-dashboard/edit?firstConnection=1");
       }).catch((err) => {
         console.error("Failed to create company:", err);
         hasStartedCreatingRef.current = false;
