@@ -491,7 +491,7 @@ export default function EditProfilePage() {
             </button>
           </div>
           {!canSave && (
-            <div className="ml-auto w-[140px]">
+            <div className="ml-auto w-full text-right">
               <p className="text-[9px] text-[#f14110] font-medium tracking-[0.18px] whitespace-pre-line text-right">
                 {bottomHintText}
               </p>
