@@ -787,7 +787,7 @@ export default function EditProfilePage() {
           {/* Project Size */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Project Size <span className="text-[#f14110]">(*)</span></h2>
+              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Project Size <span className="text-[#f14110]">(*)</span></h2>
             </div>
               <div className="space-y-1">
                 {projectSizeOptions.map((size) => {
@@ -826,7 +826,7 @@ export default function EditProfilePage() {
           {/* Location (single global) */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Location <span className="text-[#f14110]">(*)</span></h2>
+              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Location <span className="text-[#f14110]">(*)</span></h2>
             </div>
               <div className="space-y-1">
                 {locationOptions.map((loc) => {
@@ -872,7 +872,7 @@ export default function EditProfilePage() {
           {/* Construction */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Construction</h2>
+              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Construction</h2>
               <Toggle
                 checked={constructionEnabled}
                 onChange={(val) => {
@@ -931,7 +931,7 @@ export default function EditProfilePage() {
           {/* Renovation */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Renovation</h2>
+              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Renovation</h2>
               <Toggle
                 checked={renovationEnabled}
                 onChange={(val) => {
@@ -991,7 +991,7 @@ export default function EditProfilePage() {
           {isCategoryVisible("architecture") && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Architecture</h2>
+              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Architecture</h2>
               <Toggle
                 checked={architectureEnabled}
                 onChange={(val) => {
@@ -1052,7 +1052,7 @@ export default function EditProfilePage() {
           {isCategoryVisible("interior") && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Interior</h2>
+              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Interior</h2>
               <Toggle
                 checked={interiorEnabled}
                 onChange={(val) => {
@@ -1115,7 +1115,7 @@ export default function EditProfilePage() {
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Real Estate</h2>
+            <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Real Estate</h2>
             <Toggle
               checked={realEstateEnabled}
               onChange={(val) => {
