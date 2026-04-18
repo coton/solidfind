@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Eye, EyeOff, Upload } from "lucide-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import { TERMS_TEXT_PLATFORM_SETTING_KEY } from "@/lib/terms-content.mjs";
 
 const STORAGE_KEY = "solidfind_ui_settings";
 
@@ -165,6 +166,8 @@ export default function AdminUI() {
   const [saved, setSaved] = useState(false);
   const [termsFile, setTermsFile] = useState("");
   const termsRef = useRef<HTMLInputElement>(null);
+  const termsTextValue = useQuery(api.platformSettings.get, { key: TERMS_TEXT_PLATFORM_SETTING_KEY });
+  const [termsSaved, setTermsSaved] = useState(false);
 
   // New User image (Convex-backed)
   const newUserImageValue = useQuery(api.platformSettings.get, { key: "newUserImage" });
@@ -208,6 +211,7 @@ export default function AdminUI() {
 
   const newUserImageUrl = newUserImageHasDraft ? newUserImageDraftUrl : parsedNewUserImage.url;
   const newUserImageType = "image" as const;
+  const effectiveTermsText = s.termsText || termsTextValue || "";
 
   useEffect(() => {
     if (adVerticalValue !== undefined && adVerticalValue !== null) {
@@ -625,21 +629,35 @@ export default function AdminUI() {
         </div>
 
         <textarea
-          value={s.termsText}
+          value={effectiveTermsText}
           onChange={(e) => u({ termsText: e.target.value })}
           placeholder={"[TITLE] Section 1\n[COPY] Content of the section goes here.\n\n[TITLE] Section 2\n[COPY] More content here."}
           rows={8}
           className="w-full max-w-[600px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#333] transition-colors font-mono resize-y"
         />
 
-        {s.termsText && (
+        {effectiveTermsText && (
           <div className="mt-4">
             <p className="text-[10px] font-semibold text-[#333]/50 mb-2 uppercase tracking-wider">Preview</p>
             <div className="max-w-[600px] bg-[#f8f8f8] rounded-[6px] p-4 border border-[#e4e4e4]">
-              {parseTermsPreview(s.termsText)}
+              {parseTermsPreview(effectiveTermsText)}
             </div>
           </div>
         )}
+
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={async () => {
+              await setPlatformSetting({ key: TERMS_TEXT_PLATFORM_SETTING_KEY, value: effectiveTermsText, updatedBy: "admin" });
+              setTermsSaved(true);
+              setTimeout(() => setTermsSaved(false), 2000);
+            }}
+            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+          >
+            {termsSaved ? "✓ Saved!" : "Save Terms & Conditions"}
+          </button>
+        </div>
       </SectionCard>
     </div>
   );
