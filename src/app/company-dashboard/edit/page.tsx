@@ -218,9 +218,9 @@ export default function EditProfilePage() {
   let bottomHintIsWarning = false;
 
   if (!hasCategory) {
-    // Category missing — show default text, orange only if other fields are filled
+    // Category missing — keep the repeated warning consistently orange
     bottomHintText = "*Select at least 1 category before saving\n*Pilih setidaknya 1 kategori sebelum menyimpan";
-    bottomHintIsWarning = !missingProjectSize && !missingLocation; // turn orange when user tried but no category
+    bottomHintIsWarning = true;
   } else if (missingLocation && !missingProjectSize) {
     bottomHintText = "*Location needs to be activated\n*Lokasi perlu diaktifkan";
     bottomHintIsWarning = true;
@@ -435,7 +435,7 @@ export default function EditProfilePage() {
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         {/* Header Row */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-6">
           <div>
             {company ? (
               <Link href={`/profile/${company._id}`} className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2 block hover:text-[#f14110] transition-colors">
@@ -454,7 +454,7 @@ export default function EditProfilePage() {
             </p>
           </div>
 
-          <div className="text-right">
+          <div className="text-left md:text-right">
             {company?.isPro && proEnabled ? (
               <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">PRO ACCOUNT</p>
             ) : proEnabled ? (
@@ -470,7 +470,7 @@ export default function EditProfilePage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-8 mb-8 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-8 items-center">
           <div className="flex gap-4 items-center">
             {company && (
               <Link
@@ -482,14 +482,14 @@ export default function EditProfilePage() {
               </Link>
             )}
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
             {!canSave && (
               <p className="text-[9px] text-[#f14110] font-medium tracking-[0.18px] whitespace-pre-line">{bottomHintText}</p>
             )}
             <button
               onClick={() => { setIsDirty(false); handleSave(); }}
               disabled={saving || !canSave}
-              className={`ml-auto h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
+              className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center w-full sm:w-auto md:ml-auto ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
               style={{ minWidth: '140px' }}
             >
               {saving ? "Saving..." : "Save"}
@@ -498,7 +498,7 @@ export default function EditProfilePage() {
         </div>
 
         {/* Form Grid */}
-        <div className="grid grid-cols-2 gap-8 mb-8" onChangeCapture={() => setIsDirty(true)}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8" onChangeCapture={() => setIsDirty(true)}>
           {/* Left Column */}
           <div className="space-y-4">
             {/* Logo Upload */}
@@ -557,7 +557,7 @@ export default function EditProfilePage() {
             </div>
 
             {/* Phone & Email */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                   Phone / Telepon <span className="text-[#f14110]">(*)</span>
@@ -583,7 +583,7 @@ export default function EditProfilePage() {
             </div>
 
             {/* Website & WhatsApp */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                   Website
@@ -609,7 +609,7 @@ export default function EditProfilePage() {
             </div>
 
             {/* Facebook & LinkedIn */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                   Facebook
@@ -669,7 +669,7 @@ export default function EditProfilePage() {
             </div>
 
             {/* Projects & Team */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                   Projects number / Nomor proyek <span className="text-[#f14110]">(*)</span>
@@ -719,7 +719,7 @@ export default function EditProfilePage() {
                   <>Upload project pictures /<br />Unggah gambar proyek <span className="text-[#f14110]">(*)</span></>
                 )}
               </label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {Array(totalSlots).fill(null).map((_, index) => {
                   const imgId = projectImageIds[index];
                   const isLocked = index >= maxImages;
@@ -781,7 +781,7 @@ export default function EditProfilePage() {
 
 
         {/* Project Size & Location - Top Row */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
           {/* Project Size */}
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -866,7 +866,7 @@ export default function EditProfilePage() {
         </div>
 
         {/* Construction / Renovation / Architecture / Interior - 4 Categories */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
           {/* Construction */}
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -1110,7 +1110,7 @@ export default function EditProfilePage() {
 
         {/* Real Estate - Bottom Row */}
         {isCategoryVisible("real-estate") && (
-        <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
           <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Real Estate</h2>
@@ -1172,20 +1172,20 @@ export default function EditProfilePage() {
         )}
 
         {/* Bottom Save */}
-        <div className="grid grid-cols-2 gap-8 py-8 border-t border-[#e4e4e4] items-center">
-          <div />
-          <div className="flex items-center justify-between">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 py-8 border-t border-[#e4e4e4] items-center">
+          <div className="hidden md:block" />
+          <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
             <p className={`text-[9px] tracking-[0.18px] whitespace-pre-line ${bottomHintIsWarning ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
               {bottomHintText}
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex w-full flex-col items-start gap-3 sm:w-auto sm:flex-row sm:items-center">
               {saveError && (
                 <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px]">{saveError}</p>
               )}
               <button
                 onClick={() => { setIsDirty(false); handleSave(); }}
                 disabled={saving || !canSave}
-                className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
+                className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center w-full sm:w-auto ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
                 style={{ minWidth: '140px' }}
               >
                 {saving ? "Saving..." : "Save"}
