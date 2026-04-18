@@ -783,7 +783,7 @@ export default function EditProfilePage() {
 
 
         {/* Project Size & Location - Top Row */}
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
           {/* Project Size */}
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -868,7 +868,7 @@ export default function EditProfilePage() {
         </div>
 
         {/* Construction / Renovation / Architecture / Interior - 4 Categories */}
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
           {/* Construction */}
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -1112,7 +1112,7 @@ export default function EditProfilePage() {
 
         {/* Real Estate - Bottom Row */}
         {isCategoryVisible("real-estate") && (
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[20px] font-bold text-[#333] tracking-[0.4px]">Real Estate</h2>
