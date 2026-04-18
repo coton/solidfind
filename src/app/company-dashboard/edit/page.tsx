@@ -658,9 +658,7 @@ export default function EditProfilePage() {
             {/* Description */}
             <div>
               <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                Description of your company and range of work / Deskripsi perusahaan
-                <br />
-                Anda dan lingkup pekerjaan <span className="text-[#f14110]">(*)</span>
+                Company introduction as well as description of your project range / Pengenalan perusahaan serta deskripsi jangkauan proyek Anda <span className="text-[#f14110]">(*)</span>
               </label>
               <textarea
                 value={description}
