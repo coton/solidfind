@@ -97,6 +97,7 @@ function MediaUpload({
   mediaType,
   onUrl,
   onFile,
+  accept = "image/*,video/*",
 }: {
   label: string;
   hint?: string;
@@ -104,6 +105,7 @@ function MediaUpload({
   mediaType: string;
   onUrl: (url: string) => void;
   onFile: (dataUrl: string, type: "image" | "video") => void;
+  accept?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -130,7 +132,7 @@ function MediaUpload({
           <Upload className="w-3.5 h-3.5" />
           Upload
         </button>
-        <input ref={inputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleFile} />
+        <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={handleFile} />
       </div>
       {url && (
         <div className="mt-2 rounded-[6px] overflow-hidden border border-[#e4e4e4] w-[200px] h-[100px]">
@@ -164,6 +166,12 @@ export default function AdminUI() {
   const [termsFile, setTermsFile] = useState("");
   const termsRef = useRef<HTMLInputElement>(null);
 
+  // New User image (Convex-backed)
+  const newUserImageValue = useQuery(api.platformSettings.get, { key: "newUserImage" });
+  const [newUserImageDraftUrl, setNewUserImageDraftUrl] = useState("");
+  const [newUserImageHasDraft, setNewUserImageHasDraft] = useState(false);
+  const [newUserImageSaved, setNewUserImageSaved] = useState(false);
+
   // About profile picture (Convex-backed)
   const aboutProfilePictureUrlValue = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
   const [aboutProfilePictureUrl, setAboutProfilePictureUrl] = useState("");
@@ -184,6 +192,22 @@ export default function AdminUI() {
   const [adHorizontalUrl, setAdHorizontalUrl] = useState("");
   const [adHorizontalMediaType, setAdHorizontalMediaType] = useState<"image" | "video" | "">("");
   const [adSpacesSaved, setAdSpacesSaved] = useState(false);
+
+  const parsedNewUserImage = (() => {
+    if (!newUserImageValue) return { url: "", type: "image" as const };
+    try {
+      const parsed = JSON.parse(newUserImageValue);
+      return {
+        url: parsed.url ?? "",
+        type: (parsed.type ?? "image") as "image" | "video",
+      };
+    } catch {
+      return { url: newUserImageValue, type: "image" as const };
+    }
+  })();
+
+  const newUserImageUrl = newUserImageHasDraft ? newUserImageDraftUrl : parsedNewUserImage.url;
+  const newUserImageType = "image" as const;
 
   useEffect(() => {
     if (adVerticalValue !== undefined && adVerticalValue !== null) {
@@ -452,6 +476,44 @@ export default function AdminUI() {
           {linksSaved ? "✓ Links Saved!" : "Save Contact & Instagram"}
         </button>
       </div>
+
+      {/* New User Image */}
+      <SectionCard title="New User Image">
+        <Field
+          label="New User image"
+          hint="Shown on the account type selection page for new users. Use a wide desktop/mobile-safe image. Recommended ratio: 386:96 (about 4.02:1), for example 1608×400px or larger. Keep the important content centered because the image can crop slightly on smaller screens."
+        >
+          <MediaUpload
+            label="New User image"
+            url={newUserImageUrl}
+            mediaType={newUserImageType}
+            onUrl={(v) => {
+              setNewUserImageHasDraft(true);
+              setNewUserImageDraftUrl(v);
+            }}
+            onFile={(dataUrl) => {
+              setNewUserImageHasDraft(true);
+              setNewUserImageDraftUrl(dataUrl);
+            }}
+            accept="image/*"
+          />
+        </Field>
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={async () => {
+              await setPlatformSetting({ key: "newUserImage", value: JSON.stringify({ url: newUserImageUrl, type: "image" }), updatedBy: "admin" });
+              setNewUserImageHasDraft(false);
+              setNewUserImageDraftUrl("");
+              setNewUserImageSaved(true);
+              setTimeout(() => setNewUserImageSaved(false), 2000);
+            }}
+            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+          >
+            {newUserImageSaved ? "✓ Saved!" : "Save New User Image"}
+          </button>
+        </div>
+      </SectionCard>
 
       {/* Ads */}
       <SectionCard title="Ad Spaces">

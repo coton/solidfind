@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test tests/*.test.cjs",
+    "cleanup:test-users": "node scripts/admin-cleanup-test-users.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.4",

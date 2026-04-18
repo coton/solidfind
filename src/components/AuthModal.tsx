@@ -742,19 +742,20 @@ export function AuthModal({
         Back
       </button>
 
-      <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
-        {mode === "login" ? "LOGIN" : "CREATE AN ACCOUNT"}
-      </h2>
+      <div style={{ width: '100%', maxWidth: '320px', margin: '0 auto', paddingTop: '28px' }}>
+        <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
+          {mode === "login" ? "LOGIN" : "CREATE AN ACCOUNT"}
+        </h2>
 
-      <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
-        {mode === "register" ? (
-          <>Continue with your email address.<br />Lanjutkan dengan alamat email Anda.</>
-        ) : (
-          <>Sign in with your email and password.<br />Masuk dengan email dan kata sandi Anda.</>
-        )}
-      </p>
+        <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
+          {mode === "register" ? (
+            <>Continue with your email address.<br />Lanjutkan dengan alamat email Anda.</>
+          ) : (
+            <>Sign in with your email and password.<br />Masuk dengan email dan kata sandi Anda.</>
+          )}
+        </p>
 
-      <form onSubmit={mode === "login" ? handleSignIn : handleSignUp} style={{ marginBottom: 0 }}>
+        <form onSubmit={mode === "login" ? handleSignIn : handleSignUp} style={{ marginBottom: 0 }}>
 
         {/* Clerk CAPTCHA widget container (required for bot protection in Custom Flows) */}
         {mode === "register" && <div id="clerk-captcha" />}
@@ -892,28 +893,19 @@ export function AuthModal({
             Forgot Password
           </button>
         )}
-      </form>
 
-      {/* Switch mode */}
-      <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: 0 }}>
-        {mode === "login" ? (
-          <>
+        {/* Switch mode */}
+        {mode === "login" && (
+          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: 0 }}>
             Don&apos;t have an account?
             <br />
             <button onClick={() => { setMode("register"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'underline' }}>
               Sign up!
             </button>
-          </>
-        ) : (
-          <>
-            Already have an account?
-            <br />
-            <button onClick={() => { setMode("login"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'underline' }}>
-              Log in
-            </button>
-          </>
+          </p>
         )}
-      </p>
+      </form>
+      </div>
     </>
   );
 }

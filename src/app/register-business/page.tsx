@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
@@ -9,7 +9,7 @@ import { api } from "../../../convex/_generated/api";
 export default function RegisterBusinessPage() {
   const router = useRouter();
   const { user: clerkUser, isLoaded: isClerkLoaded } = useUser();
-  const [creating, setCreating] = useState(false);
+  const hasStartedCreatingRef = useRef(false);
 
   const currentUser = useQuery(
     api.users.getCurrentUser,
@@ -43,8 +43,8 @@ export default function RegisterBusinessPage() {
     if (existingCompany === undefined) return;
 
     // No company exists — create a blank one and redirect
-    if (!creating && existingCompany === null) {
-      setCreating(true);
+    if (!hasStartedCreatingRef.current && existingCompany === null) {
+      hasStartedCreatingRef.current = true;
       const companyName = clerkUser?.fullName || clerkUser?.firstName || "My Company";
 
       createCompany({
@@ -64,10 +64,10 @@ export default function RegisterBusinessPage() {
         router.replace("/company-dashboard/edit");
       }).catch((err) => {
         console.error("Failed to create company:", err);
-        setCreating(false);
+        hasStartedCreatingRef.current = false;
       });
     }
-  }, [isClerkLoaded, currentUser, existingCompany, creating, clerkUser, createCompany, updateAccountType, router]);
+  }, [isClerkLoaded, currentUser, existingCompany, clerkUser, createCompany, updateAccountType, router]);
 
   // Show a minimal loading state while creating/redirecting
   return (

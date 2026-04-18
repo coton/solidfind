@@ -73,7 +73,7 @@ export default function AuthCompletePage() {
 
       sessionStorage.removeItem("solidfind_accountType");
       sessionStorage.removeItem("solidfind_companyName");
-      router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
+      router.replace(accountType === "company" ? "/register-business" : "/dashboard");
     } finally {
       setIsSaving(false);
     }
