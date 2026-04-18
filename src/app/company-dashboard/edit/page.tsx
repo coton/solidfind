@@ -674,7 +674,7 @@ export default function EditProfilePage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Projects number / Nomor proyek <span className="text-[#f14110]">(*)</span>
+                  Project number / Nomor proyek <span className="text-[#f14110]">(*)</span>
                 </label>
                 <input
                   type="number"
