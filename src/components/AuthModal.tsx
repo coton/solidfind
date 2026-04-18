@@ -517,82 +517,86 @@ export function AuthModal({
   if (pendingReset) {
     return modalShell(
       <>
-        <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
-          RESET PASSWORD
-        </h2>
+        <button
+          type="button"
+          onClick={() => { setPendingReset(false); setError(""); setVerificationCode(""); setNewPassword(""); }}
+          style={{ position: 'absolute', top: '18px', left: '28px', background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: '11px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', zIndex: 1 }}
+        >
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M6.5 1.5L3 5L6.5 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Back
+        </button>
 
-        <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
-          Enter the code sent to<br /><strong style={{ color: '#333' }}>{email}</strong><br />and your new password.
-        </p>
+        <div style={{ width: '100%', maxWidth: '320px', margin: '0 auto', paddingTop: '28px' }}>
+          <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
+            RESET PASSWORD
+          </h2>
 
-        <form onSubmit={handleResetPassword}>
-          <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-              Verification Code
-            </label>
-            <input
-              type="text"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-              placeholder="Enter 6-digit code"
-              required
-              style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '4px' }}
-            />
-          </div>
+          <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
+            Enter the code sent to<br /><strong style={{ color: '#333' }}>{email}</strong><br />and your new password.
+          </p>
 
-          <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-              New Password
-            </label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
-            />
-          </div>
+          <form onSubmit={handleResetPassword}>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
+                Verification Code
+              </label>
+              <input
+                type="text"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                placeholder="Enter 6-digit code"
+                required
+                style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '4px' }}
+              />
+            </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '28px', marginBottom: '12px' }}>
-            <button
-              type="submit"
-              disabled={isLoading}
-              onMouseEnter={() => setSubmitHovered(true)}
-              onMouseLeave={() => setSubmitHovered(false)}
-              style={{
-                width: '145px',
-                height: '40px',
-                borderRadius: '20px',
-                border: submitHovered ? 'none' : '1px solid #F14110',
-                background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
-                color: submitHovered ? 'white' : '#F14110',
-                fontSize: '13px',
-                fontWeight: 600,
-                letterSpacing: '0.5px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s ease',
-                opacity: isLoading ? 0.6 : 1,
-              }}
-            >
-              {isLoading ? "Resetting..." : "Reset Password"}
-            </button>
-          </div>
-        </form>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
+                New Password
+              </label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
+              />
+            </div>
 
-        {error && (
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*{error}</p>
-          </div>
-        )}
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '28px', marginBottom: '12px' }}>
+              <button
+                type="submit"
+                disabled={isLoading}
+                onMouseEnter={() => setSubmitHovered(true)}
+                onMouseLeave={() => setSubmitHovered(false)}
+                style={{
+                  width: '145px',
+                  height: '40px',
+                  borderRadius: '20px',
+                  border: submitHovered ? 'none' : '1px solid #F14110',
+                  background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
+                  color: submitHovered ? 'white' : '#F14110',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  letterSpacing: '0.5px',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  opacity: isLoading ? 0.6 : 1,
+                }}
+              >
+                {isLoading ? "Resetting..." : "Reset Password"}
+              </button>
+            </div>
+          </form>
 
-        <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: '8px 0 0 0' }}>
-          <button
-            onClick={() => { setPendingReset(false); setError(""); setVerificationCode(""); setNewPassword(""); }}
-            style={{ color: '#333', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '10px' }}
-          >
-            Back to Login
-          </button>
-        </p>
+          {error && (
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*{error}</p>
+            </div>
+          )}
+        </div>
       </>
     );
   }
