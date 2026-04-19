@@ -89,9 +89,31 @@ test('header dropdown keeps category toggle switches close to their labels on mo
     'expected dropdown options to use a 5px gap between the filter label and its switch'
   );
 
+  assert.match(
+    headerSource,
+    /<span className="min-w-0 flex-1 inline-flex items-center min-h-3 leading-\[14px\]">\{option\.label\}<\/span>/,
+    'expected dropdown option labels to use inline flex centering so the text sits level with the switch track'
+  );
+
   assert.doesNotMatch(
     headerSource,
     /mr-\[40px\]/,
     'expected the old oversized label-to-switch spacing to be removed'
+  );
+});
+
+test('mobile categories dropdown widens to span the project size and categories buttons together', () => {
+  const headerSource = readProjectFile('src/components/Header.tsx');
+
+  assert.match(
+    headerSource,
+    /menuClassName=\{'min-w-\[calc\(200%\+2px\)\] max-w-none'\}/,
+    'expected the mobile categories dropdown menu to widen to the combined project-size-plus-categories button width'
+  );
+
+  assert.match(
+    headerSource,
+    /isMobileCategoryDropdown=\{true\}/,
+    'expected the mobile categories dropdown invocation to opt into the wider two-button menu width'
   );
 });

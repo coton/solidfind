@@ -134,6 +134,8 @@ interface DropdownProps {
   isOptionSelected?: (optionId: string) => boolean;
   // Align menu to right edge of button
   alignRight?: boolean;
+  menuClassName?: string;
+  isMobileCategoryDropdown?: boolean;
 }
 
 function Dropdown({ 
@@ -148,7 +150,9 @@ function Dropdown({
   displayText,
   isActive = false,
   isOptionSelected,
-  alignRight = false
+  alignRight = false,
+  menuClassName = '',
+  isMobileCategoryDropdown = false
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedOption = options.find(opt => opt.id === value);
@@ -188,9 +192,9 @@ function Dropdown({
           <div 
             className={`absolute top-full mt-[2px] z-[70] bg-white rounded-[6px] shadow-lg w-max max-w-[calc(100vw-40px)] ${
               alignRight ? 'right-0' : 'left-0'
-            }`}
+            } ${menuClassName}`}
           >
-            <div className="pt-2 pb-[10px] px-3">
+            <div className={`pt-2 pb-[10px] px-3 ${isMobileCategoryDropdown ? 'pr-4' : ''}`}>
               {options.map((option, index) => {
                 const isSelected = isOptionSelected 
                   ? isOptionSelected(option.id)
@@ -219,7 +223,7 @@ function Dropdown({
                       borderBottom: index < options.length - 1 ? '1px solid #e4e4e4' : 'none'
                     }}
                   >
-                    <span className="min-w-0 flex-1 leading-[14px]">{option.label}</span>
+                    <span className="min-w-0 flex-1 inline-flex items-center min-h-3 leading-[14px]">{option.label}</span>
                     <div 
                       className={`flex-shrink-0 w-6 h-3 rounded-full ${isSelected ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
                     >
@@ -706,6 +710,8 @@ function HeaderInner() {
                     isActive={isSubcategoryFilterActive(selectedCategories, categoryOptions)}
                     isOptionSelected={(optionId) => isSubcategoryOptionSelected(selectedCategories, optionId, categoryOptions)}
                     alignRight={true}
+                    menuClassName={'min-w-[calc(200%+2px)] max-w-none'}
+                    isMobileCategoryDropdown={true}
                   />
                 </div>
 
