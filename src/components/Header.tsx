@@ -8,6 +8,10 @@ import { SignedIn, SignedOut, useUser, useClerk } from "@clerk/nextjs";
 import { AuthModal } from "@/components/AuthModal";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import {
+  HEADER_MEDIA_PLATFORM_SETTING_KEY,
+  parseMediaSetting,
+} from "@/lib/platform-settings.mjs";
 
 // Fallback categories shown while DB config is loading or if empty
 // Only include the initially visible ones to prevent flash of hidden tabs
@@ -260,6 +264,8 @@ function HeaderInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
+  const headerMediaValue = useQuery(api.platformSettings.get, { key: HEADER_MEDIA_PLATFORM_SETTING_KEY });
+  const headerMedia = parseMediaSetting(headerMediaValue, { url: "", type: "image" });
   const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
   const igVisible = useQuery(api.platformSettings.get, { key: "ig_visible" });
 
@@ -451,19 +457,40 @@ function HeaderInner() {
   return (
     <>
     <header className="relative">
-      {/* Gradient Background - Desktop: #E4E4E4 to #F14110, Mobile: #E9A28E to #F14110 */}
-      <div
-        className="absolute inset-0 rounded-b-[6px]"
-        style={{
-          background: "linear-gradient(to right, #E9A28E, #F14110)"
-        }}
-      />
-      <div
-        className="hidden sm:block absolute inset-0 rounded-b-[6px]"
-        style={{
-          background: "linear-gradient(to right, #E4E4E4, #F14110)"
-        }}
-      />
+      {headerMedia.url ? (
+        <>
+          <div className="absolute inset-0 rounded-b-[6px] overflow-hidden">
+            {headerMedia.type === "video" ? (
+              <video src={headerMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
+            ) : (
+              <Image
+                src={headerMedia.url}
+                alt="Header background"
+                fill
+                className="object-cover"
+                unoptimized={headerMedia.url.startsWith("data:")}
+              />
+            )}
+          </div>
+          <div className="absolute inset-0 rounded-b-[6px] bg-black/25" />
+        </>
+      ) : (
+        <>
+          {/* Gradient Background - Desktop: #E4E4E4 to #F14110, Mobile: #E9A28E to #F14110 */}
+          <div
+            className="absolute inset-0 rounded-b-[6px]"
+            style={{
+              background: "linear-gradient(to right, #E9A28E, #F14110)"
+            }}
+          />
+          <div
+            className="hidden sm:block absolute inset-0 rounded-b-[6px]"
+            style={{
+              background: "linear-gradient(to right, #E4E4E4, #F14110)"
+            }}
+          />
+        </>
+      )}
 
       <div className="relative z-10 px-5 sm:px-0 pt-4 sm:pt-6 pb-[8px] sm:pb-4">
         {/* Top Bar */}

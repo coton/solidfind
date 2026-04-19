@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { parseMediaSetting } from "@/lib/platform-settings.mjs";
 
 export default function AboutPage() {
   // Dynamic content from admin UI tab
@@ -17,6 +18,7 @@ export default function AboutPage() {
   const contact = useQuery(api.platformSettings.get, { key: "aboutPageContact" });
   const email = useQuery(api.platformSettings.get, { key: "aboutPageEmail" });
   const aboutProfilePicture = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
+  const aboutProfileMedia = parseMediaSetting(aboutProfilePicture, { url: "", type: "image" });
   const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
   const handleShare = async () => {
     if (navigator.share) {
@@ -63,19 +65,19 @@ export default function AboutPage() {
           {/* Left Column */}
           <div className="flex flex-col items-center lg:items-start">
             {/* Logo */}
-            <div className="w-[180px] sm:w-[200px] h-[180px] sm:h-[200px] rounded-[6px] mb-4 bg-[#f8f8f8] flex items-center justify-center p-6 sm:p-8 overflow-hidden">
-              {aboutProfilePicture ? (
-                (() => {
-                  try {
-                    const parsed = JSON.parse(aboutProfilePicture);
-                    if (parsed.type === "video") {
-                      return <video src={parsed.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />;
-                    }
-                    return <Image src={parsed.url} alt="SOLIDFIND.ID Logo" fill className="object-cover" />;
-                  } catch {
-                    return <Image src={aboutProfilePicture} alt="SOLIDFIND.ID Logo" fill className="object-cover" />;
-                  }
-                })()
+            <div className="w-[180px] sm:w-[200px] h-[180px] sm:h-[200px] relative rounded-[6px] mb-4 bg-[#f8f8f8] flex items-center justify-center p-6 sm:p-8 overflow-hidden">
+              {aboutProfileMedia.url ? (
+                aboutProfileMedia.type === "video" ? (
+                  <video src={aboutProfileMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
+                ) : (
+                  <Image
+                    src={aboutProfileMedia.url}
+                    alt="SOLIDFIND.ID Logo"
+                    fill
+                    className="object-cover"
+                    unoptimized={aboutProfileMedia.url.startsWith("data:")}
+                  />
+                )
               ) : (
                 <Image 
                   src="/images/logo-full.svg" 
