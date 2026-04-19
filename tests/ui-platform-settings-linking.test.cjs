@@ -75,6 +75,32 @@ test('public website consumers use load-aware platform-setting helpers', () => {
   }
 });
 
+test('admin/public UI linkage files do not contain unresolved merge markers', () => {
+  const files = [
+    'src/app/admin/ui/page.tsx',
+    'src/app/about/page.tsx',
+    'src/app/terms/page.tsx',
+    'src/components/AccountTypeSelectionCard.tsx',
+    'src/components/AuthModal.tsx',
+    'src/components/Footer.tsx',
+    'src/components/Header.tsx',
+    'src/components/cards/WelcomeCard.tsx',
+    'src/lib/platform-settings.mjs',
+    'src/lib/terms-content.mjs',
+    'tests/terms-linking.test.cjs',
+    'tests/ui-platform-settings-linking.test.cjs',
+  ];
+
+  for (const file of files) {
+    const source = readProjectFile(file);
+    assert.doesNotMatch(
+      source,
+      /^(<<<<<<<|=======|>>>>>>>)/m,
+      `${file} should not contain unresolved merge conflict markers`
+    );
+  }
+});
+
 test('admin UI exposes a visible draft/upload state for the About page profile picture section', () => {
   const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
 
