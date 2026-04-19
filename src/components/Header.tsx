@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { Suspense, useState, useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -151,9 +151,6 @@ function Dropdown({
   alignRight = false
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, right: 0, width: 0 });
-  const [isPositioned, setIsPositioned] = useState(false);
   const selectedOption = options.find(opt => opt.id === value);
 
   // For PROJECT SIZE: remove numbers in parentheses when closed
@@ -172,24 +169,9 @@ function Dropdown({
   // Determine if button should show active color
   const buttonIsActive = multiSelect ? isActive : !!value;
 
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const rightPos = window.innerWidth - rect.right;
-      setMenuPos({ top: rect.bottom + 2, left: rect.left, right: rightPos, width: rect.width });
-      // Allow rendering after position is calculated
-      requestAnimationFrame(() => {
-        setIsPositioned(true);
-      });
-    } else {
-      setIsPositioned(false);
-    }
-  }, [isOpen]);
-
   return (
-    <div className={`relative ${width}`}>
+    <div className={`relative ${width} ${isOpen ? 'z-[80]' : ''}`}>
       <button
-        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="h-10 bg-[#f8f8f8] rounded-[6px] flex items-center justify-between px-3 w-full"
         style={{ letterSpacing: '0.12px' }}
@@ -202,16 +184,11 @@ function Dropdown({
 
       {isOpen && (
         <>
-          <div className="fixed inset-0" style={{ zIndex: 9998 }} onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
           <div 
-            className={`fixed bg-white rounded-[6px] shadow-lg transition-opacity duration-75 w-max ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
-            style={{
-              zIndex: 9999,
-              ...(alignRight 
-                ? { top: menuPos.top, right: menuPos.right }
-                : { top: menuPos.top, left: menuPos.left }
-              )
-            }}
+            className={`absolute top-full mt-[2px] z-[70] bg-white rounded-[6px] shadow-lg w-max max-w-[calc(100vw-40px)] ${
+              alignRight ? 'right-0' : 'left-0'
+            }`}
           >
             <div className="pt-2 pb-[10px] px-3">
               {options.map((option, index) => {
@@ -230,7 +207,7 @@ function Dropdown({
                         setIsOpen(false);
                       }
                     }}
-                    className={`w-full text-left py-2 text-[11px] flex items-center ${
+                    className={`w-full text-left py-2 text-[11px] flex items-center gap-[5px] ${
                       index < options.length - 1 ? 'mb-[2px]' : ''
                     } ${
                       isSelected ? 'text-[#f14110]' : 'text-[#333]'
@@ -242,9 +219,9 @@ function Dropdown({
                       borderBottom: index < options.length - 1 ? '1px solid #e4e4e4' : 'none'
                     }}
                   >
-                    <span className="whitespace-nowrap mr-[40px]">{option.label}</span>
+                    <span className="min-w-0 flex-1 leading-[14px]">{option.label}</span>
                     <div 
-                      className={`flex-shrink-0 w-6 h-3 rounded-full ml-auto ${isSelected ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
+                      className={`flex-shrink-0 w-6 h-3 rounded-full ${isSelected ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
                     >
                       <div className={`w-2 h-2 bg-white rounded-full mt-0.5 transition-all ${isSelected ? 'ml-3.5' : 'ml-0.5'}`} />
                     </div>
@@ -728,6 +705,7 @@ function HeaderInner() {
                     displayText={getSubcategoryDisplayText(selectedCategories, categoryOptions)}
                     isActive={isSubcategoryFilterActive(selectedCategories, categoryOptions)}
                     isOptionSelected={(optionId) => isSubcategoryOptionSelected(selectedCategories, optionId, categoryOptions)}
+                    alignRight={true}
                   />
                 </div>
 

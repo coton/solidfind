@@ -63,3 +63,35 @@ test('home page and header wire category filters through the shared multi-select
     'expected the homepage listing filter to read the category sub-filter state'
   );
 });
+
+test('header dropdown keeps category filter overlays anchored to the trigger and above page content', () => {
+  const headerSource = readProjectFile('src/components/Header.tsx');
+
+  assert.doesNotMatch(
+    headerSource,
+    /className=\{`fixed bg-white rounded-\[6px\] shadow-lg/,
+    'expected dropdown menus to stop using fixed viewport positioning so they move with the trigger while scrolling'
+  );
+
+  assert.match(
+    headerSource,
+    /className=\{`absolute top-full mt-\[2px\] z-\[70\] bg-white rounded-\[6px\] shadow-lg/,
+    'expected dropdown menus to render as anchored absolute overlays above surrounding content'
+  );
+});
+
+test('header dropdown keeps category toggle switches close to their labels on mobile', () => {
+  const headerSource = readProjectFile('src/components/Header.tsx');
+
+  assert.match(
+    headerSource,
+    /flex items-center gap-\[5px\]/,
+    'expected dropdown options to use a 5px gap between the filter label and its switch'
+  );
+
+  assert.doesNotMatch(
+    headerSource,
+    /mr-\[40px\]/,
+    'expected the old oversized label-to-switch spacing to be removed'
+  );
+});
