@@ -133,3 +133,31 @@ test('admin UI can delete the existing About page profile picture entry before r
     'expected Convex platform settings to expose a reusable deleteByKey mutation for admin-managed UI media'
   );
 });
+
+test('Save All UI Settings only re-saves media sections that still have unsaved local draft state', () => {
+  const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
+
+  assert.match(
+    adminUiSource,
+    /if \(newUserImageHasDraft\) \{\s*pendingSaves\.push\(saveNewUserImage\(\)\);\s*\}/,
+    'expected Save All to avoid overwriting the New User image after an individual save clears its draft state'
+  );
+
+  assert.match(
+    adminUiSource,
+    /if \(aboutProfilePictureHasDraft\) \{\s*pendingSaves\.push\(saveAboutProfilePicture\(\)\);\s*\}/,
+    'expected Save All to avoid overwriting the About profile picture after an individual save clears its draft state'
+  );
+
+  assert.match(
+    adminUiSource,
+    /if \(s\.headerMediaUrl \|\| s\.headerMediaType\) \{\s*pendingSaves\.push\(saveHeaderMedia\(\)\);\s*\}/,
+    'expected Save All to only persist header media when there is unsaved local media draft state'
+  );
+
+  assert.match(
+    adminUiSource,
+    /if \(s\.footerMediaUrl \|\| s\.footerMediaType\) \{\s*pendingSaves\.push\(saveFooterMedia\(\)\);\s*\}/,
+    'expected Save All to only persist footer media when there is unsaved local media draft state'
+  );
+});

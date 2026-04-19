@@ -392,17 +392,31 @@ export default function AdminUI() {
   };
 
   const saveAllUiSettings = async () => {
-    await Promise.all([
+    const pendingSaves = [
       saveAboutText(),
       saveAboutPage(),
       saveLinks(),
-      saveNewUserImage(),
       saveAdSpaces(),
-      saveHeaderMedia(),
-      saveFooterMedia(),
-      saveAboutProfilePicture(),
       saveTermsContent(),
-    ]);
+    ];
+
+    if (newUserImageHasDraft) {
+      pendingSaves.push(saveNewUserImage());
+    }
+
+    if (s.headerMediaUrl || s.headerMediaType) {
+      pendingSaves.push(saveHeaderMedia());
+    }
+
+    if (s.footerMediaUrl || s.footerMediaType) {
+      pendingSaves.push(saveFooterMedia());
+    }
+
+    if (aboutProfilePictureHasDraft) {
+      pendingSaves.push(saveAboutProfilePicture());
+    }
+
+    await Promise.all(pendingSaves);
 
     flashSaved(setSaveAllUiSaved);
   };
