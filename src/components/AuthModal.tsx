@@ -9,7 +9,7 @@ import { api } from "../../convex/_generated/api";
 import type { OAuthStrategy } from "@clerk/types";
 import {
   AD_VERTICAL_PLATFORM_SETTING_KEY,
-  parseMediaSetting,
+  resolveMediaSetting,
 } from "@/lib/platform-settings.mjs";
 
 type AuthMode = "login" | "register";
@@ -138,7 +138,8 @@ export function AuthModal({
   const { signUp, setActive: setSignUpActive, isLoaded: isSignUpLoaded } = useSignUp();
   const convex = useConvex();
   const verticalAdValue = useQuery(api.platformSettings.get, { key: AD_VERTICAL_PLATFORM_SETTING_KEY });
-  const verticalAdMedia = parseMediaSetting(verticalAdValue, { url: "", type: "image" });
+  const verticalAdState = resolveMediaSetting(verticalAdValue, { url: "", type: "image" });
+  const verticalAdMedia = verticalAdState.media;
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [accountType, setAccountType] = useState<AccountType>(initialAccountType);
@@ -427,6 +428,8 @@ export function AuthModal({
                 unoptimized={verticalAdMedia.url.startsWith('data:')}
               />
             )
+          ) : verticalAdState.isLoading ? (
+            <div className="w-full h-full bg-[#e4e4e4]" />
           ) : (
             <span style={{ color: '#999', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
               AD SPACE

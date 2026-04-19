@@ -10,7 +10,8 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
   HEADER_MEDIA_PLATFORM_SETTING_KEY,
-  parseMediaSetting,
+  resolveMediaSetting,
+  resolveTextSetting,
 } from "@/lib/platform-settings.mjs";
 
 // Fallback categories shown while DB config is loading or if empty
@@ -265,9 +266,12 @@ function HeaderInner() {
   const searchParams = useSearchParams();
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
   const headerMediaValue = useQuery(api.platformSettings.get, { key: HEADER_MEDIA_PLATFORM_SETTING_KEY });
-  const headerMedia = parseMediaSetting(headerMediaValue, { url: "", type: "image" });
+  const headerMediaState = resolveMediaSetting(headerMediaValue, { url: "", type: "image" });
+  const headerMedia = headerMediaState.media;
   const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
+  const igUrlState = resolveTextSetting(igUrl, "#");
   const igVisible = useQuery(api.platformSettings.get, { key: "ig_visible" });
+  const igVisibleState = resolveTextSetting(igVisible, "true");
 
   const handleSignOut = async () => {
     await signOut({ redirectUrl: "/" });
@@ -474,6 +478,8 @@ function HeaderInner() {
           </div>
           <div className="absolute inset-0 rounded-b-[6px] bg-black/25" />
         </>
+      ) : headerMediaState.isLoading ? (
+        <div className="absolute inset-0 rounded-b-[6px] bg-[#e4e4e4]" />
       ) : (
         <>
           {/* Gradient Background - Desktop: #E4E4E4 to #F14110, Mobile: #E9A28E to #F14110 */}
@@ -503,8 +509,8 @@ function HeaderInner() {
           {/* Right Side Buttons */}
           <div className="flex items-center gap-3 sm:gap-5">
             {/* Desktop: IG (first) */}
-            {igVisible !== "false" && (
-              <a href={igUrl || "#"} target="_blank" rel="noopener noreferrer" className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity">
+            {igVisibleState.value !== "false" && (
+              <a href={igUrlState.value || "#"} target="_blank" rel="noopener noreferrer" className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity">
                 <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
               </a>
             )}

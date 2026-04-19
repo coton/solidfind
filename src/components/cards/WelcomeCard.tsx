@@ -4,12 +4,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { resolveTextSetting } from "@/lib/platform-settings.mjs";
 
 const DEFAULT_TEXT = "We help you find trusted professionals to build, renovate, design and shape the places you live in.";
 
 export function WelcomeCard() {
   const aboutText = useQuery(api.platformSettings.get, { key: "aboutCardDescription" });
-  const description = aboutText || DEFAULT_TEXT;
+  const aboutTextState = resolveTextSetting(aboutText, DEFAULT_TEXT);
+  const description = aboutTextState.value;
 
   return (
     <Link href="/about" className="block">

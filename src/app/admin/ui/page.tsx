@@ -172,9 +172,12 @@ export default function AdminUI() {
 
   // About profile picture (Convex-backed)
   const aboutProfilePictureUrlValue = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
-  const [aboutProfilePictureUrl, setAboutProfilePictureUrl] = useState("");
-  const [aboutProfilePictureType, setAboutProfilePictureType] = useState<"image" | "video" | "">("");
+  const parsedAboutProfilePicture = parseMediaSetting(aboutProfilePictureUrlValue, { url: "", type: "image" });
+  const [aboutProfilePictureDraft, setAboutProfilePictureDraft] = useState<{ url: string; type: "image" | "video" }>({ url: "", type: "image" });
+  const [aboutProfilePictureHasDraft, setAboutProfilePictureHasDraft] = useState(false);
   const [aboutProfilePictureSaved, setAboutProfilePictureSaved] = useState(false);
+  const effectiveAboutProfilePictureUrl = aboutProfilePictureHasDraft ? aboutProfilePictureDraft.url : parsedAboutProfilePicture.url;
+  const effectiveAboutProfilePictureType = aboutProfilePictureHasDraft ? aboutProfilePictureDraft.type : parsedAboutProfilePicture.type;
 
   // About Card (Convex-backed)
   const aboutCardValue = useQuery(api.platformSettings.get, { key: "aboutCardDescription" });
@@ -284,19 +287,6 @@ export default function AdminUI() {
     }
   }, [aboutCardValue]);
 
-  useEffect(() => {
-    if (aboutProfilePictureUrlValue !== undefined && aboutProfilePictureUrlValue !== null) {
-      try {
-        const parsed = JSON.parse(aboutProfilePictureUrlValue);
-        setAboutProfilePictureUrl(parsed.url ?? "");
-        setAboutProfilePictureType(parsed.type ?? "");
-      } catch {
-        setAboutProfilePictureUrl(aboutProfilePictureUrlValue ?? "");
-        setAboutProfilePictureType("image");
-      }
-    }
-  }, [aboutProfilePictureUrlValue]);
-
   const u = (patch: Partial<UISettings>) => setS((prev) => ({ ...prev, ...patch }));
 
   const handleTermsFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -378,7 +368,13 @@ export default function AdminUI() {
   };
 
   const saveAboutProfilePicture = async () => {
-    await setPlatformSetting({ key: "aboutProfilePictureUrl", value: JSON.stringify({ url: aboutProfilePictureUrl, type: aboutProfilePictureType }), updatedBy: "admin" });
+    await setPlatformSetting({
+      key: "aboutProfilePictureUrl",
+      value: JSON.stringify({ url: effectiveAboutProfilePictureUrl, type: effectiveAboutProfilePictureType }),
+      updatedBy: "admin",
+    });
+    setAboutProfilePictureDraft({ url: "", type: "image" });
+    setAboutProfilePictureHasDraft(false);
     flashSaved(setAboutProfilePictureSaved);
   };
 
@@ -647,12 +643,22 @@ export default function AdminUI() {
         <Field label="Profile picture" hint="Upload a profile picture for the About page (1:1 ratio recommended)">
           <MediaUpload
             label="About Profile Picture"
-            url={aboutProfilePictureUrl}
-            mediaType={aboutProfilePictureType}
-            onUrl={(v) => setAboutProfilePictureUrl(v)}
-            onFile={(dataUrl, type) => { setAboutProfilePictureUrl(dataUrl); setAboutProfilePictureType(type); }}
+            url={effectiveAboutProfilePictureUrl}
+            mediaType={effectiveAboutProfilePictureType}
+            onUrl={(v) => {
+              setAboutProfilePictureHasDraft(true);
+              setAboutProfilePictureDraft({ url: v, type: "image" });
+            }}
+            onFile={(dataUrl, type) => {
+              setAboutProfilePictureHasDraft(true);
+              setAboutProfilePictureDraft({ url: dataUrl, type });
+            }}
+            accept="image/*"
           />
         </Field>
+        {aboutProfilePictureHasDraft && (
+          <p className="text-[10px] text-green-600 mb-2">✓ About profile picture draft loaded — click Save Profile Picture or Save All UI Settings to publish it.</p>
+        )}
         <div className="mt-2">
           <button
             type="button"

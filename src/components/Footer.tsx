@@ -10,19 +10,24 @@ import { AuthModal } from "./AuthModal";
 import {
   FOOTER_MEDIA_PLATFORM_SETTING_KEY,
   normalizeContactHref,
-  parseMediaSetting,
+  resolveMediaSetting,
+  resolveTextSetting,
 } from "@/lib/platform-settings.mjs";
 
 export function Footer() {
   const footerMediaValue = useQuery(api.platformSettings.get, { key: FOOTER_MEDIA_PLATFORM_SETTING_KEY });
-  const footerMedia = parseMediaSetting(footerMediaValue, { url: "", type: "image" });
+  const footerMediaState = resolveMediaSetting(footerMediaValue, { url: "", type: "image" });
+  const footerMedia = footerMediaState.media;
   const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
+  const igUrlState = resolveTextSetting(igUrl, "#");
   const igVisible = useQuery(api.platformSettings.get, { key: "ig_visible" });
+  const igVisibleState = resolveTextSetting(igVisible, "true");
   const contactUrl = useQuery(api.platformSettings.get, { key: "contact_url" });
+  const contactUrlState = resolveTextSetting(contactUrl, "mailto:hello@solidfind.id");
 
-  const igHref = igUrl || "#";
-  const mailHref = normalizeContactHref(contactUrl);
-  const showIg = igVisible !== "false";
+  const igHref = igUrlState.value || "#";
+  const mailHref = normalizeContactHref(contactUrlState.value);
+  const showIg = igVisibleState.value !== "false";
   const { user } = useUser();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
@@ -58,6 +63,8 @@ export function Footer() {
           )}
           <div className="absolute inset-0 bg-black/25" />
         </div>
+      ) : footerMediaState.isLoading ? (
+        <div className="absolute inset-0 bg-[#e4e4e4]" />
       ) : (
         <div
           className="absolute inset-0"

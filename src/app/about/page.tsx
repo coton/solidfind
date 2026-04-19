@@ -6,20 +6,42 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { parseMediaSetting } from "@/lib/platform-settings.mjs";
+import {
+  normalizeContactHref,
+  resolveMediaSetting,
+  resolveTextSetting,
+} from "@/lib/platform-settings.mjs";
+
+const DEFAULT_ABOUT_TAGLINE = "A clearer way to build and live in Indonesia.";
+const DEFAULT_ABOUT_DESCRIPTION = `Building, renovating, or choosing a home is one of the most important decisions people make — yet reliable information and trustworthy contacts are often hard to find. SOLIDFIND.ID exists to bring clarity, structure, and confidence to that process.`;
+const DEFAULT_INDIVIDUAL_TEXT = "For property owners & renters — browse listings, bookmark companies, write testimonials, and find the right professionals for your project. Choose your household type: Solo / Couple, Family / Co-Hosting, or Shared / Community.";
+const DEFAULT_FREE_COMPANY_TEXT = "For construction & renovation professionals — create your company profile, showcase up to 3 project photos, receive testimonials, and get discovered by potential clients across Bali.";
+const DEFAULT_PRO_COMPANY_TEXT = "Everything in Free, plus: top search ranking, AI search optimization, detailed analytics, 12 project photos, and access to premium ad space. Built for companies ready to grow.";
+const DEFAULT_CONTACT_TEXT = "Questions, feedback, or partnership inquiries?";
+const DEFAULT_CONTACT_EMAIL = "hello@solidfind.id";
 
 export default function AboutPage() {
   // Dynamic content from admin UI tab
   const tagline = useQuery(api.platformSettings.get, { key: "aboutPageTagline" });
+  const taglineState = resolveTextSetting(tagline, DEFAULT_ABOUT_TAGLINE);
   const description = useQuery(api.platformSettings.get, { key: "aboutPageDescription" });
+  const descriptionState = resolveTextSetting(description, DEFAULT_ABOUT_DESCRIPTION);
   const individual = useQuery(api.platformSettings.get, { key: "aboutPageIndividual" });
+  const individualState = resolveTextSetting(individual, DEFAULT_INDIVIDUAL_TEXT);
   const freeCompany = useQuery(api.platformSettings.get, { key: "aboutPageFreeCompany" });
+  const freeCompanyState = resolveTextSetting(freeCompany, DEFAULT_FREE_COMPANY_TEXT);
   const proCompany = useQuery(api.platformSettings.get, { key: "aboutPageProCompany" });
+  const proCompanyState = resolveTextSetting(proCompany, DEFAULT_PRO_COMPANY_TEXT);
   const contact = useQuery(api.platformSettings.get, { key: "aboutPageContact" });
+  const contactState = resolveTextSetting(contact, DEFAULT_CONTACT_TEXT);
   const email = useQuery(api.platformSettings.get, { key: "aboutPageEmail" });
+  const emailState = resolveTextSetting(email, DEFAULT_CONTACT_EMAIL);
   const aboutProfilePicture = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
-  const aboutProfileMedia = parseMediaSetting(aboutProfilePicture, { url: "", type: "image" });
+  const aboutProfileMediaState = resolveMediaSetting(aboutProfilePicture, { url: "", type: "image" });
+  const aboutProfileMedia = aboutProfileMediaState.media;
   const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
+  const igUrlState = resolveTextSetting(igUrl, "#");
+  const mailHref = normalizeContactHref(emailState.value, `mailto:${DEFAULT_CONTACT_EMAIL}`);
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({ title: "SOLIDFIND.ID", url: window.location.href });
@@ -78,6 +100,8 @@ export default function AboutPage() {
                     unoptimized={aboutProfileMedia.url.startsWith("data:")}
                   />
                 )
+              ) : aboutProfileMediaState.isLoading ? (
+                <div className="w-full h-full bg-[#e4e4e4]" />
               ) : (
                 <Image 
                   src="/images/logo-full.svg" 
@@ -92,14 +116,14 @@ export default function AboutPage() {
             {/* Social Links */}
             <div className="flex items-center gap-4">
               {/* Mail icon - same as footer (25×20, stroke 1.5) */}
-              <a href={`mailto:${email || "hello@solidfind.id"}`} className="text-[#333] hover:opacity-70 transition-opacity">
+              <a href={mailHref} className="text-[#333] hover:opacity-70 transition-opacity">
                 <svg width="25" height="20" viewBox="0 0 25 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M24 2H1C0.447715 2 0 2.44772 0 3V17C0 17.5523 0.447715 18 1 18H24C24.5523 18 25 17.5523 25 17V3C25 2.44772 24.5523 2 24 2Z" fill="none" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M1 3L12.5 11L24 3" fill="none" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </a>
               {/* IG icon - same as header (20×20, stroke 1.5) */}
-              <a href={igUrl || "#"} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:opacity-70 transition-opacity">
+              <a href={igUrlState.value || "#"} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:opacity-70 transition-opacity">
                 <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
               </a>
             </div>
@@ -109,40 +133,12 @@ export default function AboutPage() {
           <div>
             {/* Tagline */}
             <p className="text-[14px] font-semibold text-[#333] mb-4">
-              {tagline || "A clearer way to build and live in Indonesia."}
+              {taglineState.value}
             </p>
 
             {/* About Description */}
             <div className="space-y-4 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]" style={{ whiteSpace: "pre-wrap" }}>
-              {description ? (
-                <p>{description}</p>
-              ) : (
-                <>
-                  <p>
-                    Building, renovating, or choosing a home is one of the most important
-                    decisions people make — yet reliable information and trustworthy contacts are often hard to find.{" "}
-                    <span className="font-semibold text-[#333]">
-                      SOLIDFIND.ID exists to bring clarity, structure, and confidence to that process.
-                    </span>
-                  </p>
-
-                  <p>SOLIDFIND.ID is built for people who are:</p>
-                  <ul className="space-y-1 ml-4">
-                    <li className="flex items-start gap-2">
-                      <span className="text-[#333]">•</span>
-                      <span>planning to build or renovate</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-[#333]">•</span>
-                      <span>looking for professionals they can trust</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-[#333]">•</span>
-                      <span>trying to make informed decisions in a complex environment</span>
-                    </li>
-                  </ul>
-                </>
-              )}
+              <p>{descriptionState.value}</p>
             </div>
 
             {/* Account Types */}
@@ -156,7 +152,7 @@ export default function AboutPage() {
                   INDIVIDUAL ACCOUNT
                 </h4>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  {individual || "For property owners & renters — browse listings, bookmark companies, write testimonials, and find the right professionals for your project. Choose your household type: Solo / Couple, Family / Co-Hosting, or Shared / Community."}
+                  {individualState.value}
                 </p>
               </div>
 
@@ -165,7 +161,7 @@ export default function AboutPage() {
                   FREE COMPANY ACCOUNT
                 </h4>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  {freeCompany || "For construction & renovation professionals — create your company profile, showcase up to 3 project photos, receive testimonials, and get discovered by potential clients across Bali."}
+                  {freeCompanyState.value}
                 </p>
               </div>
 
@@ -174,7 +170,7 @@ export default function AboutPage() {
                   PRO COMPANY ACCOUNT
                 </h4>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  {proCompany || "Everything in Free, plus: top search ranking, AI search optimization, detailed analytics, 12 project photos, and access to premium ad space. Built for companies ready to grow."}
+                  {proCompanyState.value}
                 </p>
               </div>
             </div>
@@ -185,11 +181,11 @@ export default function AboutPage() {
                 Get in touch
               </h3>
               <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
-                {contact || "Questions, feedback, or partnership inquiries?"}
+                {contactState.value}
                 <br />
                 Reach us at{" "}
-                <a href={`mailto:${email || "hello@solidfind.id"}`} className="text-[#f14110] hover:underline">
-                  {email || "hello@solidfind.id"}
+                <a href={mailHref} className="text-[#f14110] hover:underline">
+                  {emailState.value}
                 </a>
               </p>
             </div>

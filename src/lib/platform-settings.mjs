@@ -29,6 +29,42 @@ export function parseMediaSetting(value, fallback = { url: "", type: "image" }) 
 /**
  * @param {string | null | undefined} value
  * @param {string} [fallback]
+ * @returns {{ isLoading: boolean, value: string }}
+ */
+export function resolveTextSetting(value, fallback = "") {
+  if (value === undefined) {
+    return { isLoading: true, value: "" };
+  }
+
+  const trimmed = typeof value === "string" ? value.trim() : "";
+  return {
+    isLoading: false,
+    value: trimmed || fallback,
+  };
+}
+
+/**
+ * @param {string | null | undefined} value
+ * @param {PlatformMediaValue} [fallback]
+ * @returns {{ isLoading: boolean, media: PlatformMediaValue }}
+ */
+export function resolveMediaSetting(value, fallback = { url: "", type: "image" }) {
+  if (value === undefined) {
+    return {
+      isLoading: true,
+      media: { url: "", type: fallback.type === "video" ? "video" : "image" },
+    };
+  }
+
+  return {
+    isLoading: false,
+    media: parseMediaSetting(value, fallback),
+  };
+}
+
+/**
+ * @param {string | null | undefined} value
+ * @param {string} [fallback]
  * @returns {string}
  */
 export function normalizeContactHref(value, fallback = "mailto:hello@solidfind.id") {
