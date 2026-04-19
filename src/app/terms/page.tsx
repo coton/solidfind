@@ -22,7 +22,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
+      <main className="max-w-[1200px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         <div className="mb-6">
           <Link
             href="/"
@@ -37,7 +37,7 @@ export default function TermsPage() {
           SOLIDFIND.ID Terms &amp; Conditions
         </h1>
 
-        <div className="space-y-8 text-[11px] text-[#333]/70 leading-[18px] tracking-[0.22px] mb-12">
+        <div className="space-y-8 text-[11px] text-[#333]/70 leading-[14px] tracking-[0.22px] mb-12">
           {sections.map((section) => (
             <section key={section.title}>
               <h2 className="text-[18px] font-semibold text-[#333] tracking-[0.36px] mb-3">
