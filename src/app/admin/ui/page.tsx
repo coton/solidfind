@@ -19,7 +19,6 @@ interface UISettings {
   headerMediaType: "image" | "video" | "";
   footerMediaUrl: string;
   footerMediaType: "image" | "video" | "";
-  termsText: string;
   aboutProfilePictureUrl: string;
   aboutProfilePictureType: "image" | "video" | "";
 }
@@ -36,7 +35,6 @@ const DEFAULT: UISettings = {
   headerMediaType: "",
   footerMediaUrl: "",
   footerMediaType: "",
-  termsText: "",
   aboutProfilePictureUrl: "",
   aboutProfilePictureType: "",
 };
@@ -161,8 +159,18 @@ function parseTermsPreview(text: string) {
 export default function AdminUI() {
   const [s, setS] = useState<UISettings>(DEFAULT);
   const [saved, setSaved] = useState(false);
-  const [termsFile, setTermsFile] = useState("");
   const termsRef = useRef<HTMLInputElement>(null);
+
+  // Terms & Conditions (Convex-backed)
+  const termsTextValue = useQuery(api.platformSettings.get, { key: "termsText" });
+  const [termsText, setTermsText] = useState("");
+  const [termsSaved, setTermsSaved] = useState(false);
+
+  useEffect(() => {
+    if (termsTextValue !== undefined && termsTextValue !== null) {
+      setTermsText(termsTextValue);
+    }
+  }, [termsTextValue]);
 
   // About profile picture (Convex-backed)
   const aboutProfilePictureUrlValue = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
@@ -295,8 +303,7 @@ export default function AdminUI() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
-      setTermsFile(text);
-      u({ termsText: text });
+      setTermsText(text);
     };
     reader.readAsText(file);
   };
@@ -559,25 +566,38 @@ export default function AdminUI() {
             Upload .txt file
           </button>
           <input ref={termsRef} type="file" accept=".txt" className="hidden" onChange={handleTermsFile} />
-          {termsFile && <span className="text-[10px] text-green-600">✓ File loaded</span>}
+          {termsText && <span className="text-[10px] text-green-600">✓ File loaded</span>}
         </div>
 
         <textarea
-          value={s.termsText}
-          onChange={(e) => u({ termsText: e.target.value })}
+          value={termsText}
+          onChange={(e) => setTermsText(e.target.value)}
           placeholder={"[TITLE] Section 1\n[COPY] Content of the section goes here.\n\n[TITLE] Section 2\n[COPY] More content here."}
           rows={8}
           className="w-full max-w-[600px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#333] transition-colors font-mono resize-y"
         />
 
-        {s.termsText && (
+        {termsText && (
           <div className="mt-4">
             <p className="text-[10px] font-semibold text-[#333]/50 mb-2 uppercase tracking-wider">Preview</p>
             <div className="max-w-[600px] bg-[#f8f8f8] rounded-[6px] p-4 border border-[#e4e4e4]">
-              {parseTermsPreview(s.termsText)}
+              {parseTermsPreview(termsText)}
             </div>
           </div>
         )}
+
+        <div className="mt-4">
+          <button
+            onClick={async () => {
+              await setPlatformSetting({ key: "termsText", value: termsText, updatedBy: "admin" });
+              setTermsSaved(true);
+              setTimeout(() => setTermsSaved(false), 2000);
+            }}
+            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+          >
+            {termsSaved ? "✓ Saved!" : "Save T&C"}
+          </button>
+        </div>
       </SectionCard>
     </div>
   );
