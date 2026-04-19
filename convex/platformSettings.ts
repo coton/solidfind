@@ -52,6 +52,25 @@ export const set = mutation({
   },
 });
 
+export const deleteByKey = mutation({
+  args: {
+    key: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("platformSettings")
+      .withIndex("by_key", (q) => q.eq("key", args.key))
+      .first();
+
+    if (!existing) {
+      return { deleted: false };
+    }
+
+    await ctx.db.delete(existing._id);
+    return { deleted: true };
+  },
+});
+
 // Seed default settings (call once to initialize)
 export const seedDefaults = internalMutation({
   args: {},

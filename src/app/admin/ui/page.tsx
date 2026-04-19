@@ -182,6 +182,7 @@ export default function AdminUI() {
   // About Card (Convex-backed)
   const aboutCardValue = useQuery(api.platformSettings.get, { key: "aboutCardDescription" });
   const setPlatformSetting = useMutation(api.platformSettings.set);
+  const deletePlatformSettingByKey = useMutation(api.platformSettings.deleteByKey);
   const [aboutText, setAboutText] = useState("");
   const [aboutSaved, setAboutSaved] = useState(false);
 
@@ -373,6 +374,13 @@ export default function AdminUI() {
       value: JSON.stringify({ url: effectiveAboutProfilePictureUrl, type: effectiveAboutProfilePictureType }),
       updatedBy: "admin",
     });
+    setAboutProfilePictureDraft({ url: "", type: "image" });
+    setAboutProfilePictureHasDraft(false);
+    flashSaved(setAboutProfilePictureSaved);
+  };
+
+  const clearAboutProfilePicture = async () => {
+    await deletePlatformSettingByKey({ key: "aboutProfilePictureUrl" });
     setAboutProfilePictureDraft({ url: "", type: "image" });
     setAboutProfilePictureHasDraft(false);
     flashSaved(setAboutProfilePictureSaved);
@@ -660,13 +668,22 @@ export default function AdminUI() {
           <p className="text-[10px] text-green-600 mb-2">✓ About profile picture draft loaded — click Save Profile Picture or Save All UI Settings to publish it.</p>
         )}
         <div className="mt-2">
-          <button
-            type="button"
-            onClick={saveAboutProfilePicture}
-            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
-          >
-            {aboutProfilePictureSaved ? "✓ Saved!" : "Save Profile Picture"}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={saveAboutProfilePicture}
+              className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+            >
+              {aboutProfilePictureSaved ? "✓ Saved!" : "Save Profile Picture"}
+            </button>
+            <button
+              type="button"
+              onClick={clearAboutProfilePicture}
+              className="h-8 px-4 rounded-[6px] border border-[#e4e4e4] text-[11px] font-medium text-[#333]/70 hover:border-[#333] hover:text-[#333] transition-colors"
+            >
+              Delete Existing Entry
+            </button>
+          </div>
         </div>
       </SectionCard>
 

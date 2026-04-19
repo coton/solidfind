@@ -110,3 +110,26 @@ test('admin UI exposes a visible draft/upload state for the About page profile p
     'expected the Back Office UI tab to show when a replacement About profile picture has been loaded but not yet published'
   );
 });
+
+test('admin UI can delete the existing About page profile picture entry before re-uploading', () => {
+  const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
+  const platformSettingsSource = readProjectFile('convex/platformSettings.ts');
+
+  assert.match(
+    adminUiSource,
+    /Delete Existing Entry/,
+    'expected the Back Office UI tab to expose a delete action for the About page profile picture setting'
+  );
+
+  assert.match(
+    adminUiSource,
+    /deletePlatformSettingByKey\(\{ key: "aboutProfilePictureUrl" \}\)/,
+    'expected the Back Office About profile picture delete action to target the website-facing aboutProfilePictureUrl setting'
+  );
+
+  assert.match(
+    platformSettingsSource,
+    /export const deleteByKey = mutation\(/,
+    'expected Convex platform settings to expose a reusable deleteByKey mutation for admin-managed UI media'
+  );
+});
