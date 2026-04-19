@@ -15,6 +15,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { ListingCardSkeleton } from "@/components/ui/ListingCardSkeleton";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
+import { getEffectiveSubcategoryFilters, parseSubcategoryParam } from "@/lib/category-filter.mjs";
 
 export default function Home() {
   return (
@@ -34,11 +35,14 @@ function HomeContent() {
   const proEnabled = useProEnabled();
   const reviewsEnabled = useReviewsEnabled();
   const categoryParam = searchParams.get("category") || "construction";
+  const subcategoryParam = searchParams.get("subcategory") || undefined;
+  const selectedSubcategories = parseSubcategoryParam(subcategoryParam);
+  const effectiveSubcategories = getEffectiveSubcategoryFilters(selectedSubcategories);
   const locationParam = searchParams.get("location") || undefined;
   const searchParam = searchParams.get("search") || undefined;
   const projectSizeParam = searchParams.get("projectSize") || undefined;
 
-  const hasFilters = !!(locationParam || searchParam || projectSizeParam);
+  const hasFilters = !!(locationParam || searchParam || projectSizeParam || effectiveSubcategories.length);
 
   // Get visible page categories to filter out hidden ones
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
@@ -51,10 +55,13 @@ function HomeContent() {
     projectSize: projectSizeParam,
   });
 
-  // Filter companies: only show those in visible categories
-  const companies = allCompanies && visibleCategoryIds
-    ? allCompanies.filter((c) => visibleCategoryIds.includes(c.category))
-    : allCompanies;
+  // Filter companies: only show those in visible categories and matching selected subcategories
+  const companies = allCompanies
+    ?.filter((c) => !visibleCategoryIds || visibleCategoryIds.includes(c.category))
+    ?.filter((c) => {
+      if (effectiveSubcategories.length === 0) return true;
+      return !!c.subcategory && effectiveSubcategories.includes(c.subcategory.toLowerCase());
+    });
 
   const allLatestCompanies = useQuery(api.companies.latest);
   const latestCompanies = allLatestCompanies && visibleCategoryIds
@@ -159,7 +166,7 @@ function HomeContent() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [categoryParam, locationParam, searchParam, projectSizeParam]);
+  }, [categoryParam, subcategoryParam, locationParam, searchParam, projectSizeParam]);
 
   return (
     <div className="min-h-screen bg-[#ececec] flex flex-col">

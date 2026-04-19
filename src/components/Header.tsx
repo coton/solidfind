@@ -4,7 +4,7 @@ import { Suspense, useState, useCallback, useRef, useEffect, useMemo } from "rea
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { SignedIn, SignedOut, useUser, useClerk } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useClerk } from "@clerk/nextjs";
 import { AuthModal } from "@/components/AuthModal";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -13,6 +13,14 @@ import {
   resolveMediaSetting,
   resolveTextSetting,
 } from "@/lib/platform-settings.mjs";
+import {
+  encodeSubcategoryParam,
+  getSubcategoryDisplayText,
+  isSubcategoryFilterActive,
+  isSubcategoryOptionSelected,
+  parseSubcategoryParam,
+  toggleSubcategorySelection,
+} from "@/lib/category-filter.mjs";
 
 // Fallback categories shown while DB config is loading or if empty
 // Only include the initially visible ones to prevent flash of hidden tabs
@@ -309,7 +317,7 @@ function HeaderInner() {
 
   const [keywords, setKeywords] = useState(searchParams.get("search") ?? "");
   const [projectSize, setProjectSize] = useState(searchParams.get("projectSize") ?? "");
-  const [category, setCategory] = useState(searchParams.get("subcategory") ?? "");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>(
     searchParams.get("location") ? searchParams.get("location")!.split(",") : []
   );
@@ -358,7 +366,7 @@ function HeaderInner() {
 
   const handleCategoryTab = (catId: string) => {
     updateParams({ category: catId, subcategory: null });
-    setCategory("");
+    setSelectedCategories([]);
   };
 
   const handleSearch = () => {
@@ -372,7 +380,7 @@ function HeaderInner() {
   const clearFilters = () => {
     setKeywords("");
     setProjectSize("");
-    setCategory("");
+    setSelectedCategories([]);
     setLocations([]);
     // Keep the current category tab, only reset filters
     const params = new URLSearchParams();
@@ -383,16 +391,30 @@ function HeaderInner() {
   };
 
   // Get dynamic filter options for current category
-  const getDynamicFilter = (filterId: string) => {
+  const getDynamicFilter = useCallback((filterId: string) => {
     if (activeCategory && configFiltersMap && configFiltersMap[activeCategory]) {
       const filter = configFiltersMap[activeCategory].find((f) => f.id === filterId);
       if (filter) return filter.options;
     }
     return null;
-  };
+  }, [activeCategory, configFiltersMap]);
 
   const currentLocationOptions = getDynamicFilter("location") ?? locationOptions;
   const currentProjectSizeOptions = getDynamicFilter("project-size") ?? projectSizeOptions;
+  const categoryOptions = useMemo(() => {
+    const dynamicCats = getDynamicFilter("categories");
+    if (dynamicCats) return dynamicCats;
+
+    if (activeCategory === "renovation") return renovationCategories;
+    if (activeCategory === "architecture") return architectureCategories;
+    if (activeCategory === "interior") return interiorCategories;
+    if (activeCategory === "real-estate") return realEstateCategories;
+    return constructionCategories;
+  }, [activeCategory, getDynamicFilter]);
+
+  useEffect(() => {
+    setSelectedCategories(parseSubcategoryParam(searchParams.get("subcategory"), categoryOptions));
+  }, [searchParams, categoryOptions]);
 
   // Handle location multi-select
   const handleLocationChange = (locationId: string) => {
@@ -446,16 +468,10 @@ function HeaderInner() {
     return allRegions.every(region => locations.includes(region)) || locations.includes("bali");
   };
 
-  // Get categories based on active main category (dynamic or fallback)
-  const getCategoryOptions = () => {
-    const dynamicCats = getDynamicFilter("categories");
-    if (dynamicCats) return dynamicCats;
-
-    if (activeCategory === "renovation") return renovationCategories;
-    if (activeCategory === "architecture") return architectureCategories;
-    if (activeCategory === "interior") return interiorCategories;
-    if (activeCategory === "real-estate") return realEstateCategories;
-    return constructionCategories;
+  const handleCategoryChange = (subcategoryId: string) => {
+    const nextCategories = toggleSubcategorySelection(selectedCategories, subcategoryId, categoryOptions);
+    setSelectedCategories(nextCategories);
+    updateParams({ subcategory: encodeSubcategoryParam(nextCategories, categoryOptions) });
   };
 
   return (
@@ -620,10 +636,15 @@ function HeaderInner() {
               {/* Categories Dropdown */}
               <Dropdown
                 label="CATEGORIES"
-                options={getCategoryOptions()}
-                value={category}
-                onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
+                options={categoryOptions}
+                value=""
+                onChange={handleCategoryChange}
                 width="w-[140px]"
+                multiSelect={true}
+                selectedValues={selectedCategories}
+                displayText={getSubcategoryDisplayText(selectedCategories, categoryOptions)}
+                isActive={isSubcategoryFilterActive(selectedCategories, categoryOptions)}
+                isOptionSelected={(optionId) => isSubcategoryOptionSelected(selectedCategories, optionId, categoryOptions)}
               />
 
               {/* Location Dropdown - multi-select enabled */}
@@ -698,10 +719,15 @@ function HeaderInner() {
                 <div className="flex-1">
                   <Dropdown
                     label="CATEGORIES"
-                    options={getCategoryOptions()}
-                    value={category}
-                    onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
+                    options={categoryOptions}
+                    value=""
+                    onChange={handleCategoryChange}
                     width="w-full"
+                    multiSelect={true}
+                    selectedValues={selectedCategories}
+                    displayText={getSubcategoryDisplayText(selectedCategories, categoryOptions)}
+                    isActive={isSubcategoryFilterActive(selectedCategories, categoryOptions)}
+                    isOptionSelected={(optionId) => isSubcategoryOptionSelected(selectedCategories, optionId, categoryOptions)}
                   />
                 </div>
 
