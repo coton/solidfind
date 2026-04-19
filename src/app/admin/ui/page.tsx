@@ -4,42 +4,27 @@ import { useState, useEffect, useRef } from "react";
 import { Eye, EyeOff, Upload } from "lucide-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import {
+  FOOTER_MEDIA_PLATFORM_SETTING_KEY,
+  HEADER_MEDIA_PLATFORM_SETTING_KEY,
+  parseMediaSetting,
+} from "@/lib/platform-settings.mjs";
 import { TERMS_TEXT_PLATFORM_SETTING_KEY } from "@/lib/terms-content.mjs";
 
-const STORAGE_KEY = "solidfind_ui_settings";
-
 interface UISettings {
-  contactUrl: string;
-  igUrl: string;
-  igVisible: boolean;
-  adVerticalUrl: string;
-  adVerticalMediaType: "image" | "video" | "";
-  adHorizontalUrl: string;
-  adHorizontalMediaType: "image" | "video" | "";
   headerMediaUrl: string;
   headerMediaType: "image" | "video" | "";
   footerMediaUrl: string;
   footerMediaType: "image" | "video" | "";
   termsText: string;
-  aboutProfilePictureUrl: string;
-  aboutProfilePictureType: "image" | "video" | "";
 }
 
 const DEFAULT: UISettings = {
-  contactUrl: "",
-  igUrl: "",
-  igVisible: true,
-  adVerticalUrl: "",
-  adVerticalMediaType: "",
-  adHorizontalUrl: "",
-  adHorizontalMediaType: "",
   headerMediaUrl: "",
   headerMediaType: "",
   footerMediaUrl: "",
   footerMediaType: "",
   termsText: "",
-  aboutProfilePictureUrl: "",
-  aboutProfilePictureType: "",
 };
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -163,11 +148,21 @@ function parseTermsPreview(text: string) {
 
 export default function AdminUI() {
   const [s, setS] = useState<UISettings>(DEFAULT);
-  const [saved, setSaved] = useState(false);
   const [termsFile, setTermsFile] = useState("");
   const termsRef = useRef<HTMLInputElement>(null);
+  const [saveAllUiSaved, setSaveAllUiSaved] = useState(false);
   const termsTextValue = useQuery(api.platformSettings.get, { key: TERMS_TEXT_PLATFORM_SETTING_KEY });
   const [termsSaved, setTermsSaved] = useState(false);
+  const headerMediaValue = useQuery(api.platformSettings.get, { key: HEADER_MEDIA_PLATFORM_SETTING_KEY });
+  const footerMediaValue = useQuery(api.platformSettings.get, { key: FOOTER_MEDIA_PLATFORM_SETTING_KEY });
+  const parsedHeaderMedia = parseMediaSetting(headerMediaValue, { url: "", type: "image" });
+  const parsedFooterMedia = parseMediaSetting(footerMediaValue, { url: "", type: "image" });
+  const effectiveHeaderMediaUrl = s.headerMediaUrl || parsedHeaderMedia.url;
+  const effectiveHeaderMediaType = (s.headerMediaType || parsedHeaderMedia.type) as "image" | "video";
+  const effectiveFooterMediaUrl = s.footerMediaUrl || parsedFooterMedia.url;
+  const effectiveFooterMediaType = (s.footerMediaType || parsedFooterMedia.type) as "image" | "video";
+  const [headerMediaSaved, setHeaderMediaSaved] = useState(false);
+  const [footerMediaSaved, setFooterMediaSaved] = useState(false);
 
   // New User image (Convex-backed)
   const newUserImageValue = useQuery(api.platformSettings.get, { key: "newUserImage" });
@@ -177,9 +172,12 @@ export default function AdminUI() {
 
   // About profile picture (Convex-backed)
   const aboutProfilePictureUrlValue = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
-  const [aboutProfilePictureUrl, setAboutProfilePictureUrl] = useState("");
-  const [aboutProfilePictureType, setAboutProfilePictureType] = useState<"image" | "video" | "">("");
+  const parsedAboutProfilePicture = parseMediaSetting(aboutProfilePictureUrlValue, { url: "", type: "image" });
+  const [aboutProfilePictureDraft, setAboutProfilePictureDraft] = useState<{ url: string; type: "image" | "video" }>({ url: "", type: "image" });
+  const [aboutProfilePictureHasDraft, setAboutProfilePictureHasDraft] = useState(false);
   const [aboutProfilePictureSaved, setAboutProfilePictureSaved] = useState(false);
+  const effectiveAboutProfilePictureUrl = aboutProfilePictureHasDraft ? aboutProfilePictureDraft.url : parsedAboutProfilePicture.url;
+  const effectiveAboutProfilePictureType = aboutProfilePictureHasDraft ? aboutProfilePictureDraft.type : parsedAboutProfilePicture.type;
 
   // About Card (Convex-backed)
   const aboutCardValue = useQuery(api.platformSettings.get, { key: "aboutCardDescription" });
@@ -289,32 +287,6 @@ export default function AdminUI() {
     }
   }, [aboutCardValue]);
 
-  useEffect(() => {
-    if (aboutProfilePictureUrlValue !== undefined && aboutProfilePictureUrlValue !== null) {
-      try {
-        const parsed = JSON.parse(aboutProfilePictureUrlValue);
-        setAboutProfilePictureUrl(parsed.url ?? "");
-        setAboutProfilePictureType(parsed.type ?? "");
-      } catch {
-        setAboutProfilePictureUrl(aboutProfilePictureUrlValue ?? "");
-        setAboutProfilePictureType("image");
-      }
-    }
-  }, [aboutProfilePictureUrlValue]);
-
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try { setS(JSON.parse(stored) as UISettings); } catch { /* ignore */ }
-    }
-  }, []);
-
-  const save = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
-
   const u = (patch: Partial<UISettings>) => setS((prev) => ({ ...prev, ...patch }));
 
   const handleTermsFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -329,15 +301,117 @@ export default function AdminUI() {
     reader.readAsText(file);
   };
 
+  const flashSaved = (setter: (value: boolean) => void) => {
+    setter(true);
+    setTimeout(() => setter(false), 2000);
+  };
+
+  const saveAboutText = async () => {
+    await setPlatformSetting({ key: "aboutCardDescription", value: aboutText, updatedBy: "admin" });
+    flashSaved(setAboutSaved);
+  };
+
+  const saveAboutPage = async () => {
+    const entries: [string, string][] = [
+      ["aboutPageTagline", aboutPageFields.tagline],
+      ["aboutPageDescription", aboutPageFields.description],
+      ["aboutPageIndividual", aboutPageFields.individual],
+      ["aboutPageFreeCompany", aboutPageFields.freeCompany],
+      ["aboutPageProCompany", aboutPageFields.proCompany],
+      ["aboutPageContact", aboutPageFields.contact],
+      ["aboutPageEmail", aboutPageFields.email],
+    ];
+
+    for (const [key, value] of entries) {
+      await setPlatformSetting({ key, value, updatedBy: "admin" });
+    }
+
+    flashSaved(setAboutPageSaved);
+  };
+
+  const saveLinks = async () => {
+    await Promise.all([
+      setPlatformSetting({ key: "ig_url", value: igUrl, updatedBy: "admin" }),
+      setPlatformSetting({ key: "ig_visible", value: igVisible ? "true" : "false", updatedBy: "admin" }),
+      setPlatformSetting({ key: "contact_url", value: contactUrl, updatedBy: "admin" }),
+    ]);
+
+    flashSaved(setLinksSaved);
+  };
+
+  const saveNewUserImage = async () => {
+    await setPlatformSetting({ key: "newUserImage", value: JSON.stringify({ url: newUserImageUrl, type: "image" }), updatedBy: "admin" });
+    setNewUserImageHasDraft(false);
+    setNewUserImageDraftUrl("");
+    flashSaved(setNewUserImageSaved);
+  };
+
+  const saveAdSpaces = async () => {
+    await Promise.all([
+      setPlatformSetting({ key: "adVertical", value: JSON.stringify({ url: adVerticalUrl, type: adVerticalMediaType }), updatedBy: "admin" }),
+      setPlatformSetting({ key: "adHorizontal", value: JSON.stringify({ url: adHorizontalUrl, type: adHorizontalMediaType }), updatedBy: "admin" }),
+    ]);
+
+    flashSaved(setAdSpacesSaved);
+  };
+
+  const saveHeaderMedia = async () => {
+    await setPlatformSetting({ key: HEADER_MEDIA_PLATFORM_SETTING_KEY, value: JSON.stringify({ url: effectiveHeaderMediaUrl, type: effectiveHeaderMediaType }), updatedBy: "admin" });
+    u({ headerMediaUrl: "", headerMediaType: "" });
+    flashSaved(setHeaderMediaSaved);
+  };
+
+  const saveFooterMedia = async () => {
+    await setPlatformSetting({ key: FOOTER_MEDIA_PLATFORM_SETTING_KEY, value: JSON.stringify({ url: effectiveFooterMediaUrl, type: effectiveFooterMediaType }), updatedBy: "admin" });
+    u({ footerMediaUrl: "", footerMediaType: "" });
+    flashSaved(setFooterMediaSaved);
+  };
+
+  const saveAboutProfilePicture = async () => {
+    await setPlatformSetting({
+      key: "aboutProfilePictureUrl",
+      value: JSON.stringify({ url: effectiveAboutProfilePictureUrl, type: effectiveAboutProfilePictureType }),
+      updatedBy: "admin",
+    });
+    setAboutProfilePictureDraft({ url: "", type: "image" });
+    setAboutProfilePictureHasDraft(false);
+    flashSaved(setAboutProfilePictureSaved);
+  };
+
+  const saveTermsContent = async () => {
+    await setPlatformSetting({ key: TERMS_TEXT_PLATFORM_SETTING_KEY, value: effectiveTermsText, updatedBy: "admin" });
+    flashSaved(setTermsSaved);
+  };
+
+  const saveAllUiSettings = async () => {
+    await Promise.all([
+      saveAboutText(),
+      saveAboutPage(),
+      saveLinks(),
+      saveNewUserImage(),
+      saveAdSpaces(),
+      saveHeaderMedia(),
+      saveFooterMedia(),
+      saveAboutProfilePicture(),
+      saveTermsContent(),
+    ]);
+
+    flashSaved(setSaveAllUiSaved);
+  };
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">UI Settings</h1>
+      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+        <div>
+          <h1 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">UI Settings</h1>
+          <p className="text-[11px] text-[#333]/50 mt-1">Each section saves directly to website-facing platform settings.</p>
+        </div>
         <button
-          onClick={save}
-          className="h-9 px-5 rounded-[6px] bg-[#333] text-white text-[12px] font-medium hover:bg-[#111] transition-colors"
+          type="button"
+          onClick={saveAllUiSettings}
+          className="h-9 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
         >
-          {saved ? "✓ Saved!" : "Save All"}
+          {saveAllUiSaved ? "✓ All UI Settings Saved!" : "Save All UI Settings"}
         </button>
       </div>
 
@@ -353,11 +427,8 @@ export default function AdminUI() {
           />
         </Field>
         <button
-          onClick={async () => {
-            await setPlatformSetting({ key: "aboutCardDescription", value: aboutText });
-            setAboutSaved(true);
-            setTimeout(() => setAboutSaved(false), 2000);
-          }}
+          type="button"
+          onClick={saveAboutText}
           className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
         >
           {aboutSaved ? "✓ Saved!" : "Save About Text"}
@@ -424,22 +495,8 @@ export default function AdminUI() {
           />
         </Field>
         <button
-          onClick={async () => {
-            const entries: [string, string][] = [
-              ["aboutPageTagline", aboutPageFields.tagline],
-              ["aboutPageDescription", aboutPageFields.description],
-              ["aboutPageIndividual", aboutPageFields.individual],
-              ["aboutPageFreeCompany", aboutPageFields.freeCompany],
-              ["aboutPageProCompany", aboutPageFields.proCompany],
-              ["aboutPageContact", aboutPageFields.contact],
-              ["aboutPageEmail", aboutPageFields.email],
-            ];
-            for (const [key, value] of entries) {
-              await setPlatformSetting({ key, value });
-            }
-            setAboutPageSaved(true);
-            setTimeout(() => setAboutPageSaved(false), 2000);
-          }}
+          type="button"
+          onClick={saveAboutPage}
           className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
         >
           {aboutPageSaved ? "✓ Saved!" : "Save About Page"}
@@ -468,13 +525,8 @@ export default function AdminUI() {
       {/* Save Links */}
       <div className="mb-4">
         <button
-          onClick={async () => {
-            await setPlatformSetting({ key: "ig_url", value: igUrl, updatedBy: "admin" });
-            await setPlatformSetting({ key: "ig_visible", value: igVisible ? "true" : "false", updatedBy: "admin" });
-            await setPlatformSetting({ key: "contact_url", value: contactUrl, updatedBy: "admin" });
-            setLinksSaved(true);
-            setTimeout(() => setLinksSaved(false), 2000);
-          }}
+          type="button"
+          onClick={saveLinks}
           className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
         >
           {linksSaved ? "✓ Links Saved!" : "Save Contact & Instagram"}
@@ -505,13 +557,7 @@ export default function AdminUI() {
         <div className="mt-2">
           <button
             type="button"
-            onClick={async () => {
-              await setPlatformSetting({ key: "newUserImage", value: JSON.stringify({ url: newUserImageUrl, type: "image" }), updatedBy: "admin" });
-              setNewUserImageHasDraft(false);
-              setNewUserImageDraftUrl("");
-              setNewUserImageSaved(true);
-              setTimeout(() => setNewUserImageSaved(false), 2000);
-            }}
+            onClick={saveNewUserImage}
             className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
           >
             {newUserImageSaved ? "✓ Saved!" : "Save New User Image"}
@@ -542,15 +588,7 @@ export default function AdminUI() {
         <div className="flex items-center gap-4 mt-2">
           <button
             type="button"
-            onClick={() => {
-              setAdSpacesSaved(false);
-              const promiseVertical = setPlatformSetting({ key: "adVertical", value: JSON.stringify({ url: adVerticalUrl, type: adVerticalMediaType }) });
-              const promiseHorizontal = setPlatformSetting({ key: "adHorizontal", value: JSON.stringify({ url: adHorizontalUrl, type: adHorizontalMediaType }) });
-              Promise.all([promiseVertical, promiseHorizontal]).then(() => {
-                setAdSpacesSaved(true);
-                setTimeout(() => setAdSpacesSaved(false), 2000);
-              });
-            }}
+            onClick={saveAdSpaces}
             className={`h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center ${adSpacesSaved ? 'border-[#f14110] text-[#f14110]' : ''}`}
           >
             {adSpacesSaved ? "Saved" : "Save Ad Spaces"}
@@ -563,11 +601,20 @@ export default function AdminUI() {
         <MediaUpload
           label="Header media"
           hint="Photo or video — replaces the header background across the whole website. Recommended JPG size: 3840×1080px (supports up to 4K)"
-          url={s.headerMediaUrl}
-          mediaType={s.headerMediaType}
+          url={effectiveHeaderMediaUrl}
+          mediaType={effectiveHeaderMediaType}
           onUrl={(v) => u({ headerMediaUrl: v })}
           onFile={(dataUrl, type) => u({ headerMediaUrl: dataUrl, headerMediaType: type })}
         />
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={saveHeaderMedia}
+            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+          >
+            {headerMediaSaved ? "✓ Saved!" : "Save Header Media"}
+          </button>
+        </div>
       </SectionCard>
 
       {/* Footer */}
@@ -575,11 +622,20 @@ export default function AdminUI() {
         <MediaUpload
           label="Footer media"
           hint="Photo or video — replaces the footer background across the whole website. Recommended JPG size: 3840×600px (supports up to 4K)"
-          url={s.footerMediaUrl}
-          mediaType={s.footerMediaType}
+          url={effectiveFooterMediaUrl}
+          mediaType={effectiveFooterMediaType}
           onUrl={(v) => u({ footerMediaUrl: v })}
           onFile={(dataUrl, type) => u({ footerMediaUrl: dataUrl, footerMediaType: type })}
         />
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={saveFooterMedia}
+            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+          >
+            {footerMediaSaved ? "✓ Saved!" : "Save Footer Media"}
+          </button>
+        </div>
       </SectionCard>
 
       {/* About Profile Picture */}
@@ -587,20 +643,26 @@ export default function AdminUI() {
         <Field label="Profile picture" hint="Upload a profile picture for the About page (1:1 ratio recommended)">
           <MediaUpload
             label="About Profile Picture"
-            url={aboutProfilePictureUrl}
-            mediaType={aboutProfilePictureType}
-            onUrl={(v) => setAboutProfilePictureUrl(v)}
-            onFile={(dataUrl, type) => { setAboutProfilePictureUrl(dataUrl); setAboutProfilePictureType(type); }}
+            url={effectiveAboutProfilePictureUrl}
+            mediaType={effectiveAboutProfilePictureType}
+            onUrl={(v) => {
+              setAboutProfilePictureHasDraft(true);
+              setAboutProfilePictureDraft({ url: v, type: "image" });
+            }}
+            onFile={(dataUrl, type) => {
+              setAboutProfilePictureHasDraft(true);
+              setAboutProfilePictureDraft({ url: dataUrl, type });
+            }}
+            accept="image/*"
           />
         </Field>
+        {aboutProfilePictureHasDraft && (
+          <p className="text-[10px] text-green-600 mb-2">✓ About profile picture draft loaded — click Save Profile Picture or Save All UI Settings to publish it.</p>
+        )}
         <div className="mt-2">
           <button
             type="button"
-            onClick={async () => {
-              await setPlatformSetting({ key: "aboutProfilePictureUrl", value: JSON.stringify({ url: aboutProfilePictureUrl, type: aboutProfilePictureType }), updatedBy: "admin" });
-              setAboutProfilePictureSaved(true);
-              setTimeout(() => setAboutProfilePictureSaved(false), 2000);
-            }}
+            onClick={saveAboutProfilePicture}
             className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
           >
             {aboutProfilePictureSaved ? "✓ Saved!" : "Save Profile Picture"}
@@ -615,7 +677,10 @@ export default function AdminUI() {
           <code className="bg-[#f5f5f5] px-1 rounded">[TITLE]</code> for section headings and{" "}
           <code className="bg-[#f5f5f5] px-1 rounded">[COPY]</code> for body text. These are auto-formatted on the website.
         </p>
-        <div className="flex items-center gap-3 mb-4">
+        <p className="text-[10px] text-[#f14110] mb-3">
+          Upload loads a draft only. Click Save Terms & Conditions or Save All UI Settings to publish it to the website.
+        </p>
+        <div className="flex flex-wrap items-center gap-3 mb-4">
           <button
             type="button"
             onClick={() => termsRef.current?.click()}
@@ -623,6 +688,13 @@ export default function AdminUI() {
           >
             <Upload className="w-3.5 h-3.5" />
             Upload .txt file
+          </button>
+          <button
+            type="button"
+            onClick={saveTermsContent}
+            className="h-9 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+          >
+            {termsSaved ? "✓ Saved!" : "Save Terms & Conditions"}
           </button>
           <input ref={termsRef} type="file" accept=".txt" className="hidden" onChange={handleTermsFile} />
           {termsFile && <span className="text-[10px] text-green-600">✓ File loaded</span>}
@@ -648,11 +720,7 @@ export default function AdminUI() {
         <div className="mt-4">
           <button
             type="button"
-            onClick={async () => {
-              await setPlatformSetting({ key: TERMS_TEXT_PLATFORM_SETTING_KEY, value: effectiveTermsText, updatedBy: "admin" });
-              setTermsSaved(true);
-              setTimeout(() => setTermsSaved(false), 2000);
-            }}
+            onClick={saveTermsContent}
             className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
           >
             {termsSaved ? "✓ Saved!" : "Save Terms & Conditions"}

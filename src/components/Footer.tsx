@@ -7,15 +7,27 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { AuthModal } from "./AuthModal";
+import {
+  FOOTER_MEDIA_PLATFORM_SETTING_KEY,
+  normalizeContactHref,
+  resolveMediaSetting,
+  resolveTextSetting,
+} from "@/lib/platform-settings.mjs";
 
 export function Footer() {
+  const footerMediaValue = useQuery(api.platformSettings.get, { key: FOOTER_MEDIA_PLATFORM_SETTING_KEY });
+  const footerMediaState = resolveMediaSetting(footerMediaValue, { url: "", type: "image" });
+  const footerMedia = footerMediaState.media;
   const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
+  const igUrlState = resolveTextSetting(igUrl, "#");
   const igVisible = useQuery(api.platformSettings.get, { key: "ig_visible" });
+  const igVisibleState = resolveTextSetting(igVisible, "true");
   const contactUrl = useQuery(api.platformSettings.get, { key: "contact_url" });
+  const contactUrlState = resolveTextSetting(contactUrl, "mailto:hello@solidfind.id");
 
-  const igHref = igUrl || "#";
-  const mailHref = contactUrl || "#";
-  const showIg = igVisible !== "false";
+  const igHref = igUrlState.value || "#";
+  const mailHref = normalizeContactHref(contactUrlState.value);
+  const showIg = igVisibleState.value !== "false";
   const { user } = useUser();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
@@ -36,13 +48,31 @@ export function Footer() {
         initialAccountType="individual"
       />
       
-      {/* Gradient: E9A28E → F14110 (both mobile & desktop) */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: "linear-gradient(to right, #E9A28E, #F14110)"
-        }}
-      />
+      {footerMedia.url ? (
+        <div className="absolute inset-0">
+          {footerMedia.type === "video" ? (
+            <video src={footerMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
+          ) : (
+            <Image
+              src={footerMedia.url}
+              alt="Footer background"
+              fill
+              className="object-cover"
+              unoptimized={footerMedia.url.startsWith("data:")}
+            />
+          )}
+          <div className="absolute inset-0 bg-black/25" />
+        </div>
+      ) : footerMediaState.isLoading ? (
+        <div className="absolute inset-0 bg-[#e4e4e4]" />
+      ) : (
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(to right, #E9A28E, #F14110)"
+          }}
+        />
+      )}
       {/* Mobile Layout - Right-aligned */}
       <div className="sm:hidden absolute inset-0 flex items-center justify-end p-5 z-10">
         <div className="flex flex-col items-end gap-3">
@@ -76,7 +106,7 @@ export function Footer() {
                 <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
               </button>
             )}
-            <a href={`mailto:${mailHref}`} className="hover:opacity-80 transition-opacity">
+            <a href={mailHref} className="hover:opacity-80 transition-opacity">
               <Image src="/images/footer-mail.svg" alt="Email" width={25} height={20} />
             </a>
             <Link
@@ -131,7 +161,7 @@ export function Footer() {
                 <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
               </button>
             )}
-            <a href={`mailto:${mailHref}`} className="hover:opacity-80 transition-opacity">
+            <a href={mailHref} className="hover:opacity-80 transition-opacity">
               <Image src="/images/footer-mail.svg" alt="Email" width={25} height={20} />
             </a>
             <Link

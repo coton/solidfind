@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { resolveMediaSetting } from "@/lib/platform-settings.mjs";
 
 type AccountType = "company" | "individual";
 
@@ -62,16 +63,8 @@ export function AccountTypeSelectionCard({
   const [submitHovered, setSubmitHovered] = useState(false);
 
   const newUserImageValue = useQuery(api.platformSettings.get, { key: "newUserImage" });
-  let bannerImageSrc = "/images/bg-individual-page.png";
-
-  if (newUserImageValue) {
-    try {
-      const parsed = JSON.parse(newUserImageValue);
-      bannerImageSrc = parsed.url || bannerImageSrc;
-    } catch {
-      bannerImageSrc = newUserImageValue;
-    }
-  }
+  const newUserImageState = resolveMediaSetting(newUserImageValue, { url: "/images/bg-individual-page.png", type: "image" });
+  const bannerImageSrc = newUserImageState.media.url;
 
   return (
     <div className="relative">
@@ -83,14 +76,18 @@ export function AccountTypeSelectionCard({
         <p className="text-[11px] text-[#333] tracking-[0.22px] mt-3">{email}</p>
 
         <div className="mt-5 mb-5 rounded-[6px] overflow-hidden relative" style={{ width: "100%", aspectRatio: "386 / 96" }}>
-          <Image
-            src={bannerImageSrc}
-            alt="SolidFind"
-            fill
-            sizes="(max-width: 440px) calc(100vw - 56px), 384px"
-            className="absolute inset-0 w-full h-full object-cover object-right-bottom sm:object-center"
-            unoptimized={bannerImageSrc.startsWith("data:")}
-          />
+          {bannerImageSrc ? (
+            <Image
+              src={bannerImageSrc}
+              alt="SolidFind"
+              fill
+              sizes="(max-width: 440px) calc(100vw - 56px), 384px"
+              className="absolute inset-0 w-full h-full object-cover object-right-bottom sm:object-center"
+              unoptimized={bannerImageSrc.startsWith("data:")}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-[#e4e4e4]" />
+          )}
         </div>
 
         <h3

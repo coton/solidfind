@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useSignIn, useSignUp } from "@clerk/nextjs";
-import { useConvex } from "convex/react";
+import { useConvex, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { OAuthStrategy } from "@clerk/types";
+import {
+  AD_VERTICAL_PLATFORM_SETTING_KEY,
+  resolveMediaSetting,
+} from "@/lib/platform-settings.mjs";
 
 type AuthMode = "login" | "register";
 type AccountType = "company" | "individual";
@@ -132,6 +137,9 @@ export function AuthModal({
   const { signIn, setActive: setSignInActive, isLoaded: isSignInLoaded } = useSignIn();
   const { signUp, setActive: setSignUpActive, isLoaded: isSignUpLoaded } = useSignUp();
   const convex = useConvex();
+  const verticalAdValue = useQuery(api.platformSettings.get, { key: AD_VERTICAL_PLATFORM_SETTING_KEY });
+  const verticalAdState = resolveMediaSetting(verticalAdValue, { url: "", type: "image" });
+  const verticalAdMedia = verticalAdState.media;
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [accountType, setAccountType] = useState<AccountType>(initialAccountType);
@@ -405,10 +413,28 @@ export function AuthModal({
           backgroundColor: '#D9D9D9',
           alignItems: 'center',
           justifyContent: 'center',
+          position: 'relative',
+          overflow: 'hidden',
         }}>
-          <span style={{ color: '#999', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
-            AD SPACE
-          </span>
+          {verticalAdMedia.url ? (
+            verticalAdMedia.type === 'video' ? (
+              <video src={verticalAdMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
+            ) : (
+              <Image
+                src={verticalAdMedia.url}
+                alt="Advertisement"
+                fill
+                className="object-cover"
+                unoptimized={verticalAdMedia.url.startsWith('data:')}
+              />
+            )
+          ) : verticalAdState.isLoading ? (
+            <div className="w-full h-full bg-[#e4e4e4]" />
+          ) : (
+            <span style={{ color: '#999', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
+              AD SPACE
+            </span>
+          )}
         </div>
 
         {/* ── RIGHT: Content ── */}

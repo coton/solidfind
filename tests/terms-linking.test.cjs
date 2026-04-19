@@ -35,6 +35,19 @@ test('shared terms utility exposes the Convex key used by admin and website', as
   assert.equal(termsUtils.TERMS_TEXT_PLATFORM_SETTING_KEY, 'termsText');
 });
 
+test('Convex platform settings seed includes the shared Terms & Conditions key', async () => {
+  const termsUtils = await import(path.join(projectRoot, 'src/lib/terms-content.mjs'));
+  const platformSettingsSource = readProjectFile('convex/platformSettings.ts');
+
+  assert.match(
+    platformSettingsSource,
+    /const defaults: Record<string, string> = \{[\s\S]*?\[TERMS_TEXT_PLATFORM_SETTING_KEY\]: DEFAULT_TERMS_TEXT[\s\S]*?\};/,
+    'expected Convex platform settings defaults to seed the shared termsText key with default terms content'
+  );
+
+  assert.equal(termsUtils.TERMS_TEXT_PLATFORM_SETTING_KEY, 'termsText');
+});
+
 test('shared terms utility parses admin-authored sections, paragraphs, and lists', async () => {
   const termsUtils = await import(path.join(projectRoot, 'src/lib/terms-content.mjs'));
   const sections = termsUtils.parseTermsContent(`

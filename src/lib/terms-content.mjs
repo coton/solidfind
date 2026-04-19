@@ -1,3 +1,10 @@
+/**
+ * @typedef {{ type: "paragraph", content: string }} TermsParagraphBlock
+ * @typedef {{ type: "list", items: string[] }} TermsListBlock
+ * @typedef {TermsParagraphBlock | TermsListBlock} TermsBlock
+ * @typedef {{ title: string, blocks: TermsBlock[] }} TermsSection
+ */
+
 export const TERMS_TEXT_PLATFORM_SETTING_KEY = "termsText";
 
 export const DEFAULT_TERMS_TEXT = `[TITLE] Terms of Use
@@ -23,16 +30,27 @@ export const DEFAULT_TERMS_TEXT = `[TITLE] Terms of Use
 - Comply with all applicable local laws and regulations
 [COPY] SOLIDFIND.ID reserves the right to suspend or terminate accounts that violate these responsibilities without prior notice.`;
 
+/**
+ * @param {string | null | undefined} value
+ * @returns {string}
+ */
 export function normalizeTermsText(value) {
   return typeof value === "string" && value.trim() ? value.trim() : DEFAULT_TERMS_TEXT;
 }
 
+/**
+ * @param {string | null | undefined} value
+ * @returns {TermsSection[]}
+ */
 export function parseTermsContent(value) {
   const text = normalizeTermsText(value);
   const lines = text.split(/\r?\n/);
+  /** @type {TermsSection[]} */
   const sections = [];
+  /** @type {TermsSection | null} */
   let currentSection = null;
 
+  /** @returns {TermsSection} */
   const ensureSection = () => {
     if (!currentSection) {
       currentSection = { title: "Terms & Conditions", blocks: [] };

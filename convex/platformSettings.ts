@@ -1,5 +1,9 @@
 import { mutation, query, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import {
+  DEFAULT_TERMS_TEXT,
+  TERMS_TEXT_PLATFORM_SETTING_KEY,
+} from "../src/lib/terms-content.mjs";
 
 export const get = query({
   args: { key: v.string() },
@@ -60,6 +64,7 @@ export const seedDefaults = internalMutation({
       monthly_price_standard: "650000",
       yearly_price_standard: "7000000",
       pricing_phase: "launch",
+      [TERMS_TEXT_PLATFORM_SETTING_KEY]: DEFAULT_TERMS_TEXT,
     };
 
     for (const [key, value] of Object.entries(defaults)) {

@@ -11,10 +11,12 @@ import {
   parseTermsContent,
   TERMS_TEXT_PLATFORM_SETTING_KEY,
 } from "@/lib/terms-content.mjs";
+import { resolveTextSetting } from "@/lib/platform-settings.mjs";
 
 export default function TermsPage() {
   const termsText = useQuery(api.platformSettings.get, { key: TERMS_TEXT_PLATFORM_SETTING_KEY });
-  const sections = parseTermsContent(termsText ?? DEFAULT_TERMS_TEXT);
+  const termsTextState = resolveTextSetting(termsText, DEFAULT_TERMS_TEXT);
+  const sections = termsTextState.isLoading ? [] : parseTermsContent(termsTextState.value || DEFAULT_TERMS_TEXT);
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">

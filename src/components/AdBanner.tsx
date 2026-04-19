@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { resolveMediaSetting } from "@/lib/platform-settings.mjs";
 
 interface AdBannerProps {
   imageSrc?: string;
@@ -16,8 +17,8 @@ interface AdBannerProps {
 export function AdBanner({ imageSrc: propImageSrc, alt = "Advertisement" }: AdBannerProps) {
   // Fetch ad image from platform settings
   const horizontalAdValue = useQuery(api.platformSettings.get, { key: "adHorizontal" });
-  const horizontalAdData = horizontalAdValue ? JSON.parse(horizontalAdValue) : null;
-  const displayUrl = horizontalAdData?.url || propImageSrc;
+  const horizontalAdState = resolveMediaSetting(horizontalAdValue, { url: "", type: "image" });
+  const displayUrl = horizontalAdState.media.url || propImageSrc;
 
   // Don't show ad space if no ad is uploaded
   if (!displayUrl) return null;
@@ -41,6 +42,7 @@ export function AdBanner({ imageSrc: propImageSrc, alt = "Advertisement" }: AdBa
         fill
         sizes="(max-width: 700px) 100vw, 700px"
         style={{ objectFit: "cover" }}
+        unoptimized={displayUrl.startsWith("data:")}
       />
     </div>
   );
