@@ -1,20 +1,20 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { fetchQuery } from "convex/nextjs";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
-import ProfilePageClient from "./ProfilePageClient";
+import ProfilePageClient from "../profile/[id]/ProfilePageClient";
 
 type Props = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ companySlug: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
+  const { companySlug } = await params;
 
   try {
     const company = await fetchQuery(api.companies.getByPublicIdentifier, {
-      identifier: id,
+      identifier: companySlug,
     });
 
     if (!company) {
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function ProfilePage() {
+export default function CompanySlugPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#e4e4e4]" />}>
       <ProfilePageClient />

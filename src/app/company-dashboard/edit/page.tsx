@@ -10,6 +10,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 import { Star, X, Upload, Lock } from "lucide-react";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import { useProEnabled } from "@/hooks/useProEnabled";
@@ -440,7 +441,7 @@ export default function EditProfilePage() {
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-6">
           <div>
             {company ? (
-              <Link href={`/profile/${company._id}`} className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2 block hover:text-[#f14110] transition-colors">
+              <Link href={buildCompanyProfilePath(company)} className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2 block hover:text-[#f14110] transition-colors">
                 Company profile
               </Link>
             ) : (

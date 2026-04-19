@@ -4,19 +4,19 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
-import { Id } from "../../../../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Star } from "lucide-react";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
 export default function CompanyReviewsPage() {
   const params = useParams();
-  const companyId = params.id as Id<"companies">;
+  const companyIdentifier = (params.companySlug ?? params.id) as string;
 
   const reviewsEnabled = useReviewsEnabled();
-  const company = useQuery(api.companies.getById, { id: companyId });
-  const reviews = useQuery(api.reviews.listByCompany, { companyId });
+  const company = useQuery(api.companies.getByPublicIdentifier, { identifier: companyIdentifier });
+  const reviews = useQuery(api.reviews.listByCompany, company?._id ? { companyId: company._id } : "skip");
 
   if (!reviewsEnabled) {
     return (
@@ -24,7 +24,7 @@ export default function CompanyReviewsPage() {
         <Header />
         <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
           <Link
-            href={`/profile/${companyId}`}
+            href={company ? buildCompanyProfilePath(company) : "/"}
             className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors mb-6"
           >
             <span>←</span> BACK TO PROFILE
@@ -42,7 +42,7 @@ export default function CompanyReviewsPage() {
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         <Link
-          href={`/profile/${companyId}`}
+          href={company ? buildCompanyProfilePath(company) : "/"}
           className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors mb-6"
         >
           <span>←</span> BACK TO PROFILE

@@ -18,6 +18,7 @@ import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { starFillColor, starColor } from "@/lib/starColors";
+import { buildCompanyProfilePath, buildCompanyReviewsPath } from "@/lib/company-profile-url.mjs";
 
 /** Capitalize first letter of each word in every array element, then join */
 function capitalizeJoin(arr: string[]): string {
@@ -157,7 +158,7 @@ export default function ProfilePageClient() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const companyId = params.id as string;
+  const companyIdentifier = (params.companySlug ?? params.id) as string;
   const fromCategory = searchParams.get("from");
   const { user: clerkUser } = useUser();
   const [isSaved, setIsSaved] = useState(false);
@@ -183,15 +184,10 @@ export default function ProfilePageClient() {
     }
   };
 
-  // Try to parse as Convex ID; if invalid format just pass it
-  let validId: Id<"companies"> | undefined;
-  try {
-    validId = companyId as Id<"companies">;
-  } catch {
-    validId = undefined;
-  }
-
-  // Helper function to get image URL from storage ID
+  const company = useQuery(api.companies.getByPublicIdentifier, {
+    identifier: companyIdentifier,
+  });
+  const validId = company?._id;
   // Note: This should only be used inside the component body, not in useCallback/useMemo
   const getImageUrl = (storageId: Id<"_storage">) => {
     const result = useQuery(api.files.getUrl, storageId ? { storageId } : "skip");
@@ -202,11 +198,6 @@ export default function ProfilePageClient() {
     setCurrentImage({ src, alt });
     setShowImageViewer(true);
   };
-
-  const company = useQuery(
-    api.companies.getById,
-    validId ? { id: validId } : "skip"
-  );
 
   // Get all project image URLs (both external and Convex storage)
   const allProjectImageUrls = useMemo(() => {
@@ -721,7 +712,7 @@ export default function ProfilePageClient() {
                 </button>
               )}
               <Link
-                href={`/profile/${companyId}/reviews`}
+                href={company ? buildCompanyReviewsPath(company) : "/"}
                 className="rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
                 style={{ width: '140px', height: '40px' }}
               >
@@ -790,9 +781,9 @@ export default function ProfilePageClient() {
 
         {/* Navigation */}
         <div className="flex items-center justify-between mb-8 border-t border-[#333]/10 pt-4">
-          {adjacentIds?.prevId ? (
+          {adjacentIds?.prevCompany ? (
             <Link
-              href={`/profile/${adjacentIds.prevId}`}
+              href={buildCompanyProfilePath(adjacentIds.prevCompany)}
               className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
             >
               <svg width="8" height="5" viewBox="0 0 16 10" fill="none" className="flex-shrink-0"><path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -804,9 +795,9 @@ export default function ProfilePageClient() {
               <span>PREVIOUS</span>
             </span>
           )}
-          {adjacentIds?.nextId ? (
+          {adjacentIds?.nextCompany ? (
             <Link
-              href={`/profile/${adjacentIds.nextId}`}
+              href={buildCompanyProfilePath(adjacentIds.nextCompany)}
               className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
             >
               <span>NEXT</span>

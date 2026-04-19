@@ -466,7 +466,7 @@ export default function AdminUI() {
             placeholder="A clearer way to build and live in Indonesia."
           />
         </Field>
-        <Field label="Description" hint="Main paragraph below the tagline. Use line breaks for multiple paragraphs.">
+        <Field label="Description" hint="Main paragraph below the tagline. Use line breaks for multiple paragraphs. Wrap text in **bold** to emphasize it on the public About page.">
           <textarea
             value={aboutPageFields.description}
             onChange={(e) => setAboutPageFields((p) => ({ ...p, description: e.target.value }))}
@@ -484,7 +484,7 @@ export default function AdminUI() {
             className="w-full max-w-[500px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
           />
         </Field>
-        <Field label="Free Company Account description">
+        <Field label="Company Account description">
           <textarea
             value={aboutPageFields.freeCompany}
             onChange={(e) => setAboutPageFields((p) => ({ ...p, freeCompany: e.target.value }))}

@@ -1,5 +1,7 @@
 import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
+import { ensureUniqueCompanySlug, normalizeCompanySlug } from "../src/lib/company-profile-url.mjs";
 
 export const list = query({
   args: {
@@ -67,6 +69,30 @@ export const getById = query({
   },
 });
 
+export const getByPublicIdentifier = query({
+  args: { identifier: v.string() },
+  handler: async (ctx, args) => {
+    const identifier = args.identifier.trim();
+
+    if (!identifier) return null;
+
+    try {
+      const byId = await ctx.db.get(identifier as Id<"companies">);
+      if (byId) return byId;
+    } catch {
+      // Fall through to slug lookup.
+    }
+
+    const companies = await ctx.db.query("companies").collect();
+    return (
+      companies.find((company) => {
+        const slug = company.slug?.trim() || normalizeCompanySlug(company.name);
+        return slug === identifier;
+      }) ?? null
+    );
+  },
+});
+
 export const getByOwner = query({
   args: { ownerId: v.id("users") },
   handler: async (ctx, args) => {
@@ -86,6 +112,8 @@ export const getAdjacentIds = query({
     return {
       prevId: idx > 0 ? all[idx - 1]._id : null,
       nextId: idx < all.length - 1 ? all[idx + 1]._id : null,
+      prevCompany: idx > 0 ? all[idx - 1] : null,
+      nextCompany: idx < all.length - 1 ? all[idx + 1] : null,
     };
   },
 });
@@ -112,8 +140,15 @@ export const create = mutation({
     since: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const companies = await ctx.db.query("companies").collect();
+    const slug = ensureUniqueCompanySlug(
+      args.name,
+      companies.map((company) => company.slug ?? normalizeCompanySlug(company.name))
+    );
+
     return await ctx.db.insert("companies", {
       ...args,
+      slug,
       rating: 0,
       reviewCount: 0,
       bookmarkCount: 0,
@@ -127,6 +162,7 @@ export const update = mutation({
   args: {
     id: v.id("companies"),
     name: v.optional(v.string()),
+    slug: v.optional(v.string()),
     description: v.optional(v.string()),
     category: v.optional(v.string()),
     subcategory: v.optional(v.string()),
@@ -160,6 +196,9 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
+    const existingCompany = await ctx.db.get(id);
+    if (!existingCompany) return;
+
     // Filter out undefined values
     const filtered: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(updates)) {
@@ -167,6 +206,18 @@ export const update = mutation({
         filtered[key] = value;
       }
     }
+
+    if (updates.name !== undefined || updates.slug !== undefined) {
+      const companies = await ctx.db.query("companies").collect();
+      filtered.slug = ensureUniqueCompanySlug(
+        updates.name ?? existingCompany.name,
+        companies
+          .filter((company) => company._id !== id)
+          .map((company) => company.slug ?? normalizeCompanySlug(company.name)),
+        existingCompany.slug ?? normalizeCompanySlug(existingCompany.name)
+      );
+    }
+
     await ctx.db.patch(id, filtered);
   },
 });
@@ -231,6 +282,6 @@ export const listIds = query({
   args: {},
   handler: async (ctx) => {
     const companies = await ctx.db.query("companies").collect();
-    return companies.map((c) => ({ id: c._id, createdAt: c.createdAt }));
+    return companies.map((c) => ({ id: c._id, name: c.name, slug: c.slug, createdAt: c.createdAt }));
   },
 });

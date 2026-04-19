@@ -9,6 +9,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { buildCompanyProfilePath, buildCompanyReviewsPath } from "@/lib/company-profile-url.mjs";
 import { Star } from "lucide-react";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
@@ -141,7 +142,7 @@ export default function CompanyDashboardPage() {
           <div>
             <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-0">
               {company?._id ? (
-                <Link href={`/profile/${company._id}`} className="hover:text-[#f14110] transition-colors">
+                <Link href={buildCompanyProfilePath(company)} className="hover:text-[#f14110] transition-colors">
                   Company profile
                 </Link>
               ) : (
@@ -358,7 +359,7 @@ export default function CompanyDashboardPage() {
             </div>
             {company?._id && (
               <Link
-                href={`/profile/${company._id}/reviews`}
+                href={buildCompanyReviewsPath(company)}
                 className="rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
                 style={{ width: '140px', height: '40px' }}
               >

@@ -8,6 +8,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Star } from "lucide-react";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
 export default function UserReviewsPage() {
   const reviewsEnabled = useReviewsEnabled();
@@ -82,7 +83,7 @@ export default function UserReviewsPage() {
             {reviews.map((review) => (
               <div key={review._id} className="bg-white rounded-[6px] p-5">
                 <Link
-                  href={`/profile/${review.companyId}`}
+                  href={buildCompanyProfilePath({ _id: review.companyId, name: review.companyName })}
                   className="text-[13px] font-semibold text-[#f14110] hover:underline mb-2 inline-block"
                 >
                   {review.companyName}

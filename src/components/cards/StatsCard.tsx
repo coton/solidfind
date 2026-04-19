@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Star, ArrowRight } from "lucide-react";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
 interface StatsCardProps {
   id?: string;
+  name?: string;
   projects?: number;
   team?: number;
   address?: string;
@@ -14,6 +16,7 @@ interface StatsCardProps {
 
 export function StatsCard({
   id = "stats",
+  name = "stats",
   projects = 75,
   team = 25,
   address = "Jl. Imam Bonjol No.198/249, Pemecutan Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80119",
@@ -22,7 +25,7 @@ export function StatsCard({
   reviewsEnabled = false,
 }: StatsCardProps) {
   return (
-    <Link href={`/profile/${id}`} className="block">
+    <Link href={buildCompanyProfilePath({ _id: id, name })} className="block">
       <div className="relative w-[210px] h-[230px] bg-[#333] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
         {/* Action Buttons */}
         <div className="absolute top-[10px] left-[10px] right-[10px] flex justify-between">

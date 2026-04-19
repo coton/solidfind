@@ -20,6 +20,26 @@ const DEFAULT_PRO_COMPANY_TEXT = "Everything in Free, plus: top search ranking, 
 const DEFAULT_CONTACT_TEXT = "Questions, feedback, or partnership inquiries?";
 const DEFAULT_CONTACT_EMAIL = "hello@solidfind.id";
 
+function renderBoldTextLine(line: string) {
+  return line.split(/(\*\*[^*]+\*\*)/g).map((segment, index) => {
+    if (segment.startsWith("**") && segment.endsWith("**") && segment.length > 4) {
+      return <strong key={`${segment}-${index}`} className="font-semibold text-[#333]">{segment.slice(2, -2)}</strong>;
+    }
+
+    return <span key={`${segment}-${index}`}>{segment}</span>;
+  });
+}
+
+function renderFormattedParagraphs(text: string, className: string) {
+  return text.split("\n").map((line, index) => {
+    if (!line.trim()) {
+      return <div key={`spacer-${index}`} className="h-2" aria-hidden="true" />;
+    }
+
+    return <p key={`line-${index}`} className={className}>{renderBoldTextLine(line)}</p>;
+  });
+}
+
 export default function AboutPage() {
   // Dynamic content from admin UI tab
   const tagline = useQuery(api.platformSettings.get, { key: "aboutPageTagline" });
@@ -41,6 +61,8 @@ export default function AboutPage() {
   const aboutProfileMedia = aboutProfileMediaState.media;
   const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
   const igUrlState = resolveTextSetting(igUrl, "#");
+  const proFeatureValue = useQuery(api.platformSettings.get, { key: "pro_enabled" });
+  const showProCompany = proFeatureValue === "true";
   const mailHref = normalizeContactHref(emailState.value, `mailto:${DEFAULT_CONTACT_EMAIL}`);
   const handleShare = async () => {
     if (navigator.share) {
@@ -137,8 +159,8 @@ export default function AboutPage() {
             </p>
 
             {/* About Description */}
-            <div className="space-y-4 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]" style={{ whiteSpace: "pre-wrap" }}>
-              <p>{descriptionState.value}</p>
+            <div className="space-y-2 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]">
+              {renderFormattedParagraphs(descriptionState.value, "text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]")}
             </div>
 
             {/* Account Types */}
@@ -158,21 +180,23 @@ export default function AboutPage() {
 
               <div className="p-3 bg-white rounded-[6px]">
                 <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
-                  FREE COMPANY ACCOUNT
+                  COMPANY ACCOUNT
                 </h4>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  {freeCompanyState.value}
-                </p>
+                <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px] space-y-1">
+                  {renderFormattedParagraphs(freeCompanyState.value, "text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]")}
+                </div>
               </div>
 
-              <div className="p-3 bg-white rounded-[6px]">
-                <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
-                  PRO COMPANY ACCOUNT
-                </h4>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  {proCompanyState.value}
-                </p>
-              </div>
+              {showProCompany && (
+                <div className="p-3 bg-white rounded-[6px]">
+                  <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
+                    PRO COMPANY ACCOUNT
+                  </h4>
+                  <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px] space-y-1">
+                    {renderFormattedParagraphs(proCompanyState.value, "text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]")}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Contact */}

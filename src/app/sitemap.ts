@@ -1,9 +1,10 @@
 import { MetadataRoute } from 'next'
 import { fetchQuery } from 'convex/nextjs'
 import { api } from '../../convex/_generated/api'
+import { buildCompanyProfilePath } from '@/lib/company-profile-url.mjs'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://solidfind.vercel.app'
+  const baseUrl = 'https://solidfind.id'
 
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -47,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const companyIds = await fetchQuery(api.companies.listIds)
     const companyPages: MetadataRoute.Sitemap = companyIds.map((c) => ({
-      url: `${baseUrl}/profile/${c.id}`,
+      url: `${baseUrl}${buildCompanyProfilePath(c)}`,
       lastModified: new Date(c.createdAt),
       changeFrequency: 'weekly' as const,
       priority: 0.9,

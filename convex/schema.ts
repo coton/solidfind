@@ -18,6 +18,7 @@ export default defineSchema({
   companies: defineTable({
     ownerId: v.id("users"),
     name: v.string(),
+    slug: v.optional(v.string()),
     description: v.optional(v.string()),
     category: v.string(), // construction, renovation, architecture, interior, real-estate
     subcategory: v.optional(v.string()),

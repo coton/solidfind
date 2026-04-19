@@ -7,6 +7,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { starColor } from "@/lib/starColors";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
 interface ListingCardProps {
   id: string;
@@ -88,7 +89,7 @@ export function ListingCard({
   };
 
   return (
-    <Link href={categoryContext ? `/profile/${id}?from=${categoryContext}` : `/profile/${id}`} className="block">
+    <Link href={buildCompanyProfilePath({ _id: id, name }, categoryContext ? { from: categoryContext } : {})} className="block">
       <div
         className={`relative w-[210px] h-[220px] rounded-[6px] overflow-hidden cursor-pointer transition-all ${
           isHovered ? 'bg-[#333]' : 'bg-[#f8f8f8]'
