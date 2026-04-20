@@ -11,6 +11,12 @@ import {
   AD_VERTICAL_PLATFORM_SETTING_KEY,
   resolveMediaSetting,
 } from "@/lib/platform-settings.mjs";
+import {
+  getAuthStatusMessage,
+  getVerificationErrorMessage,
+  isVerificationCodeComplete,
+  sanitizeVerificationCode,
+} from "@/lib/auth-verification.mjs";
 
 type AuthMode = "login" | "register";
 type AccountType = "company" | "individual";
@@ -57,8 +63,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
   );
 }
 
-function SocialButton({ provider, label, icon, onClick, disabled }: {
-  provider: string;
+function SocialButton({ label, icon, onClick, disabled }: {
   label: string;
   icon: React.ReactNode;
   onClick: () => void;
@@ -241,7 +246,16 @@ export function AuthModal({
         if (onAuthSuccess) onAuthSuccess(accountType);
         onClose();
         router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
+        return;
       }
+
+      setError(
+        getAuthStatusMessage(result.status, {
+          fallbackMessage: "Login requires additional verification before it can continue.",
+          needsSecondFactorMessage:
+            "This account requires two-factor authentication. The current popup cannot complete the second step yet.",
+        })
+      );
     } catch (err: unknown) {
       const clerkError = err as { errors?: Array<{ message: string }> };
       setError(clerkError.errors?.[0]?.message || "Login failed. Please try again.");
@@ -295,12 +309,18 @@ export function AuthModal({
     if (e) e.preventDefault();
     if (!isSignUpLoaded || !signUp) return;
 
+    const normalizedCode = sanitizeVerificationCode(verificationCode);
+    if (!isVerificationCodeComplete(normalizedCode)) {
+      setError("Please enter the 6-digit verification code.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
       const result = await signUp.attemptEmailAddressVerification({
-        code: verificationCode,
+        code: normalizedCode,
       });
 
       if (result.status === "complete" && setSignUpActive) {
@@ -321,8 +341,33 @@ export function AuthModal({
         router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
       }
     } catch (err: unknown) {
-      const clerkError = err as { errors?: Array<{ message: string }> };
-      setError(clerkError.errors?.[0]?.message || "Invalid verification code.");
+      setError(
+        getVerificationErrorMessage(err, {
+          fallbackMessage: "Invalid verification code.",
+          expiredMessage: "This code expired. Please request a new one below.",
+        })
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendVerificationCode = async () => {
+    if (!isSignUpLoaded || !signUp) return;
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setVerificationCode("");
+    } catch (err: unknown) {
+      setError(
+        getVerificationErrorMessage(err, {
+          fallbackMessage: "Failed to resend verification code.",
+          expiredMessage: "Your previous code expired. A fresh code could not be sent yet. Please try again.",
+        })
+      );
     } finally {
       setIsLoading(false);
     }
@@ -352,7 +397,12 @@ export function AuthModal({
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSignInLoaded || !signIn) return;
-    if (!verificationCode || !newPassword) { setError("Please fill in all fields / Mohon isi semua kolom"); return; }
+
+    const normalizedCode = sanitizeVerificationCode(verificationCode);
+    if (!isVerificationCodeComplete(normalizedCode) || !newPassword) {
+      setError(!newPassword ? "Please fill in all fields / Mohon isi semua kolom" : "Please enter the 6-digit verification code.");
+      return;
+    }
 
     setIsLoading(true);
     setError("");
@@ -360,7 +410,7 @@ export function AuthModal({
     try {
       const result = await signIn.attemptFirstFactor({
         strategy: "reset_password_email_code",
-        code: verificationCode,
+        code: normalizedCode,
         password: newPassword,
       });
 
@@ -371,8 +421,37 @@ export function AuthModal({
         router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
       }
     } catch (err: unknown) {
-      const clerkError = err as { errors?: Array<{ message: string }> };
-      setError(clerkError.errors?.[0]?.message || "Failed to reset password.");
+      setError(
+        getVerificationErrorMessage(err, {
+          fallbackMessage: "Failed to reset password.",
+          expiredMessage: "This reset code expired. Please request a new one below.",
+        })
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendResetCode = async () => {
+    if (!isSignInLoaded || !signIn || !email) return;
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await signIn.create({
+        strategy: "reset_password_email_code",
+        identifier: email,
+      });
+      setVerificationCode("");
+      setNewPassword("");
+    } catch (err: unknown) {
+      setError(
+        getVerificationErrorMessage(err, {
+          fallbackMessage: "Failed to resend reset code.",
+          expiredMessage: "Your previous reset code expired. A fresh code could not be sent yet. Please try again.",
+        })
+      );
     } finally {
       setIsLoading(false);
     }
@@ -496,8 +575,11 @@ export function AuthModal({
             </label>
             <input
               type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
               value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
+              onChange={(e) => setVerificationCode(sanitizeVerificationCode(e.target.value))}
               placeholder="Enter 6-digit code"
               style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '4px' }}
             />
@@ -526,6 +608,26 @@ export function AuthModal({
               }}
             >
               {isLoading ? "Verifying..." : "Verify"}
+            </button>
+          </div>
+
+          <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={handleResendVerificationCode}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                color: '#F14110',
+                fontSize: '10px',
+                fontWeight: 600,
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: isLoading ? 0.6 : 1,
+              }}
+            >
+              {isLoading ? 'Sending...' : 'Request a new code'}
             </button>
           </div>
 
@@ -570,8 +672,11 @@ export function AuthModal({
               </label>
               <input
                 type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
+                onChange={(e) => setVerificationCode(sanitizeVerificationCode(e.target.value))}
                 placeholder="Enter 6-digit code"
                 required
                 style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '4px' }}
@@ -616,6 +721,26 @@ export function AuthModal({
               </button>
             </div>
           </form>
+
+          <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={handleResendResetCode}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                color: '#F14110',
+                fontSize: '10px',
+                fontWeight: 600,
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: isLoading ? 0.6 : 1,
+              }}
+            >
+              {isLoading ? 'Sending...' : 'Request a new code'}
+            </button>
+          </div>
 
           {error && (
             <div style={{ textAlign: 'center' }}>
@@ -677,21 +802,18 @@ export function AuthModal({
         {/* Social auth buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
           <SocialButton
-            provider="google"
             label="Continue with Google"
             icon={<GoogleIcon />}
             onClick={() => handleSocialAuth("oauth_google")}
             disabled={isLoading}
           />
           <SocialButton
-            provider="apple"
             label="Continue with Apple"
             icon={<AppleIcon />}
             onClick={() => handleSocialAuth("oauth_apple")}
             disabled={isLoading}
           />
           <SocialButton
-            provider="microsoft"
             label="Continue with Microsoft"
             icon={<MicrosoftIcon />}
             onClick={() => handleSocialAuth("oauth_microsoft")}
