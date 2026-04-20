@@ -134,6 +134,34 @@ test('admin UI can delete the existing About page profile picture entry before r
   );
 });
 
+test('admin UI uploads About page profile picture assets through Convex storage before saving the website setting', () => {
+  const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
+
+  assert.match(
+    adminUiSource,
+    /useConvex/,
+    'expected the Back Office UI tab to use Convex client queries so uploaded About profile picture files resolve to a public URL before save'
+  );
+
+  assert.match(
+    adminUiSource,
+    /useMutation\(api\.files\.generateUploadUrl\)/,
+    'expected the About profile picture upload flow to request a Convex upload URL instead of only storing a local data URL preview'
+  );
+
+  assert.match(
+    adminUiSource,
+    /uploadFileToStorage\(/,
+    'expected the About profile picture upload flow to post the selected file to Convex storage'
+  );
+
+  assert.match(
+    adminUiSource,
+    /convex\.query\(api\.files\.getUrl/,
+    'expected the About profile picture upload flow to resolve the uploaded storage file to a website-usable URL'
+  );
+});
+
 test('Save All UI Settings only re-saves media sections that still have unsaved local draft state', () => {
   const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
 

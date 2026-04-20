@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Eye, EyeOff, Upload } from "lucide-react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvex } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import {
   FOOTER_MEDIA_PLATFORM_SETTING_KEY,
   HEADER_MEDIA_PLATFORM_SETTING_KEY,
@@ -90,20 +92,23 @@ function MediaUpload({
   url: string;
   mediaType: string;
   onUrl: (url: string) => void;
-  onFile: (dataUrl: string, type: "image" | "video") => void;
+  onFile: (payload: { file: File; previewUrl: string; type: "image" | "video" }) => void | Promise<void>;
   accept?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const isVideo = file.type.startsWith("video/");
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      onFile(ev.target?.result as string, isVideo ? "video" : "image");
-    };
-    reader.readAsDataURL(file);
+    const previewUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => resolve((ev.target?.result as string) || "");
+      reader.onerror = () => reject(reader.error ?? new Error("Failed to read media file"));
+      reader.readAsDataURL(file);
+    });
+    await onFile({ file, previewUrl, type: isVideo ? "video" : "image" });
+    e.target.value = "";
   };
 
   return (
@@ -148,6 +153,7 @@ function parseTermsPreview(text: string) {
 
 export default function AdminUI() {
   const [s, setS] = useState<UISettings>(DEFAULT);
+  const convex = useConvex();
   const [termsFile, setTermsFile] = useState("");
   const termsRef = useRef<HTMLInputElement>(null);
   const [saveAllUiSaved, setSaveAllUiSaved] = useState(false);
@@ -176,6 +182,8 @@ export default function AdminUI() {
   const [aboutProfilePictureDraft, setAboutProfilePictureDraft] = useState<{ url: string; type: "image" | "video" }>({ url: "", type: "image" });
   const [aboutProfilePictureHasDraft, setAboutProfilePictureHasDraft] = useState(false);
   const [aboutProfilePictureSaved, setAboutProfilePictureSaved] = useState(false);
+  const [aboutProfilePictureUploading, setAboutProfilePictureUploading] = useState(false);
+  const [aboutProfilePictureUploadError, setAboutProfilePictureUploadError] = useState("");
   const effectiveAboutProfilePictureUrl = aboutProfilePictureHasDraft ? aboutProfilePictureDraft.url : parsedAboutProfilePicture.url;
   const effectiveAboutProfilePictureType = aboutProfilePictureHasDraft ? aboutProfilePictureDraft.type : parsedAboutProfilePicture.type;
 
@@ -183,6 +191,7 @@ export default function AdminUI() {
   const aboutCardValue = useQuery(api.platformSettings.get, { key: "aboutCardDescription" });
   const setPlatformSetting = useMutation(api.platformSettings.set);
   const deletePlatformSettingByKey = useMutation(api.platformSettings.deleteByKey);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const [aboutText, setAboutText] = useState("");
   const [aboutSaved, setAboutSaved] = useState(false);
 
@@ -305,6 +314,18 @@ export default function AdminUI() {
   const flashSaved = (setter: (value: boolean) => void) => {
     setter(true);
     setTimeout(() => setter(false), 2000);
+  };
+
+  const uploadAdminMediaAsset = async (file: File) => {
+    const uploadUrl = await generateUploadUrl();
+    const storageId = await uploadFileToStorage(file, uploadUrl);
+    const publicUrl = await convex.query(api.files.getUrl, { storageId: storageId as Id<"_storage"> });
+
+    if (!publicUrl) {
+      throw new Error("Upload completed but no public URL was returned.");
+    }
+
+    return publicUrl;
   };
 
   const saveAboutText = async () => {
@@ -569,9 +590,9 @@ export default function AdminUI() {
               setNewUserImageHasDraft(true);
               setNewUserImageDraftUrl(v);
             }}
-            onFile={(dataUrl) => {
+            onFile={({ previewUrl }) => {
               setNewUserImageHasDraft(true);
-              setNewUserImageDraftUrl(dataUrl);
+              setNewUserImageDraftUrl(previewUrl);
             }}
             accept="image/*"
           />
@@ -595,7 +616,7 @@ export default function AdminUI() {
             url={adVerticalUrl}
             mediaType={adVerticalMediaType}
             onUrl={(v) => setAdVerticalUrl(v)}
-            onFile={(dataUrl, type) => { setAdVerticalUrl(dataUrl); setAdVerticalMediaType(type); }}
+            onFile={({ previewUrl, type }) => { setAdVerticalUrl(previewUrl); setAdVerticalMediaType(type); }}
           />
         </Field>
         <Field label="Horizontal Ad" hint="Appears below search results — 700×150px (scales proportionally on mobile)">
@@ -604,7 +625,7 @@ export default function AdminUI() {
             url={adHorizontalUrl}
             mediaType={adHorizontalMediaType}
             onUrl={(v) => setAdHorizontalUrl(v)}
-            onFile={(dataUrl, type) => { setAdHorizontalUrl(dataUrl); setAdHorizontalMediaType(type); }}
+            onFile={({ previewUrl, type }) => { setAdHorizontalUrl(previewUrl); setAdHorizontalMediaType(type); }}
           />
         </Field>
         <div className="flex items-center gap-4 mt-2">
@@ -626,7 +647,7 @@ export default function AdminUI() {
           url={effectiveHeaderMediaUrl}
           mediaType={effectiveHeaderMediaType}
           onUrl={(v) => u({ headerMediaUrl: v })}
-          onFile={(dataUrl, type) => u({ headerMediaUrl: dataUrl, headerMediaType: type })}
+          onFile={({ previewUrl, type }) => u({ headerMediaUrl: previewUrl, headerMediaType: type })}
         />
         <div className="mt-2">
           <button
@@ -647,7 +668,7 @@ export default function AdminUI() {
           url={effectiveFooterMediaUrl}
           mediaType={effectiveFooterMediaType}
           onUrl={(v) => u({ footerMediaUrl: v })}
-          onFile={(dataUrl, type) => u({ footerMediaUrl: dataUrl, footerMediaType: type })}
+          onFile={({ previewUrl, type }) => u({ footerMediaUrl: previewUrl, footerMediaType: type })}
         />
         <div className="mt-2">
           <button
@@ -668,16 +689,33 @@ export default function AdminUI() {
             url={effectiveAboutProfilePictureUrl}
             mediaType={effectiveAboutProfilePictureType}
             onUrl={(v) => {
+              setAboutProfilePictureUploadError("");
               setAboutProfilePictureHasDraft(true);
               setAboutProfilePictureDraft({ url: v, type: "image" });
             }}
-            onFile={(dataUrl, type) => {
-              setAboutProfilePictureHasDraft(true);
-              setAboutProfilePictureDraft({ url: dataUrl, type });
+            onFile={async ({ file, type }) => {
+              setAboutProfilePictureUploadError("");
+              setAboutProfilePictureUploading(true);
+
+              try {
+                const uploadedUrl = await uploadAdminMediaAsset(file);
+                setAboutProfilePictureHasDraft(true);
+                setAboutProfilePictureDraft({ url: uploadedUrl, type });
+              } catch (error) {
+                setAboutProfilePictureUploadError(error instanceof Error ? error.message : "Failed to upload profile picture.");
+              } finally {
+                setAboutProfilePictureUploading(false);
+              }
             }}
             accept="image/*"
           />
         </Field>
+        {aboutProfilePictureUploading && (
+          <p className="text-[10px] text-[#f14110] mb-2">Uploading profile picture to Convex storage…</p>
+        )}
+        {aboutProfilePictureUploadError && (
+          <p className="text-[10px] text-red-600 mb-2">{aboutProfilePictureUploadError}</p>
+        )}
         {aboutProfilePictureHasDraft && (
           <p className="text-[10px] text-green-600 mb-2">✓ About profile picture draft loaded — click Save Profile Picture or Save All UI Settings to publish it.</p>
         )}
@@ -686,9 +724,10 @@ export default function AdminUI() {
             <button
               type="button"
               onClick={saveAboutProfilePicture}
-              className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+              disabled={aboutProfilePictureUploading}
+              className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {aboutProfilePictureSaved ? "✓ Saved!" : "Save Profile Picture"}
+              {aboutProfilePictureUploading ? "Uploading..." : aboutProfilePictureSaved ? "✓ Saved!" : "Save Profile Picture"}
             </button>
             <button
               type="button"
