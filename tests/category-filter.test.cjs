@@ -117,3 +117,19 @@ test('mobile categories dropdown widens to span the project size and categories 
     'expected the mobile categories dropdown invocation to opt into the wider two-button menu width'
   );
 });
+
+test('active header category tabs stay pure white instead of the old light grey state color', () => {
+  const headerSource = readProjectFile('src/components/Header.tsx');
+
+  assert.match(
+    headerSource,
+    /\? "bg-white text-\[#f14110\] hover:bg-white opacity-100 hover:opacity-100"/,
+    'expected the active category tab to stay full white even while hovered'
+  );
+
+  assert.doesNotMatch(
+    headerSource,
+    /\? "bg-\[#f8f8f8\] text-\[#f14110\]"/,
+    'expected the old light grey active category tab background to be removed'
+  );
+});

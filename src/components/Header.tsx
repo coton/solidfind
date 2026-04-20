@@ -590,9 +590,9 @@ function HeaderInner() {
                   key={cat.id}
                   ref={index === dynamicCategories.length - 1 ? lastCategoryButtonRef : undefined}
                   onClick={() => handleCategoryTab(cat.id)}
-                  className={`h-10 px-4 sm:px-5 rounded-full text-[11px] sm:text-[12px] font-medium transition-all whitespace-nowrap ${
+                  className={`h-10 px-4 sm:px-5 rounded-full text-[11px] sm:text-[12px] font-medium transition-colors whitespace-nowrap ${
                     activeCategory === cat.id
-                      ? "bg-[#f8f8f8] text-[#f14110]"
+                      ? "bg-white text-[#f14110] hover:bg-white opacity-100 hover:opacity-100"
                       : "text-[#f8f8f8] border border-transparent hover:border-white hover:text-[#FFF]"
                   }`}
                 >
