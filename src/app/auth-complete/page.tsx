@@ -1,21 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { AccountTypeSelectionCard } from "@/components/AccountTypeSelectionCard";
 import { api } from "../../../convex/_generated/api";
+import { getPostAuthRedirectPath, sanitizeNextPath } from "@/lib/magic-link-login.mjs";
 
 type AccountType = "company" | "individual";
 
 export default function AuthCompletePage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const createOrGetUser = useMutation(api.users.createOrGetUser);
   const [isSaving, setIsSaving] = useState(false);
 
   const existingAccountType = user?.publicMetadata?.accountType as AccountType | undefined;
+  const requestedNextPath = useMemo(() => sanitizeNextPath(searchParams.get("next")), [searchParams]);
   const pendingAccountType = typeof window !== "undefined"
     ? (sessionStorage.getItem("solidfind_accountType") as AccountType | null)
     : null;
@@ -30,14 +33,14 @@ export default function AuthCompletePage() {
     if (existingAccountType === "company") {
       sessionStorage.removeItem("solidfind_accountType");
       sessionStorage.removeItem("solidfind_companyName");
-      router.replace("/company-dashboard");
+      router.replace(getPostAuthRedirectPath({ accountType: "company", requestedNextPath }));
       return;
     }
 
     if (existingAccountType === "individual") {
       sessionStorage.removeItem("solidfind_accountType");
       sessionStorage.removeItem("solidfind_companyName");
-      router.replace("/dashboard");
+      router.replace(getPostAuthRedirectPath({ accountType: "individual", requestedNextPath }));
       return;
     }
 
@@ -45,7 +48,7 @@ export default function AuthCompletePage() {
     // Don't auto-redirect based on sessionStorage — show the AccountTypeSelectionCard
     // so the user can confirm or change their choice.
     // pendingAccountType from sessionStorage is passed as initialAccountType below.
-  }, [isLoaded, user, existingAccountType, router]);
+  }, [isLoaded, user, existingAccountType, requestedNextPath, router]);
 
   const persistAccountType = async (accountType: AccountType, companyName?: string) => {
     if (!user) return;
@@ -73,7 +76,11 @@ export default function AuthCompletePage() {
 
       sessionStorage.removeItem("solidfind_accountType");
       sessionStorage.removeItem("solidfind_companyName");
-      router.replace(accountType === "company" ? "/register-business" : "/dashboard");
+      router.replace(
+        accountType === "company"
+          ? getPostAuthRedirectPath({ accountType: "company", requestedNextPath: requestedNextPath || "/register-business" })
+          : getPostAuthRedirectPath({ accountType: "individual", requestedNextPath })
+      );
     } finally {
       setIsSaving(false);
     }
