@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useCallback, useEffect, useMemo } from "react";
+import { Suspense, useState, useCallback, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -302,6 +302,8 @@ function HeaderInner() {
   const [locations, setLocations] = useState<string[]>(
     searchParams.get("location") ? searchParams.get("location")!.split(",") : []
   );
+  const lastCategoryButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [mobileCategoryEndSpacerWidth, setMobileCategoryEndSpacerWidth] = useState(0);
 
   // Auth modal state
   const [showLogoutPrompt, setShowLogoutPrompt] = useState(false);
@@ -328,6 +330,26 @@ function HeaderInner() {
     : isProfilePage
       ? (fromCategory || null)
       : (searchParams.get("category") ?? "construction");
+
+  useEffect(() => {
+    const updateMobileCategoryEndSpacer = () => {
+      if (typeof window === "undefined" || window.innerWidth >= 640) {
+        setMobileCategoryEndSpacerWidth(0);
+        return;
+      }
+
+      const lastButtonWidth = lastCategoryButtonRef.current?.offsetWidth ?? 0;
+      const horizontalPadding = 16; // matches mobile px-4 on the scroll container
+      const spacerWidth = Math.max(0, window.innerWidth / 2 - horizontalPadding - lastButtonWidth / 2);
+
+      setMobileCategoryEndSpacerWidth(spacerWidth);
+    };
+
+    updateMobileCategoryEndSpacer();
+    window.addEventListener("resize", updateMobileCategoryEndSpacer);
+
+    return () => window.removeEventListener("resize", updateMobileCategoryEndSpacer);
+  }, [dynamicCategories]);
 
   // Determine user type from Clerk metadata (default to "individual")
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
@@ -563,9 +585,10 @@ function HeaderInner() {
           <div className="relative overflow-visible">
           <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-2 min-w-max">
-              {dynamicCategories.map((cat) => (
+              {dynamicCategories.map((cat, index) => (
                 <button
                   key={cat.id}
+                  ref={index === dynamicCategories.length - 1 ? lastCategoryButtonRef : undefined}
                   onClick={() => handleCategoryTab(cat.id)}
                   className={`h-10 px-4 sm:px-5 rounded-full text-[11px] sm:text-[12px] font-medium transition-all whitespace-nowrap ${
                     activeCategory === cat.id
@@ -576,6 +599,11 @@ function HeaderInner() {
                   {cat.label}
                 </button>
               ))}
+              <div
+                aria-hidden="true"
+                className="sm:hidden flex-shrink-0"
+                style={{ width: mobileCategoryEndSpacerWidth }}
+              />
             </div>
           </div>
           {/* Gradient fade on right edge — mobile only, extends to screen edge past padding */}
