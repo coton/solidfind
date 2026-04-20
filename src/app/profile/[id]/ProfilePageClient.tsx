@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -41,31 +41,76 @@ function formatWhatsApp(num: string): string {
   return num.replace(/^[+0]+/, "");
 }
 
+function ProjectStorageImageTile({
+  storageId,
+  index,
+  onImageClick,
+}: {
+  storageId: Id<"_storage">;
+  index: number;
+  onImageClick: (src: string, alt: string) => void;
+}) {
+  const url = useStorageUrl(storageId);
+  const alt = `Project ${index + 1}`;
+
+  return (
+    <div
+      className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative cursor-pointer hover:opacity-90 transition-opacity"
+      onClick={() => url && onImageClick(url, alt)}
+    >
+      {url ? (
+        <Image
+          src={url}
+          alt={alt}
+          fill
+          unoptimized
+          sizes="(max-width: 640px) 33vw, 210px"
+          className="object-cover"
+        />
+      ) : null}
+    </div>
+  );
+}
+
 function ProjectImagesGrid({
   imageUrls,
-  allProjectImageUrls,
+  storageImageIds,
   onImageClick,
 }: {
   imageUrls: string[];
-  allProjectImageUrls: string[];
+  storageImageIds: Id<"_storage">[];
   onImageClick: (src: string, alt: string) => void;
 }) {
-  const urlImages = imageUrls.filter(Boolean);
-  const totalCount = allProjectImageUrls.length;
+  const externalImages = imageUrls.filter(Boolean);
+  const totalCount = externalImages.length + storageImageIds.length;
 
   if (totalCount === 0) return <div />;
 
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5">
-      {allProjectImageUrls.map((src, i) => (
-        <div 
-          key={`img-${i}`} 
+      {externalImages.map((src, i) => (
+        <div
+          key={`img-url-${i}`}
           className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative cursor-pointer hover:opacity-90 transition-opacity"
           onClick={() => onImageClick(src, `Project ${i + 1}`)}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt={`Project ${i + 1}`} className="object-cover w-full h-full absolute inset-0" loading="lazy" />
+          <Image
+            src={src}
+            alt={`Project ${i + 1}`}
+            fill
+            unoptimized
+            sizes="(max-width: 640px) 33vw, 210px"
+            className="object-cover"
+          />
         </div>
+      ))}
+      {storageImageIds.map((storageId, i) => (
+        <ProjectStorageImageTile
+          key={`img-storage-${storageId}`}
+          storageId={storageId}
+          index={externalImages.length + i}
+          onImageClick={onImageClick}
+        />
       ))}
     </div>
   );
@@ -188,26 +233,11 @@ export default function ProfilePageClient() {
     identifier: companyIdentifier,
   });
   const validId = company?._id;
-  // Note: This should only be used inside the component body, not in useCallback/useMemo
-  const getImageUrl = (storageId: Id<"_storage">) => {
-    const result = useQuery(api.files.getUrl, storageId ? { storageId } : "skip");
-    return result as string | undefined;
-  };
 
   const handleImageClick = (src: string, alt: string) => {
     setCurrentImage({ src, alt });
     setShowImageViewer(true);
   };
-
-  // Get all project image URLs (both external and Convex storage)
-  const allProjectImageUrls = useMemo(() => {
-    const urls = [...(company?.projectImageUrls ?? [])];
-    for (const id of company?.projectImageIds ?? []) {
-      const url = useQuery(api.files.getUrl, id ? { storageId: id } : "skip");
-      if (url) urls.push(url);
-    }
-    return urls;
-  }, [company]);
 
   const reviews = useQuery(
     api.reviews.listByCompany,
@@ -239,7 +269,6 @@ export default function ProfilePageClient() {
   );
 
   const toggleSave = useMutation(api.savedListings.toggle);
-  const createReview = useMutation(api.reviews.create);
   const recordView = useMutation(api.profileViews.record);
 
   const viewRecorded = useRef(false);
@@ -582,7 +611,7 @@ export default function ProfilePageClient() {
           {!reviewsEnabled && (
             <ProjectImagesGrid
               imageUrls={company.projectImageUrls ?? []}
-              allProjectImageUrls={allProjectImageUrls}
+              storageImageIds={company.projectImageIds ?? []}
               onImageClick={handleImageClick}
             />
           )}
@@ -706,7 +735,8 @@ export default function ProfilePageClient() {
               {clerkUser && currentUser && (
                 <button
                   onClick={() => setShowReviewModal(true)}
-                  className="hidden sm:flex h-[40px] px-6 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors items-center"
+                  className="hidden sm:flex rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors items-center justify-center"
+                  style={{ width: '140px', height: '40px' }}
                 >
                   Write a Testimonial
                 </button>
@@ -737,7 +767,8 @@ export default function ProfilePageClient() {
           {clerkUser && currentUser && (
             <button
               onClick={() => setShowReviewModal(true)}
-              className="sm:hidden mt-4 h-[40px] px-6 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
+              className="sm:hidden mt-4 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors inline-flex items-center justify-center"
+              style={{ width: '140px', height: '40px' }}
             >
               Write a Testimonial
             </button>
