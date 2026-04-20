@@ -182,8 +182,14 @@ async function main() {
   }
 
   const runtime = resolveRuntimeConfig(args);
-  const { createMagicLinkToken, getMagicLinkSigningSecret } = await import('../src/lib/magic-link-login.mjs');
-  const signingSecret = getMagicLinkSigningSecret(runtime.clerkSecretKey);
+  const { createMagicLinkToken, getPrimaryMagicLinkSigningSecret } = await import('../src/lib/magic-link-login.mjs');
+  const signingSecret = getPrimaryMagicLinkSigningSecret({
+    magicLinkSigningSecret: runtime.magicLinkSigningSecret,
+    clerkSecretKey: runtime.clerkSecretKey,
+  });
+  if (!signingSecret) {
+    throw new Error('Missing magic-link signing secret configuration. Set MAGIC_LINK_SIGNING_SECRET or CLERK_SECRET_KEY.');
+  }
   const names = normalizeNames([
     ...args.companyNames,
     ...(args.file ? companyNamesFromFile(args.file) : []),

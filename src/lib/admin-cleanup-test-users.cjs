@@ -110,11 +110,12 @@ function loadEnvFile(envFile) {
   return env;
 }
 
-function resolveRuntimeConfig({ convexUrl, clerkSecretKey, envFile, target }) {
+function resolveRuntimeConfig({ convexUrl, clerkSecretKey, magicLinkSigningSecret, envFile, target }) {
   if (convexUrl && clerkSecretKey) {
     return {
       convexUrl: convexUrl.trim(),
       clerkSecretKey: clerkSecretKey.trim(),
+      magicLinkSigningSecret: typeof magicLinkSigningSecret === 'string' ? magicLinkSigningSecret.trim() || null : null,
       envFile: envFile || null,
       target: target || null,
     };
@@ -128,6 +129,7 @@ function resolveRuntimeConfig({ convexUrl, clerkSecretKey, envFile, target }) {
   return {
     convexUrl: env.NEXT_PUBLIC_CONVEX_URL.trim(),
     clerkSecretKey: env.CLERK_SECRET_KEY.trim(),
+    magicLinkSigningSecret: env.MAGIC_LINK_SIGNING_SECRET?.trim() || null,
     envFile: resolvedEnvFile,
     target: target || null,
   };

@@ -115,3 +115,49 @@ test('parseMagicLinkToken rejects tampered tokens', async () => {
   const tamperedToken = `${token.slice(0, -1)}x`;
   assert.equal(parseMagicLinkToken({ secret: 'super-secret', token: tamperedToken }), null);
 });
+
+test('resolveMagicLinkSigningSecrets prefers dedicated secret and keeps legacy fallback', async () => {
+  const { getMagicLinkSigningSecret, resolveMagicLinkSigningSecrets } = await loadModule();
+
+  const secrets = resolveMagicLinkSigningSecrets({
+    magicLinkSigningSecret: 'dedicated-secret',
+    clerkSecretKey: 'clerk-secret',
+  });
+
+  assert.deepEqual(secrets, [
+    'dedicated-secret',
+    getMagicLinkSigningSecret('clerk-secret'),
+  ]);
+});
+
+test('parseMagicLinkTokenWithFallback accepts legacy tokens after dedicated secret is configured', async () => {
+  const {
+    createMagicLinkToken,
+    getMagicLinkSigningSecret,
+    parseMagicLinkTokenWithFallback,
+  } = await loadModule();
+
+  const legacySecret = getMagicLinkSigningSecret('legacy-clerk-secret');
+  const token = createMagicLinkToken({
+    secret: legacySecret,
+    payload: {
+      clerkUserId: 'user_123',
+      companyName: 'Balitecture',
+      expiresAt: 1777888800000,
+      targetPath: '/company-dashboard/edit',
+    },
+  });
+
+  assert.deepEqual(
+    parseMagicLinkTokenWithFallback({
+      secrets: ['dedicated-secret', legacySecret],
+      token,
+    }),
+    {
+      clerkUserId: 'user_123',
+      companyName: 'Balitecture',
+      expiresAt: 1777888800000,
+      targetPath: '/company-dashboard/edit',
+    }
+  );
+});

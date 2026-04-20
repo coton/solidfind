@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClerkClient } from "@clerk/backend";
-import { buildTicketSignInUrl, getMagicLinkSigningSecret, parseMagicLinkToken } from "@/lib/magic-link-login.mjs";
+import { buildTicketSignInUrl, parseMagicLinkTokenWithFallback, resolveMagicLinkSigningSecrets } from "@/lib/magic-link-login.mjs";
 
 export async function GET(
   request: NextRequest,
@@ -13,8 +13,11 @@ export async function GET(
     return NextResponse.json({ error: "Magic link configuration is missing." }, { status: 500 });
   }
 
-  const signingSecret = getMagicLinkSigningSecret(clerkSecretKey);
-  const payload = parseMagicLinkToken({ secret: signingSecret, token: code });
+  const signingSecrets = resolveMagicLinkSigningSecrets({
+    magicLinkSigningSecret: process.env.MAGIC_LINK_SIGNING_SECRET,
+    clerkSecretKey,
+  });
+  const payload = parseMagicLinkTokenWithFallback({ secrets: signingSecrets, token: code });
   if (!payload) {
     return NextResponse.json({ error: "Magic link not found." }, { status: 404 });
   }

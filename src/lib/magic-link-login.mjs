@@ -57,6 +57,25 @@ export function getMagicLinkSigningSecret(baseSecret) {
     .digest('base64url');
 }
 
+function normalizeSigningSecret(secret) {
+  if (typeof secret !== 'string') return null;
+  const trimmed = secret.trim();
+  return trimmed || null;
+}
+
+export function resolveMagicLinkSigningSecrets({ magicLinkSigningSecret, clerkSecretKey }) {
+  const candidates = [
+    normalizeSigningSecret(magicLinkSigningSecret),
+    normalizeSigningSecret(clerkSecretKey) ? getMagicLinkSigningSecret(clerkSecretKey) : null,
+  ].filter(Boolean);
+
+  return [...new Set(candidates)];
+}
+
+export function getPrimaryMagicLinkSigningSecret(options) {
+  return resolveMagicLinkSigningSecrets(options)[0] || null;
+}
+
 export function createMagicLinkToken({ secret, payload }) {
   const encodedPayload = encodeBase64Url(JSON.stringify({
     ...payload,
@@ -92,4 +111,12 @@ export function parseMagicLinkToken({ secret, token }) {
   } catch {
     return null;
   }
+}
+
+export function parseMagicLinkTokenWithFallback({ secrets, token }) {
+  for (const secret of [...new Set((secrets || []).map(normalizeSigningSecret).filter(Boolean))]) {
+    const payload = parseMagicLinkToken({ secret, token });
+    if (payload) return payload;
+  }
+  return null;
 }
