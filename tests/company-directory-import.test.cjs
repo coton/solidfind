@@ -54,6 +54,22 @@ test('normalizeCompanyDirectoryRow maps the provided test row into a complete So
   assert.equal(normalized.googleMapsLink, 'https://maps.google.com/?q=Balitecture+Seminyak+Bali');
 });
 
+test('mapCategorySelections keeps filter keyword categories instead of collapsing them into one raw string', () => {
+  const normalized = importer.normalizeCompanyDirectoryRow(
+    {
+      'Company Name': 'Keyword Builder',
+      Email: 'keywords@example.com',
+      'Password Format': 'Test1234',
+      Provinces: 'Badung',
+      Categories: 'Residential, Commercial',
+    },
+    { sourceName: 'Living_id_Construction_Directory_TEST.csv' }
+  );
+
+  assert.equal(normalized.primaryCategory, 'construction');
+  assert.deepEqual(normalized.constructionTypes, ['residential', 'commercial']);
+});
+
 test('loadRowsFromFile preserves empty spreadsheet columns when parsing xlsx uploads', () => {
   const rows = importer.loadRowsFromFile(
     path.join(projectRoot, '..', '..', '3_assets', 'Living_id_Construction_Directory_TEST.xlsx')
@@ -95,6 +111,7 @@ test('buildCompanyMutationPayload keeps every import-relevant profile field, inc
     primaryCategory: 'construction',
     location: 'badung',
     address: 'Address',
+    googleMapsLink: 'https://maps.google.com/?q=Balitecture+Seminyak+Bali',
     isPro: false,
     projects: undefined,
     teamSize: undefined,
@@ -122,6 +139,7 @@ test('buildCompanyMutationPayload keeps every import-relevant profile field, inc
   });
 
   assert.equal(payload.imageUrl, 'https://logo.clearbit.com/balitecture.com');
+  assert.equal(payload.googleMapsLink, 'https://maps.google.com/?q=Balitecture+Seminyak+Bali');
   assert.deepEqual(payload.projectImageUrls, ['https://example.com/p1.webp']);
   assert.deepEqual(payload.projectSizes, ['any']);
   assert.deepEqual(payload.constructionTypes, ['all']);

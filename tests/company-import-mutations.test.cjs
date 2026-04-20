@@ -29,4 +29,10 @@ test('companies mutations accept import-owned fields for directory onboarding', 
     /projectImageUrls: v\.optional\(v\.array\(v\.string\(\)\)\)/,
     'expected companies mutations to accept external project image URLs from the directory file'
   );
+
+  assert.match(
+    source,
+    /googleMapsLink: v\.optional\(v\.string\(\)\)/,
+    'expected companies mutations to accept the imported Google Maps URL used by the public profile address link'
+  );
 });

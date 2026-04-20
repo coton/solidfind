@@ -18,7 +18,8 @@ import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { starFillColor, starColor } from "@/lib/starColors";
-import { buildCompanyProfilePath, buildCompanyReviewsPath } from "@/lib/company-profile-url.mjs";
+import { buildCompanyAddressHref } from '@/lib/company-address-link.mjs';
+import { buildCompanyProfilePath, buildCompanyReviewsPath } from '@/lib/company-profile-url.mjs';
 
 /** Capitalize first letter of each word in every array element, then join */
 function capitalizeJoin(arr: string[]): string {
@@ -483,7 +484,7 @@ export default function ProfilePageClient() {
             {/* Address */}
             <div className="flex flex-col mt-auto">
               <a 
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company.address || "")}`}
+                href={buildCompanyAddressHref(company)}
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-start gap-2.5 group cursor-pointer"

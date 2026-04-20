@@ -24,6 +24,7 @@ export default defineSchema({
     subcategory: v.optional(v.string()),
     location: v.optional(v.string()),
     address: v.optional(v.string()),
+    googleMapsLink: v.optional(v.string()),
     isPro: v.boolean(),
     rating: v.optional(v.float64()),
     reviewCount: v.optional(v.number()),

@@ -39,9 +39,102 @@ function inferPrimaryCategory({ sourceName, rowCategoryValue }) {
   throw new Error(`Unable to infer primary category from source "${sourceName || ''}" and value "${rowCategoryValue || ''}"`);
 }
 
+const CATEGORY_FIELD_BY_PRIMARY = {
+  construction: 'constructionTypes',
+  renovation: 'renovationTypes',
+  architecture: 'architectureTypes',
+  interior: 'interiorTypes',
+  'real-estate': 'realEstateTypes',
+};
+
+const CATEGORY_ALIASES = {
+  construction: {
+    all: 'all',
+    'all types': 'all',
+    'any type': 'all',
+    'any types': 'all',
+    residential: 'residential',
+    commercial: 'commercial',
+    hospitality: 'hospitality',
+  },
+  renovation: {
+    every: 'every',
+    'every renovation': 'every',
+    'every renovations': 'every',
+    'any renovation': 'every',
+    'any renovations': 'every',
+    'complete house': 'complete',
+    'living room': 'living',
+    kitchen: 'kitchen',
+    bathroom: 'bathroom',
+    bedroom: 'bedroom',
+    electricity: 'electricity',
+    plumbing: 'plumbing',
+    roofing: 'roofing',
+    waterproofing: 'waterproofing',
+    pool: 'pool',
+    'mold treatment': 'mold',
+    mold: 'mold',
+    tiling: 'tiling',
+    painting: 'painting',
+    fencing: 'fencing',
+  },
+  architecture: {
+    all: 'all',
+    'all types': 'all',
+    'any type': 'all',
+    'any types': 'all',
+    residential: 'residential',
+    commercial: 'commercial',
+    'renovations and extensions': 'renovations-extensions',
+    'renovation and extensions': 'renovations-extensions',
+    'renovations extensions': 'renovations-extensions',
+    'sustainable eco archi': 'sustainable-eco',
+    sustainable: 'sustainable-eco',
+    'eco archi': 'sustainable-eco',
+  },
+  interior: {
+    all: 'all',
+    'all types': 'all',
+    'any type': 'all',
+    'any types': 'all',
+    residential: 'residential',
+    commercial: 'commercial',
+    hospitality: 'hospitality',
+    furnitures: 'furnitures',
+    furniture: 'furnitures',
+    lighting: 'lighting',
+    'styling decoration': 'styling-decoration',
+    styling: 'styling-decoration',
+    decoration: 'styling-decoration',
+  },
+  'real-estate': {
+    all: 'all',
+    'all types': 'all',
+    'any type': 'all',
+    'any types': 'all',
+    residential: 'residential',
+    commercial: 'commercial',
+    'land development plots': 'land-development',
+    'land development': 'land-development',
+    'property management': 'property-management',
+    'legal notary services': 'legal-notary',
+    'legal notary': 'legal-notary',
+  },
+};
+
+function normalizeCategoryKeyword(value) {
+  return cleanString(value)
+    ?.toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
 function mapCategorySelections(primaryCategory, rowCategoryValue) {
   const raw = cleanString(rowCategoryValue);
-  if (!raw) {
+  const categoryField = CATEGORY_FIELD_BY_PRIMARY[primaryCategory];
+  if (!raw || !categoryField) {
     return {
       constructionTypes: [],
       renovationTypes: [],
@@ -51,21 +144,17 @@ function mapCategorySelections(primaryCategory, rowCategoryValue) {
     };
   }
 
-  const normalized = raw.toLowerCase();
-  const categoryMap = {
-    construction: 'constructionTypes',
-    renovation: 'renovationTypes',
-    architecture: 'architectureTypes',
-    interior: 'interiorTypes',
-    'real-estate': 'realEstateTypes',
-  };
-  const optionByCategory = {
-    construction: normalized.includes('any') || normalized.includes('all') ? 'all' : normalized,
-    renovation: normalized.includes('any') || normalized.includes('every') ? 'every' : normalized,
-    architecture: normalized.includes('any') || normalized.includes('all') ? 'all' : normalized,
-    interior: normalized.includes('any') || normalized.includes('all') ? 'all' : normalized,
-    'real-estate': normalized.includes('any') || normalized.includes('all') ? 'all' : normalized,
-  };
+  const aliases = CATEGORY_ALIASES[primaryCategory] || {};
+  const selections = [...new Set(
+    parseDelimitedCell(raw)
+      .map((token) => aliases[normalizeCategoryKeyword(token)] || normalizeCategoryKeyword(token))
+      .filter(Boolean)
+  )];
+  const normalizedSelections = selections.includes('all')
+    ? ['all']
+    : selections.includes('every')
+      ? ['every']
+      : selections;
 
   return {
     constructionTypes: [],
@@ -73,7 +162,7 @@ function mapCategorySelections(primaryCategory, rowCategoryValue) {
     architectureTypes: [],
     interiorTypes: [],
     realEstateTypes: [],
-    [categoryMap[primaryCategory]]: [optionByCategory[primaryCategory]],
+    [categoryField]: normalizedSelections,
   };
 }
 
@@ -143,6 +232,7 @@ function buildCompanyMutationPayload(normalized) {
     category: normalized.primaryCategory,
     location: normalized.location,
     address: normalized.address,
+    googleMapsLink: normalized.googleMapsLink,
     isPro: Boolean(normalized.isPro),
     projects: normalized.projects,
     teamSize: normalized.teamSize,
