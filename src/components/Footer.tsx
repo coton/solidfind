@@ -78,7 +78,7 @@ export function Footer() {
         <div className="flex flex-col items-end gap-3">
           {/* Description */}
           <div className="text-right max-w-[320px]">
-            <p className="text-[#E4E4E4] text-[9px] leading-[12px] font-medium tracking-[0.18px]">
+            <p className="text-white text-[9px] leading-[12px] font-medium tracking-[0.18px]">
               <span className="font-bold">SOLIDFIND.ID</span>
               {" is an independent platform built to bring clarity,"}
               <br />
@@ -111,14 +111,14 @@ export function Footer() {
             </a>
             <Link
               href="/about"
-              className="text-[#E4E4E4] font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
+              className="text-white font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
             >
               ABOUT
             </Link>
           </div>
 
           {/* Bottom Links */}
-          <div className="flex items-center gap-5 text-[#E4E4E4]">
+          <div className="flex items-center gap-5 text-white">
             <Link href="/terms" className="text-[8px] font-bold tracking-[0.4px] underline hover:opacity-80">
               Terms & Conditions.
             </Link>
@@ -134,7 +134,7 @@ export function Footer() {
         <div className="flex flex-col items-end gap-4">
           {/* Description */}
           <div className="text-right max-w-[426px]">
-            <p className="text-[#E4E4E4] text-[12px] leading-[18px] tracking-[0.24px]">
+            <p className="text-white text-[12px] leading-[18px] tracking-[0.24px]">
               <span className="font-semibold text-[13px] leading-[17px]">SOLIDFIND</span>
               <span className="font-semibold text-[13px] leading-[17px]">.id </span>
               <span className="font-normal">is an independent platform built to bring clarity, trust, and perspective to the places we live in.</span>
@@ -166,14 +166,14 @@ export function Footer() {
             </a>
             <Link
               href="/about"
-              className="text-[#E4E4E4] font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
+              className="text-white font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
             >
               ABOUT
             </Link>
           </div>
 
           {/* Bottom Links */}
-          <div className="flex items-center gap-5 text-[#E4E4E4]">
+          <div className="flex items-center gap-5 text-white">
             <Link href="/terms" className="text-[8px] font-bold tracking-[0.4px] underline hover:opacity-80">
               Terms & Conditions.
             </Link>
