@@ -51,7 +51,7 @@ test('company edit page keeps imported external media visible and editable', () 
   );
 });
 
-test("company dashboard mirrors the individual dashboard greeting UI with a Hello label and company name heading", () => {
+test("company dashboard mirrors the individual dashboard greeting UI while keeping the company name clickable", () => {
   const source = read(dashboardPagePath);
 
   assert.match(
@@ -62,13 +62,19 @@ test("company dashboard mirrors the individual dashboard greeting UI with a Hell
 
   assert.match(
     source,
-    /<h1 className="text-\[32px\] font-bold text-\[#333\] tracking-\[0\.64px\] mb-0">\s*\{data\.name\}\s*<\/h1>/,
-    "Expected the company dashboard heading to render the company name in its own line"
+    /buildCompanyProfilePath, buildCompanyReviewsPath/,
+    "Expected the company dashboard to import the company profile path helper so the heading can stay clickable"
+  );
+
+  assert.match(
+    source,
+    /<Link href=\{buildCompanyProfilePath\(company\)\} className="hover:text-\[#f14110\] transition-colors">\s*\{data\.name\}\s*<\/Link>/,
+    "Expected the company name heading to remain clickable and route to the public company profile"
   );
 
   assert.doesNotMatch(
     source,
     /Hello \{data\.name\}/,
-    "Expected the old combined Hello + company name heading to be removed"
+    "Expected the old combined Hello + company name heading to remain removed"
   );
 });
