@@ -60,8 +60,14 @@ test('company profile image viewer supports previous/next controls and mobile sw
 
   assert.match(
     source,
-    /<button[\s\S]*aria-label="Close image viewer"[\s\S]*\{currentImage\.kind === "external"/,
-    'Expected the image viewer close button to sit inside the image frame before the image renders'
+    /<span className="font-bam text-\[9px\][\s\S]*aria-label="Close image viewer"[\s\S]*<\/div>\s*<div\s*className="relative flex max-h-\[72vh\]/,
+    'Expected the image viewer close button to sit top-right above the image frame'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /className="relative flex max-h-\[72vh\][\s\S]*aria-label="Close image viewer"/,
+    'Expected the image viewer close button to stay outside the image frame'
   );
 
   assert.doesNotMatch(
@@ -72,8 +78,30 @@ test('company profile image viewer supports previous/next controls and mobile sw
 
   assert.match(
     source,
+    /text-\[11px\][\s\S]{0,180}<span>Previous<\/span>[\s\S]*text-\[11px\][\s\S]{0,180}<span>Next<\/span>/,
+    'Expected previous and next text links to use 11px typography'
+  );
+
+  assert.match(
+    source,
     /aria-label="Close image viewer"[\s\S]*<svg width="16" height="16"/,
     'Expected the close affordance to use the reduced 16px icon size'
+  );
+});
+
+test('company profile mobile actions sit directly below the company picture', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /\/\* Mobile only: Save\/Share\/Report directly below the company picture \*\/[\s\S]*className="mt-3 flex lg:hidden items-center gap-4"/,
+    'Expected mobile bookmark/share/report actions to render directly below the company picture'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /\/\* Mobile only: Save\/Share\/Report below description/,
+    'Expected mobile bookmark/share/report actions to no longer render below the description'
   );
 });
 

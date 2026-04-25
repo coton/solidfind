@@ -507,6 +507,43 @@ export default function ProfilePageClient() {
                 />
               )}
             </div>
+
+            {/* Mobile only: Save/Share/Report directly below the company picture */}
+            <div className="mt-3 flex lg:hidden items-center gap-4">
+              <button onClick={handleToggleSave} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
+                <span className={`font-bam text-[9px] ${company.bookmarkCount ? 'text-[#F14110]' : '#666'}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
+                <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  className={`transition-colors ${isBookmarked
+                    ? 'fill-[#f14110] stroke-[#f14110] group-hover:fill-transparent group-hover:stroke-[#D8D8D8]'
+                    : 'fill-transparent stroke-[#D8D8D8] group-hover:fill-[#f14110] group-hover:stroke-[#f14110]'
+                  }`}
+                  style={{ strokeWidth: 2, strokeLinejoin: 'round' as const }}
+                >
+                  <path d="M1 1H14.2353V19.1985L7.61765 14.2353L1 19.1985V1Z" />
+                </svg>
+              </button>
+              <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
+                <span className="font-bam text-[9px]">Share</span>
+                <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                  style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+                >
+                  <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
+                </svg>
+                {showCopiedToast && (
+                  <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
+                )}
+              </button>
+              <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
+                <span className="font-bam text-[9px]">Report</span>
+                <svg width="15" height="17" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                  style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+                >
+                  <path d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Column 2: Contact Info */}
@@ -672,42 +709,6 @@ export default function ProfilePageClient() {
               {company.description ?? ""}
             </p>
 
-            {/* Mobile only: Save/Share/Report below description, left-aligned */}
-            <div className="flex lg:hidden items-center gap-4">
-              <button onClick={handleToggleSave} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
-                <span className={`font-bam text-[9px] ${company.bookmarkCount ? 'text-[#F14110]' : '#666'}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
-                <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  className={`transition-colors ${isBookmarked
-                    ? 'fill-[#f14110] stroke-[#f14110] group-hover:fill-transparent group-hover:stroke-[#D8D8D8]'
-                    : 'fill-transparent stroke-[#D8D8D8] group-hover:fill-[#f14110] group-hover:stroke-[#f14110]'
-                  }`}
-                  style={{ strokeWidth: 2, strokeLinejoin: 'round' as const }}
-                >
-                  <path d="M1 1H14.2353V19.1985L7.61765 14.2353L1 19.1985V1Z" />
-                </svg>
-              </button>
-              <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
-                <span className="font-bam text-[9px]">Share</span>
-                <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                  style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-                >
-                  <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
-                </svg>
-                {showCopiedToast && (
-                  <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
-                )}
-              </button>
-              <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
-                <span className="font-bam text-[9px]">Report</span>
-                <svg width="15" height="17" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                  style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-                >
-                  <path d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
-                </svg>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -991,6 +992,16 @@ export default function ProfilePageClient() {
               <span className="font-bam text-[9px] uppercase tracking-[0.18px] text-white/65">
                 {currentImageIndex !== null ? `${currentImageIndex + 1} / ${projectImages.length}` : ""}
               </span>
+              <button
+                type="button"
+                onClick={closeImageViewer}
+                aria-label="Close image viewer"
+                className="inline-flex h-6 w-6 items-center justify-center text-white transition-colors hover:text-[#f14110]"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 2L14 14M2 14L14 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
             </div>
 
             <div
@@ -998,17 +1009,6 @@ export default function ProfilePageClient() {
               onTouchStart={handleViewerTouchStart}
               onTouchEnd={handleViewerTouchEnd}
             >
-              <button
-                type="button"
-                onClick={closeImageViewer}
-                aria-label="Close image viewer"
-                className="absolute left-3 top-3 z-10 inline-flex h-6 w-6 items-center justify-center text-white transition-colors hover:text-[#f14110]"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 2L14 14M2 14L14 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-
               {currentImage.kind === "external" ? (
                 <img
                   src={currentImage.src}
@@ -1033,7 +1033,7 @@ export default function ProfilePageClient() {
                 type="button"
                 onClick={goToPreviousImage}
                 disabled={isFirstImage}
-                className="font-bam text-[9px] uppercase tracking-[0.18px] text-white/65 transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
+                className="font-bam text-[11px] uppercase tracking-[0.18px] text-white/65 transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
               >
                 <span>Previous</span>
               </button>
@@ -1042,7 +1042,7 @@ export default function ProfilePageClient() {
                 type="button"
                 onClick={goToNextImage}
                 disabled={isLastImage}
-                className="font-bam text-[9px] uppercase tracking-[0.18px] text-white/65 transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
+                className="font-bam text-[11px] uppercase tracking-[0.18px] text-white/65 transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
               >
                 <span>Next</span>
               </button>
