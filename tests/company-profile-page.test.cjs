@@ -42,3 +42,47 @@ test('company profile testimonial actions keep the 140px website button width', 
     'Expected the testimonial CTA button typography to stay aligned with the rest of the website'
   );
 });
+
+test('company profile image viewer supports previous/next controls and mobile swipe navigation', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /handleViewerTouchStart[\s\S]*handleViewerTouchEnd/,
+    'Expected the image viewer to register touch handlers for mobile swipe navigation'
+  );
+
+  assert.match(
+    source,
+    /<span>Previous<\/span>[\s\S]*<span>Next<\/span>/,
+    'Expected the image viewer to render previous and next navigation controls'
+  );
+
+  assert.match(
+    source,
+    /aria-label="Close image viewer"[\s\S]*<svg width="16" height="16"/,
+    'Expected the close affordance to use the reduced 16px icon size'
+  );
+});
+
+test('company profile address stacks the pin above a three-line clamped address', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /formatProfileAddress[\s\S]*PROFILE_ADDRESS_MAX_CHARS[\s\S]*\[\.\.\.\]/,
+    'Expected long company addresses to be formatted with a [...] suffix'
+  );
+
+  assert.match(
+    source,
+    /className="group flex w-full cursor-pointer flex-col items-start gap-1\.5"/,
+    'Expected the address link to stack the pin icon above the full-width address text'
+  );
+
+  assert.match(
+    source,
+    /WebkitLineClamp: 3/,
+    'Expected the company address display to be clamped to three lines'
+  );
+});

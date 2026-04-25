@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type TouchEvent } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -42,27 +42,42 @@ function formatWhatsApp(num: string): string {
   return num.replace(/^[+0]+/, "");
 }
 
+type ProjectImageItem =
+  | { kind: "external"; src: string; alt: string }
+  | { kind: "storage"; storageId: Id<"_storage">; alt: string };
+
+const PROFILE_ADDRESS_MAX_CHARS = 150;
+
+function formatProfileAddress(address: string | undefined): string {
+  const trimmed = address?.trim();
+  if (!trimmed) return "-";
+  if (trimmed.length <= PROFILE_ADDRESS_MAX_CHARS) return trimmed;
+
+  const clipped = trimmed.slice(0, PROFILE_ADDRESS_MAX_CHARS).trimEnd();
+  const clippedAtWord = clipped.replace(/\s+\S*$/, "").trimEnd();
+  return `${clippedAtWord || clipped}[...]`;
+}
+
 function ProjectStorageImageTile({
-  storageId,
+  image,
   index,
   onImageClick,
 }: {
-  storageId: Id<"_storage">;
+  image: Extract<ProjectImageItem, { kind: "storage" }>;
   index: number;
-  onImageClick: (src: string, alt: string) => void;
+  onImageClick: (index: number) => void;
 }) {
-  const url = useStorageUrl(storageId);
-  const alt = `Project ${index + 1}`;
+  const url = useStorageUrl(image.storageId);
 
   return (
     <div
       className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative cursor-pointer hover:opacity-90 transition-opacity"
-      onClick={() => url && onImageClick(url, alt)}
+      onClick={() => url && onImageClick(index)}
     >
       {url ? (
         <Image
           src={url}
-          alt={alt}
+          alt={image.alt}
           fill
           unoptimized
           sizes="(max-width: 640px) 33vw, 210px"
@@ -74,45 +89,41 @@ function ProjectStorageImageTile({
 }
 
 function ProjectImagesGrid({
-  imageUrls,
-  storageImageIds,
+  items,
   onImageClick,
 }: {
-  imageUrls: string[];
-  storageImageIds: Id<"_storage">[];
-  onImageClick: (src: string, alt: string) => void;
+  items: ProjectImageItem[];
+  onImageClick: (index: number) => void;
 }) {
-  const externalImages = imageUrls.filter(Boolean);
-  const totalCount = externalImages.length + storageImageIds.length;
-
-  if (totalCount === 0) return <div />;
+  if (items.length === 0) return <div />;
 
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5">
-      {externalImages.map((src, i) => (
-        <div
-          key={`img-url-${i}`}
-          className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative cursor-pointer hover:opacity-90 transition-opacity"
-          onClick={() => onImageClick(src, `Project ${i + 1}`)}
-        >
-          <Image
-            src={src}
-            alt={`Project ${i + 1}`}
-            fill
-            unoptimized
-            sizes="(max-width: 640px) 33vw, 210px"
-            className="object-cover"
+      {items.map((image, index) =>
+        image.kind === "external" ? (
+          <div
+            key={`img-url-${image.src}-${index}`}
+            className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={() => onImageClick(index)}
+          >
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              unoptimized
+              sizes="(max-width: 640px) 33vw, 210px"
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <ProjectStorageImageTile
+            key={`img-storage-${image.storageId}`}
+            image={image}
+            index={index}
+            onImageClick={onImageClick}
           />
-        </div>
-      ))}
-      {storageImageIds.map((storageId, i) => (
-        <ProjectStorageImageTile
-          key={`img-storage-${storageId}`}
-          storageId={storageId}
-          index={externalImages.length + i}
-          onImageClick={onImageClick}
-        />
-      ))}
+        )
+      )}
     </div>
   );
 }
@@ -215,7 +226,9 @@ export default function ProfilePageClient() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCopiedToast, setShowCopiedToast] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);
-  const [currentImage, setCurrentImage] = useState<{ src: string; alt: string } | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
 
   const handleShare = async () => {
     const shareUrl = window.location.href;
@@ -235,8 +248,8 @@ export default function ProfilePageClient() {
   });
   const validId = company?._id;
 
-  const handleImageClick = (src: string, alt: string) => {
-    setCurrentImage({ src, alt });
+  const handleImageClick = (index: number) => {
+    setCurrentImageIndex(index);
     setShowImageViewer(true);
   };
 
@@ -355,6 +368,90 @@ export default function ProfilePageClient() {
     text: r.content,
     date: new Date(r.createdAt).toLocaleDateString("en-CA").replace(/-/g, "/"),
   }));
+
+  const externalProjectImages = (company.projectImageUrls ?? []).filter(Boolean);
+  const projectImages: ProjectImageItem[] = [
+    ...externalProjectImages.map((src, index) => ({
+      kind: "external" as const,
+      src,
+      alt: `Project ${index + 1}`,
+    })),
+    ...(company.projectImageIds ?? []).map((storageId, index) => ({
+      kind: "storage" as const,
+      storageId,
+      alt: `Project ${externalProjectImages.length + index + 1}`,
+    })),
+  ];
+  const currentImage = currentImageIndex !== null ? projectImages[currentImageIndex] ?? null : null;
+  const isFirstImage = currentImageIndex === 0;
+  const isLastImage = currentImageIndex === projectImages.length - 1;
+  const profileAddress = formatProfileAddress(company.address);
+
+  const closeImageViewer = () => {
+    setShowImageViewer(false);
+    setCurrentImageIndex(null);
+  };
+
+  const goToPreviousImage = () => {
+    setCurrentImageIndex((index) => (index === null || index <= 0 ? index : index - 1));
+  };
+
+  const goToNextImage = () => {
+    setCurrentImageIndex((index) => (index === null || index >= projectImages.length - 1 ? index : index + 1));
+  };
+
+  const handleViewerTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0];
+    touchStartXRef.current = touch.clientX;
+    touchStartYRef.current = touch.clientY;
+  };
+
+  const handleViewerTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) {
+      return;
+    }
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - touchStartXRef.current;
+    const deltaY = touch.clientY - touchStartYRef.current;
+
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      goToNextImage();
+      return;
+    }
+
+    goToPreviousImage();
+  };
+
+  useEffect(() => {
+    if (!showImageViewer) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeImageViewer();
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToPreviousImage();
+      }
+
+      if (event.key === "ArrowRight") {
+        goToNextImage();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showImageViewer, projectImages.length]);
 
   return (
     <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
@@ -487,14 +584,22 @@ export default function ProfilePageClient() {
                 href={buildCompanyAddressHref(company)}
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-start gap-2.5 group cursor-pointer"
+                className="group flex w-full cursor-pointer flex-col items-start gap-1.5"
               >
-                <svg width="14" height="17" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333] group-hover:text-[#f14110] transition-colors flex-shrink-0 mt-[1px]">
+                <svg width="14" height="17" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333] group-hover:text-[#f14110] transition-colors flex-shrink-0">
                   <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
                 </svg>
-                <span className="font-bam text-[9px] text-[#333]/50 group-hover:text-[#f14110] transition-colors leading-[14px] w-full break-words">
-                  {company.address || "-"}
+                <span
+                  className="font-bam w-full break-words text-[9px] leading-[14px] text-[#333]/50 transition-colors group-hover:text-[#f14110]"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 3,
+                    overflow: "hidden",
+                  }}
+                >
+                  {profileAddress}
                 </span>
               </a>
             </div>
@@ -611,8 +716,7 @@ export default function ProfilePageClient() {
           {/* Only render grid if there are actual images and reviews are not enabled */}
           {!reviewsEnabled && (
             <ProjectImagesGrid
-              imageUrls={company.projectImageUrls ?? []}
-              storageImageIds={company.projectImageIds ?? []}
+              items={projectImages}
               onImageClick={handleImageClick}
             />
           )}
@@ -881,21 +985,78 @@ export default function ProfilePageClient() {
       {/* Image Viewer Modal */}
       {showImageViewer && currentImage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90">
-          <div className="absolute inset-0" onClick={() => { setShowImageViewer(false); setCurrentImage(null); }} />
-          <div className="relative z-10 max-w-[90vw] max-h-[90vh] flex items-center justify-center p-4">
-            <button
-              onClick={() => { setShowImageViewer(false); setCurrentImage(null); }}
-              className="absolute -top-10 right-0 text-white hover:text-gray-300"
+          <div className="absolute inset-0" onClick={closeImageViewer} />
+          <div className="relative z-10 flex w-full max-w-[90vw] flex-col items-center gap-4 px-4 py-6 sm:max-w-[92vw]">
+            <div className="flex w-full max-w-[960px] items-center justify-between gap-3">
+              <span className="font-bam text-[9px] uppercase tracking-[0.18px] text-white/65">
+                {currentImageIndex !== null ? `${currentImageIndex + 1} / ${projectImages.length}` : ""}
+              </span>
+            </div>
+
+            <div
+              className="relative flex max-h-[72vh] w-full max-w-[960px] items-center justify-center overflow-hidden rounded-[6px]"
+              onTouchStart={handleViewerTouchStart}
+              onTouchEnd={handleViewerTouchEnd}
             >
-              <svg width="32" height="32" viewBox="0 0 16 16" fill="none">
-                <path d="M1 1L15 15M1 15L15 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            <img 
-              src={currentImage.src} 
-              alt={currentImage.alt} 
-              className="max-w-full max-h-[85vh] object-contain rounded-[6px]"
-            />
+              {currentImage.kind === "external" ? (
+                <img
+                  src={currentImage.src}
+                  alt={currentImage.alt}
+                  className="max-w-full max-h-[72vh] object-contain rounded-[6px]"
+                />
+              ) : (
+                <div className="relative h-[72vh] w-full">
+                  <StorageImage
+                    storageId={currentImage.storageId}
+                    alt={currentImage.alt}
+                    fill
+                    sizes="90vw"
+                    className="object-contain"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex w-full max-w-[960px] items-center justify-between gap-3 sm:gap-4">
+              <button
+                type="button"
+                onClick={goToPreviousImage}
+                disabled={isFirstImage}
+                className="inline-flex h-10 min-w-[120px] items-center justify-center gap-1.5 rounded-full border border-white text-[11px] font-medium tracking-[0.22px] text-white transition-colors hover:border-[#f14110] hover:text-[#f14110] disabled:border-white/25 disabled:text-white/25 disabled:hover:border-white/25 disabled:hover:text-white/25"
+              >
+                <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                  <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Previous</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={closeImageViewer}
+                aria-label="Close image viewer"
+                className="inline-flex h-6 w-6 items-center justify-center text-white transition-colors hover:text-[#f14110]"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 2L14 14M2 14L14 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                onClick={goToNextImage}
+                disabled={isLastImage}
+                className="inline-flex h-10 min-w-[120px] items-center justify-center gap-1.5 rounded-full border border-white text-[11px] font-medium tracking-[0.22px] text-white transition-colors hover:border-[#f14110] hover:text-[#f14110] disabled:border-white/25 disabled:text-white/25 disabled:hover:border-white/25 disabled:hover:text-white/25"
+              >
+                <span>Next</span>
+                <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                  <path d="M15 5H1M15 5L11 1M15 5L11 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="font-bam text-[9px] uppercase tracking-[0.18px] text-white/45 sm:hidden">
+              Swipe to navigate
+            </p>
           </div>
         </div>
       )}
