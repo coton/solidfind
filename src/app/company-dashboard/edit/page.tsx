@@ -243,7 +243,9 @@ export default function EditProfilePage() {
 
   const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription;
   const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
-  const shouldPromptSetupAccount = searchParams.get("setupAccount") === "1" && !!clerkUser && !clerkUser.passwordEnabled;
+  const hasSetupAccountQuery = searchParams.get("setupAccount") === "1";
+  const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser && !clerkUser.passwordEnabled;
+  const isResolvingSetupAccount = hasSetupAccountQuery && (!clerkUser || currentUser === undefined || company === undefined);
 
   const logoUrl = useStorageUrl(logoId);
 
@@ -472,6 +474,19 @@ export default function EditProfilePage() {
       setSetupAccountSaving(false);
     }
   };
+
+  if (isResolvingSetupAccount) {
+    return (
+      <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center px-4">
+        <div className="text-center">
+          <p className="text-[18px] font-semibold tracking-[0.36px] text-[#333]">Setup your Account</p>
+          <p className="mt-2 text-[10px] tracking-[0.2px] text-[#333]/60">
+            Loading your company access...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -1258,12 +1273,12 @@ export default function EditProfilePage() {
         <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-[#333]/85 px-4">
           <div className="w-full max-w-[440px] rounded-[6px] bg-[#f8f8f8] px-6 py-7 sm:px-8">
             <h2 className="text-center text-[18px] font-semibold tracking-[0.36px] text-[#333]">
-              Setup Account
+              Setup your Account
             </h2>
             <p className="mt-2 text-center text-[9px] leading-[14px] text-[#999]">
-              Just register your password before accessing your company profile.
+              Register your password before accessing your company profile.
               <br />
-              Cukup daftarkan kata sandi Anda sebelum mengakses profil perusahaan Anda.
+              Daftarkan kata sandi Anda sebelum mengakses profil perusahaan Anda.
             </p>
 
             <form onSubmit={handleSetupAccount} className="mt-5">

@@ -42,7 +42,7 @@ test('company dashboard edit blocks password-less magic-link users behind the se
 
   assert.match(
     source,
-    /const shouldPromptSetupAccount = searchParams\.get\("setupAccount"\) === "1" && !!clerkUser && !clerkUser\.passwordEnabled;/,
+    /const hasSetupAccountQuery = searchParams\.get\("setupAccount"\) === "1";[\s\S]*const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser && !clerkUser\.passwordEnabled;/,
     'expected the company editor to gate setup-account onboarding on the setupAccount query and Clerk password state'
   );
 
@@ -54,14 +54,20 @@ test('company dashboard edit blocks password-less magic-link users behind the se
 
   assert.match(
     source,
-    /<h2 className="text-center text-\[18px\] font-semibold tracking-\[0\.36px\] text-\[#333\]">\s*Setup Account/,
-    'expected the company editor overlay to use the requested Setup Account title'
+    /<h2 className="text-center text-\[18px\] font-semibold tracking-\[0\.36px\] text-\[#333\]">\s*Setup your Account/,
+    'expected the company editor overlay to use the requested Setup your Account title'
   );
 
   assert.match(
     source,
-    /Just register your password before accessing your company profile\.[\s\S]*Cukup daftarkan kata sandi Anda sebelum mengakses profil perusahaan Anda\./,
+    /Register your password before accessing your company profile\.[\s\S]*Daftarkan kata sandi Anda sebelum mengakses profil perusahaan Anda\./,
     'expected the setup-account popup to show the requested bilingual subtitle'
+  );
+
+  assert.match(
+    source,
+    /const isResolvingSetupAccount = hasSetupAccountQuery && \(!clerkUser \|\| currentUser === undefined \|\| company === undefined\);[\s\S]*Loading your company access\.\.\./,
+    'expected the company editor to keep a dedicated loading screen visible while setup-account access checks resolve'
   );
 
   assert.match(
@@ -71,12 +77,12 @@ test('company dashboard edit blocks password-less magic-link users behind the se
   );
 });
 
-test('auth modal continue with email button uses the standard 140px width', () => {
+test('auth modal continue with email button keeps its original full width', () => {
   const source = readProjectFile('src/components/AuthModal.tsx');
 
   assert.match(
     source,
-    /Continue with email[\s\S]*width: '140px'/,
-    'expected the Continue with email button to use the standard 140px width'
+    /Continue with email[\s\S]*width: '100%'/,
+    'expected the Continue with email button to keep its original full-width layout'
   );
 });
