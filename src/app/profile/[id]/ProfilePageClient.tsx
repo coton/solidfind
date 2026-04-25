@@ -509,8 +509,8 @@ export default function ProfilePageClient() {
             </div>
 
             {/* Mobile only: Save/Share/Report directly below the company picture */}
-            <div className="mt-3 flex lg:hidden items-center gap-4">
-              <button onClick={handleToggleSave} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
+            <div className="mt-3 flex lg:hidden items-center gap-2">
+              <button onClick={handleToggleSave} className="group flex items-center gap-1.5 text-[#333]/35 transition-colors">
                 <span className={`font-bam text-[9px] ${company.bookmarkCount ? 'text-[#F14110]' : '#666'}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
                 <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
                   className={`transition-colors ${isBookmarked
@@ -522,7 +522,7 @@ export default function ProfilePageClient() {
                   <path d="M1 1H14.2353V19.1985L7.61765 14.2353L1 19.1985V1Z" />
                 </svg>
               </button>
-              <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
+              <button onClick={handleShare} className="group flex items-center gap-1.5 text-[#333]/35 transition-colors relative">
                 <span className="font-bam text-[9px]">Share</span>
                 <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
                   className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
@@ -534,7 +534,7 @@ export default function ProfilePageClient() {
                   <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
                 )}
               </button>
-              <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
+              <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-1.5 text-[#333]/35 transition-colors">
                 <span className="font-bam text-[9px]">Report</span>
                 <svg width="15" height="17" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"
                   className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
@@ -1033,8 +1033,11 @@ export default function ProfilePageClient() {
                 type="button"
                 onClick={goToPreviousImage}
                 disabled={isFirstImage}
-                className="font-bam text-[11px] uppercase tracking-[0.18px] text-white/65 transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.22px] text-white transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
               >
+                <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                  <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
                 <span>Previous</span>
               </button>
 
@@ -1042,9 +1045,12 @@ export default function ProfilePageClient() {
                 type="button"
                 onClick={goToNextImage}
                 disabled={isLastImage}
-                className="font-bam text-[11px] uppercase tracking-[0.18px] text-white/65 transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.22px] text-white transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
               >
                 <span>Next</span>
+                <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                  <path d="M15 5H1M15 5L11 1M15 5L11 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
             </div>
 

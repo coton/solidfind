@@ -78,8 +78,20 @@ test('company profile image viewer supports previous/next controls and mobile sw
 
   assert.match(
     source,
-    /text-\[11px\][\s\S]{0,180}<span>Previous<\/span>[\s\S]*text-\[11px\][\s\S]{0,180}<span>Next<\/span>/,
-    'Expected previous and next text links to use 11px typography'
+    /inline-flex items-center gap-1\.5 text-\[11px\] font-semibold tracking-\[0\.22px\] text-white/,
+    'Expected previous and next text links to use the website 11px arrow-link typography'
+  );
+
+  assert.match(
+    source,
+    /<path d="M1 5H15M1 5L5 1M1 5L5 9"[\s\S]*<span>Previous<\/span>[\s\S]*<span>Next<\/span>[\s\S]*<path d="M15 5H1M15 5L11 1M15 5L11 9"/,
+    'Expected previous and next controls to include the website arrow icons'
+  );
+
+  assert.match(
+    source,
+    /hover:text-\[#f14110\][^"]*disabled:text-white\/25/,
+    'Expected image viewer controls to turn orange on hover and dim when disabled'
   );
 
   assert.match(
@@ -94,7 +106,7 @@ test('company profile mobile actions sit directly below the company picture', ()
 
   assert.match(
     source,
-    /\/\* Mobile only: Save\/Share\/Report directly below the company picture \*\/[\s\S]*className="mt-3 flex lg:hidden items-center gap-4"/,
+    /\/\* Mobile only: Save\/Share\/Report directly below the company picture \*\/[\s\S]*className="mt-3 flex lg:hidden items-center gap-2"/,
     'Expected mobile bookmark/share/report actions to render directly below the company picture'
   );
 
