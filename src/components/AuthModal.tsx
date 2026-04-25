@@ -836,7 +836,7 @@ export function AuthModal({
             onMouseEnter={() => setSubmitHovered(true)}
             onMouseLeave={() => setSubmitHovered(false)}
             style={{
-              width: '100%',
+              width: '140px',
               height: '40px',
               borderRadius: '20px',
               border: submitHovered ? 'none' : '1px solid #F14110',

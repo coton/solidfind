@@ -204,6 +204,10 @@ export default function EditProfilePage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [setupPassword, setSetupPassword] = useState("");
+  const [setupPasswordConfirm, setSetupPasswordConfirm] = useState("");
+  const [setupAccountSaving, setSetupAccountSaving] = useState(false);
+  const [setupAccountError, setSetupAccountError] = useState("");
 
   // Mandatory fields validation
   const hasCategory = (constructionEnabled && selectedConstruction.length > 0)
@@ -239,8 +243,20 @@ export default function EditProfilePage() {
 
   const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription;
   const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
+  const shouldPromptSetupAccount = searchParams.get("setupAccount") === "1" && !!clerkUser && !clerkUser.passwordEnabled;
 
   const logoUrl = useStorageUrl(logoId);
+
+  useEffect(() => {
+    if (searchParams.get("setupAccount") !== "1" || !clerkUser?.passwordEnabled) {
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.delete("setupAccount");
+    const nextQuery = nextParams.toString();
+    router.replace(nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit");
+  }, [clerkUser?.passwordEnabled, router, searchParams]);
 
   // Populate form when company data loads
   useEffect(() => {
@@ -417,6 +433,45 @@ export default function EditProfilePage() {
 
   const maxImages = company?.isPro ? 12 : 4;
   const totalSlots = proEnabled ? 12 : 4;
+
+  const handleSetupAccount = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!clerkUser || setupAccountSaving) return;
+
+    if (!setupPassword.trim()) {
+      setSetupAccountError("Please enter a password.");
+      return;
+    }
+
+    if (setupPassword.length < 8) {
+      setSetupAccountError("Password must be at least 8 characters.");
+      return;
+    }
+
+    if (setupPassword !== setupPasswordConfirm) {
+      setSetupAccountError("Passwords do not match.");
+      return;
+    }
+
+    setSetupAccountSaving(true);
+    setSetupAccountError("");
+
+    try {
+      await clerkUser.updatePassword({ newPassword: setupPassword });
+      setSetupPassword("");
+      setSetupPasswordConfirm("");
+
+      const nextParams = new URLSearchParams(searchParams.toString());
+      nextParams.delete("setupAccount");
+      const nextQuery = nextParams.toString();
+      router.replace(nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to register your password. Please try again.";
+      setSetupAccountError(message);
+    } finally {
+      setSetupAccountSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -1198,6 +1253,67 @@ export default function EditProfilePage() {
       </main>
 
       <Footer />
+
+      {shouldPromptSetupAccount && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-[#333]/85 px-4">
+          <div className="w-full max-w-[440px] rounded-[6px] bg-[#f8f8f8] px-6 py-7 sm:px-8">
+            <h2 className="text-center text-[18px] font-semibold tracking-[0.36px] text-[#333]">
+              Setup Account
+            </h2>
+            <p className="mt-2 text-center text-[9px] leading-[14px] text-[#999]">
+              Just register your password before accessing your company profile.
+              <br />
+              Cukup daftarkan kata sandi Anda sebelum mengakses profil perusahaan Anda.
+            </p>
+
+            <form onSubmit={handleSetupAccount} className="mt-5">
+              <div className="mb-3">
+                <label className="mb-[5px] block text-[11px] font-medium tracking-[0.22px] text-[#333]">
+                  Password <span className="text-[#f14110]">(*)</span>
+                </label>
+                <input
+                  type="password"
+                  value={setupPassword}
+                  onChange={(event) => setSetupPassword(event.target.value)}
+                  className="h-[38px] w-full rounded-[6px] border border-[#E4E4E4] bg-white px-[10px] text-[12px] text-[#333] outline-none"
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="mb-[5px] block text-[11px] font-medium tracking-[0.22px] text-[#333]">
+                  Confirm Password <span className="text-[#f14110]">(*)</span>
+                </label>
+                <input
+                  type="password"
+                  value={setupPasswordConfirm}
+                  onChange={(event) => setSetupPasswordConfirm(event.target.value)}
+                  className="h-[38px] w-full rounded-[6px] border border-[#E4E4E4] bg-white px-[10px] text-[12px] text-[#333] outline-none"
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+
+              {setupAccountError && (
+                <p className="mb-3 text-center text-[11px] font-medium text-[#F14110]">
+                  *{setupAccountError}
+                </p>
+              )}
+
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  disabled={setupAccountSaving}
+                  className="flex h-10 w-[140px] items-center justify-center rounded-full border border-[#333] text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {setupAccountSaving ? "Registering..." : "Register"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (

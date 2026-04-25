@@ -25,6 +25,21 @@ export default function AuthCompletePage() {
   const pendingCompanyName = typeof window !== "undefined"
     ? sessionStorage.getItem("solidfind_companyName") || undefined
     : undefined;
+  const requestedSetupAccount = useMemo(() => {
+    if (!requestedNextPath || !requestedNextPath.startsWith("/company-dashboard/edit")) {
+      return null;
+    }
+
+    if (user?.passwordEnabled) {
+      return requestedNextPath;
+    }
+
+    const [pathname, existingQuery = ""] = requestedNextPath.split("?");
+    const nextParams = new URLSearchParams(existingQuery);
+    nextParams.set("setupAccount", "1");
+    const serialized = nextParams.toString();
+    return serialized ? `${pathname}?${serialized}` : pathname;
+  }, [requestedNextPath, user?.passwordEnabled]);
 
   useEffect(() => {
     if (!isLoaded || !user) return;
@@ -33,7 +48,7 @@ export default function AuthCompletePage() {
     if (existingAccountType === "company") {
       sessionStorage.removeItem("solidfind_accountType");
       sessionStorage.removeItem("solidfind_companyName");
-      router.replace(getPostAuthRedirectPath({ accountType: "company", requestedNextPath }));
+      router.replace(getPostAuthRedirectPath({ accountType: "company", requestedNextPath: requestedSetupAccount || requestedNextPath }));
       return;
     }
 
@@ -48,7 +63,7 @@ export default function AuthCompletePage() {
     // Don't auto-redirect based on sessionStorage — show the AccountTypeSelectionCard
     // so the user can confirm or change their choice.
     // pendingAccountType from sessionStorage is passed as initialAccountType below.
-  }, [isLoaded, user, existingAccountType, requestedNextPath, router]);
+  }, [isLoaded, user, existingAccountType, requestedNextPath, requestedSetupAccount, router]);
 
   const persistAccountType = async (accountType: AccountType, companyName?: string) => {
     if (!user) return;
