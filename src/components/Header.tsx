@@ -136,6 +136,7 @@ interface DropdownProps {
   alignRight?: boolean;
   menuClassName?: string;
   isMobileCategoryDropdown?: boolean;
+  closeSignal?: number;
 }
 
 function Dropdown({ 
@@ -152,10 +153,15 @@ function Dropdown({
   isOptionSelected,
   alignRight = false,
   menuClassName = '',
-  isMobileCategoryDropdown = false
+  isMobileCategoryDropdown = false,
+  closeSignal = 0,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedOption = options.find(opt => opt.id === value);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [closeSignal]);
 
   // For PROJECT SIZE: remove numbers in parentheses when closed
   const getDisplayLabel = (fullLabel: string) => {
@@ -310,8 +316,10 @@ function HeaderInner() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalAccountType, setAuthModalAccountType] = useState<"company" | "individual">("individual");
   const [authModalMode, setAuthModalMode] = useState<"login" | "register">("register");
+  const [dropdownCloseSignal, setDropdownCloseSignal] = useState(0);
 
   const openAuthModal = (accountType: "company" | "individual" = "individual", mode: "login" | "register" = "register") => {
+    setDropdownCloseSignal((current) => current + 1);
     setAuthModalAccountType(accountType);
     setAuthModalMode(mode);
     setAuthModalOpen(true);
@@ -640,6 +648,7 @@ function HeaderInner() {
                 onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
                 width="w-[140px]"
                 isProjectSize={true}
+                closeSignal={dropdownCloseSignal}
               />
 
               {/* Categories Dropdown */}
@@ -654,6 +663,7 @@ function HeaderInner() {
                 displayText={getSubcategoryDisplayText(selectedCategories, categoryOptions)}
                 isActive={isSubcategoryFilterActive(selectedCategories, categoryOptions)}
                 isOptionSelected={(optionId) => isSubcategoryOptionSelected(selectedCategories, optionId, categoryOptions)}
+                closeSignal={dropdownCloseSignal}
               />
 
               {/* Location Dropdown - multi-select enabled */}
@@ -671,6 +681,7 @@ function HeaderInner() {
                   if (optionId === "bali") return isBaliActive();
                   return locations.includes(optionId);
                 }}
+                closeSignal={dropdownCloseSignal}
               />
 
               {/* Search Button - 40x40 container with 34x34 icon centered */}
@@ -721,6 +732,7 @@ function HeaderInner() {
                     onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
                     width="w-full"
                     isProjectSize={true}
+                    closeSignal={dropdownCloseSignal}
                   />
                 </div>
 
@@ -740,6 +752,7 @@ function HeaderInner() {
                     alignRight={true}
                     menuClassName={'min-w-[calc(200%+2px)] max-w-none'}
                     isMobileCategoryDropdown={true}
+                    closeSignal={dropdownCloseSignal}
                   />
                 </div>
 
@@ -760,6 +773,7 @@ function HeaderInner() {
                       return locations.includes(optionId);
                     }}
                     alignRight={true}
+                    closeSignal={dropdownCloseSignal}
                   />
                 </div>
               </div>

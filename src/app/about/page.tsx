@@ -136,13 +136,10 @@ export default function AboutPage() {
             </div>
 
             {/* Social Links */}
-            <div className="flex items-center gap-4">
-              {/* Mail icon - same as footer (25×20, stroke 1.5) */}
+            <div className="flex w-[180px] justify-end gap-4 sm:w-[200px]">
+              {/* Mail icon - matches the footer asset */}
               <a href={mailHref} className="text-[#333] hover:opacity-70 transition-opacity">
-                <svg width="25" height="20" viewBox="0 0 25 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M24 2H1C0.447715 2 0 2.44772 0 3V17C0 17.5523 0.447715 18 1 18H24C24.5523 18 25 17.5523 25 17V3C25 2.44772 24.5523 2 24 2Z" fill="none" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M1 3L12.5 11L24 3" fill="none" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <Image src="/images/footer-mail.svg" alt="Email" width={25} height={20} />
               </a>
               {/* IG icon - same as header (20×20, stroke 1.5) */}
               <a href={igUrlState.value || "#"} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:opacity-70 transition-opacity">

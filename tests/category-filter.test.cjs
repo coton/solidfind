@@ -80,6 +80,35 @@ test('header dropdown keeps category filter overlays anchored to the trigger and
   );
 });
 
+test('opening the auth modal closes any open header dropdown menus before the popup overlays the page', () => {
+  const headerSource = readProjectFile('src/components/Header.tsx');
+  const authModalSource = readProjectFile('src/components/AuthModal.tsx');
+
+  assert.match(
+    headerSource,
+    /const \[dropdownCloseSignal, setDropdownCloseSignal\] = useState\(0\);/,
+    'expected Header to track a dropdown close signal for auth modal launches'
+  );
+
+  assert.match(
+    headerSource,
+    /setDropdownCloseSignal\(\(current\) => current \+ 1\);[\s\S]*setAuthModalOpen\(true\);/,
+    'expected opening the auth modal to close header menus before showing the popup'
+  );
+
+  assert.match(
+    headerSource,
+    /useEffect\(\(\) => \{\s*setIsOpen\(false\);\s*\}, \[closeSignal\]\);/,
+    'expected dropdowns to close themselves when the shared close signal changes'
+  );
+
+  assert.match(
+    authModalSource,
+    /zIndex: 2000/,
+    'expected the auth modal overlay to sit above the rest of the website content'
+  );
+});
+
 test('header dropdown keeps category toggle switches close to their labels on mobile', () => {
   const headerSource = readProjectFile('src/components/Header.tsx');
 

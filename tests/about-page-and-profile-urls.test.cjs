@@ -49,6 +49,22 @@ test('about page ties the PRO account card to the platform pro_enabled switch an
   );
 });
 
+test('about page uses the shared email icon asset and right-aligns the contact icons under the profile image', () => {
+  const aboutSource = readProjectFile('src/app/about/page.tsx');
+
+  assert.match(
+    aboutSource,
+    /Image src="\/images\/footer-mail\.svg" alt="Email" width=\{25\} height=\{20\}/,
+    'expected the About page email icon to reuse the same footer-mail asset as the rest of the website'
+  );
+
+  assert.match(
+    aboutSource,
+    /className="flex w-\[180px\] justify-end gap-4 sm:w-\[200px\]"/,
+    'expected the About page contact icon row to align to the right edge of the profile picture'
+  );
+});
+
 test('admin UI explains bold formatting for the About page description and renames company account field copy', () => {
   const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
 
