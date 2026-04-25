@@ -46,14 +46,19 @@ export default function GlobalError({
               <button
                 onClick={() => reset()}
                 style={{
-                  padding: "12px 24px",
+                  width: "140px",
+                  height: "40px",
                   backgroundColor: "#f14110",
                   color: "white",
                   border: "none",
                   borderRadius: "50px",
                   cursor: "pointer",
-                  fontSize: "15px",
+                  fontSize: "11px",
                   fontWeight: "500",
+                  letterSpacing: "0.22px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   transition: "background-color 0.2s",
                 }}
                 onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#d83a0e")}
@@ -64,16 +69,20 @@ export default function GlobalError({
               <a
                 href="/"
                 style={{
-                  padding: "12px 24px",
+                  width: "140px",
+                  height: "40px",
                   backgroundColor: "white",
                   color: "#333",
                   border: "1px solid #e4e4e4",
                   borderRadius: "50px",
                   cursor: "pointer",
-                  fontSize: "15px",
+                  fontSize: "11px",
                   fontWeight: "500",
+                  letterSpacing: "0.22px",
                   textDecoration: "none",
-                  display: "inline-block",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   transition: "background-color 0.2s",
                 }}
                 onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}

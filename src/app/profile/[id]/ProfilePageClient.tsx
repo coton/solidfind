@@ -299,6 +299,90 @@ export default function ProfilePageClient() {
   // Use saved status from server
   const isBookmarked = savedStatus ?? isSaved;
 
+  const externalProjectImages = (company?.projectImageUrls ?? []).filter(Boolean);
+  const projectImages: ProjectImageItem[] = [
+    ...externalProjectImages.map((src, index) => ({
+      kind: "external" as const,
+      src,
+      alt: `Project ${index + 1}`,
+    })),
+    ...(company?.projectImageIds ?? []).map((storageId, index) => ({
+      kind: "storage" as const,
+      storageId,
+      alt: `Project ${externalProjectImages.length + index + 1}`,
+    })),
+  ];
+  const currentImage = currentImageIndex !== null ? projectImages[currentImageIndex] ?? null : null;
+  const isFirstImage = currentImageIndex === 0;
+  const isLastImage = currentImageIndex === projectImages.length - 1;
+  const profileAddress = formatProfileAddress(company?.address);
+
+  const closeImageViewer = () => {
+    setShowImageViewer(false);
+    setCurrentImageIndex(null);
+  };
+
+  const goToPreviousImage = () => {
+    setCurrentImageIndex((index) => (index === null || index <= 0 ? index : index - 1));
+  };
+
+  const goToNextImage = () => {
+    setCurrentImageIndex((index) => (index === null || index >= projectImages.length - 1 ? index : index + 1));
+  };
+
+  const handleViewerTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0];
+    touchStartXRef.current = touch.clientX;
+    touchStartYRef.current = touch.clientY;
+  };
+
+  const handleViewerTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) {
+      return;
+    }
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - touchStartXRef.current;
+    const deltaY = touch.clientY - touchStartYRef.current;
+
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      goToNextImage();
+      return;
+    }
+
+    goToPreviousImage();
+  };
+
+  useEffect(() => {
+    if (!showImageViewer) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeImageViewer();
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToPreviousImage();
+      }
+
+      if (event.key === "ArrowRight") {
+        goToNextImage();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showImageViewer, projectImages.length]);
+
   const handleToggleSave = async () => {
     if (!currentUser || !validId || !company) {
       if (!currentUser) {
@@ -368,90 +452,6 @@ export default function ProfilePageClient() {
     text: r.content,
     date: new Date(r.createdAt).toLocaleDateString("en-CA").replace(/-/g, "/"),
   }));
-
-  const externalProjectImages = (company.projectImageUrls ?? []).filter(Boolean);
-  const projectImages: ProjectImageItem[] = [
-    ...externalProjectImages.map((src, index) => ({
-      kind: "external" as const,
-      src,
-      alt: `Project ${index + 1}`,
-    })),
-    ...(company.projectImageIds ?? []).map((storageId, index) => ({
-      kind: "storage" as const,
-      storageId,
-      alt: `Project ${externalProjectImages.length + index + 1}`,
-    })),
-  ];
-  const currentImage = currentImageIndex !== null ? projectImages[currentImageIndex] ?? null : null;
-  const isFirstImage = currentImageIndex === 0;
-  const isLastImage = currentImageIndex === projectImages.length - 1;
-  const profileAddress = formatProfileAddress(company.address);
-
-  const closeImageViewer = () => {
-    setShowImageViewer(false);
-    setCurrentImageIndex(null);
-  };
-
-  const goToPreviousImage = () => {
-    setCurrentImageIndex((index) => (index === null || index <= 0 ? index : index - 1));
-  };
-
-  const goToNextImage = () => {
-    setCurrentImageIndex((index) => (index === null || index >= projectImages.length - 1 ? index : index + 1));
-  };
-
-  const handleViewerTouchStart = (event: TouchEvent<HTMLDivElement>) => {
-    const touch = event.touches[0];
-    touchStartXRef.current = touch.clientX;
-    touchStartYRef.current = touch.clientY;
-  };
-
-  const handleViewerTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
-    if (touchStartXRef.current === null || touchStartYRef.current === null) {
-      return;
-    }
-
-    const touch = event.changedTouches[0];
-    const deltaX = touch.clientX - touchStartXRef.current;
-    const deltaY = touch.clientY - touchStartYRef.current;
-
-    touchStartXRef.current = null;
-    touchStartYRef.current = null;
-
-    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) {
-      return;
-    }
-
-    if (deltaX < 0) {
-      goToNextImage();
-      return;
-    }
-
-    goToPreviousImage();
-  };
-
-  useEffect(() => {
-    if (!showImageViewer) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeImageViewer();
-      }
-
-      if (event.key === "ArrowLeft") {
-        goToPreviousImage();
-      }
-
-      if (event.key === "ArrowRight") {
-        goToNextImage();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showImageViewer, projectImages.length]);
 
   return (
     <div className="min-h-screen bg-[#e4e4e4] flex flex-col">

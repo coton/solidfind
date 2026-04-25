@@ -65,6 +65,19 @@ test('company profile image viewer supports previous/next controls and mobile sw
   );
 });
 
+test('company profile image viewer hooks are registered before loading returns', () => {
+  const source = readProfilePage();
+  const viewerEffectIndex = source.indexOf('const handleKeyDown = (event: KeyboardEvent)');
+  const loadingReturnIndex = source.indexOf('if (company === undefined)');
+
+  assert.ok(viewerEffectIndex !== -1, 'Expected image viewer keyboard effect to exist');
+  assert.ok(loadingReturnIndex !== -1, 'Expected company loading return to exist');
+  assert.ok(
+    viewerEffectIndex < loadingReturnIndex,
+    'Expected image viewer hooks to run before loading returns so hook order stays stable after Convex data loads'
+  );
+});
+
 test('company profile address stacks the pin above a three-line clamped address', () => {
   const source = readProfilePage();
 
