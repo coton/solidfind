@@ -579,7 +579,7 @@ export default function ProfilePageClient() {
             </div>
 
             {/* Address */}
-            <div className="flex flex-col mt-auto">
+            <div className="flex flex-col mt-auto -translate-y-3 lg:translate-y-0">
               <a 
                 href={buildCompanyAddressHref(company)}
                 target="_blank" 
@@ -998,6 +998,17 @@ export default function ProfilePageClient() {
               onTouchStart={handleViewerTouchStart}
               onTouchEnd={handleViewerTouchEnd}
             >
+              <button
+                type="button"
+                onClick={closeImageViewer}
+                aria-label="Close image viewer"
+                className="absolute left-3 top-3 z-10 inline-flex h-6 w-6 items-center justify-center text-white transition-colors hover:text-[#f14110]"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 2L14 14M2 14L14 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+
               {currentImage.kind === "external" ? (
                 <img
                   src={currentImage.src}
@@ -1022,35 +1033,18 @@ export default function ProfilePageClient() {
                 type="button"
                 onClick={goToPreviousImage}
                 disabled={isFirstImage}
-                className="inline-flex h-10 min-w-[120px] items-center justify-center gap-1.5 rounded-full border border-white text-[11px] font-medium tracking-[0.22px] text-white transition-colors hover:border-[#f14110] hover:text-[#f14110] disabled:border-white/25 disabled:text-white/25 disabled:hover:border-white/25 disabled:hover:text-white/25"
+                className="font-bam text-[9px] uppercase tracking-[0.18px] text-white/65 transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
               >
-                <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-                  <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
                 <span>Previous</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={closeImageViewer}
-                aria-label="Close image viewer"
-                className="inline-flex h-6 w-6 items-center justify-center text-white transition-colors hover:text-[#f14110]"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 2L14 14M2 14L14 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
               </button>
 
               <button
                 type="button"
                 onClick={goToNextImage}
                 disabled={isLastImage}
-                className="inline-flex h-10 min-w-[120px] items-center justify-center gap-1.5 rounded-full border border-white text-[11px] font-medium tracking-[0.22px] text-white transition-colors hover:border-[#f14110] hover:text-[#f14110] disabled:border-white/25 disabled:text-white/25 disabled:hover:border-white/25 disabled:hover:text-white/25"
+                className="font-bam text-[9px] uppercase tracking-[0.18px] text-white/65 transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
               >
                 <span>Next</span>
-                <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-                  <path d="M15 5H1M15 5L11 1M15 5L11 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
               </button>
             </div>
 

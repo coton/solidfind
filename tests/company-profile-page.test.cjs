@@ -60,6 +60,18 @@ test('company profile image viewer supports previous/next controls and mobile sw
 
   assert.match(
     source,
+    /<button[\s\S]*aria-label="Close image viewer"[\s\S]*\{currentImage\.kind === "external"/,
+    'Expected the image viewer close button to sit inside the image frame before the image renders'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /rounded-full border border-white[\s\S]*<span>Previous<\/span>|rounded-full border border-white[\s\S]*<span>Next<\/span>/,
+    'Expected previous and next controls to render as text links without outlined pills'
+  );
+
+  assert.match(
+    source,
     /aria-label="Close image viewer"[\s\S]*<svg width="16" height="16"/,
     'Expected the close affordance to use the reduced 16px icon size'
   );
@@ -91,6 +103,12 @@ test('company profile address stacks the pin above a three-line clamped address'
     source,
     /className="group flex w-full cursor-pointer flex-col items-start gap-1\.5"/,
     'Expected the address link to stack the pin icon above the full-width address text'
+  );
+
+  assert.match(
+    source,
+    /className="flex flex-col mt-auto -translate-y-3 lg:translate-y-0"/,
+    'Expected the address block to move up on mobile only while preserving the desktop position'
   );
 
   assert.match(

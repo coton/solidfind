@@ -162,6 +162,62 @@ test('admin UI uploads About page profile picture assets through Convex storage 
   );
 });
 
+test('admin UI uploads ad space media through Convex storage before saving website settings', () => {
+  const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
+
+  assert.match(
+    adminUiSource,
+    /handleAdMediaFile[\s\S]*uploadAdminMediaAsset\(file\)/,
+    'expected uploaded ad files to be sent to Convex storage instead of saving local data URL previews'
+  );
+
+  assert.match(
+    adminUiSource,
+    /onFile=\{\(\{ file, type \}\) => handleAdMediaFile\("vertical", file, type\)\}/,
+    'expected the vertical ad upload control to publish its selected file to Convex storage'
+  );
+
+  assert.match(
+    adminUiSource,
+    /onFile=\{\(\{ file, type \}\) => handleAdMediaFile\("horizontal", file, type\)\}/,
+    'expected the horizontal ad upload control to publish its selected file to Convex storage'
+  );
+
+  assert.match(
+    adminUiSource,
+    /if \(adVerticalUploading \|\| adHorizontalUploading\) return;/,
+    'expected save actions to wait until ad uploads finish before saving platform settings'
+  );
+
+  assert.match(
+    adminUiSource,
+    /disabled=\{adVerticalUploading \|\| adHorizontalUploading\}/,
+    'expected Save Ad Spaces and Save All UI Settings buttons to be disabled while ad uploads are still running'
+  );
+});
+
+test('admin UI hydrates ad settings once without overwriting local ad drafts', () => {
+  const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
+
+  assert.match(
+    adminUiSource,
+    /const adSpacesLoaded = useRef\(false\);/,
+    'expected ad settings hydration to be guarded by a loaded ref'
+  );
+
+  assert.match(
+    adminUiSource,
+    /if \(adSpacesLoaded\.current\) return;[\s\S]*adSpacesLoaded\.current = true;/,
+    'expected ad settings to hydrate once so late Convex responses do not overwrite selected ad drafts'
+  );
+
+  assert.match(
+    adminUiSource,
+    /parseMediaSetting\(adVerticalValue[\s\S]*parseMediaSetting\(adHorizontalValue/,
+    'expected ad settings hydration to support both JSON media values and legacy URL strings'
+  );
+});
+
 test('Save All UI Settings only re-saves media sections that still have unsaved local draft state', () => {
   const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
 

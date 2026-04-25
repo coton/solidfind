@@ -203,6 +203,10 @@ export default function AdminUI() {
   const [adHorizontalUrl, setAdHorizontalUrl] = useState("");
   const [adHorizontalMediaType, setAdHorizontalMediaType] = useState<"image" | "video" | "">("");
   const [adSpacesSaved, setAdSpacesSaved] = useState(false);
+  const [adVerticalUploading, setAdVerticalUploading] = useState(false);
+  const [adHorizontalUploading, setAdHorizontalUploading] = useState(false);
+  const [adSpacesUploadError, setAdSpacesUploadError] = useState("");
+  const adSpacesLoaded = useRef(false);
 
   const parsedNewUserImage = (() => {
     if (!newUserImageValue) return { url: "", type: "image" as const };
@@ -222,16 +226,17 @@ export default function AdminUI() {
   const effectiveTermsText = s.termsText || termsTextValue || "";
 
   useEffect(() => {
-    if (adVerticalValue !== undefined && adVerticalValue !== null) {
-      const parsed = JSON.parse(adVerticalValue);
-      setAdVerticalUrl(parsed.url ?? "");
-      setAdVerticalMediaType(parsed.type ?? "");
-    }
-    if (adHorizontalValue !== undefined && adHorizontalValue !== null) {
-      const parsed = JSON.parse(adHorizontalValue);
-      setAdHorizontalUrl(parsed.url ?? "");
-      setAdHorizontalMediaType(parsed.type ?? "");
-    }
+    if (adSpacesLoaded.current) return;
+    if (adVerticalValue === undefined || adHorizontalValue === undefined) return;
+
+    adSpacesLoaded.current = true;
+    const vertical = parseMediaSetting(adVerticalValue, { url: "", type: "image" });
+    const horizontal = parseMediaSetting(adHorizontalValue, { url: "", type: "image" });
+
+    setAdVerticalUrl(vertical.url);
+    setAdVerticalMediaType(vertical.url ? vertical.type : "");
+    setAdHorizontalUrl(horizontal.url);
+    setAdHorizontalMediaType(horizontal.url ? horizontal.type : "");
   }, [adVerticalValue, adHorizontalValue]);
 
   // Site-wide links (Convex-backed)
@@ -369,12 +374,36 @@ export default function AdminUI() {
   };
 
   const saveAdSpaces = async () => {
+    if (adVerticalUploading || adHorizontalUploading) return;
+
     await Promise.all([
       setPlatformSetting({ key: "adVertical", value: JSON.stringify({ url: adVerticalUrl, type: adVerticalMediaType }), updatedBy: "admin" }),
       setPlatformSetting({ key: "adHorizontal", value: JSON.stringify({ url: adHorizontalUrl, type: adHorizontalMediaType }), updatedBy: "admin" }),
     ]);
 
     flashSaved(setAdSpacesSaved);
+  };
+
+  const handleAdMediaFile = async (placement: "vertical" | "horizontal", file: File, type: "image" | "video") => {
+    setAdSpacesUploadError("");
+    const setUploading = placement === "vertical" ? setAdVerticalUploading : setAdHorizontalUploading;
+    setUploading(true);
+
+    try {
+      const uploadedUrl = await uploadAdminMediaAsset(file);
+
+      if (placement === "vertical") {
+        setAdVerticalUrl(uploadedUrl);
+        setAdVerticalMediaType(type);
+      } else {
+        setAdHorizontalUrl(uploadedUrl);
+        setAdHorizontalMediaType(type);
+      }
+    } catch (error) {
+      setAdSpacesUploadError(error instanceof Error ? error.message : "Failed to upload ad media.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const saveHeaderMedia = async () => {
@@ -413,6 +442,8 @@ export default function AdminUI() {
   };
 
   const saveAllUiSettings = async () => {
+    if (adVerticalUploading || adHorizontalUploading) return;
+
     const pendingSaves = [
       saveAboutText(),
       saveAboutPage(),
@@ -452,9 +483,10 @@ export default function AdminUI() {
         <button
           type="button"
           onClick={saveAllUiSettings}
-          className="h-9 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+          disabled={adVerticalUploading || adHorizontalUploading}
+          className="h-9 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors disabled:bg-[#333]/25"
         >
-          {saveAllUiSaved ? "✓ All UI Settings Saved!" : "Save All UI Settings"}
+          {adVerticalUploading || adHorizontalUploading ? "Uploading ad…" : saveAllUiSaved ? "✓ All UI Settings Saved!" : "Save All UI Settings"}
         </button>
       </div>
 
@@ -615,26 +647,44 @@ export default function AdminUI() {
             label="Vertical Ad Image"
             url={adVerticalUrl}
             mediaType={adVerticalMediaType}
-            onUrl={(v) => setAdVerticalUrl(v)}
-            onFile={({ previewUrl, type }) => { setAdVerticalUrl(previewUrl); setAdVerticalMediaType(type); }}
+            onUrl={(v) => {
+              setAdSpacesUploadError("");
+              setAdVerticalUrl(v);
+              setAdVerticalMediaType(v ? (adVerticalMediaType || "image") : "");
+            }}
+            onFile={({ file, type }) => handleAdMediaFile("vertical", file, type)}
           />
         </Field>
+        {adVerticalUploading && (
+          <p className="text-[10px] text-[#f14110] mb-2">Uploading vertical ad to Convex storage…</p>
+        )}
         <Field label="Horizontal Ad" hint="Appears below search results — 700×150px (scales proportionally on mobile)">
           <MediaUpload
             label="Horizontal Ad Image"
             url={adHorizontalUrl}
             mediaType={adHorizontalMediaType}
-            onUrl={(v) => setAdHorizontalUrl(v)}
-            onFile={({ previewUrl, type }) => { setAdHorizontalUrl(previewUrl); setAdHorizontalMediaType(type); }}
+            onUrl={(v) => {
+              setAdSpacesUploadError("");
+              setAdHorizontalUrl(v);
+              setAdHorizontalMediaType(v ? (adHorizontalMediaType || "image") : "");
+            }}
+            onFile={({ file, type }) => handleAdMediaFile("horizontal", file, type)}
           />
         </Field>
+        {adHorizontalUploading && (
+          <p className="text-[10px] text-[#f14110] mb-2">Uploading horizontal ad to Convex storage…</p>
+        )}
+        {adSpacesUploadError && (
+          <p className="text-[10px] text-red-600 mb-2">{adSpacesUploadError}</p>
+        )}
         <div className="flex items-center gap-4 mt-2">
           <button
             type="button"
             onClick={saveAdSpaces}
-            className={`h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center ${adSpacesSaved ? 'border-[#f14110] text-[#f14110]' : ''}`}
+            disabled={adVerticalUploading || adHorizontalUploading}
+            className={`h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center disabled:border-[#333]/25 disabled:text-[#333]/25 disabled:hover:border-[#333]/25 disabled:hover:text-[#333]/25 ${adSpacesSaved ? 'border-[#f14110] text-[#f14110]' : ''}`}
           >
-            {adSpacesSaved ? "Saved" : "Save Ad Spaces"}
+            {adVerticalUploading || adHorizontalUploading ? "Uploading…" : adSpacesSaved ? "Saved" : "Save Ad Spaces"}
           </button>
         </div>
       </SectionCard>
