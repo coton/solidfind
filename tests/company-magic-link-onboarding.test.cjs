@@ -42,8 +42,8 @@ test('company dashboard edit blocks password-less magic-link users behind the se
 
   assert.match(
     source,
-    /await clerkUser\.updatePassword\(\{ newPassword: setupPassword \}\);/,
-    'expected the setup-account flow to register the password directly on the existing Clerk user'
+    /const updatePasswordWithReverification = useReverification\([\s\S]*clerkUser\.updatePassword\(\{ newPassword \}\)/,
+    'expected the setup-account flow to wrap password registration in Clerk reverification'
   );
 
   assert.match(
@@ -56,6 +56,24 @@ test('company dashboard edit blocks password-less magic-link users behind the se
     source,
     /Register your password before accessing your company profile\.[\s\S]*Daftarkan kata sandi Anda sebelum mengakses profil perusahaan Anda\./,
     'expected the setup-account popup to show the requested bilingual subtitle'
+  );
+
+  assert.match(
+    source,
+    /primaryEmailAddress\?\.emailAddress[\s\S]*Email Code/,
+    'expected the setup-account popup to identify the account email and request an email verification code'
+  );
+
+  assert.match(
+    source,
+    /session\.startVerification\([\s\S]*prepareFirstFactorVerification\([\s\S]*strategy: "email_code"/,
+    'expected the setup-account flow to initiate Clerk email-code reverification before changing the password'
+  );
+
+  assert.match(
+    source,
+    /attemptFirstFactorVerification\([\s\S]*strategy: "email_code"[\s\S]*Verify Email/,
+    'expected the setup-account flow to verify the emailed code before completing password registration'
   );
 
   assert.match(

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useUser, useClerk, useReverification, useSession } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -126,6 +126,7 @@ export default function EditProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user: clerkUser } = useUser();
+  const { session } = useSession();
   const { signOut } = useClerk();
   const proEnabled = useProEnabled();
   const [showProModal, setShowProModal] = useState(false);
@@ -214,6 +215,16 @@ export default function EditProfilePage() {
   const [setupPasswordConfirm, setSetupPasswordConfirm] = useState("");
   const [setupAccountSaving, setSetupAccountSaving] = useState(false);
   const [setupAccountError, setSetupAccountError] = useState("");
+  const [setupVerificationCode, setSetupVerificationCode] = useState("");
+  const [setupVerificationSent, setSetupVerificationSent] = useState(false);
+  const [setupVerificationPreparing, setSetupVerificationPreparing] = useState(false);
+  const setupVerificationStartedRef = useRef(false);
+  const [reverificationState, setReverificationState] = useState<{
+    complete: () => void;
+    cancel: () => void;
+    level: "first_factor" | "second_factor" | "multi_factor" | undefined;
+    inProgress: boolean;
+  } | null>(null);
 
   // Mandatory fields validation
   const hasCategory = (constructionEnabled && selectedConstruction.length > 0)
@@ -444,6 +455,80 @@ export default function EditProfilePage() {
   const maxImages = company?.isPro ? 12 : 4;
   const totalSlots = proEnabled ? 12 : 4;
 
+  const updatePasswordWithReverification = useReverification(
+    async (newPassword: string) => {
+      if (!clerkUser) {
+        throw new Error("Unable to load your account.");
+      }
+
+      return clerkUser.updatePassword({ newPassword });
+    },
+    {
+      onNeedsReverification: ({ complete, cancel, level }) => {
+        setReverificationState({
+          complete,
+          cancel,
+          level,
+          inProgress: true,
+        });
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (!reverificationState?.inProgress || !session || setupVerificationStartedRef.current) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const startEmailVerification = async () => {
+      setSetupVerificationPreparing(true);
+      setSetupAccountError("");
+
+      try {
+        const verification = await session.startVerification({
+          level: reverificationState.level ?? "first_factor",
+        });
+
+        if (cancelled) return;
+
+        setupVerificationStartedRef.current = true;
+
+        const emailFactor = verification.supportedFirstFactors?.find(
+          (factor): factor is Extract<(typeof verification.supportedFirstFactors)[number], { strategy: "email_code" }> =>
+            factor.strategy === "email_code" && "emailAddressId" in factor && Boolean(factor.emailAddressId)
+        );
+
+        if (!emailFactor?.emailAddressId) {
+          throw new Error("This account cannot be verified by email code right now.");
+        }
+
+        await session.prepareFirstFactorVerification({
+          strategy: "email_code",
+          emailAddressId: emailFactor.emailAddressId,
+        });
+
+        if (cancelled) return;
+        setSetupVerificationSent(true);
+      } catch (error) {
+        setupVerificationStartedRef.current = false;
+        const message = error instanceof Error ? error.message : "Unable to send the verification email.";
+        setSetupAccountError(message);
+      } finally {
+        if (!cancelled) {
+          setSetupVerificationPreparing(false);
+        }
+      }
+    };
+
+    void startEmailVerification();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reverificationState, session]);
+
   const handleSetupAccount = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!clerkUser || setupAccountSaving) return;
@@ -467,9 +552,13 @@ export default function EditProfilePage() {
     setSetupAccountError("");
 
     try {
-      await clerkUser.updatePassword({ newPassword: setupPassword });
+      await updatePasswordWithReverification(setupPassword);
       setSetupPassword("");
       setSetupPasswordConfirm("");
+      setSetupVerificationCode("");
+      setSetupVerificationSent(false);
+      setupVerificationStartedRef.current = false;
+      setReverificationState(null);
 
       const nextParams = new URLSearchParams(searchParams.toString());
       nextParams.delete("setupAccount");
@@ -480,6 +569,38 @@ export default function EditProfilePage() {
       setSetupAccountError(message);
     } finally {
       setSetupAccountSaving(false);
+    }
+  };
+
+  const handleSetupVerification = async () => {
+    if (!setupVerificationStartedRef.current || !reverificationState || !session || setupVerificationPreparing) {
+      return;
+    }
+
+    if (!setupVerificationCode.trim()) {
+      setSetupAccountError("Please enter the verification code sent to your email.");
+      return;
+    }
+
+    setSetupVerificationPreparing(true);
+    setSetupAccountError("");
+
+    try {
+      const result = await session.attemptFirstFactorVerification({
+        strategy: "email_code",
+        code: setupVerificationCode.trim(),
+      });
+
+      if (result.status !== "complete") {
+        throw new Error("Invalid verification code.");
+      }
+
+      await reverificationState.complete();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to verify your email code.";
+      setSetupAccountError(message);
+    } finally {
+      setSetupVerificationPreparing(false);
     }
   };
 
@@ -1283,6 +1404,9 @@ export default function EditProfilePage() {
               <br />
               Daftarkan kata sandi Anda sebelum mengakses profil perusahaan Anda.
             </p>
+            <p className="mt-4 text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
+              {clerkUser?.primaryEmailAddress?.emailAddress || ""}
+            </p>
 
             <form onSubmit={handleSetupAccount} className="mt-5">
               <div className="mb-3">
@@ -1313,6 +1437,28 @@ export default function EditProfilePage() {
                 />
               </div>
 
+              {reverificationState?.inProgress && (
+                <div className="mb-4">
+                  <label className="mb-[5px] block text-[11px] font-medium tracking-[0.22px] text-[#333]">
+                    Email Code <span className="text-[#f14110]">(*)</span>
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={setupVerificationCode}
+                    onChange={(event) => setSetupVerificationCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                    className="h-[38px] w-full rounded-[6px] border border-[#E4E4E4] bg-white px-[10px] text-center text-[12px] tracking-[4px] text-[#333] outline-none"
+                    autoComplete="one-time-code"
+                    required
+                  />
+                  <p className="mt-2 text-[9px] leading-[14px] text-[#333]/60">
+                    {setupVerificationPreparing && !setupVerificationSent
+                      ? "Sending a verification code to your email..."
+                      : "Enter the verification code sent to your email before registering your password."}
+                  </p>
+                </div>
+              )}
+
               {setupAccountError && (
                 <p className="mb-3 text-center text-[11px] font-medium text-[#F14110]">
                   *{setupAccountError}
@@ -1321,11 +1467,18 @@ export default function EditProfilePage() {
 
               <div className="flex justify-center">
                 <button
-                  type="submit"
-                  disabled={setupAccountSaving}
+                  type={reverificationState?.inProgress ? "button" : "submit"}
+                  onClick={reverificationState?.inProgress ? handleSetupVerification : undefined}
+                  disabled={setupAccountSaving || setupVerificationPreparing}
                   className="flex h-10 w-[140px] items-center justify-center rounded-full border border-[#333] text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {setupAccountSaving ? "Registering..." : "Register"}
+                  {setupVerificationPreparing
+                    ? (setupVerificationSent ? "Verifying..." : "Sending...")
+                    : setupAccountSaving
+                      ? "Registering..."
+                      : reverificationState?.inProgress
+                        ? "Verify Email"
+                        : "Register"}
                 </button>
               </div>
             </form>
