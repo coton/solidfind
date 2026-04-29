@@ -50,7 +50,7 @@ export default function SignInPage() {
         );
       } catch {
         if (!cancelled) {
-          setTicketError("This magic link is invalid or expired. Please request a fresh link.");
+          setTicketError("This link is invalid or expired. Please request a fresh link.\nTautan ini tidak valid atau kedaluwarsa. Silakan minta tautan baru.");
         }
       }
     };
@@ -78,16 +78,29 @@ export default function SignInPage() {
     );
   }
 
+  if (ticketError) {
+    return (
+      <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center px-4">
+        <div className="w-full max-w-[420px] rounded-[6px] border border-[#f14110]/20 bg-[#fff3ef] px-4 py-4 text-center">
+          <p className="whitespace-pre-line text-[12px] leading-[18px] text-[#8a2e14]">
+            {ticketError}
+          </p>
+          <div className="mt-4 flex justify-center">
+            <a
+              href="mailto:hello@solidfind.id"
+              className="flex h-10 w-[140px] items-center justify-center rounded-full border border-[#333] text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110]"
+            >
+              Email
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center">
       <div className="w-full">
-        {ticketError ? (
-          <div className="max-w-[420px] mx-auto mb-4 px-4">
-            <div className="rounded-md border border-[#f14110]/20 bg-[#fff3ef] px-4 py-3 text-[12px] text-[#8a2e14]">
-              {ticketError}
-            </div>
-          </div>
-        ) : null}
         <AuthModal
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
