@@ -20,12 +20,6 @@ test('auth-complete routes company magic-link users without a password into setu
 
   assert.match(
     source,
-    /if \(user\?\.passwordEnabled\) \{\s*return requestedNextPath;\s*\}/,
-    'expected auth-complete to skip the setup step once the Clerk user already has a password'
-  );
-
-  assert.match(
-    source,
     /nextParams\.set\("setupAccount", "1"\)/,
     'expected auth-complete to flag password-less company sessions for setup-account onboarding'
   );
@@ -42,8 +36,8 @@ test('company dashboard edit blocks password-less magic-link users behind the se
 
   assert.match(
     source,
-    /const hasSetupAccountQuery = searchParams\.get\("setupAccount"\) === "1";[\s\S]*const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser && !clerkUser\.passwordEnabled;/,
-    'expected the company editor to gate setup-account onboarding on the setupAccount query and Clerk password state'
+    /const hasSetupAccountQuery = searchParams\.get\("setupAccount"\) === "1";[\s\S]*const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;/,
+    'expected the company editor to gate setup-account onboarding on the setupAccount query for company magic-link sessions'
   );
 
   assert.match(
@@ -66,7 +60,7 @@ test('company dashboard edit blocks password-less magic-link users behind the se
 
   assert.match(
     source,
-    /const isResolvingSetupAccount = hasSetupAccountQuery && \(!clerkUser \|\| currentUser === undefined \|\| company === undefined\);[\s\S]*Loading your company access\.\.\./,
+    /const isResolvingSetupAccount = hasSetupAccountQuery && \(!clerkUser \|\| currentUser === undefined \|\| company === undefined\);[\s\S]*return <MagicLinkLoadingPage \/>;/,
     'expected the company editor to keep a dedicated loading screen visible while setup-account access checks resolve'
   );
 

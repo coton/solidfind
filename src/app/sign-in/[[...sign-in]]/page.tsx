@@ -5,6 +5,7 @@ import { useSignIn, useUser } from "@clerk/nextjs";
 import { AuthModal } from "@/components/AuthModal";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { MagicLinkLoadingPage } from "@/components/MagicLinkLoadingPage";
 import { getAuthStatusMessage } from "@/lib/auth-verification.mjs";
 import { sanitizeNextPath } from "@/lib/magic-link-login.mjs";
 
@@ -78,11 +79,7 @@ export default function SignInPage() {
   }, [ticket, user, router, safeNextPath]);
 
   if (ticket && !ticketError) {
-    return (
-      <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center text-[#333] text-sm">
-        Completing sign in...
-      </div>
-    );
+    return <MagicLinkLoadingPage />;
   }
 
   if (ticketError) {

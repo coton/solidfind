@@ -63,4 +63,10 @@ test('magic-link sign-in bypasses ticket redemption when a Clerk user session al
     /if \(!isUserLoaded\) return;[\s\S]*if \(user\) \{[\s\S]*router\.replace\(`\/auth-complete\$\{nextSuffix\}`\);[\s\S]*return;[\s\S]*if \(!ticket\) return;/,
     'expected existing signed-in users to go straight to auth-complete before ticket redemption runs'
   );
+
+  assert.match(
+    source,
+    /if \(ticket && !ticketError\) \{\s*return <MagicLinkLoadingPage \/>;/,
+    'expected the magic-link ticket processing state to reuse the shared loading page instead of flashing plain text'
+  );
 });

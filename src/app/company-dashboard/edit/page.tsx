@@ -10,6 +10,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { MagicLinkLoadingPage } from "@/components/MagicLinkLoadingPage";
 import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 import { Star, X, Upload, Lock } from "lucide-react";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
@@ -249,23 +250,12 @@ export default function EditProfilePage() {
   const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription;
   const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
   const hasSetupAccountQuery = searchParams.get("setupAccount") === "1";
-  const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser && !clerkUser.passwordEnabled;
+  const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;
   const isResolvingSetupAccount = hasSetupAccountQuery && (!clerkUser || currentUser === undefined || company === undefined);
 
   const logoUrl = useStorageUrl(logoId);
   const logoPreviewUrl = logoUrl ?? company?.imageUrl;
   const totalProjectImages = projectImageUrls.length + projectImageIds.length;
-
-  useEffect(() => {
-    if (searchParams.get("setupAccount") !== "1" || !clerkUser?.passwordEnabled) {
-      return;
-    }
-
-    const nextParams = new URLSearchParams(searchParams.toString());
-    nextParams.delete("setupAccount");
-    const nextQuery = nextParams.toString();
-    router.replace(nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit");
-  }, [clerkUser?.passwordEnabled, router, searchParams]);
 
   // Populate form when company data loads
   useEffect(() => {
@@ -494,16 +484,7 @@ export default function EditProfilePage() {
   };
 
   if (isResolvingSetupAccount) {
-    return (
-      <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center px-4">
-        <div className="text-center">
-          <p className="text-[18px] font-semibold tracking-[0.36px] text-[#333]">Setup your Account</p>
-          <p className="mt-2 text-[10px] tracking-[0.2px] text-[#333]/60">
-            Loading your company access...
-          </p>
-        </div>
-      </div>
-    );
+    return <MagicLinkLoadingPage />;
   }
 
   return (

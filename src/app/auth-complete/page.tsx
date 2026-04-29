@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { AccountTypeSelectionCard } from "@/components/AccountTypeSelectionCard";
+import { MagicLinkLoadingPage } from "@/components/MagicLinkLoadingPage";
 import { api } from "../../../convex/_generated/api";
 import { getPostAuthRedirectPath, sanitizeNextPath } from "@/lib/magic-link-login.mjs";
 
@@ -25,13 +26,10 @@ export default function AuthCompletePage() {
   const pendingCompanyName = typeof window !== "undefined"
     ? sessionStorage.getItem("solidfind_companyName") || undefined
     : undefined;
+  const isCompanyMagicLinkFlow = Boolean(requestedNextPath?.startsWith("/company-dashboard/edit"));
   const requestedSetupAccount = useMemo(() => {
     if (!requestedNextPath || !requestedNextPath.startsWith("/company-dashboard/edit")) {
       return null;
-    }
-
-    if (user?.passwordEnabled) {
-      return requestedNextPath;
     }
 
     const [pathname, existingQuery = ""] = requestedNextPath.split("?");
@@ -103,7 +101,7 @@ export default function AuthCompletePage() {
 
   // Loading state
   if (!isLoaded || !user) {
-    return (
+    return isCompanyMagicLinkFlow ? <MagicLinkLoadingPage /> : (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8f8f8", fontFamily: "var(--font-sora), sans-serif", color: "#333", fontSize: "14px" }}>
         Completing sign in...
       </div>
@@ -112,7 +110,7 @@ export default function AuthCompletePage() {
 
   // Returning user — useEffect will redirect, show brief loading state
   if (existingAccountType) {
-    return (
+    return isCompanyMagicLinkFlow ? <MagicLinkLoadingPage /> : (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8f8f8", fontFamily: "var(--font-sora), sans-serif", color: "#333", fontSize: "14px" }}>
         Completing sign in...
       </div>
