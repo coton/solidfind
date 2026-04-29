@@ -26,6 +26,18 @@ test('companies mutations accept import-owned fields for directory onboarding', 
 
   assert.match(
     source,
+    /logoId: v\.optional\(v\.id\("_storage"\)\)/,
+    'expected companies mutations to accept a stored logo ID when imported remote media is uploaded into Convex storage'
+  );
+
+  assert.match(
+    source,
+    /projectImageIds: v\.optional\(v\.array\(v\.id\("_storage"\)\)\)/,
+    'expected companies mutations to accept stored project image IDs when imported remote media is uploaded into Convex storage'
+  );
+
+  assert.match(
+    source,
     /projectImageUrls: v\.optional\(v\.array\(v\.string\(\)\)\)/,
     'expected companies mutations to accept external project image URLs from the directory file'
   );

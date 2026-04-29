@@ -8,6 +8,7 @@ const {
   buildCompanyMutationPayload,
   loadRowsFromFile,
   normalizeCompanyDirectoryRow,
+  resolveStoredCompanyMedia,
 } = require('../src/lib/company-directory-import.cjs');
 const {
   loadEnvFile,
@@ -197,19 +198,33 @@ async function upsertCompanyDirectory(options) {
     const companyPayload = buildCompanyMutationPayload(normalized);
     let companyOperation = existingCompany ? 'update' : 'create';
     let companyId = existingCompany?._id || null;
+    let storedMedia = {
+      logoId: existingCompany?.logoId || null,
+      projectImageIds: existingCompany?.projectImageIds ?? [],
+    };
 
     if (options.apply) {
+      storedMedia = await resolveStoredCompanyMedia({
+        normalized,
+        existingCompany,
+        generateUploadUrl: async () => fetchMutation(anyApi.files.generateUploadUrl, {}, { url: runtime.convexUrl }),
+      });
+
       if (existingCompany) {
         await fetchMutation(anyApi.companies.update, {
           id: existingCompany._id,
           ownerId: convexUserId,
           ...companyPayload,
+          logoId: storedMedia.logoId,
+          projectImageIds: storedMedia.projectImageIds,
         }, { url: runtime.convexUrl });
         companyId = existingCompany._id;
       } else {
         companyId = await fetchMutation(anyApi.companies.create, {
           ownerId: convexUserId,
           ...companyPayload,
+          logoId: storedMedia.logoId,
+          projectImageIds: storedMedia.projectImageIds,
         }, { url: runtime.convexUrl });
       }
     }

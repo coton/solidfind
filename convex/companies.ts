@@ -139,6 +139,8 @@ export const create = mutation({
     linkedin: v.optional(v.string()),
     instagram: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
+    logoId: v.optional(v.id("_storage")),
+    projectImageIds: v.optional(v.array(v.id("_storage"))),
     projectImageUrls: v.optional(v.array(v.string())),
     projectSizes: v.optional(v.array(v.string())),
     constructionTypes: v.optional(v.array(v.string())),

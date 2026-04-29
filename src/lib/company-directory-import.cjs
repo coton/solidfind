@@ -260,6 +260,77 @@ function buildCompanyMutationPayload(normalized) {
   };
 }
 
+function normalizeUrlList(values) {
+  return (Array.isArray(values) ? values : []).map((value) => cleanString(value)).filter(Boolean);
+}
+
+function arraysEqual(left, right) {
+  if (left.length !== right.length) return false;
+  return left.every((value, index) => value === right[index]);
+}
+
+async function uploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchImpl = fetch }) {
+  const response = await fetchImpl(sourceUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to download remote media: ${sourceUrl}`);
+  }
+
+  const uploadUrl = await generateUploadUrl();
+  const contentType = response.headers?.get?.('content-type') || 'application/octet-stream';
+  const uploadResponse = await fetchImpl(uploadUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': contentType },
+    body: Buffer.from(await response.arrayBuffer()),
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Failed to upload remote media into Convex storage: ${sourceUrl}`);
+  }
+
+  const payload = await uploadResponse.json();
+  if (!payload?.storageId) {
+    throw new Error(`Convex storage upload did not return a storageId for: ${sourceUrl}`);
+  }
+
+  return payload.storageId;
+}
+
+async function resolveStoredCompanyMedia({
+  normalized,
+  existingCompany,
+  generateUploadUrl,
+  fetchImpl = fetch,
+}) {
+  const imageUrl = cleanString(normalized?.imageUrl);
+  const projectImageUrls = normalizeUrlList(normalized?.projectImageUrls);
+
+  const existingImageUrl = cleanString(existingCompany?.imageUrl);
+  const existingProjectImageUrls = normalizeUrlList(existingCompany?.projectImageUrls);
+  const existingProjectImageIds = Array.isArray(existingCompany?.projectImageIds)
+    ? existingCompany.projectImageIds.filter(Boolean)
+    : [];
+
+  const media = {
+    imageUrl,
+    projectImageUrls,
+  };
+
+  if (imageUrl) {
+    media.logoId = imageUrl === existingImageUrl && existingCompany?.logoId
+      ? existingCompany.logoId
+      : await uploadRemoteAssetToStorage({ sourceUrl: imageUrl, generateUploadUrl, fetchImpl });
+  }
+
+  media.projectImageIds = arraysEqual(projectImageUrls, existingProjectImageUrls)
+    && existingProjectImageIds.length === projectImageUrls.length
+    ? existingProjectImageIds
+    : await Promise.all(
+        projectImageUrls.map((sourceUrl) => uploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchImpl }))
+      );
+
+  return media;
+}
+
 function parseCsvText(content) {
   const rows = [];
   const lines = content.replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean);
@@ -336,4 +407,6 @@ module.exports = {
   normalizeCompanyDirectoryRow,
   parseCsvText,
   parseDelimitedCell,
+  resolveStoredCompanyMedia,
+  uploadRemoteAssetToStorage,
 };
