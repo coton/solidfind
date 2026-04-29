@@ -117,6 +117,10 @@ function ProjectImage({ storageId }: { storageId: Id<"_storage"> }) {
   return <Image src={url} alt="Project" fill className="object-cover" />;
 }
 
+function ExternalProjectImage({ src }: { src: string }) {
+  return <Image src={src} alt="Project" fill className="object-cover" />;
+}
+
 export default function EditProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -199,6 +203,7 @@ export default function EditProfilePage() {
   // Image state
   const [logoId, setLogoId] = useState<Id<"_storage"> | undefined>();
   const [projectImageIds, setProjectImageIds] = useState<Id<"_storage">[]>([]);
+  const [projectImageUrls, setProjectImageUrls] = useState<string[]>([]);
   const [logoUploading, setLogoUploading] = useState(false);
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -248,6 +253,8 @@ export default function EditProfilePage() {
   const isResolvingSetupAccount = hasSetupAccountQuery && (!clerkUser || currentUser === undefined || company === undefined);
 
   const logoUrl = useStorageUrl(logoId);
+  const logoPreviewUrl = logoUrl ?? company?.imageUrl;
+  const totalProjectImages = projectImageUrls.length + projectImageIds.length;
 
   useEffect(() => {
     if (searchParams.get("setupAccount") !== "1" || !clerkUser?.passwordEnabled) {
@@ -293,6 +300,7 @@ export default function EditProfilePage() {
       setLocationEnabled(existingLocs.length > 0);
       setLogoId(company.logoId ?? undefined);
       setProjectImageIds(company.projectImageIds ?? []);
+      setProjectImageUrls(company.projectImageUrls ?? []);
       setFoundedYear(company.since?.toString() ?? "");
     }
   }, [company]);
@@ -341,15 +349,15 @@ export default function EditProfilePage() {
       return;
     }
     const max = company.isPro ? 12 : 4;
-    if (projectImageIds.length >= max) return;
+    if (totalProjectImages >= max) return;
     setUploadError(null);
-    const slotIndex = projectImageIds.length;
+    const slotIndex = totalProjectImages;
     setUploadingSlot(slotIndex);
     try {
       const id = await uploadFile(file);
       const newIds = [...projectImageIds, id];
       setProjectImageIds(newIds);
-      await updateCompany({ id: company._id, projectImageIds: newIds });
+      await updateCompany({ id: company._id, projectImageIds: newIds, projectImageUrls });
     } catch {
       setUploadError("Failed to upload image. Please try again.");
     } finally {
@@ -360,9 +368,18 @@ export default function EditProfilePage() {
 
   const handleRemoveProjectImage = async (index: number) => {
     if (!company) return;
-    const newIds = projectImageIds.filter((_, i) => i !== index);
-    setProjectImageIds(newIds);
-    await updateCompany({ id: company._id, projectImageIds: newIds });
+
+    if (index < projectImageUrls.length) {
+      const nextExternalUrls = projectImageUrls.filter((_, i) => i !== index);
+      setProjectImageUrls(nextExternalUrls);
+      await updateCompany({ id: company._id, projectImageIds, projectImageUrls: nextExternalUrls });
+      return;
+    }
+
+    const storageIndex = index - projectImageUrls.length;
+    const nextStorageIds = projectImageIds.filter((_, i) => i !== storageIndex);
+    setProjectImageIds(nextStorageIds);
+    await updateCompany({ id: company._id, projectImageIds: nextStorageIds, projectImageUrls: projectImageUrls });
   };
 
   const createCompany = useMutation(api.companies.create);
@@ -407,6 +424,7 @@ export default function EditProfilePage() {
           realEstateLocations: selectedLocations,
           logoId: logoId ?? undefined,
           projectImageIds,
+          projectImageUrls,
           since: foundedYear ? parseInt(foundedYear) : undefined,
         });
       } else {
@@ -585,10 +603,10 @@ export default function EditProfilePage() {
               </label>
               <div
                 onClick={() => logoInputRef.current?.click()}
-                className={`w-[100px] h-[100px] rounded-[6px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden relative ${!logoUrl ? 'border-2 border-dashed border-[#ccc] flex items-center justify-center bg-white' : ''}`}
+                className={`w-[100px] h-[100px] rounded-[6px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden relative ${!logoPreviewUrl ? 'border-2 border-dashed border-[#ccc] flex items-center justify-center bg-white' : ''}`}
               >
-                {logoUrl ? (
-                  <Image src={logoUrl} alt="Company logo" fill className="object-cover" />
+                {logoPreviewUrl ? (
+                  <Image src={logoPreviewUrl} alt="Company logo" fill className="object-cover" />
                 ) : (
                   <Upload className="w-5 h-5 text-[#ccc]" />
                 )}
@@ -794,9 +812,12 @@ export default function EditProfilePage() {
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {Array(totalSlots).fill(null).map((_, index) => {
-                  const imgId = projectImageIds[index];
+                  const imgUrl = projectImageUrls[index];
+                  const storageIndex = index - projectImageUrls.length;
+                  const imgId = storageIndex >= 0 ? projectImageIds[storageIndex] : undefined;
+                  const hasImage = Boolean(imgUrl || imgId);
                   const isLocked = index >= maxImages;
-                  const isNextEmpty = !imgId && index === projectImageIds.length && !isLocked;
+                  const isNextEmpty = !hasImage && index === totalProjectImages && !isLocked;
                   const isUploading = uploadingSlot === index;
                   return (
                     <div
@@ -804,14 +825,15 @@ export default function EditProfilePage() {
                       onClick={() => {
                         if (isNextEmpty && uploadingSlot === null) projectInputRef.current?.click();
                       }}
-                      className={`aspect-square rounded-[4px] overflow-hidden relative group ${isNextEmpty ? 'cursor-pointer border-2 border-dashed border-[#ccc] flex items-center justify-center bg-white hover:border-[#f14110] transition-colors' : ''} ${isLocked && !imgId ? '' : ''}`}
-                      style={!imgId && !isNextEmpty ? {
+                      className={`aspect-square rounded-[4px] overflow-hidden relative group ${isNextEmpty ? 'cursor-pointer border-2 border-dashed border-[#ccc] flex items-center justify-center bg-white hover:border-[#f14110] transition-colors' : ''} ${isLocked && !hasImage ? '' : ''}`}
+                      style={!hasImage && !isNextEmpty ? {
                         backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23e4e4e4'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23e4e4e4'/%3E%3C/svg%3E")`,
                         backgroundSize: '10px 10px'
                       } : undefined}
                     >
+                      {imgUrl && <ExternalProjectImage src={imgUrl} />}
                       {imgId && <ProjectImage storageId={imgId} />}
-                      {imgId && (
+                      {hasImage && (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -831,7 +853,7 @@ export default function EditProfilePage() {
                           <div className="w-5 h-5 border-2 border-[#f14110] border-t-transparent rounded-full animate-spin" />
                         </div>
                       )}
-                      {isLocked && !imgId && (
+                      {isLocked && !hasImage && (
                         <div className="absolute inset-0 bg-[#f8f8f8]/80 flex flex-col items-center justify-center">
                           <Lock className="w-3 h-3 text-[#333]/30 mb-0.5" />
                           <span className="text-[7px] text-[#333]/40 font-medium">PRO</span>
