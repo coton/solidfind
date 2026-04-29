@@ -15,12 +15,13 @@ interface AdBannerProps {
  * Only shows if an ad image is uploaded via admin panel.
  */
 export function AdBanner({ imageSrc: propImageSrc, alt = "Advertisement" }: AdBannerProps) {
-  // Fetch ad image from platform settings
+  // Fetch ad media from platform settings
   const horizontalAdValue = useQuery(api.platformSettings.get, { key: "adHorizontal" });
   const horizontalAdState = resolveMediaSetting(horizontalAdValue, { url: "", type: "image" });
   const displayUrl = horizontalAdState.media.url || propImageSrc;
+  const displayType = propImageSrc && !horizontalAdState.media.url ? "image" : horizontalAdState.media.type;
 
-  // Don't show ad space if no ad is uploaded
+  // Don't show ad space if no ad media is uploaded
   if (!displayUrl) return null;
 
   return (
@@ -36,14 +37,26 @@ export function AdBanner({ imageSrc: propImageSrc, alt = "Advertisement" }: AdBa
         backgroundColor: "#d8d8d8",
       }}
     >
-      <Image
-        src={displayUrl}
-        alt={alt}
-        fill
-        sizes="(max-width: 700px) 100vw, 700px"
-        style={{ objectFit: "cover" }}
-        unoptimized={displayUrl.startsWith("data:")}
-      />
+      {displayType === "video" ? (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="h-full w-full object-cover"
+        >
+          <source src={displayUrl} type="video/mp4" />
+        </video>
+      ) : (
+        <Image
+          src={displayUrl}
+          alt={alt}
+          fill
+          sizes="(max-width: 700px) 100vw, 700px"
+          style={{ objectFit: "cover" }}
+          unoptimized={displayUrl.startsWith("data:")}
+        />
+      )}
     </div>
   );
 }
