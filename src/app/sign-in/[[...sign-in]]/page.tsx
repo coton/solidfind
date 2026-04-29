@@ -4,13 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useSignIn, useUser } from "@clerk/nextjs";
 import { AuthModal } from "@/components/AuthModal";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { getAuthStatusMessage } from "@/lib/auth-verification.mjs";
 import { sanitizeNextPath } from "@/lib/magic-link-login.mjs";
 
 export default function SignInPage() {
   const [isOpen, setIsOpen] = useState(true);
   const [ticketError, setTicketError] = useState("");
-  const { user } = useUser();
+  const { user, isLoaded: isUserLoaded } = useUser();
   const { signIn, setActive, isLoaded: isSignInLoaded } = useSignIn();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,6 +20,12 @@ export default function SignInPage() {
   const safeNextPath = useMemo(() => sanitizeNextPath(searchParams.get("next")), [searchParams]);
 
   useEffect(() => {
+    if (!isUserLoaded) return;
+    if (user) {
+      const nextSuffix = safeNextPath ? `?next=${encodeURIComponent(safeNextPath)}` : "";
+      router.replace(`/auth-complete${nextSuffix}`);
+      return;
+    }
     if (!ticket) return;
     if (!isSignInLoaded || !signIn || !setActive) return;
 
@@ -60,7 +67,7 @@ export default function SignInPage() {
     return () => {
       cancelled = true;
     };
-  }, [ticket, isSignInLoaded, signIn, setActive, router, safeNextPath]);
+  }, [ticket, isSignInLoaded, signIn, setActive, router, safeNextPath, user, isUserLoaded]);
 
   useEffect(() => {
     if (ticket) return;
@@ -80,18 +87,33 @@ export default function SignInPage() {
 
   if (ticketError) {
     return (
-      <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center px-4">
-        <div className="w-full max-w-[420px] rounded-[6px] border border-[#f14110]/20 bg-[#fff3ef] px-4 py-4 text-center">
-          <p className="whitespace-pre-line text-[12px] leading-[18px] text-[#8a2e14]">
-            {ticketError}
-          </p>
-          <div className="mt-4 flex justify-center">
-            <a
-              href="mailto:hello@solidfind.id"
-              className="flex h-10 w-[140px] items-center justify-center rounded-full border border-[#333] text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110]"
-            >
-              Email
-            </a>
+      <div className="relative min-h-screen overflow-hidden bg-white">
+        <div className="fixed inset-[10px] overflow-hidden rounded-[6px]">
+          <Image
+            src="/coming-soon/bg-photo.jpg"
+            alt="Construction blocks background"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+        </div>
+
+        <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
+          <div className="w-full max-w-[420px] rounded-[6px] border border-[#f14110]/20 bg-[#fff3ef]/95 px-6 py-6 text-center backdrop-blur-sm">
+            <h1 className="text-[18px] font-semibold tracking-[0.36px] text-[#333]">
+              Sorry
+            </h1>
+            <p className="mt-3 whitespace-pre-line text-[12px] leading-[18px] text-[#8a2e14]">
+              {ticketError}
+            </p>
+            <div className="mt-5 flex justify-center">
+              <a
+                href="mailto:hello@solidfind.id"
+                className="flex h-10 w-[140px] items-center justify-center rounded-full border border-[#333] text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110]"
+              >
+                Email us
+              </a>
+            </div>
           </div>
         </div>
       </div>
