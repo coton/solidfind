@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useUser, useClerk, useReverification } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import type { OAuthStrategy } from "@clerk/types";
 import { api } from "../../../../convex/_generated/api";
@@ -323,6 +323,11 @@ export default function EditProfilePage() {
   const [setupVerificationSent, setSetupVerificationSent] = useState(false);
   const [setupVerificationSending, setSetupVerificationSending] = useState(false);
   const [setupVerificationSubmitting, setSetupVerificationSubmitting] = useState(false);
+  const createExternalAccount = useReverification((params: {
+    strategy: OAuthStrategy;
+    redirectUrl: string;
+    oidcLoginHint?: string;
+  }) => clerkUser?.createExternalAccount(params));
   const setupEmailResourceRef = useRef<{
     id: string;
     emailAddress: string;
@@ -1634,7 +1639,7 @@ export default function EditProfilePage() {
                       setSetupStage("emailChoice");
                       setSetupAccountError("");
                     }}
-                    className="flex min-h-10 w-full items-center justify-center rounded-full border border-[#F14110] px-4 py-2 text-center text-[11px] font-medium tracking-[0.22px] text-[#F14110] transition hover:bg-[linear-gradient(to_right,#E9A28E,#F14110)] hover:text-white"
+                    className="flex min-h-10 w-full items-center justify-center rounded-full border border-[#333] px-4 py-2 text-center text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110]"
                   >
                     Continue with Email
                   </button>
@@ -1798,11 +1803,18 @@ export default function EditProfilePage() {
                         nextParams.delete("setupAccount");
                         const nextQuery = nextParams.toString();
                         const redirectTarget = nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit";
-                        await clerkUser.createExternalAccount({
+                        const externalAccount = await createExternalAccount({
                           strategy: setupSelectedSocial,
                           redirectUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectTarget)}`,
                           oidcLoginHint: setupLoginEmail || undefined,
                         });
+
+                        if (externalAccount?.verification?.externalVerificationRedirectURL?.href) {
+                          router.push(externalAccount.verification.externalVerificationRedirectURL.href);
+                          return;
+                        }
+
+                        throw new Error("Unable to continue with this social account right now.");
                       } catch (error) {
                         const message = error instanceof Error ? error.message : "Unable to continue with this social account right now.";
                         setSetupAccountError(message);

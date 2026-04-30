@@ -114,6 +114,18 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
+    /const createExternalAccount = useReverification\([\s\S]*clerkUser\?\.createExternalAccount\(params\)/,
+    'expected the final social-linking step to use Clerk reverification before adding an external account'
+  );
+
+  assert.match(
+    source,
+    /externalAccount\?\.verification\?\.externalVerificationRedirectURL\?\.href[\s\S]*router\.push\(externalAccount\.verification\.externalVerificationRedirectURL\.href\)/,
+    'expected the final social-linking step to follow Clerk external verification redirects explicitly'
+  );
+
+  assert.match(
+    source,
     /await syncSetupLoginEmail\(setupPassword\);/,
     'expected email-password setup to finalize against the chosen company login email'
   );
@@ -182,5 +194,15 @@ test('auth modal continue with email button keeps its original full width', () =
     source,
     /Continue with email[\s\S]*width: '100%'/,
     'expected the Continue with email button to keep its original full-width layout'
+  );
+});
+
+test('company setup continue-with-email button uses the standard outline hover treatment', () => {
+  const source = readProjectFile('src/app/company-dashboard/edit/page.tsx');
+
+  assert.match(
+    source,
+    /Continue with Email[\s\S]*border-\[#333\][\s\S]*text-\[#333\][\s\S]*hover:border-\[#f14110\][\s\S]*hover:text-\[#f14110\]/,
+    'expected the company setup continue-with-email button to match the standard orange-outline hover treatment'
   );
 });
