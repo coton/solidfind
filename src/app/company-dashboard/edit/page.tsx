@@ -177,6 +177,19 @@ function MicrosoftIcon() {
   );
 }
 
+function getSocialProviderLabel(strategy: OAuthStrategy | null) {
+  switch (strategy) {
+    case "oauth_google":
+      return "Google";
+    case "oauth_apple":
+      return "Apple";
+    case "oauth_microsoft":
+      return "Microsoft";
+    default:
+      return "Social";
+  }
+}
+
 export default function EditProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -266,8 +279,9 @@ export default function EditProfilePage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
-  const [setupStage, setSetupStage] = useState<"method" | "password" | "verify">("method");
+  const [setupStage, setSetupStage] = useState<"method" | "socialEmail" | "password" | "verify">("method");
   const [setupSelectedSocial, setSetupSelectedSocial] = useState<OAuthStrategy | null>(null);
+  const [setupSocialEmail, setSetupSocialEmail] = useState("");
   const [setupPassword, setSetupPassword] = useState("");
   const [setupPasswordConfirm, setSetupPasswordConfirm] = useState("");
   const [setupAccountSaving, setSetupAccountSaving] = useState(false);
@@ -382,6 +396,14 @@ export default function EditProfilePage() {
 
     setSetupStage("method");
   }, [hasSetupAccountQuery, setupStageQuery]);
+
+  useEffect(() => {
+    if (!hasSetupAccountQuery) {
+      return;
+    }
+
+    setSetupSocialEmail(clerkUser?.primaryEmailAddress?.emailAddress || "");
+  }, [clerkUser?.primaryEmailAddress?.emailAddress, hasSetupAccountQuery]);
 
   const toggleService = (list: string[], setList: (val: string[]) => void, id: string) => {
     setIsDirty(true);
@@ -535,6 +557,7 @@ export default function EditProfilePage() {
   const clearSetupFlow = () => {
     setSetupStage("method");
     setSetupSelectedSocial(null);
+    setSetupSocialEmail("");
     setSetupPassword("");
     setSetupPasswordConfirm("");
     setSetupAccountSaving(false);
@@ -582,6 +605,7 @@ export default function EditProfilePage() {
         await clerkUser.createExternalAccount({
           strategy: selectedSocial,
           redirectUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectTarget)}`,
+          oidcLoginHint: setupSocialEmail || clerkUser.primaryEmailAddress?.emailAddress || undefined,
         });
         return;
       }
@@ -592,6 +616,7 @@ export default function EditProfilePage() {
     {
       onNeedsReverification: ({ complete, cancel, level }) => {
         setReverificationState({ complete, cancel, level });
+        setSetupAccountSaving(false);
         setSetupStage("verify");
         setSetupVerificationSent(false);
         setSetupVerificationCode("");
@@ -603,8 +628,27 @@ export default function EditProfilePage() {
 
   const handleSetupSocialAuth = async (strategy: OAuthStrategy) => {
     setSetupSelectedSocial(strategy);
-    setSetupStage("password");
+    setSetupSocialEmail(clerkUser?.primaryEmailAddress?.emailAddress || "");
+    setSetupStage("socialEmail");
     setSetupAccountError("");
+  };
+
+  const handleSetupSocialEmailContinue = () => {
+    const primaryEmail = clerkUser?.primaryEmailAddress?.emailAddress?.trim().toLowerCase();
+    const enteredEmail = setupSocialEmail.trim().toLowerCase();
+
+    if (!enteredEmail) {
+      setSetupAccountError("Please confirm the company email before continuing.");
+      return;
+    }
+
+    if (primaryEmail && enteredEmail !== primaryEmail) {
+      setSetupAccountError("Please use the company email shown on this account.");
+      return;
+    }
+
+    setSetupAccountError("");
+    setSetupStage("password");
   };
 
   useEffect(() => {
@@ -1515,6 +1559,12 @@ export default function EditProfilePage() {
                   <br />
                   Masukkan kode verifikasi yang dikirim ke email Anda sebelum mengakses profil perusahaan Anda.
                 </>
+              ) : setupStage === "socialEmail" ? (
+                <>
+                  Confirm the email linked to your {getSocialProviderLabel(setupSelectedSocial)} account before continuing.
+                  <br />
+                  Konfirmasikan email yang ditautkan ke akun {getSocialProviderLabel(setupSelectedSocial)} Anda sebelum melanjutkan.
+                </>
               ) : (
                 <>
                   Register your password before accessing your company profile.
@@ -1573,6 +1623,46 @@ export default function EditProfilePage() {
                   </p>
                 )}
               </>
+            )}
+
+            {setupStage === "socialEmail" && (
+              <div className="mt-5">
+                <p className="mb-4 text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
+                  {getSocialProviderLabel(setupSelectedSocial)}
+                </p>
+                <div className="mb-4">
+                  <label className="mb-[5px] block text-[11px] font-medium tracking-[0.22px] text-[#333]">
+                    Email <span className="text-[#f14110]">(*)</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={setupSocialEmail}
+                    onChange={(event) => setSetupSocialEmail(event.target.value)}
+                    className="h-[38px] w-full rounded-[6px] border border-[#E4E4E4] bg-white px-[10px] text-[12px] text-[#333] outline-none"
+                    autoComplete="email"
+                    required
+                  />
+                  <p className="mt-2 text-[9px] leading-[14px] text-[#333]/60">
+                    Use the same email as this company account before continuing with {getSocialProviderLabel(setupSelectedSocial)}.
+                  </p>
+                </div>
+
+                {setupAccountError && (
+                  <p className="mb-3 text-center text-[11px] font-medium text-[#F14110]">
+                    *{setupAccountError}
+                  </p>
+                )}
+
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    onClick={handleSetupSocialEmailContinue}
+                    className="flex h-10 w-[140px] items-center justify-center rounded-full border border-[#333] text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110]"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
             )}
 
             {setupStage === "password" && (

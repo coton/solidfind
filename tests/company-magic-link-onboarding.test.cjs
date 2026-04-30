@@ -42,7 +42,7 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /const \[setupStage, setSetupStage\] = useState<"method" \| "password" \| "verify">\("method"\);[\s\S]*const \[setupSelectedSocial, setSetupSelectedSocial\] = useState<OAuthStrategy \| null>\(null\);/,
+    /const \[setupStage, setSetupStage\] = useState<"method" \| "socialEmail" \| "password" \| "verify">\("method"\);[\s\S]*const \[setupSelectedSocial, setSetupSelectedSocial\] = useState<OAuthStrategy \| null>\(null\);/,
     'expected the company setup popup to run as its own staged onboarding flow'
   );
 
@@ -72,13 +72,19 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /const handleSetupSocialAuth = async \(strategy: OAuthStrategy\) => \{[\s\S]*setSetupSelectedSocial\(strategy\);[\s\S]*setSetupStage\("password"\);/,
-    'expected choosing a company social setup method to continue into the password stage before the social account is linked'
+    /const handleSetupSocialAuth = async \(strategy: OAuthStrategy\) => \{[\s\S]*setSetupSelectedSocial\(strategy\);[\s\S]*setSetupStage\("socialEmail"\);/,
+    'expected choosing a company social setup method to continue into a social-email confirmation step before the password stage'
   );
 
   assert.match(
     source,
-    /if \(selectedSocial\) \{[\s\S]*await clerkUser\.createExternalAccount\(\{[\s\S]*strategy: selectedSocial,[\s\S]*redirectUrl: `\/sso-callback\?redirect_url=\$\{encodeURIComponent\(redirectTarget\)\}`/,
+    /Confirm the email linked to your \{getSocialProviderLabel\(setupSelectedSocial\)\} account before continuing\.[\s\S]*handleSetupSocialEmailContinue/,
+    'expected the company social setup path to ask for email confirmation before continuing'
+  );
+
+  assert.match(
+    source,
+    /if \(selectedSocial\) \{[\s\S]*await clerkUser\.createExternalAccount\(\{[\s\S]*strategy: selectedSocial,[\s\S]*redirectUrl: `\/sso-callback\?redirect_url=\$\{encodeURIComponent\(redirectTarget\)\}`,[\s\S]*oidcLoginHint: setupSocialEmail \|\| clerkUser\.primaryEmailAddress\?\.emailAddress \|\| undefined/,
     'expected the selected company social account to be linked only after password and email verification complete'
   );
 
@@ -92,6 +98,12 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
     source,
     /const finalizeSetup = useReverification\([\s\S]*clerkUser\.updatePassword\(\{ newPassword \}\)[\s\S]*onNeedsReverification:[\s\S]*setSetupStage\("verify"\)/,
     'expected the setup-account flow to use Clerk reverification and move into the custom verify step when sensitive actions need extra checks'
+  );
+
+  assert.match(
+    source,
+    /onNeedsReverification:[\s\S]*setSetupAccountSaving\(false\)/,
+    'expected the setup flow to release the initial saving state once Clerk moves into the verify-code step'
   );
 
   assert.match(
