@@ -190,6 +190,19 @@ function getSocialProviderLabel(strategy: OAuthStrategy | null) {
   }
 }
 
+function getSocialProviderIcon(strategy: OAuthStrategy | null) {
+  switch (strategy) {
+    case "oauth_google":
+      return <GoogleIcon />;
+    case "oauth_apple":
+      return <AppleIcon />;
+    case "oauth_microsoft":
+      return <MicrosoftIcon />;
+    default:
+      return null;
+  }
+}
+
 export default function EditProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -336,6 +349,14 @@ export default function EditProfilePage() {
   const setupStageQuery = searchParams.get("setupStage");
   const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;
   const isResolvingSetupAccount = hasSetupAccountQuery && (!clerkUser || currentUser === undefined || company === undefined);
+  const primaryCompanyEmail = clerkUser?.primaryEmailAddress?.emailAddress || "";
+  const isDifferentSocialEmail = Boolean(
+    setupSelectedSocial
+    && setupSocialEmail.trim()
+    && primaryCompanyEmail
+    && setupSocialEmail.trim().toLowerCase() !== primaryCompanyEmail.trim().toLowerCase()
+  );
+  const hasCompleteVerificationCode = setupVerificationCode.trim().length === 6;
 
   const logoUrl = useStorageUrl(logoId);
   const logoPreviewUrl = logoUrl ?? company?.imageUrl;
@@ -634,16 +655,10 @@ export default function EditProfilePage() {
   };
 
   const handleSetupSocialEmailContinue = () => {
-    const primaryEmail = clerkUser?.primaryEmailAddress?.emailAddress?.trim().toLowerCase();
     const enteredEmail = setupSocialEmail.trim().toLowerCase();
 
     if (!enteredEmail) {
       setSetupAccountError("Please confirm the company email before continuing.");
-      return;
-    }
-
-    if (primaryEmail && enteredEmail !== primaryEmail) {
-      setSetupAccountError("Please use the company email shown on this account.");
       return;
     }
 
@@ -725,7 +740,7 @@ export default function EditProfilePage() {
   };
 
   const handleSetupVerification = async () => {
-    if (!setupVerificationStartedRef.current || !session || !reverificationState || setupVerificationSending || setupVerificationSubmitting) {
+    if (!setupVerificationStartedRef.current || !session || !reverificationState || setupVerificationSubmitting) {
       return;
     }
 
@@ -1627,9 +1642,12 @@ export default function EditProfilePage() {
 
             {setupStage === "socialEmail" && (
               <div className="mt-5">
-                <p className="mb-4 text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
+                <p className="text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
                   {getSocialProviderLabel(setupSelectedSocial)}
                 </p>
+                <div className="mt-2 mb-4 flex justify-center text-[#333]">
+                  {getSocialProviderIcon(setupSelectedSocial)}
+                </div>
                 <div className="mb-4">
                   <label className="mb-[5px] block text-[11px] font-medium tracking-[0.22px] text-[#333]">
                     Email <span className="text-[#f14110]">(*)</span>
@@ -1642,9 +1660,17 @@ export default function EditProfilePage() {
                     autoComplete="email"
                     required
                   />
-                  <p className="mt-2 text-[9px] leading-[14px] text-[#333]/60">
-                    Use the same email as this company account before continuing with {getSocialProviderLabel(setupSelectedSocial)}.
-                  </p>
+                  {isDifferentSocialEmail ? (
+                    <p className="mt-2 text-[9px] leading-[14px] font-medium text-[#f14110]">
+                      Using a different email than {primaryCompanyEmail} will set this new email as your login for your company.
+                      <br />
+                      Menggunakan email yang berbeda dari {primaryCompanyEmail} akan menetapkan email baru ini sebagai login Anda untuk perusahaan Anda.
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-[9px] leading-[14px] text-[#333]/60">
+                      Use the same email as this company account before continuing with {getSocialProviderLabel(setupSelectedSocial)}.
+                    </p>
+                  )}
                 </div>
 
                 {setupAccountError && (
@@ -1735,7 +1761,7 @@ export default function EditProfilePage() {
                     required
                   />
                   <p className="mt-2 text-[9px] leading-[14px] text-[#333]/60">
-                    {setupVerificationSending && !setupVerificationSent
+                    {setupVerificationSending && !setupVerificationSent && !hasCompleteVerificationCode
                       ? "Sending a verification code to your email..."
                       : "Enter the verification code sent to your email before registering your password."}
                   </p>
@@ -1751,16 +1777,16 @@ export default function EditProfilePage() {
                   <button
                     type="button"
                     onClick={handleSetupVerification}
-                    disabled={setupAccountSaving || setupVerificationSending || setupVerificationSubmitting}
+                    disabled={setupAccountSaving || setupVerificationSubmitting || !hasCompleteVerificationCode}
                     className="flex h-10 w-[140px] items-center justify-center rounded-full border border-[#333] text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {setupVerificationSending
+                    {setupVerificationSubmitting
+                      ? "Verifying..."
+                      : setupVerificationSending && !hasCompleteVerificationCode
                       ? "Sending..."
-                      : setupVerificationSubmitting
-                        ? "Verifying..."
-                        : setupAccountSaving
-                          ? "Registering..."
-                          : "Verify Email"}
+                      : setupAccountSaving
+                        ? "Registering..."
+                        : "Verify Email"}
                   </button>
                 </div>
               </div>

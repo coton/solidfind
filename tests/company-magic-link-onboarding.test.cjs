@@ -84,6 +84,18 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
+    /getSocialProviderIcon\(setupSelectedSocial\)/,
+    'expected the social-email confirmation step to show the selected provider icon under the provider title'
+  );
+
+  assert.match(
+    source,
+    /Using a different email than \{primaryCompanyEmail\} will set this new email as your login for your company\.[\s\S]*Menggunakan email yang berbeda dari \{primaryCompanyEmail\} akan menetapkan email baru ini sebagai login Anda untuk perusahaan Anda\./,
+    'expected the social-email confirmation step to warn in orange when a different email is entered'
+  );
+
+  assert.match(
+    source,
     /if \(selectedSocial\) \{[\s\S]*await clerkUser\.createExternalAccount\(\{[\s\S]*strategy: selectedSocial,[\s\S]*redirectUrl: `\/sso-callback\?redirect_url=\$\{encodeURIComponent\(redirectTarget\)\}`,[\s\S]*oidcLoginHint: setupSocialEmail \|\| clerkUser\.primaryEmailAddress\?\.emailAddress \|\| undefined/,
     'expected the selected company social account to be linked only after password and email verification complete'
   );
@@ -116,6 +128,18 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
     source,
     /attemptFirstFactorVerification\([\s\S]*strategy: "email_code"[\s\S]*await reverificationState\.complete\(\)/,
     'expected the setup-account flow to verify the emailed code and then ask Clerk to retry the protected action'
+  );
+
+  assert.match(
+    source,
+    /const hasCompleteVerificationCode = setupVerificationCode\.trim\(\)\.length === 6;/,
+    'expected the verify step to treat a full 6-digit code as ready to submit'
+  );
+
+  assert.match(
+    source,
+    /disabled=\{setupAccountSaving \|\| setupVerificationSubmitting \|\| !hasCompleteVerificationCode\}/,
+    'expected the verify button to become clickable once a full code is entered instead of staying blocked by the send state'
   );
 
   assert.match(
