@@ -111,4 +111,4 @@ On submit (`handleSignUp`):
 | **Clerk** | Identity provider — handles OAuth, email/password, sessions, user metadata (`publicMetadata`, `unsafeMetadata`) |
 | **Convex** (`convex/users.ts`) | Application user store — `createOrGetUser`, `getCurrentUser`, `updateAccountType`, `checkEmailAccountType` |
 | **`useStoreUserEffect`** | Auto-syncs Clerk user → Convex on every session load, reading accountType from `publicMetadata` (authoritative) → `unsafeMetadata` (fallback) → `"individual"` (default) |
-| **`/api/set-account-type`** | Server route that writes Clerk `publicMetadata` (file not found in repo — may have been removed or moved) |
+| **`/api/set-account-type`** (`src/app/api/set-account-type/route.ts`) | Server route that writes Clerk `publicMetadata` — authenticates via Clerk `auth()`, validates `accountType`, and calls `clerkClient.users.updateUserMetadata` to persist `accountType` (and optional `companyName`) to `publicMetadata` |
