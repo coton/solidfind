@@ -203,6 +203,25 @@ function getSocialProviderIcon(strategy: OAuthStrategy | null) {
   }
 }
 
+function SetupBackButton({
+  onClick,
+}: {
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="absolute left-6 top-7 flex items-center gap-1 bg-transparent text-[11px] font-medium text-[#999] transition-colors hover:text-[#f14110] sm:left-8"
+    >
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <path d="M6.5 1.5L3 5L6.5 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      Back
+    </button>
+  );
+}
+
 export default function EditProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -601,12 +620,30 @@ export default function EditProfilePage() {
     setSetupAccountError("");
 
     try {
-      const existingEmailAddress = clerkUser.emailAddresses.find(
+      const prepareResponse = await fetch("/api/company/prepare-login-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: enteredEmail }),
+      });
+
+      if (!prepareResponse.ok) {
+        const payload = await prepareResponse.json().catch(() => null);
+        throw new Error(payload?.error || "Unable to prepare this login email.");
+      }
+
+      await clerkUser.reload();
+
+      const emailResource = clerkUser.emailAddresses.find(
         (item) => item.emailAddress.trim().toLowerCase() === enteredEmail
       );
 
-      const emailResource = existingEmailAddress || await clerkUser.createEmailAddress({ email: enteredEmail });
-      await emailResource.prepareVerification({ strategy: "email_code" });
+      if (!emailResource) {
+        throw new Error("Unable to find this email on your company account yet. Please try again.");
+      }
+
+      if (emailResource.verification?.status !== "verified") {
+        await emailResource.prepareVerification({ strategy: "email_code" });
+      }
 
       setupEmailResourceRef.current = emailResource;
       setSetupVerificationRequestSubmitted(true);
@@ -713,6 +750,29 @@ export default function EditProfilePage() {
     } catch (error) {
       setSetupSocialLoading(null);
       const message = error instanceof Error ? error.message : "Failed to verify your email code.";
+
+      if (message.includes("already been verified")) {
+        try {
+          await clerkUser?.reload();
+          const refreshedEmail = clerkUser?.emailAddresses.find(
+            (item) => item.emailAddress.trim().toLowerCase() === setupLoginEmail.trim().toLowerCase()
+          );
+
+          if (refreshedEmail?.verification?.status === "verified") {
+            await syncSetupLoginEmail();
+
+            if (setupSelectedSocial) {
+              setSetupStage("socialFinish");
+            } else {
+              setSetupStage("password");
+            }
+            return;
+          }
+        } catch {
+          // Fall through to the original error if Clerk does not reflect a verified email yet.
+        }
+      }
+
       setSetupAccountError(message);
     } finally {
       setSetupVerificationSubmitting(false);
@@ -1590,19 +1650,12 @@ export default function EditProfilePage() {
 
             {setupStage === "emailChoice" && (
               <div className="mt-5">
-                <button
-                  type="button"
+                <SetupBackButton
                   onClick={() => {
                     setSetupStage("method");
                     setSetupAccountError("");
                   }}
-                  className="mb-6 flex items-center gap-1 bg-transparent text-[11px] font-medium text-[#999] transition-colors hover:text-[#f14110]"
-                >
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                    <path d="M6.5 1.5L3 5L6.5 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  Back
-                </button>
+                />
                 <p className="text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
                   {setupSelectedSocial ? getSocialProviderLabel(setupSelectedSocial) : "Email"}
                 </p>
@@ -1656,6 +1709,12 @@ export default function EditProfilePage() {
 
             {setupStage === "password" && (
               <form onSubmit={handleSetupAccount} className="mt-5">
+                <SetupBackButton
+                  onClick={() => {
+                    setSetupStage("verify");
+                    setSetupAccountError("");
+                  }}
+                />
                 <p className="mb-4 text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
                   {setupDisplayEmail}
                 </p>
@@ -1707,6 +1766,12 @@ export default function EditProfilePage() {
 
             {setupStage === "socialFinish" && (
               <div className="mt-5">
+                <SetupBackButton
+                  onClick={() => {
+                    setSetupStage("verify");
+                    setSetupAccountError("");
+                  }}
+                />
                 <p className="text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
                   {getSocialProviderLabel(setupSelectedSocial)}
                 </p>
@@ -1755,6 +1820,14 @@ export default function EditProfilePage() {
 
             {setupStage === "verify" && (
               <div className="mt-5">
+                <SetupBackButton
+                  onClick={() => {
+                    setSetupStage("emailChoice");
+                    setSetupAccountError("");
+                    setSetupVerificationCode("");
+                    setSetupVerificationSubmitting(false);
+                  }}
+                />
                 <p className="mb-4 text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
                   {setupDisplayEmail}
                 </p>

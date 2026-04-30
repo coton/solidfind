@@ -78,8 +78,8 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /await clerkUser\.createEmailAddress\(\{ email: enteredEmail \}\)[\s\S]*prepareVerification\(\{ strategy: "email_code" \}\)/,
-    'expected the chosen login email to be created if needed and verified by email code'
+    /fetch\("\/api\/company\/prepare-login-email"[\s\S]*await clerkUser\.reload\(\)[\s\S]*prepareVerification\(\{ strategy: "email_code" \}\)/,
+    'expected the chosen login email to be prepared server-side first and then verified by email code'
   );
 
   assert.match(
@@ -128,6 +128,12 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
     source,
     /A verification code has been sent to your email\.[\s\S]*Verify Email/,
     'expected the verify step to show a sent-code note and keep Verify Email available once the code is entered'
+  );
+
+  assert.match(
+    source,
+    /function SetupBackButton[\s\S]*absolute left-6 top-7[\s\S]*setupStage === "emailChoice"[\s\S]*<SetupBackButton[\s\S]*setupStage === "password"[\s\S]*<SetupBackButton[\s\S]*setupStage === "socialFinish"[\s\S]*<SetupBackButton[\s\S]*setupStage === "verify"[\s\S]*<SetupBackButton/,
+    'expected the rebuilt setup flow to keep a consistent top-left Back button across the onboarding steps'
   );
 
   assert.match(
