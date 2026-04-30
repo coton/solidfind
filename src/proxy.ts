@@ -39,6 +39,11 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
+    "/api/company/(.*)",
+    "/api/set-account-type",
+    "/api/admin/export",
+    "/api/admin/cleanup-test-users",
+    "/api/admin/me",
     "/((?!api|trpc|_next|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|txt|xml)$).*)",
   ],
 };

@@ -159,6 +159,22 @@ test('magic-link loading page uses the updated in-progress title', () => {
   );
 });
 
+test('clerk proxy covers the company onboarding api routes used by the magic-link setup flow', () => {
+  const source = readProjectFile('src/proxy.ts');
+
+  assert.match(
+    source,
+    /matcher:\s*\[[\s\S]*"\/api\/company\/\(\.\*\)"/,
+    'expected Clerk proxy matcher to include company api routes so auth() works during company onboarding'
+  );
+
+  assert.match(
+    source,
+    /matcher:\s*\[[\s\S]*"\/api\/set-account-type"/,
+    'expected Clerk proxy matcher to include the set-account-type api route used in auth flows'
+  );
+});
+
 test('auth modal continue with email button keeps its original full width', () => {
   const source = readProjectFile('src/components/AuthModal.tsx');
 
