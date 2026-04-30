@@ -36,14 +36,14 @@ test('company dashboard edit blocks password-less magic-link users behind the se
 
   assert.match(
     source,
-    /const hasSetupAccountQuery = searchParams\.get\("setupAccount"\) === "1";[\s\S]*const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;/,
+    /const hasSetupAccountQuery = searchParams\.get\("setupAccount"\) === "1";[\s\S]*const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser && !clerkUser\.passwordEnabled;/,
     'expected the company editor to gate setup-account onboarding on the setupAccount query for company magic-link sessions'
   );
 
   assert.match(
     source,
-    /const updatePasswordWithReverification = useReverification\([\s\S]*clerkUser\.updatePassword\(\{ newPassword \}\)/,
-    'expected the setup-account flow to wrap password registration in Clerk reverification'
+    /const \[setupStage, setSetupStage\] = useState<"method" \| "password" \| "verify">\("method"\);/,
+    'expected the company setup popup to run as its own staged onboarding flow'
   );
 
   assert.match(
@@ -60,20 +60,26 @@ test('company dashboard edit blocks password-less magic-link users behind the se
 
   assert.match(
     source,
-    /primaryEmailAddress\?\.emailAddress[\s\S]*Email Code/,
-    'expected the setup-account popup to identify the account email and request an email verification code'
+    /Continue with Google[\s\S]*Continue with Apple[\s\S]*Continue with Microsoft[\s\S]*Continue with \{clerkUser\?\.primaryEmailAddress\?\.emailAddress \|\| "this email"\}/,
+    'expected the initial company setup popup to offer the same social options plus a company-email continue action'
   );
 
   assert.match(
     source,
-    /session\.startVerification\([\s\S]*prepareFirstFactorVerification\([\s\S]*strategy: "email_code"/,
-    'expected the setup-account flow to initiate Clerk email-code reverification before changing the password'
+    /setupStage === "password"[\s\S]*Password[\s\S]*Confirm Password/,
+    'expected the company setup popup to move to a dedicated password step after the initial method choice'
   );
 
   assert.match(
     source,
-    /attemptFirstFactorVerification\([\s\S]*strategy: "email_code"[\s\S]*Verify Email/,
-    'expected the setup-account flow to verify the emailed code before completing password registration'
+    /beginEmailVerification[\s\S]*session\.startVerification\(\{ level: "first_factor" \}\)[\s\S]*prepareFirstFactorVerification\([\s\S]*strategy: "email_code"/,
+    'expected the setup-account flow to explicitly send an email verification code before updating the password'
+  );
+
+  assert.match(
+    source,
+    /attemptFirstFactorVerification\([\s\S]*strategy: "email_code"[\s\S]*clerkUser\.updatePassword\(\{ newPassword: setupPendingPassword \}\)[\s\S]*Verify Email/,
+    'expected the setup-account flow to verify the emailed code and only then set the new password'
   );
 
   assert.match(

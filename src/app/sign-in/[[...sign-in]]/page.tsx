@@ -19,10 +19,26 @@ export default function SignInPage() {
 
   const ticket = searchParams.get("__clerk_ticket");
   const safeNextPath = useMemo(() => sanitizeNextPath(searchParams.get("next")), [searchParams]);
+  const companySetupPath = useMemo(() => {
+    if (!safeNextPath || !safeNextPath.startsWith("/company-dashboard/edit")) {
+      return null;
+    }
+
+    const [pathname, existingQuery = ""] = safeNextPath.split("?");
+    const nextParams = new URLSearchParams(existingQuery);
+    nextParams.set("setupAccount", "1");
+    const serialized = nextParams.toString();
+    return serialized ? `${pathname}?${serialized}` : pathname;
+  }, [safeNextPath]);
 
   useEffect(() => {
     if (!isUserLoaded) return;
     if (user) {
+      if (companySetupPath) {
+        router.replace(companySetupPath);
+        return;
+      }
+
       const nextSuffix = safeNextPath ? `?next=${encodeURIComponent(safeNextPath)}` : "";
       router.replace(`/auth-complete${nextSuffix}`);
       return;
@@ -44,6 +60,11 @@ export default function SignInPage() {
 
         if (result.status === "complete") {
           await setActive({ session: result.createdSessionId });
+          if (companySetupPath) {
+            router.replace(companySetupPath);
+            return;
+          }
+
           const nextSuffix = safeNextPath ? `?next=${encodeURIComponent(safeNextPath)}` : "";
           router.replace(`/auth-complete${nextSuffix}`);
           return;
@@ -68,15 +89,19 @@ export default function SignInPage() {
     return () => {
       cancelled = true;
     };
-  }, [ticket, isSignInLoaded, signIn, setActive, router, safeNextPath, user, isUserLoaded]);
+  }, [ticket, isSignInLoaded, signIn, setActive, router, safeNextPath, companySetupPath, user, isUserLoaded]);
 
   useEffect(() => {
     if (ticket) return;
     if (user) {
+      if (companySetupPath) {
+        router.push(companySetupPath);
+        return;
+      }
       const nextSuffix = safeNextPath ? `?next=${encodeURIComponent(safeNextPath)}` : "";
       router.push(`/auth-complete${nextSuffix}`);
     }
-  }, [ticket, user, router, safeNextPath]);
+  }, [ticket, user, router, safeNextPath, companySetupPath]);
 
   if (ticket && !ticketError) {
     return <MagicLinkLoadingPage />;

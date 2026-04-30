@@ -60,8 +60,20 @@ test('magic-link sign-in bypasses ticket redemption when a Clerk user session al
 
   assert.match(
     source,
-    /if \(!isUserLoaded\) return;[\s\S]*if \(user\) \{[\s\S]*router\.replace\(`\/auth-complete\$\{nextSuffix\}`\);[\s\S]*return;[\s\S]*if \(!ticket\) return;/,
-    'expected existing signed-in users to go straight to auth-complete before ticket redemption runs'
+    /const companySetupPath = useMemo\(\(\) => \{[\s\S]*nextParams\.set\("setupAccount", "1"\)/,
+    'expected company magic-link sign-in to build the setup-account editor path directly on the sign-in page'
+  );
+
+  assert.match(
+    source,
+    /if \(!isUserLoaded\) return;[\s\S]*if \(user\) \{[\s\S]*if \(companySetupPath\) \{[\s\S]*router\.replace\(companySetupPath\);[\s\S]*return;[\s\S]*router\.replace\(`\/auth-complete\$\{nextSuffix\}`\);/,
+    'expected existing signed-in company magic-link users to bypass auth-complete and go straight to the setup-account editor'
+  );
+
+  assert.match(
+    source,
+    /if \(result\.status === "complete"\) \{[\s\S]*if \(companySetupPath\) \{[\s\S]*router\.replace\(companySetupPath\);[\s\S]*return;[\s\S]*router\.replace\(`\/auth-complete\$\{nextSuffix\}`\);/,
+    'expected ticket redemption to route company magic-link sessions straight into the setup-account editor once Clerk finishes signing them in'
   );
 
   assert.match(
