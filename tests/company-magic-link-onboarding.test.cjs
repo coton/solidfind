@@ -187,6 +187,22 @@ test('clerk proxy covers the company onboarding api routes used by the magic-lin
   );
 });
 
+test('sso callback preserves redirect_url for company onboarding social completions', () => {
+  const source = readProjectFile('src/app/sso-callback/page.tsx');
+
+  assert.match(
+    source,
+    /sanitizeNextPath\(searchParams\.get\("redirect_url"\)\) \|\| "\/auth-complete"/,
+    'expected the SSO callback to sanitize and preserve redirect_url, falling back to /auth-complete only when missing'
+  );
+
+  assert.match(
+    source,
+    /<AuthenticateWithRedirectCallback[\s\S]*signInFallbackRedirectUrl=\{redirectUrl\}[\s\S]*signUpFallbackRedirectUrl=\{redirectUrl\}[\s\S]*signInForceRedirectUrl=\{redirectUrl\}[\s\S]*signUpForceRedirectUrl=\{redirectUrl\}/,
+    'expected the SSO callback to force successful OAuth completions back to the requested in-app destination'
+  );
+});
+
 test('auth modal continue with email button keeps its original full width', () => {
   const source = readProjectFile('src/components/AuthModal.tsx');
 
