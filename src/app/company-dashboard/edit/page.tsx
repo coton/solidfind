@@ -313,6 +313,7 @@ export default function EditProfilePage() {
   const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription;
   const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
   const hasSetupAccountQuery = searchParams.get("setupAccount") === "1";
+  const setupStageQuery = searchParams.get("setupStage");
   const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;
   const isResolvingSetupAccount = hasSetupAccountQuery && (!clerkUser || currentUser === undefined || company === undefined);
 
@@ -357,6 +358,24 @@ export default function EditProfilePage() {
       setFoundedYear(company.since?.toString() ?? "");
     }
   }, [company]);
+
+  useEffect(() => {
+    if (!hasSetupAccountQuery) {
+      return;
+    }
+
+    if (setupStageQuery === "password") {
+      setSetupStage("password");
+      return;
+    }
+
+    if (setupStageQuery === "verify") {
+      setSetupStage("verify");
+      return;
+    }
+
+    setSetupStage("method");
+  }, [hasSetupAccountQuery, setupStageQuery]);
 
   const toggleService = (list: string[], setList: (val: string[]) => void, id: string) => {
     setIsDirty(true);
@@ -549,9 +568,10 @@ export default function EditProfilePage() {
     setSetupAccountError("");
 
     try {
+      const redirectTarget = "/company-dashboard/edit?setupAccount=1&setupStage=password";
       await clerkUser.createExternalAccount({
         strategy,
-        redirectUrl: "/company-dashboard/edit?setupAccount=1",
+        redirectUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectTarget)}`,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to continue with this social account right now.";

@@ -66,6 +66,18 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
+    /const setupStageQuery = searchParams\.get\("setupStage"\);[\s\S]*if \(setupStageQuery === "password"\) \{[\s\S]*setSetupStage\("password"\)/,
+    'expected company setup onboarding to resume at the password step after a social OAuth callback'
+  );
+
+  assert.match(
+    source,
+    /createExternalAccount\(\{[\s\S]*strategy,[\s\S]*redirectUrl: `\/sso-callback\?redirect_url=\$\{encodeURIComponent\(redirectTarget\)\}`/,
+    'expected company social setup to use Clerk OAuth callback routing instead of pointing directly back at the editor'
+  );
+
+  assert.match(
+    source,
     /setupStage === "password"[\s\S]*Password[\s\S]*Confirm Password/,
     'expected the company setup popup to move to a dedicated password step after the initial method choice'
   );
