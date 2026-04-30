@@ -78,7 +78,7 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /if \(setupSelectedSocial\) \{[\s\S]*await clerkUser\.createExternalAccount\(\{[\s\S]*strategy: setupSelectedSocial,[\s\S]*redirectUrl: `\/sso-callback\?redirect_url=\$\{encodeURIComponent\(redirectTarget\)\}`/,
+    /if \(selectedSocial\) \{[\s\S]*await clerkUser\.createExternalAccount\(\{[\s\S]*strategy: selectedSocial,[\s\S]*redirectUrl: `\/sso-callback\?redirect_url=\$\{encodeURIComponent\(redirectTarget\)\}`/,
     'expected the selected company social account to be linked only after password and email verification complete'
   );
 
@@ -90,14 +90,20 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /beginEmailVerification[\s\S]*session\.startVerification\(\{ level: "first_factor" \}\)[\s\S]*prepareFirstFactorVerification\([\s\S]*strategy: "email_code"/,
-    'expected the setup-account flow to explicitly send an email verification code before updating the password'
+    /const finalizeSetup = useReverification\([\s\S]*clerkUser\.updatePassword\(\{ newPassword \}\)[\s\S]*onNeedsReverification:[\s\S]*setSetupStage\("verify"\)/,
+    'expected the setup-account flow to use Clerk reverification and move into the custom verify step when sensitive actions need extra checks'
   );
 
   assert.match(
     source,
-    /attemptFirstFactorVerification\([\s\S]*strategy: "email_code"[\s\S]*clerkUser\.updatePassword\(\{ newPassword: setupPendingPassword \}\)[\s\S]*Verify Email/,
-    'expected the setup-account flow to verify the emailed code and only then set the new password'
+    /beginEmailVerification[\s\S]*session\.startVerification\(\{ level: "first_factor" \}\)[\s\S]*prepareFirstFactorVerification\([\s\S]*strategy: "email_code"/,
+    'expected the setup-account flow to explicitly send an email verification code before retrying the protected action'
+  );
+
+  assert.match(
+    source,
+    /attemptFirstFactorVerification\([\s\S]*strategy: "email_code"[\s\S]*await reverificationState\.complete\(\)/,
+    'expected the setup-account flow to verify the emailed code and then ask Clerk to retry the protected action'
   );
 
   assert.match(

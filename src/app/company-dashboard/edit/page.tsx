@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser, useClerk, useSession } from "@clerk/nextjs";
+import { useUser, useClerk, useReverification, useSession } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import type { OAuthStrategy } from "@clerk/types";
 import { api } from "../../../../convex/_generated/api";
@@ -270,14 +270,19 @@ export default function EditProfilePage() {
   const [setupSelectedSocial, setSetupSelectedSocial] = useState<OAuthStrategy | null>(null);
   const [setupPassword, setSetupPassword] = useState("");
   const [setupPasswordConfirm, setSetupPasswordConfirm] = useState("");
-  const [setupPendingPassword, setSetupPendingPassword] = useState("");
   const [setupAccountSaving, setSetupAccountSaving] = useState(false);
   const [setupAccountError, setSetupAccountError] = useState("");
   const [setupSocialLoading, setSetupSocialLoading] = useState<OAuthStrategy | null>(null);
   const [setupVerificationCode, setSetupVerificationCode] = useState("");
   const [setupVerificationSent, setSetupVerificationSent] = useState(false);
-  const [setupVerificationPreparing, setSetupVerificationPreparing] = useState(false);
+  const [setupVerificationSending, setSetupVerificationSending] = useState(false);
+  const [setupVerificationSubmitting, setSetupVerificationSubmitting] = useState(false);
   const setupVerificationStartedRef = useRef(false);
+  const [reverificationState, setReverificationState] = useState<{
+    complete: () => void;
+    cancel: () => void;
+    level: "first_factor" | "second_factor" | "multi_factor" | undefined;
+  } | null>(null);
 
   // Mandatory fields validation
   const hasCategory = (constructionEnabled && selectedConstruction.length > 0)
@@ -532,13 +537,14 @@ export default function EditProfilePage() {
     setSetupSelectedSocial(null);
     setSetupPassword("");
     setSetupPasswordConfirm("");
-    setSetupPendingPassword("");
     setSetupAccountSaving(false);
     setSetupAccountError("");
     setSetupSocialLoading(null);
     setSetupVerificationCode("");
     setSetupVerificationSent(false);
-    setSetupVerificationPreparing(false);
+    setSetupVerificationSending(false);
+    setSetupVerificationSubmitting(false);
+    setReverificationState(null);
     setupVerificationStartedRef.current = false;
   };
 
@@ -563,6 +569,38 @@ export default function EditProfilePage() {
     });
   };
 
+  const finalizeSetup = useReverification(
+    async (newPassword: string, selectedSocial: OAuthStrategy | null, redirectTarget: string) => {
+      if (!clerkUser) {
+        throw new Error("Unable to load your account.");
+      }
+
+      await clerkUser.updatePassword({ newPassword });
+
+      if (selectedSocial) {
+        setSetupSocialLoading(selectedSocial);
+        await clerkUser.createExternalAccount({
+          strategy: selectedSocial,
+          redirectUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectTarget)}`,
+        });
+        return;
+      }
+
+      clearSetupFlow();
+      router.replace(redirectTarget);
+    },
+    {
+      onNeedsReverification: ({ complete, cancel, level }) => {
+        setReverificationState({ complete, cancel, level });
+        setSetupStage("verify");
+        setSetupVerificationSent(false);
+        setSetupVerificationCode("");
+        setSetupAccountError("");
+        setupVerificationStartedRef.current = false;
+      },
+    }
+  );
+
   const handleSetupSocialAuth = async (strategy: OAuthStrategy) => {
     setSetupSelectedSocial(strategy);
     setSetupStage("password");
@@ -570,14 +608,14 @@ export default function EditProfilePage() {
   };
 
   useEffect(() => {
-    if (setupStage !== "verify" || !session || setupVerificationStartedRef.current) {
+    if (setupStage !== "verify" || !session || !reverificationState || setupVerificationStartedRef.current) {
       return;
     }
 
     let cancelled = false;
 
     const startEmailVerification = async () => {
-      setSetupVerificationPreparing(true);
+      setSetupVerificationSending(true);
       setSetupAccountError("");
 
       try {
@@ -592,7 +630,7 @@ export default function EditProfilePage() {
         setSetupAccountError(message);
       } finally {
         if (!cancelled) {
-          setSetupVerificationPreparing(false);
+          setSetupVerificationSending(false);
         }
       }
     };
@@ -602,7 +640,7 @@ export default function EditProfilePage() {
     return () => {
       cancelled = true;
     };
-  }, [session, setupStage]);
+  }, [reverificationState, session, setupStage]);
 
   const handleSetupAccount = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -627,8 +665,13 @@ export default function EditProfilePage() {
     setSetupAccountError("");
 
     try {
-      setSetupPendingPassword(setupPassword);
-      setSetupStage("verify");
+      const nextParams = new URLSearchParams(searchParams.toString());
+      nextParams.delete("setupAccount");
+      nextParams.delete("setupStage");
+      const nextQuery = nextParams.toString();
+      const redirectTarget = nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit";
+
+      await finalizeSetup(setupPassword, setupSelectedSocial, redirectTarget);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to register your password. Please try again.";
       setSetupAccountError(message);
@@ -638,7 +681,7 @@ export default function EditProfilePage() {
   };
 
   const handleSetupVerification = async () => {
-    if (!setupVerificationStartedRef.current || !session || setupVerificationPreparing || !clerkUser || !setupPendingPassword) {
+    if (!setupVerificationStartedRef.current || !session || !reverificationState || setupVerificationSending || setupVerificationSubmitting) {
       return;
     }
 
@@ -647,7 +690,7 @@ export default function EditProfilePage() {
       return;
     }
 
-    setSetupVerificationPreparing(true);
+    setSetupVerificationSubmitting(true);
     setSetupAccountError("");
 
     try {
@@ -660,37 +703,13 @@ export default function EditProfilePage() {
         throw new Error("Invalid verification code.");
       }
 
-      await clerkUser.updatePassword({ newPassword: setupPendingPassword });
-
-      if (setupSelectedSocial) {
-        setSetupSocialLoading(setupSelectedSocial);
-        const nextParams = new URLSearchParams(searchParams.toString());
-        nextParams.delete("setupAccount");
-        nextParams.delete("setupStage");
-        const nextQuery = nextParams.toString();
-        const redirectTarget = nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit";
-
-        await clerkUser.createExternalAccount({
-          strategy: setupSelectedSocial,
-          redirectUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectTarget)}`,
-        });
-
-        return;
-      }
-
-      clearSetupFlow();
-
-      const nextParams = new URLSearchParams(searchParams.toString());
-      nextParams.delete("setupAccount");
-      nextParams.delete("setupStage");
-      const nextQuery = nextParams.toString();
-      router.replace(nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit");
+      await reverificationState.complete();
     } catch (error) {
       setSetupSocialLoading(null);
       const message = error instanceof Error ? error.message : "Failed to verify your email code.";
       setSetupAccountError(message);
     } finally {
-      setSetupVerificationPreparing(false);
+      setSetupVerificationSubmitting(false);
     }
   };
 
@@ -1626,7 +1645,7 @@ export default function EditProfilePage() {
                     required
                   />
                   <p className="mt-2 text-[9px] leading-[14px] text-[#333]/60">
-                    {setupVerificationPreparing && !setupVerificationSent
+                    {setupVerificationSending && !setupVerificationSent
                       ? "Sending a verification code to your email..."
                       : "Enter the verification code sent to your email before registering your password."}
                   </p>
@@ -1642,14 +1661,16 @@ export default function EditProfilePage() {
                   <button
                     type="button"
                     onClick={handleSetupVerification}
-                    disabled={setupAccountSaving || setupVerificationPreparing}
+                    disabled={setupAccountSaving || setupVerificationSending || setupVerificationSubmitting}
                     className="flex h-10 w-[140px] items-center justify-center rounded-full border border-[#333] text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {setupVerificationPreparing
-                      ? (setupVerificationSent ? "Verifying..." : "Sending...")
-                      : setupAccountSaving
-                        ? "Registering..."
-                        : "Verify Email"}
+                    {setupVerificationSending
+                      ? "Sending..."
+                      : setupVerificationSubmitting
+                        ? "Verifying..."
+                        : setupAccountSaving
+                          ? "Registering..."
+                          : "Verify Email"}
                   </button>
                 </div>
               </div>
