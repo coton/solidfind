@@ -42,7 +42,7 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /const \[setupStage, setSetupStage\] = useState<"method" \| "password" \| "verify">\("method"\);/,
+    /const \[setupStage, setSetupStage\] = useState<"method" \| "password" \| "verify">\("method"\);[\s\S]*const \[setupSelectedSocial, setSetupSelectedSocial\] = useState<OAuthStrategy \| null>\(null\);/,
     'expected the company setup popup to run as its own staged onboarding flow'
   );
 
@@ -72,8 +72,14 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /createExternalAccount\(\{[\s\S]*strategy,[\s\S]*redirectUrl: `\/sso-callback\?redirect_url=\$\{encodeURIComponent\(redirectTarget\)\}`/,
-    'expected company social setup to use Clerk OAuth callback routing instead of pointing directly back at the editor'
+    /const handleSetupSocialAuth = async \(strategy: OAuthStrategy\) => \{[\s\S]*setSetupSelectedSocial\(strategy\);[\s\S]*setSetupStage\("password"\);/,
+    'expected choosing a company social setup method to continue into the password stage before the social account is linked'
+  );
+
+  assert.match(
+    source,
+    /if \(setupSelectedSocial\) \{[\s\S]*await clerkUser\.createExternalAccount\(\{[\s\S]*strategy: setupSelectedSocial,[\s\S]*redirectUrl: `\/sso-callback\?redirect_url=\$\{encodeURIComponent\(redirectTarget\)\}`/,
+    'expected the selected company social account to be linked only after password and email verification complete'
   );
 
   assert.match(

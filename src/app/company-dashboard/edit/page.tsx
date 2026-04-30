@@ -267,6 +267,7 @@ export default function EditProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [setupStage, setSetupStage] = useState<"method" | "password" | "verify">("method");
+  const [setupSelectedSocial, setSetupSelectedSocial] = useState<OAuthStrategy | null>(null);
   const [setupPassword, setSetupPassword] = useState("");
   const [setupPasswordConfirm, setSetupPasswordConfirm] = useState("");
   const [setupPendingPassword, setSetupPendingPassword] = useState("");
@@ -528,6 +529,7 @@ export default function EditProfilePage() {
 
   const clearSetupFlow = () => {
     setSetupStage("method");
+    setSetupSelectedSocial(null);
     setSetupPassword("");
     setSetupPasswordConfirm("");
     setSetupPendingPassword("");
@@ -562,22 +564,9 @@ export default function EditProfilePage() {
   };
 
   const handleSetupSocialAuth = async (strategy: OAuthStrategy) => {
-    if (!clerkUser) return;
-
-    setSetupSocialLoading(strategy);
+    setSetupSelectedSocial(strategy);
+    setSetupStage("password");
     setSetupAccountError("");
-
-    try {
-      const redirectTarget = "/company-dashboard/edit?setupAccount=1&setupStage=password";
-      await clerkUser.createExternalAccount({
-        strategy,
-        redirectUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectTarget)}`,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to continue with this social account right now.";
-      setSetupAccountError(message);
-      setSetupSocialLoading(null);
-    }
   };
 
   useEffect(() => {
@@ -672,13 +661,32 @@ export default function EditProfilePage() {
       }
 
       await clerkUser.updatePassword({ newPassword: setupPendingPassword });
+
+      if (setupSelectedSocial) {
+        setSetupSocialLoading(setupSelectedSocial);
+        const nextParams = new URLSearchParams(searchParams.toString());
+        nextParams.delete("setupAccount");
+        nextParams.delete("setupStage");
+        const nextQuery = nextParams.toString();
+        const redirectTarget = nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit";
+
+        await clerkUser.createExternalAccount({
+          strategy: setupSelectedSocial,
+          redirectUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectTarget)}`,
+        });
+
+        return;
+      }
+
       clearSetupFlow();
 
       const nextParams = new URLSearchParams(searchParams.toString());
       nextParams.delete("setupAccount");
+      nextParams.delete("setupStage");
       const nextQuery = nextParams.toString();
       router.replace(nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit");
     } catch (error) {
+      setSetupSocialLoading(null);
       const message = error instanceof Error ? error.message : "Failed to verify your email code.";
       setSetupAccountError(message);
     } finally {
@@ -1530,6 +1538,7 @@ export default function EditProfilePage() {
                   <button
                     type="button"
                     onClick={() => {
+                      setSetupSelectedSocial(null);
                       setSetupStage("password");
                       setSetupAccountError("");
                     }}
