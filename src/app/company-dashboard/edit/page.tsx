@@ -1570,7 +1570,7 @@ export default function EditProfilePage() {
 
       {shouldPromptSetupAccount && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-[#333]/85 px-4">
-          <div className="w-full max-w-[440px] rounded-[6px] bg-[#f8f8f8] px-6 py-7 sm:px-8">
+          <div className="relative w-full max-w-[440px] rounded-[6px] bg-[#f8f8f8] px-6 py-7 sm:px-8">
             <h2 className="text-center text-[18px] font-semibold tracking-[0.36px] text-[#333]">
               Setup your Account
             </h2>
