@@ -313,7 +313,7 @@ export default function EditProfilePage() {
   const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription;
   const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
   const hasSetupAccountQuery = searchParams.get("setupAccount") === "1";
-  const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser && !clerkUser.passwordEnabled;
+  const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;
   const isResolvingSetupAccount = hasSetupAccountQuery && (!clerkUser || currentUser === undefined || company === undefined);
 
   const logoUrl = useStorageUrl(logoId);
@@ -520,17 +520,6 @@ export default function EditProfilePage() {
     setSetupVerificationPreparing(false);
     setupVerificationStartedRef.current = false;
   };
-
-  useEffect(() => {
-    if (!hasSetupAccountQuery || !clerkUser?.passwordEnabled) {
-      return;
-    }
-
-    const nextParams = new URLSearchParams(searchParams.toString());
-    nextParams.delete("setupAccount");
-    const nextQuery = nextParams.toString();
-    router.replace(nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit");
-  }, [clerkUser?.passwordEnabled, hasSetupAccountQuery, router, searchParams]);
 
   const beginEmailVerification = async () => {
     if (!session) {

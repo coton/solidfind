@@ -21,7 +21,7 @@ test('auth-complete routes company magic-link users without a password into setu
   assert.match(
     source,
     /nextParams\.set\("setupAccount", "1"\)/,
-    'expected auth-complete to flag password-less company sessions for setup-account onboarding'
+    'expected auth-complete to flag company magic-link sessions for setup-account onboarding'
   );
 
   assert.match(
@@ -31,13 +31,13 @@ test('auth-complete routes company magic-link users without a password into setu
   );
 });
 
-test('company dashboard edit blocks password-less magic-link users behind the setup-account popup', () => {
+test('company dashboard edit blocks company magic-link users behind the setup-account popup', () => {
   const source = readProjectFile('src/app/company-dashboard/edit/page.tsx');
 
   assert.match(
     source,
-    /const hasSetupAccountQuery = searchParams\.get\("setupAccount"\) === "1";[\s\S]*const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser && !clerkUser\.passwordEnabled;/,
-    'expected the company editor to gate setup-account onboarding on the setupAccount query for company magic-link sessions'
+    /const hasSetupAccountQuery = searchParams\.get\("setupAccount"\) === "1";[\s\S]*const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;/,
+    'expected the company editor to gate setup-account onboarding on the setupAccount query for every company magic-link session'
   );
 
   assert.match(
@@ -92,6 +92,16 @@ test('company dashboard edit blocks password-less magic-link users behind the se
     source,
     /className="flex h-10 w-\[140px\] items-center justify-center rounded-full border border-\[#333\] text-\[11px\] font-medium tracking-\[0\.22px\] text-\[#333\]/,
     'expected the setup-account Register button to use the standard 140px website button sizing'
+  );
+});
+
+test('magic-link loading page uses the updated in-progress title', () => {
+  const source = readProjectFile('src/components/MagicLinkLoadingPage.tsx');
+
+  assert.match(
+    source,
+    /Setting up your Account/,
+    'expected the magic-link loading screen to use the requested Setting up your Account title'
   );
 });
 
