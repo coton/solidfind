@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser, useClerk, useReverification, useSession } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import type { OAuthStrategy } from "@clerk/types";
 import { api } from "../../../../convex/_generated/api";
@@ -207,7 +207,6 @@ export default function EditProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user: clerkUser } = useUser();
-  const { session } = useSession();
   const { signOut } = useClerk();
   const proEnabled = useProEnabled();
   const [showProModal, setShowProModal] = useState(false);
@@ -292,23 +291,24 @@ export default function EditProfilePage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
-  const [setupStage, setSetupStage] = useState<"method" | "socialEmail" | "password" | "verify">("method");
+  const [setupStage, setSetupStage] = useState<"method" | "emailChoice" | "verify" | "password" | "socialFinish">("method");
   const [setupSelectedSocial, setSetupSelectedSocial] = useState<OAuthStrategy | null>(null);
-  const [setupSocialEmail, setSetupSocialEmail] = useState("");
+  const [setupLoginEmail, setSetupLoginEmail] = useState("");
   const [setupPassword, setSetupPassword] = useState("");
   const [setupPasswordConfirm, setSetupPasswordConfirm] = useState("");
   const [setupAccountSaving, setSetupAccountSaving] = useState(false);
   const [setupAccountError, setSetupAccountError] = useState("");
   const [setupSocialLoading, setSetupSocialLoading] = useState<OAuthStrategy | null>(null);
   const [setupVerificationCode, setSetupVerificationCode] = useState("");
+  const [setupVerificationRequestSubmitted, setSetupVerificationRequestSubmitted] = useState(false);
   const [setupVerificationSent, setSetupVerificationSent] = useState(false);
   const [setupVerificationSending, setSetupVerificationSending] = useState(false);
   const [setupVerificationSubmitting, setSetupVerificationSubmitting] = useState(false);
-  const setupVerificationStartedRef = useRef(false);
-  const [reverificationState, setReverificationState] = useState<{
-    complete: () => void;
-    cancel: () => void;
-    level: "first_factor" | "second_factor" | "multi_factor" | undefined;
+  const setupEmailResourceRef = useRef<{
+    id: string;
+    emailAddress: string;
+    prepareVerification: (params: { strategy: "email_code" }) => Promise<unknown>;
+    attemptVerification: (params: { code: string }) => Promise<{ verification?: { status?: string | null } | null }>;
   } | null>(null);
 
   // Mandatory fields validation
@@ -346,15 +346,16 @@ export default function EditProfilePage() {
   const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription;
   const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
   const hasSetupAccountQuery = searchParams.get("setupAccount") === "1";
-  const setupStageQuery = searchParams.get("setupStage");
   const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;
   const isResolvingSetupAccount = hasSetupAccountQuery && (!clerkUser || currentUser === undefined || company === undefined);
   const primaryCompanyEmail = clerkUser?.primaryEmailAddress?.emailAddress || "";
+  const storedCompanyEmail = company?.email || primaryCompanyEmail;
+  const setupDisplayEmail = setupLoginEmail || storedCompanyEmail;
   const isDifferentSocialEmail = Boolean(
     setupSelectedSocial
-    && setupSocialEmail.trim()
-    && primaryCompanyEmail
-    && setupSocialEmail.trim().toLowerCase() !== primaryCompanyEmail.trim().toLowerCase()
+    && setupLoginEmail.trim()
+    && storedCompanyEmail
+    && setupLoginEmail.trim().toLowerCase() !== storedCompanyEmail.trim().toLowerCase()
   );
   const hasCompleteVerificationCode = setupVerificationCode.trim().length === 6;
 
@@ -404,27 +405,10 @@ export default function EditProfilePage() {
     if (!hasSetupAccountQuery) {
       return;
     }
-
-    if (setupStageQuery === "password") {
-      setSetupStage("password");
-      return;
+    if (!setupLoginEmail) {
+      setSetupLoginEmail(storedCompanyEmail);
     }
-
-    if (setupStageQuery === "verify") {
-      setSetupStage("verify");
-      return;
-    }
-
-    setSetupStage("method");
-  }, [hasSetupAccountQuery, setupStageQuery]);
-
-  useEffect(() => {
-    if (!hasSetupAccountQuery) {
-      return;
-    }
-
-    setSetupSocialEmail(clerkUser?.primaryEmailAddress?.emailAddress || "");
-  }, [clerkUser?.primaryEmailAddress?.emailAddress, hasSetupAccountQuery]);
+  }, [hasSetupAccountQuery, setupLoginEmail, storedCompanyEmail]);
 
   const toggleService = (list: string[], setList: (val: string[]) => void, id: string) => {
     setIsDirty(true);
@@ -578,128 +562,85 @@ export default function EditProfilePage() {
   const clearSetupFlow = () => {
     setSetupStage("method");
     setSetupSelectedSocial(null);
-    setSetupSocialEmail("");
+    setSetupLoginEmail("");
     setSetupPassword("");
     setSetupPasswordConfirm("");
     setSetupAccountSaving(false);
     setSetupAccountError("");
     setSetupSocialLoading(null);
     setSetupVerificationCode("");
+    setSetupVerificationRequestSubmitted(false);
     setSetupVerificationSent(false);
     setSetupVerificationSending(false);
     setSetupVerificationSubmitting(false);
-    setReverificationState(null);
-    setupVerificationStartedRef.current = false;
+    setupEmailResourceRef.current = null;
   };
-
-  const beginEmailVerification = async () => {
-    if (!session) {
-      throw new Error("Unable to start email verification right now.");
-    }
-
-    const verification = await session.startVerification({ level: "first_factor" });
-    const emailFactor = verification.supportedFirstFactors?.find(
-      (factor): factor is Extract<(typeof verification.supportedFirstFactors)[number], { strategy: "email_code" }> =>
-        factor.strategy === "email_code" && "emailAddressId" in factor && Boolean(factor.emailAddressId)
-    );
-
-    if (!emailFactor?.emailAddressId) {
-      throw new Error("This account cannot be verified by email code right now.");
-    }
-
-    await session.prepareFirstFactorVerification({
-      strategy: "email_code",
-      emailAddressId: emailFactor.emailAddressId,
-    });
-  };
-
-  const finalizeSetup = useReverification(
-    async (newPassword: string, selectedSocial: OAuthStrategy | null, redirectTarget: string) => {
-      if (!clerkUser) {
-        throw new Error("Unable to load your account.");
-      }
-
-      await clerkUser.updatePassword({ newPassword });
-
-      if (selectedSocial) {
-        setSetupSocialLoading(selectedSocial);
-        await clerkUser.createExternalAccount({
-          strategy: selectedSocial,
-          redirectUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectTarget)}`,
-          oidcLoginHint: setupSocialEmail || clerkUser.primaryEmailAddress?.emailAddress || undefined,
-        });
-        return;
-      }
-
-      clearSetupFlow();
-      router.replace(redirectTarget);
-    },
-    {
-      onNeedsReverification: ({ complete, cancel, level }) => {
-        setReverificationState({ complete, cancel, level });
-        setSetupAccountSaving(false);
-        setSetupStage("verify");
-        setSetupVerificationSent(false);
-        setSetupVerificationCode("");
-        setSetupAccountError("");
-        setupVerificationStartedRef.current = false;
-      },
-    }
-  );
 
   const handleSetupSocialAuth = async (strategy: OAuthStrategy) => {
     setSetupSelectedSocial(strategy);
-    setSetupSocialEmail(clerkUser?.primaryEmailAddress?.emailAddress || "");
-    setSetupStage("socialEmail");
+    setSetupLoginEmail(storedCompanyEmail);
+    setSetupStage("emailChoice");
     setSetupAccountError("");
   };
 
-  const handleSetupSocialEmailContinue = () => {
-    const enteredEmail = setupSocialEmail.trim().toLowerCase();
+  const handleSetupEmailChoice = async () => {
+    if (!clerkUser) return;
+
+    const enteredEmail = setupLoginEmail.trim().toLowerCase();
 
     if (!enteredEmail) {
-      setSetupAccountError("Please confirm the company email before continuing.");
+      setSetupAccountError("Please enter the login email before continuing.");
       return;
     }
 
+    setSetupVerificationSending(true);
+    setSetupVerificationSubmitting(false);
+    setSetupVerificationCode("");
+    setSetupVerificationRequestSubmitted(false);
+    setSetupVerificationSent(false);
     setSetupAccountError("");
-    setSetupStage("password");
+
+    try {
+      const existingEmailAddress = clerkUser.emailAddresses.find(
+        (item) => item.emailAddress.trim().toLowerCase() === enteredEmail
+      );
+
+      const emailResource = existingEmailAddress || await clerkUser.createEmailAddress({ email: enteredEmail });
+      await emailResource.prepareVerification({ strategy: "email_code" });
+
+      setupEmailResourceRef.current = emailResource;
+      setSetupVerificationRequestSubmitted(true);
+      setSetupVerificationSent(true);
+      setSetupStage("verify");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to send the verification email.";
+      setSetupAccountError(message);
+    } finally {
+      setSetupVerificationSending(false);
+    }
   };
 
-  useEffect(() => {
-    if (setupStage !== "verify" || !session || !reverificationState || setupVerificationStartedRef.current) {
-      return;
+  const syncSetupLoginEmail = async (nextPassword?: string) => {
+    const response = await fetch("/api/company/setup-login-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: setupLoginEmail.trim().toLowerCase(),
+        ...(nextPassword ? { password: nextPassword } : {}),
+      }),
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload?.error || "Unable to finish setting up this company account.");
     }
 
-    let cancelled = false;
+    if (clerkUser) {
+      await clerkUser.reload();
+    }
 
-    const startEmailVerification = async () => {
-      setSetupVerificationSending(true);
-      setSetupAccountError("");
-
-      try {
-        setupVerificationStartedRef.current = true;
-        await beginEmailVerification();
-
-        if (cancelled) return;
-        setSetupVerificationSent(true);
-      } catch (error) {
-        setupVerificationStartedRef.current = false;
-        const message = error instanceof Error ? error.message : "Unable to send the verification email.";
-        setSetupAccountError(message);
-      } finally {
-        if (!cancelled) {
-          setSetupVerificationSending(false);
-        }
-      }
-    };
-
-    void startEmailVerification();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [reverificationState, session, setupStage]);
+    return response.json();
+  };
 
   const handleSetupAccount = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -724,13 +665,14 @@ export default function EditProfilePage() {
     setSetupAccountError("");
 
     try {
+      await syncSetupLoginEmail(setupPassword);
+
       const nextParams = new URLSearchParams(searchParams.toString());
       nextParams.delete("setupAccount");
-      nextParams.delete("setupStage");
       const nextQuery = nextParams.toString();
       const redirectTarget = nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit";
-
-      await finalizeSetup(setupPassword, setupSelectedSocial, redirectTarget);
+      clearSetupFlow();
+      router.replace(redirectTarget);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to register your password. Please try again.";
       setSetupAccountError(message);
@@ -740,7 +682,7 @@ export default function EditProfilePage() {
   };
 
   const handleSetupVerification = async () => {
-    if (!setupVerificationStartedRef.current || !session || !reverificationState || setupVerificationSubmitting) {
+    if (!setupEmailResourceRef.current || setupVerificationSubmitting) {
       return;
     }
 
@@ -753,16 +695,21 @@ export default function EditProfilePage() {
     setSetupAccountError("");
 
     try {
-      const result = await session.attemptFirstFactorVerification({
-        strategy: "email_code",
+      const result = await setupEmailResourceRef.current.attemptVerification({
         code: setupVerificationCode.trim(),
       });
 
-      if (result.status !== "complete") {
+      if (result.verification?.status !== "verified") {
         throw new Error("Invalid verification code.");
       }
 
-      await reverificationState.complete();
+      await syncSetupLoginEmail();
+
+      if (setupSelectedSocial) {
+        setSetupStage("socialFinish");
+      } else {
+        setSetupStage("password");
+      }
     } catch (error) {
       setSetupSocialLoading(null);
       const message = error instanceof Error ? error.message : "Failed to verify your email code.";
@@ -1574,11 +1521,11 @@ export default function EditProfilePage() {
                   <br />
                   Masukkan kode verifikasi yang dikirim ke email Anda sebelum mengakses profil perusahaan Anda.
                 </>
-              ) : setupStage === "socialEmail" ? (
+              ) : setupStage === "emailChoice" ? (
                 <>
-                  Confirm the email linked to your {getSocialProviderLabel(setupSelectedSocial)} account before continuing.
+                  Choose the login email for your company account before continuing.
                   <br />
-                  Konfirmasikan email yang ditautkan ke akun {getSocialProviderLabel(setupSelectedSocial)} Anda sebelum melanjutkan.
+                  Pilih email login untuk akun perusahaan Anda sebelum melanjutkan.
                 </>
               ) : (
                 <>
@@ -1623,12 +1570,13 @@ export default function EditProfilePage() {
                     type="button"
                     onClick={() => {
                       setSetupSelectedSocial(null);
-                      setSetupStage("password");
+                      setSetupLoginEmail(storedCompanyEmail);
+                      setSetupStage("emailChoice");
                       setSetupAccountError("");
                     }}
                     className="flex min-h-10 w-full items-center justify-center rounded-full border border-[#F14110] px-4 py-2 text-center text-[11px] font-medium tracking-[0.22px] text-[#F14110] transition hover:bg-[linear-gradient(to_right,#E9A28E,#F14110)] hover:text-white"
                   >
-                    Continue with {clerkUser?.primaryEmailAddress?.emailAddress || "this email"}
+                    Continue with Email
                   </button>
                 </div>
 
@@ -1640,10 +1588,23 @@ export default function EditProfilePage() {
               </>
             )}
 
-            {setupStage === "socialEmail" && (
+            {setupStage === "emailChoice" && (
               <div className="mt-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSetupStage("method");
+                    setSetupAccountError("");
+                  }}
+                  className="mb-6 flex items-center gap-1 bg-transparent text-[11px] font-medium text-[#999] transition-colors hover:text-[#f14110]"
+                >
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M6.5 1.5L3 5L6.5 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Back
+                </button>
                 <p className="text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
-                  {getSocialProviderLabel(setupSelectedSocial)}
+                  {setupSelectedSocial ? getSocialProviderLabel(setupSelectedSocial) : "Email"}
                 </p>
                 <div className="mt-2 mb-4 flex justify-center text-[#333]">
                   {getSocialProviderIcon(setupSelectedSocial)}
@@ -1654,21 +1615,23 @@ export default function EditProfilePage() {
                   </label>
                   <input
                     type="email"
-                    value={setupSocialEmail}
-                    onChange={(event) => setSetupSocialEmail(event.target.value)}
+                    value={setupLoginEmail}
+                    onChange={(event) => setSetupLoginEmail(event.target.value)}
                     className="h-[38px] w-full rounded-[6px] border border-[#E4E4E4] bg-white px-[10px] text-[12px] text-[#333] outline-none"
                     autoComplete="email"
                     required
                   />
                   {isDifferentSocialEmail ? (
                     <p className="mt-2 text-[9px] leading-[14px] font-medium text-[#f14110]">
-                      Using a different email than {primaryCompanyEmail} will set this new email as your login for your company.
+                      Using a different email than {storedCompanyEmail} will set this new email as your login for your company.
                       <br />
-                      Menggunakan email yang berbeda dari {primaryCompanyEmail} akan menetapkan email baru ini sebagai login Anda untuk perusahaan Anda.
+                      Menggunakan email yang berbeda dari {storedCompanyEmail} akan menetapkan email baru ini sebagai login Anda untuk perusahaan Anda.
                     </p>
                   ) : (
                     <p className="mt-2 text-[9px] leading-[14px] text-[#333]/60">
-                      Use the same email as this company account before continuing with {getSocialProviderLabel(setupSelectedSocial)}.
+                      {setupSelectedSocial
+                        ? `Use the email you want to keep as the login for this company before continuing with ${getSocialProviderLabel(setupSelectedSocial)}.`
+                        : "Use the email you want to keep as the login for this company before continuing."}
                     </p>
                   )}
                 </div>
@@ -1682,7 +1645,7 @@ export default function EditProfilePage() {
                 <div className="flex justify-center">
                   <button
                     type="button"
-                    onClick={handleSetupSocialEmailContinue}
+                    onClick={handleSetupEmailChoice}
                     className="flex h-10 w-[140px] items-center justify-center rounded-full border border-[#333] text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110]"
                   >
                     Continue
@@ -1694,7 +1657,7 @@ export default function EditProfilePage() {
             {setupStage === "password" && (
               <form onSubmit={handleSetupAccount} className="mt-5">
                 <p className="mb-4 text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
-                  {clerkUser?.primaryEmailAddress?.emailAddress || ""}
+                  {setupDisplayEmail}
                 </p>
                 <div className="mb-3">
                   <label className="mb-[5px] block text-[11px] font-medium tracking-[0.22px] text-[#333]">
@@ -1742,10 +1705,58 @@ export default function EditProfilePage() {
               </form>
             )}
 
+            {setupStage === "socialFinish" && (
+              <div className="mt-5">
+                <p className="text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
+                  {getSocialProviderLabel(setupSelectedSocial)}
+                </p>
+                <div className="mt-2 mb-4 flex justify-center text-[#333]">
+                  {getSocialProviderIcon(setupSelectedSocial)}
+                </div>
+                <p className="mb-4 text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
+                  {setupDisplayEmail}
+                </p>
+                {setupAccountError && (
+                  <p className="mb-3 text-center text-[11px] font-medium text-[#F14110]">
+                    *{setupAccountError}
+                  </p>
+                )}
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!clerkUser || !setupSelectedSocial) return;
+                      setSetupSocialLoading(setupSelectedSocial);
+                      setSetupAccountError("");
+                      try {
+                        const nextParams = new URLSearchParams(searchParams.toString());
+                        nextParams.delete("setupAccount");
+                        const nextQuery = nextParams.toString();
+                        const redirectTarget = nextQuery ? `/company-dashboard/edit?${nextQuery}` : "/company-dashboard/edit";
+                        await clerkUser.createExternalAccount({
+                          strategy: setupSelectedSocial,
+                          redirectUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectTarget)}`,
+                          oidcLoginHint: setupLoginEmail || undefined,
+                        });
+                      } catch (error) {
+                        const message = error instanceof Error ? error.message : "Unable to continue with this social account right now.";
+                        setSetupAccountError(message);
+                        setSetupSocialLoading(null);
+                      }
+                    }}
+                    disabled={Boolean(setupSocialLoading)}
+                    className="flex h-10 w-[140px] items-center justify-center rounded-full border border-[#333] text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {setupSocialLoading ? "Continuing..." : `Finish with ${getSocialProviderLabel(setupSelectedSocial)}`}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {setupStage === "verify" && (
               <div className="mt-5">
                 <p className="mb-4 text-center text-[11px] font-medium tracking-[0.22px] text-[#333]">
-                  {clerkUser?.primaryEmailAddress?.emailAddress || ""}
+                  {setupDisplayEmail}
                 </p>
                 <div className="mb-4">
                   <label className="mb-[5px] block text-[11px] font-medium tracking-[0.22px] text-[#333]">
@@ -1761,8 +1772,8 @@ export default function EditProfilePage() {
                     required
                   />
                   <p className="mt-2 text-[9px] leading-[14px] text-[#333]/60">
-                    {setupVerificationSending && !setupVerificationSent && !hasCompleteVerificationCode
-                      ? "Sending a verification code to your email..."
+                    {setupVerificationRequestSubmitted
+                      ? "A verification code has been sent to your email."
                       : "Enter the verification code sent to your email before registering your password."}
                   </p>
                 </div>
@@ -1782,8 +1793,6 @@ export default function EditProfilePage() {
                   >
                     {setupVerificationSubmitting
                       ? "Verifying..."
-                      : setupVerificationSending && !hasCompleteVerificationCode
-                      ? "Sending..."
                       : setupAccountSaving
                         ? "Registering..."
                         : "Verify Email"}

@@ -42,7 +42,7 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /const \[setupStage, setSetupStage\] = useState<"method" \| "socialEmail" \| "password" \| "verify">\("method"\);[\s\S]*const \[setupSelectedSocial, setSetupSelectedSocial\] = useState<OAuthStrategy \| null>\(null\);/,
+    /const \[setupStage, setSetupStage\] = useState<"method" \| "emailChoice" \| "verify" \| "password" \| "socialFinish">\("method"\);[\s\S]*const \[setupSelectedSocial, setSetupSelectedSocial\] = useState<OAuthStrategy \| null>\(null\);/,
     'expected the company setup popup to run as its own staged onboarding flow'
   );
 
@@ -60,86 +60,74 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /Continue with Google[\s\S]*Continue with Apple[\s\S]*Continue with Microsoft[\s\S]*Continue with \{clerkUser\?\.primaryEmailAddress\?\.emailAddress \|\| "this email"\}/,
-    'expected the initial company setup popup to offer the same social options plus a company-email continue action'
+    /Continue with Google[\s\S]*Continue with Apple[\s\S]*Continue with Microsoft[\s\S]*Continue with Email/,
+    'expected the initial company setup popup to offer the same social options plus a generic continue-with-email action'
   );
 
   assert.match(
     source,
-    /const setupStageQuery = searchParams\.get\("setupStage"\);[\s\S]*if \(setupStageQuery === "password"\) \{[\s\S]*setSetupStage\("password"\)/,
-    'expected company setup onboarding to resume at the password step after a social OAuth callback'
+    /const handleSetupSocialAuth = async \(strategy: OAuthStrategy\) => \{[\s\S]*setSetupSelectedSocial\(strategy\);[\s\S]*setSetupLoginEmail\(storedCompanyEmail\);[\s\S]*setSetupStage\("emailChoice"\);/,
+    'expected choosing a company social setup method to move into the shared login-email step'
   );
 
   assert.match(
     source,
-    /const handleSetupSocialAuth = async \(strategy: OAuthStrategy\) => \{[\s\S]*setSetupSelectedSocial\(strategy\);[\s\S]*setSetupStage\("socialEmail"\);/,
-    'expected choosing a company social setup method to continue into a social-email confirmation step before the password stage'
+    /Choose the login email for your company account before continuing\.[\s\S]*Pilih email login untuk akun perusahaan Anda sebelum melanjutkan\./,
+    'expected the rebuilt flow to choose the canonical company login email before verification'
   );
 
   assert.match(
     source,
-    /Confirm the email linked to your \{getSocialProviderLabel\(setupSelectedSocial\)\} account before continuing\.[\s\S]*handleSetupSocialEmailContinue/,
-    'expected the company social setup path to ask for email confirmation before continuing'
+    /await clerkUser\.createEmailAddress\(\{ email: enteredEmail \}\)[\s\S]*prepareVerification\(\{ strategy: "email_code" \}\)/,
+    'expected the chosen login email to be created if needed and verified by email code'
+  );
+
+  assert.match(
+    source,
+    /await syncSetupLoginEmail\(\);[\s\S]*if \(setupSelectedSocial\) \{[\s\S]*setSetupStage\("socialFinish"\);[\s\S]*\} else \{[\s\S]*setSetupStage\("password"\);/,
+    'expected email ownership confirmation to branch into social finish or password creation based on the chosen method'
+  );
+
+  assert.match(
+    source,
+    /fetch\("\/api\/company\/setup-login-email"/,
+    'expected the rebuilt flow to sync the chosen company login email through the dedicated server route'
+  );
+
+  assert.match(
+    source,
+    /Using a different email than \{storedCompanyEmail\} will set this new email as your login for your company\.[\s\S]*Menggunakan email yang berbeda dari \{storedCompanyEmail\} akan menetapkan email baru ini sebagai login Anda untuk perusahaan Anda\./,
+    'expected the login-email step to warn when the chosen company login email differs from the existing company email on file'
+  );
+
+  assert.match(
+    source,
+    /const storedCompanyEmail = company\?\.email \|\| primaryCompanyEmail;[\s\S]*setupDisplayEmail = setupLoginEmail \|\| storedCompanyEmail/,
+    'expected later setup stages to display the chosen company login email'
+  );
+
+  assert.match(
+    source,
+    /setupStage === "socialFinish"[\s\S]*Finish with \$\{getSocialProviderLabel\(setupSelectedSocial\)\}/,
+    'expected social setup to finish only after the chosen company login email has been verified'
+  );
+
+  assert.match(
+    source,
+    /await syncSetupLoginEmail\(setupPassword\);/,
+    'expected email-password setup to finalize against the chosen company login email'
   );
 
   assert.match(
     source,
     /getSocialProviderIcon\(setupSelectedSocial\)/,
-    'expected the social-email confirmation step to show the selected provider icon under the provider title'
+    'expected the rebuilt social flow to keep showing the selected provider icon in the popup'
   );
 
   assert.match(
     source,
-    /Using a different email than \{primaryCompanyEmail\} will set this new email as your login for your company\.[\s\S]*Menggunakan email yang berbeda dari \{primaryCompanyEmail\} akan menetapkan email baru ini sebagai login Anda untuk perusahaan Anda\./,
-    'expected the social-email confirmation step to warn in orange when a different email is entered'
-  );
-
-  assert.match(
-    source,
-    /if \(selectedSocial\) \{[\s\S]*await clerkUser\.createExternalAccount\(\{[\s\S]*strategy: selectedSocial,[\s\S]*redirectUrl: `\/sso-callback\?redirect_url=\$\{encodeURIComponent\(redirectTarget\)\}`,[\s\S]*oidcLoginHint: setupSocialEmail \|\| clerkUser\.primaryEmailAddress\?\.emailAddress \|\| undefined/,
-    'expected the selected company social account to be linked only after password and email verification complete'
-  );
-
-  assert.match(
-    source,
-    /setupStage === "password"[\s\S]*Password[\s\S]*Confirm Password/,
-    'expected the company setup popup to move to a dedicated password step after the initial method choice'
-  );
-
-  assert.match(
-    source,
-    /const finalizeSetup = useReverification\([\s\S]*clerkUser\.updatePassword\(\{ newPassword \}\)[\s\S]*onNeedsReverification:[\s\S]*setSetupStage\("verify"\)/,
-    'expected the setup-account flow to use Clerk reverification and move into the custom verify step when sensitive actions need extra checks'
-  );
-
-  assert.match(
-    source,
-    /onNeedsReverification:[\s\S]*setSetupAccountSaving\(false\)/,
-    'expected the setup flow to release the initial saving state once Clerk moves into the verify-code step'
-  );
-
-  assert.match(
-    source,
-    /beginEmailVerification[\s\S]*session\.startVerification\(\{ level: "first_factor" \}\)[\s\S]*prepareFirstFactorVerification\([\s\S]*strategy: "email_code"/,
-    'expected the setup-account flow to explicitly send an email verification code before retrying the protected action'
-  );
-
-  assert.match(
-    source,
-    /attemptFirstFactorVerification\([\s\S]*strategy: "email_code"[\s\S]*await reverificationState\.complete\(\)/,
-    'expected the setup-account flow to verify the emailed code and then ask Clerk to retry the protected action'
-  );
-
-  assert.match(
-    source,
-    /const hasCompleteVerificationCode = setupVerificationCode\.trim\(\)\.length === 6;/,
-    'expected the verify step to treat a full 6-digit code as ready to submit'
-  );
-
-  assert.match(
-    source,
-    /disabled=\{setupAccountSaving \|\| setupVerificationSubmitting \|\| !hasCompleteVerificationCode\}/,
-    'expected the verify button to become clickable once a full code is entered instead of staying blocked by the send state'
+    /A verification code has been sent to your email\.[\s\S]*Verify Email/,
+    'expected the verify step to show a sent-code note and keep Verify Email available once the code is entered'
   );
 
   assert.match(
