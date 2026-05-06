@@ -14,11 +14,44 @@ import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 
 const DASHBOARD_CATEGORY_PAGE_SIZE = 4;
+const savedListingSortOptions = [
+  { value: "az", label: "Sort by: A > Z" },
+  { value: "recent", label: "Sort by: Recent" },
+  { value: "latest", label: "Sort by: Latest" },
+] as const;
+
+type SavedListingSort = typeof savedListingSortOptions[number]["value"];
+
+type SavedListingCard = {
+  id: string;
+  name: string;
+  description: string;
+  rating: number;
+  isPro: boolean;
+  isSaved: boolean;
+  imageUrl?: string;
+  logoId?: string;
+  savedAt: number;
+  createdAt: number;
+};
+
+function sortSavedListings(listings: SavedListingCard[], sortBy: string) {
+  return [...listings].sort((a, b) => {
+    if (sortBy === "az") {
+      return a.name.localeCompare(b.name);
+    }
+
+    if (sortBy === "recent") {
+      return b.createdAt - a.createdAt;
+    }
+
+    return b.savedAt - a.savedAt;
+  });
+}
 
 export default function DashboardPage() {
-  const [sortByCategory, setSortByCategory] = useState<Record<string, string>>({});
+  const [sortByCategory, setSortByCategory] = useState<Record<string, SavedListingSort>>({});
   const [sortDropdownOpen, setSortDropdownOpen] = useState<string | null>(null);
-  const [categoryPages, setCategoryPages] = useState<Record<string, number>>({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const router = useRouter();
@@ -93,6 +126,8 @@ export default function DashboardPage() {
         isSaved: true,
         imageUrl: s.company!.imageUrl,
         logoId: s.company!.logoId,
+        savedAt: s.savedAt,
+        createdAt: s.company!.createdAt,
       })),
   }));
 
@@ -144,12 +179,8 @@ export default function DashboardPage() {
         {/* Bookmark sections — dynamic per category */}
         {visibleCategories.map((cat) => {
           const sortVal = sortByCategory[cat.id] ?? "latest";
-          const totalPages = Math.max(1, Math.ceil(cat.listings.length / DASHBOARD_CATEGORY_PAGE_SIZE));
-          const currentPage = Math.min(categoryPages[cat.id] ?? 1, totalPages);
-          const pageStart = (currentPage - 1) * DASHBOARD_CATEGORY_PAGE_SIZE;
-          const desktopListings = cat.listings.slice(pageStart, pageStart + DASHBOARD_CATEGORY_PAGE_SIZE);
-          const hasPreviousPage = currentPage > 1;
-          const hasNextPage = currentPage < totalPages;
+          const sortedListings = sortSavedListings(cat.listings, sortVal);
+          const desktopListings = sortedListings.slice(0, DASHBOARD_CATEGORY_PAGE_SIZE);
 
           return (
             <section key={cat.id} className="mb-10">
@@ -165,7 +196,7 @@ export default function DashboardPage() {
                         onClick={() => setSortDropdownOpen(sortDropdownOpen === cat.id ? null : cat.id)}
                         className="flex items-center gap-2 text-right text-[11px] text-[#333]/70 tracking-[0.22px]"
                       >
-                        Sort by: <span className="text-[#f14110] font-medium">{sortVal === 'latest' ? 'Latest' : 'Favorite'}</span>
+                        Sort by: <span className="text-[#f14110] font-medium">{sortVal === 'az' ? 'A > Z' : sortVal === 'recent' ? 'Recent' : 'Latest'}</span>
                         <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
@@ -174,18 +205,15 @@ export default function DashboardPage() {
                         <>
                           <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
                           <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
-                            <button
-                              onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: 'latest' })); setSortDropdownOpen(null); }}
-                              className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === 'latest' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                            >
-                              Latest
-                            </button>
-                            <button
-                              onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: 'favorite' })); setSortDropdownOpen(null); }}
-                              className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === 'favorite' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                            >
-                              Favorite
-                            </button>
+                            {savedListingSortOptions.map((option) => (
+                              <button
+                                key={option.value}
+                                onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: option.value })); setSortDropdownOpen(null); }}
+                                className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === option.value ? 'text-[#f14110]' : 'text-[#333]'}`}
+                              >
+                                {option.label.replace("Sort by: ", "")}
+                              </button>
+                            ))}
                           </div>
                         </>
                       )}
@@ -198,7 +226,7 @@ export default function DashboardPage() {
                 <>
                   <div className="sm:hidden overflow-x-auto overscroll-x-contain scrollbar-hide -mx-4 px-4">
                     <div className="flex gap-5 pb-2">
-                      {cat.listings.map((listing) => (
+                      {sortedListings.map((listing) => (
                         <div key={listing.id} className="flex-shrink-0">
                           <ListingCard {...listing} proEnabled={proEnabled} categoryContext={cat.id} />
                         </div>
@@ -212,23 +240,7 @@ export default function DashboardPage() {
                     ))}
                   </div>
                   {cat.listings.length > 4 && (
-                    <div className="flex items-center justify-end sm:justify-between mt-4">
-                      <div className="hidden sm:flex items-center gap-6">
-                        <button
-                          disabled={!hasPreviousPage}
-                          onClick={() => setCategoryPages((prev) => ({ ...prev, [cat.id]: Math.max(1, currentPage - 1) }))}
-                          className={`text-[11px] tracking-[0.22px] ${hasPreviousPage ? 'text-[#333] hover:text-[#f14110]' : 'text-[#333]/35 cursor-not-allowed'}`}
-                        >
-                          ← PREVIOUS
-                        </button>
-                        <button
-                          disabled={!hasNextPage}
-                          onClick={() => setCategoryPages((prev) => ({ ...prev, [cat.id]: Math.min(totalPages, currentPage + 1) }))}
-                          className={`text-[11px] font-medium tracking-[0.22px] ${hasNextPage ? 'text-[#333] hover:text-[#f14110]' : 'text-[#333]/35 cursor-not-allowed'}`}
-                        >
-                          NEXT →
-                        </button>
-                      </div>
+                    <div className="hidden sm:flex items-center justify-end mt-4">
                       <Link
                         href={`/dashboard/${cat.id}`}
                         className="h-[32px] px-5 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"

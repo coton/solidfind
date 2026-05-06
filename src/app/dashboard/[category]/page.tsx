@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
@@ -24,6 +24,44 @@ const categoryLabels: Record<string, string> = {
 };
 
 const ITEMS_PER_PAGE = 20;
+const savedListingSortOptions = [
+  { value: "az", label: "Sort by: A > Z" },
+  { value: "recent", label: "Sort by: Recent" },
+  { value: "latest", label: "Sort by: Latest" },
+];
+
+type SavedListingCard = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  rating: number;
+  reviewCount: number;
+  projects: number;
+  team: number;
+  address: string;
+  isPro: boolean;
+  isSaved: boolean;
+  imageUrl?: string;
+  logoId?: string;
+  projectImageIds: string[];
+  savedAt: number;
+  createdAt: number;
+};
+
+function sortSavedListings(listings: SavedListingCard[], sortBy: string) {
+  return [...listings].sort((a, b) => {
+    if (sortBy === "az") {
+      return a.name.localeCompare(b.name);
+    }
+
+    if (sortBy === "recent") {
+      return b.createdAt - a.createdAt;
+    }
+
+    return b.savedAt - a.savedAt;
+  });
+}
 
 export default function DashboardCategoryPage() {
   const params = useParams();
@@ -92,12 +130,21 @@ export default function DashboardCategoryPage() {
       imageUrl: s.company!.imageUrl,
       logoId: s.company!.logoId,
       projectImageIds: s.company!.projectImageIds ?? [],
+      savedAt: s.savedAt,
+      createdAt: s.company!.createdAt,
     }));
 
-  const totalCount = listings.length;
+  const sortedListings = sortSavedListings(listings, sortBy);
+  const totalCount = sortedListings.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedListings = listings.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedListings = sortedListings.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="min-h-screen bg-[#ececec] flex flex-col">
@@ -124,7 +171,7 @@ export default function DashboardCategoryPage() {
             {totalCount.toString().padStart(2, "0")} Listings Saved
           </span>
 
-          <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />
+          <SortDropdown value={sortBy} onChange={handleSortChange} reviewsEnabled={reviewsEnabled} options={savedListingSortOptions} />
         </div>
 
         {/* Featured Articles */}
@@ -188,7 +235,7 @@ export default function DashboardCategoryPage() {
             {totalPages > 1 && (
               <div className="flex justify-start mt-8 mb-8">
                 <Pagination
-                  currentPage={currentPage}
+                  currentPage={safeCurrentPage}
                   totalPages={totalPages}
                   onPageChange={setCurrentPage}
                 />

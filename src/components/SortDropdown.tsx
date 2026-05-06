@@ -16,12 +16,13 @@ interface SortDropdownProps {
   value: string;
   onChange: (value: string) => void;
   reviewsEnabled?: boolean;
+  options?: Array<{ value: string; label: string; requiresReviews?: boolean }>;
 }
 
-export function SortDropdown({ value, onChange, reviewsEnabled = false }: SortDropdownProps) {
+export function SortDropdown({ value, onChange, reviewsEnabled = false, options = allSortOptions }: SortDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const sortOptions = allSortOptions.filter((opt) => !opt.requiresReviews || reviewsEnabled);
+  const sortOptions = options.filter((opt) => !opt.requiresReviews || reviewsEnabled);
   const selectedOption = sortOptions.find((opt) => opt.value === value) || sortOptions[0];
 
   useEffect(() => {

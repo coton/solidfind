@@ -27,7 +27,7 @@ test('auth modal portals to the document body so footer account login overlays t
   );
 });
 
-test('individual dashboard pages saved listing sections on desktop', () => {
+test('individual dashboard shows the latest four bookmarks on desktop and uses see-all for overflow', () => {
   const source = readProjectFile('src/app/dashboard/page.tsx');
 
   assert.match(
@@ -38,14 +38,26 @@ test('individual dashboard pages saved listing sections on desktop', () => {
 
   assert.match(
     source,
-    /const desktopListings = cat\.listings\.slice\(pageStart, pageStart \+ DASHBOARD_CATEGORY_PAGE_SIZE\);/,
-    'expected the desktop grid to show the current saved-listings page instead of always the first four'
+    /return b\.savedAt - a\.savedAt;/,
+    'expected the default latest sort to use bookmark chronology'
   );
 
   assert.match(
     source,
-    /setCategoryPages\(\(prev\) => \(\{ \.\.\.prev, \[cat\.id\]: Math\.min\(totalPages, currentPage \+ 1\) \}\)\)/,
-    'expected the Next button to advance to the remaining saved listings'
+    /const desktopListings = sortedListings\.slice\(0, DASHBOARD_CATEGORY_PAGE_SIZE\);/,
+    'expected the desktop overview grid to show only the first four sorted saved listings'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /NEXT →|← PREVIOUS|setCategoryPages/,
+    'expected the overview dashboard to remove next/previous paging controls'
+  );
+
+  assert.match(
+    source,
+    /<div className="hidden sm:flex items-center justify-end mt-4">[\s\S]*See all/,
+    'expected the see-all button to remain desktop-only when a category has more than four bookmarks'
   );
 });
 
@@ -75,5 +87,35 @@ test('individual dashboard keeps saved listing metadata under the category title
     categorySource,
     /sm:hidden overflow-x-auto overscroll-x-contain scrollbar-hide -mx-4 px-4/,
     'expected category dashboard mobile rows to use contained horizontal scrolling'
+  );
+});
+
+test('individual dashboard saved-listing sorts are A to Z, Recent, and Latest', () => {
+  const source = readProjectFile('src/app/dashboard/page.tsx');
+  const categorySource = readProjectFile('src/app/dashboard/[category]/page.tsx');
+  const dropdownSource = readProjectFile('src/components/SortDropdown.tsx');
+
+  assert.match(
+    source,
+    /Sort by: A > Z[\s\S]*Sort by: Recent[\s\S]*Sort by: Latest/,
+    'expected the overview dashboard to offer the requested saved-listing sort options'
+  );
+
+  assert.match(
+    categorySource,
+    /Sort by: A > Z[\s\S]*Sort by: Recent[\s\S]*Sort by: Latest/,
+    'expected the category dashboard to offer the requested saved-listing sort options'
+  );
+
+  assert.match(
+    dropdownSource,
+    /options = allSortOptions/,
+    'expected SortDropdown to support dashboard-specific options without changing homepage defaults'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /Favorite/,
+    'expected the overview dashboard saved-listing sort UI to remove Favorite'
   );
 });
