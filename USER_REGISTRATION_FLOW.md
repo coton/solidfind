@@ -29,12 +29,13 @@ Both paths converge on the same post-auth pipeline.
 
 - Checks `user.publicMetadata.accountType`
 - If metadata exists (**returning user**): redirects immediately to the appropriate dashboard
-- If metadata does not exist (**new user**): shows `AccountTypeSelectionCard`
+- If metadata does not exist (**new user**) and the OAuth flow has a pending Company or Individual choice: persists that choice and redirects without asking again
+- If no pending choice is available: shows `AccountTypeSelectionCard`
 
 ### 3. `AccountTypeSelectionCard` (`src/components/AccountTypeSelectionCard.tsx`)
 
 - Greets the user by name/email from Clerk
-- Shows Company/Individual toggle (pre-selected from `sessionStorage`)
+- Shows Company/Individual toggle (pre-selected from `sessionStorage`) only when automatic OAuth completion is not possible
 - If **Company**: requires company name input
 - On submit: calls `persistAccountType`
 
@@ -98,7 +99,7 @@ On submit (`handleSignUp`):
     - `POST`s to `/api/set-account-type`
     - Closes modal
   - Redirects based on account type:
-    - **Company** → `/company-dashboard`
+    - **Company** → `/register-business`
     - **Individual** → `/dashboard`
 - Expired codes: `Request a new code` button resends via `signUp.prepareEmailAddressVerification`
 

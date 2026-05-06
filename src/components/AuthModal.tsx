@@ -338,7 +338,7 @@ export function AuthModal({
 
         if (onAuthSuccess) onAuthSuccess(accountType);
         onClose();
-        router.push(accountType === "company" ? "/company-dashboard" : "/dashboard");
+        router.push(accountType === "company" ? "/register-business" : "/dashboard");
       }
     } catch (err: unknown) {
       setError(
