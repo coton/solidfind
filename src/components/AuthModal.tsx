@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import { useSignIn, useSignUp } from "@clerk/nextjs";
 import { useConvex, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -163,6 +164,7 @@ export function AuthModal({
   const [pendingVerification, setPendingVerification] = useState(false);
   const [pendingReset, setPendingReset] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const portalElement = typeof document !== "undefined" ? document.body : null;
 
   // Sync when props change (e.g. re-opening with different defaults)
   useEffect(() => { setMode(initialMode); }, [initialMode]);
@@ -458,92 +460,96 @@ export function AuthModal({
   };
 
   // ── Shared modal shell ──
-  const modalShell = (content: React.ReactNode) => (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 2000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(51, 51, 51, 0.85)',
-      }}
-      onClick={onClose}
-    >
+  const modalShell = (content: React.ReactNode) => {
+    const shell = (
       <div
         style={{
-          position: 'relative',
+          position: 'fixed',
+          inset: 0,
+          zIndex: 2000,
           display: 'flex',
-          width: '100%',
-          maxWidth: '500px',
-          height: '500px',
-          borderRadius: '6px',
-          overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-          margin: '0 16px',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* ── LEFT: Ad space — hidden on mobile ── */}
-        <div className="hidden sm:flex" style={{
-          width: '150px',
-          flexShrink: 0,
-          backgroundColor: '#D9D9D9',
           alignItems: 'center',
           justifyContent: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
-          {verticalAdMedia.url ? (
-            verticalAdMedia.type === 'video' ? (
-              <video src={verticalAdMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
+          backgroundColor: 'rgba(51, 51, 51, 0.85)',
+        }}
+        onClick={onClose}
+      >
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            width: '100%',
+            maxWidth: '500px',
+            height: '500px',
+            borderRadius: '6px',
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            margin: '0 16px',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* ── LEFT: Ad space — hidden on mobile ── */}
+          <div className="hidden sm:flex" style={{
+            width: '150px',
+            flexShrink: 0,
+            backgroundColor: '#D9D9D9',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            {verticalAdMedia.url ? (
+              verticalAdMedia.type === 'video' ? (
+                <video src={verticalAdMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
+              ) : (
+                <Image
+                  src={verticalAdMedia.url}
+                  alt="Advertisement"
+                  fill
+                  className="object-cover"
+                  unoptimized={verticalAdMedia.url.startsWith('data:')}
+                />
+              )
+            ) : verticalAdState.isLoading ? (
+              <div className="w-full h-full bg-[#e4e4e4]" />
             ) : (
-              <Image
-                src={verticalAdMedia.url}
-                alt="Advertisement"
-                fill
-                className="object-cover"
-                unoptimized={verticalAdMedia.url.startsWith('data:')}
-              />
-            )
-          ) : verticalAdState.isLoading ? (
-            <div className="w-full h-full bg-[#e4e4e4]" />
-          ) : (
-            <span style={{ color: '#999', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
-              AD SPACE
-            </span>
-          )}
-        </div>
+              <span style={{ color: '#999', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
+                AD SPACE
+              </span>
+            )}
+          </div>
 
-        {/* ── RIGHT: Content ── */}
-        <div style={{
-          flex: 1,
-          backgroundColor: '#F8F8F8',
-          padding: '20px 28px',
-          position: 'relative',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-        }}>
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            onMouseEnter={() => setCloseHovered(true)}
-            onMouseLeave={() => setCloseHovered(false)}
-            style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: closeHovered ? '#F14110' : '#999', lineHeight: 1, transition: 'color 0.15s ease', zIndex: 1 }}
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          </button>
+          {/* ── RIGHT: Content ── */}
+          <div style={{
+            flex: 1,
+            backgroundColor: '#F8F8F8',
+            padding: '20px 28px',
+            position: 'relative',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}>
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              onMouseEnter={() => setCloseHovered(true)}
+              onMouseLeave={() => setCloseHovered(false)}
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: closeHovered ? '#F14110' : '#999', lineHeight: 1, transition: 'color 0.15s ease', zIndex: 1 }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
 
           {content}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+
+    return portalElement ? createPortal(shell, portalElement) : shell;
+  };
 
   // ── Email verification view ──
   if (pendingVerification) {

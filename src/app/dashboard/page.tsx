@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useUser, SignOutButton, useClerk } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
@@ -13,11 +13,13 @@ import { ListingCard } from "@/components/cards";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 
+const DASHBOARD_CATEGORY_PAGE_SIZE = 4;
+
 export default function DashboardPage() {
   const [sortByCategory, setSortByCategory] = useState<Record<string, string>>({});
   const [sortDropdownOpen, setSortDropdownOpen] = useState<string | null>(null);
+  const [categoryPages, setCategoryPages] = useState<Record<string, number>>({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [redirected, setRedirected] = useState(false);
 
   const router = useRouter();
   const { user: clerkUser } = useUser();
@@ -31,13 +33,6 @@ export default function DashboardPage() {
     api.users.getCurrentUser,
     clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
   );
-
-  // Redirect company users to company dashboard based on accountType, not DB company record
-  if (currentUser && currentUser.accountType === "company" && !redirected) {
-    setRedirected(true);
-    router.push("/company-dashboard");
-    return null;
-  }
 
   const handleSignOut = async () => {
     await signOut({ redirectUrl: "/" });
@@ -62,6 +57,17 @@ export default function DashboardPage() {
 
   // Get visible page categories from admin config
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
+
+  useEffect(() => {
+    if (currentUser?.accountType === "company") {
+      router.push("/company-dashboard");
+    }
+  }, [currentUser?.accountType, router]);
+
+  // Redirect company users to company dashboard based on accountType, not DB company record
+  if (currentUser?.accountType === "company") {
+    return null;
+  }
 
   // All category definitions — fallback while loading
   const fallbackCategories = [
@@ -138,63 +144,88 @@ export default function DashboardPage() {
         {/* Bookmark sections — dynamic per category */}
         {visibleCategories.map((cat) => {
           const sortVal = sortByCategory[cat.id] ?? "latest";
+          const totalPages = Math.max(1, Math.ceil(cat.listings.length / DASHBOARD_CATEGORY_PAGE_SIZE));
+          const currentPage = Math.min(categoryPages[cat.id] ?? 1, totalPages);
+          const pageStart = (currentPage - 1) * DASHBOARD_CATEGORY_PAGE_SIZE;
+          const desktopListings = cat.listings.slice(pageStart, pageStart + DASHBOARD_CATEGORY_PAGE_SIZE);
+          const hasPreviousPage = currentPage > 1;
+          const hasNextPage = currentPage < totalPages;
+
           return (
             <section key={cat.id} className="mb-10">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-baseline gap-4">
-                  <h2 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">{cat.label}</h2>
+              <div className="mb-4">
+                <h2 className="mb-2 text-[24px] font-bold text-[#333] tracking-[0.48px]">{cat.label}</h2>
+                <div className="flex items-center justify-between gap-4">
                   <span className={`text-[11px] tracking-[0.22px] ${cat.listings.length > 0 ? 'text-[#f14110]' : 'text-[#333]/50'}`}>
                     {cat.listings.length.toString().padStart(2, '0')} Listings Saved
                   </span>
+                  {cat.listings.length > 0 && (
+                    <div className="relative">
+                      <button
+                        onClick={() => setSortDropdownOpen(sortDropdownOpen === cat.id ? null : cat.id)}
+                        className="flex items-center gap-2 text-right text-[11px] text-[#333]/70 tracking-[0.22px]"
+                      >
+                        Sort by: <span className="text-[#f14110] font-medium">{sortVal === 'latest' ? 'Latest' : 'Favorite'}</span>
+                        <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                      {sortDropdownOpen === cat.id && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
+                          <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
+                            <button
+                              onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: 'latest' })); setSortDropdownOpen(null); }}
+                              className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === 'latest' ? 'text-[#f14110]' : 'text-[#333]'}`}
+                            >
+                              Latest
+                            </button>
+                            <button
+                              onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: 'favorite' })); setSortDropdownOpen(null); }}
+                              className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === 'favorite' ? 'text-[#f14110]' : 'text-[#333]'}`}
+                            >
+                              Favorite
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
-                {cat.listings.length > 0 && (
-                  <div className="relative">
-                    <button
-                      onClick={() => setSortDropdownOpen(sortDropdownOpen === cat.id ? null : cat.id)}
-                      className="flex items-center gap-2 text-[11px] text-[#333]/70 tracking-[0.22px]"
-                    >
-                      Sort by: <span className="text-[#f14110] font-medium">{sortVal === 'latest' ? 'Latest' : 'Favorite'}</span>
-                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                    {sortDropdownOpen === cat.id && (
-                      <>
-                        <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
-                        <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
-                          <button
-                            onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: 'latest' })); setSortDropdownOpen(null); }}
-                            className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === 'latest' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                          >
-                            Latest
-                          </button>
-                          <button
-                            onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: 'favorite' })); setSortDropdownOpen(null); }}
-                            className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === 'favorite' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                          >
-                            Favorite
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
               </div>
 
               {cat.listings.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
-                    {cat.listings.slice(0, 4).map((listing) => (
+                  <div className="sm:hidden overflow-x-auto overscroll-x-contain scrollbar-hide -mx-4 px-4">
+                    <div className="flex gap-5 pb-2">
+                      {cat.listings.map((listing) => (
+                        <div key={listing.id} className="flex-shrink-0">
+                          <ListingCard {...listing} proEnabled={proEnabled} categoryContext={cat.id} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="hidden sm:grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
+                    {desktopListings.map((listing) => (
                       <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} categoryContext={cat.id} />
                     ))}
                   </div>
                   {cat.listings.length > 4 && (
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center gap-6">
-                        <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
+                    <div className="flex items-center justify-end sm:justify-between mt-4">
+                      <div className="hidden sm:flex items-center gap-6">
+                        <button
+                          disabled={!hasPreviousPage}
+                          onClick={() => setCategoryPages((prev) => ({ ...prev, [cat.id]: Math.max(1, currentPage - 1) }))}
+                          className={`text-[11px] tracking-[0.22px] ${hasPreviousPage ? 'text-[#333] hover:text-[#f14110]' : 'text-[#333]/35 cursor-not-allowed'}`}
+                        >
                           ← PREVIOUS
                         </button>
-                        <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
+                        <button
+                          disabled={!hasNextPage}
+                          onClick={() => setCategoryPages((prev) => ({ ...prev, [cat.id]: Math.min(totalPages, currentPage + 1) }))}
+                          className={`text-[11px] font-medium tracking-[0.22px] ${hasNextPage ? 'text-[#333] hover:text-[#f14110]' : 'text-[#333]/35 cursor-not-allowed'}`}
+                        >
                           NEXT →
                         </button>
                       </div>

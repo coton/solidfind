@@ -104,15 +104,22 @@ export default function DashboardCategoryPage() {
       <Header />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
-        {/* Top bar: Back | Count | Sort */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Back */}
+        <div className="mb-6">
           <Link
             href="/dashboard"
             className="text-[11px] text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
           >
             ← BACK
           </Link>
+        </div>
 
+        {/* Category Title */}
+        <h1 className="text-[24px] font-bold text-[#333] tracking-[0.48px] mb-2">
+          {categoryLabel}
+        </h1>
+
+        <div className="mb-6 flex items-center justify-between gap-4">
           <span className={`text-[11px] tracking-[0.22px] font-medium ${totalCount > 0 ? "text-[#f14110]" : "text-[#333]/50"}`}>
             {totalCount.toString().padStart(2, "0")} Listings Saved
           </span>
@@ -120,28 +127,51 @@ export default function DashboardCategoryPage() {
           <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />
         </div>
 
-        {/* Category Title */}
-        <h1 className="text-[24px] font-bold text-[#333] tracking-[0.48px] mb-6">
-          {categoryLabel}
-        </h1>
-
         {/* Featured Articles */}
         {visibleArticles && visibleArticles.length > 0 && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8" style={{ gridTemplateColumns: "repeat(4, 210px)" }}>
-            {visibleArticles.map((article) => (
-              <FeaturedCard
-                key={article._id}
-                article={article}
-                fromCategory={category}
-              />
-            ))}
-          </div>
+          <>
+            <div className="sm:hidden mb-8 overflow-x-auto overscroll-x-contain scrollbar-hide -mx-4 px-4">
+              <div className="flex gap-5 pb-2">
+                {visibleArticles.map((article) => (
+                  <div key={article._id} className="flex-shrink-0">
+                    <FeaturedCard article={article} fromCategory={category} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="hidden sm:grid grid-cols-4 gap-5 mb-8" style={{ gridTemplateColumns: "repeat(4, 210px)" }}>
+              {visibleArticles.map((article) => (
+                <FeaturedCard
+                  key={article._id}
+                  article={article}
+                  fromCategory={category}
+                />
+              ))}
+            </div>
+          </>
         )}
 
         {/* Grid */}
         {paginatedListings.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5" style={{ gridTemplateColumns: "repeat(4, 210px)" }}>
+            <div className="sm:hidden overflow-x-auto overscroll-x-contain scrollbar-hide -mx-4 px-4">
+              <div className="flex gap-5 pb-2">
+                {paginatedListings.map((listing) => (
+                  <div key={listing.id} className="flex-shrink-0">
+                    <ListingCard
+                      {...listing}
+                      proEnabled={proEnabled}
+                      reviewsEnabled={reviewsEnabled}
+                      categoryContext={category}
+                      onBookmark={() => handleBookmark(listing.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="hidden sm:grid grid-cols-4 gap-5" style={{ gridTemplateColumns: "repeat(4, 210px)" }}>
               {paginatedListings.map((listing) => (
                 <ListingCard
                   key={listing.id}
