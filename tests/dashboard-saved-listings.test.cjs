@@ -27,7 +27,7 @@ test('auth modal portals to the document body so footer account login overlays t
   );
 });
 
-test('individual dashboard shows the latest four bookmarks on desktop and uses see-all for overflow', () => {
+test('individual dashboard shows the most recent four bookmarks on desktop and uses see-all for overflow', () => {
   const source = readProjectFile('src/app/dashboard/page.tsx');
 
   assert.match(
@@ -39,7 +39,7 @@ test('individual dashboard shows the latest four bookmarks on desktop and uses s
   assert.match(
     source,
     /return b\.savedAt - a\.savedAt;/,
-    'expected the default latest sort to use bookmark chronology'
+    'expected the default recent sort to use bookmark chronology'
   );
 
   assert.match(
@@ -90,20 +90,20 @@ test('individual dashboard keeps saved listing metadata under the category title
   );
 });
 
-test('individual dashboard saved-listing sorts are A to Z, Recent, and Latest', () => {
+test('individual dashboard saved-listing sorts are A to Z and Recent only', () => {
   const source = readProjectFile('src/app/dashboard/page.tsx');
   const categorySource = readProjectFile('src/app/dashboard/[category]/page.tsx');
   const dropdownSource = readProjectFile('src/components/SortDropdown.tsx');
 
   assert.match(
     source,
-    /Sort by: A > Z[\s\S]*Sort by: Recent[\s\S]*Sort by: Latest/,
+    /Sort by: A > Z[\s\S]*Sort by: Recent/,
     'expected the overview dashboard to offer the requested saved-listing sort options'
   );
 
   assert.match(
     categorySource,
-    /Sort by: A > Z[\s\S]*Sort by: Recent[\s\S]*Sort by: Latest/,
+    /Sort by: A > Z[\s\S]*Sort by: Recent/,
     'expected the category dashboard to offer the requested saved-listing sort options'
   );
 
@@ -115,7 +115,23 @@ test('individual dashboard saved-listing sorts are A to Z, Recent, and Latest', 
 
   assert.doesNotMatch(
     source,
-    /Favorite/,
-    'expected the overview dashboard saved-listing sort UI to remove Favorite'
+    /Favorite|Sort by: Latest/,
+    'expected the overview dashboard saved-listing sort UI to remove Favorite and Latest'
+  );
+
+  assert.doesNotMatch(
+    categorySource,
+    /Favorite|Sort by: Latest/,
+    'expected the category dashboard saved-listing sort UI to remove Favorite and Latest'
+  );
+});
+
+test('individual dashboard intro copy spans the mobile content width', () => {
+  const source = readProjectFile('src/app/dashboard/page.tsx');
+
+  assert.match(
+    source,
+    /<div className="flex items-start justify-between gap-4">[\s\S]*\{user\.email\}[\s\S]*<\/div>\s*<p className="font-bam text-\[10px\][^"]*w-full sm:max-w-\[440px\]"/,
+    'expected intro copy to live below the name/email row and use full mobile width'
   );
 });

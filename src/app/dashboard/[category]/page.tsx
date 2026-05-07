@@ -27,7 +27,6 @@ const ITEMS_PER_PAGE = 20;
 const savedListingSortOptions = [
   { value: "az", label: "Sort by: A > Z" },
   { value: "recent", label: "Sort by: Recent" },
-  { value: "latest", label: "Sort by: Latest" },
 ];
 
 type SavedListingCard = {
@@ -46,17 +45,12 @@ type SavedListingCard = {
   logoId?: string;
   projectImageIds: string[];
   savedAt: number;
-  createdAt: number;
 };
 
 function sortSavedListings(listings: SavedListingCard[], sortBy: string) {
   return [...listings].sort((a, b) => {
     if (sortBy === "az") {
       return a.name.localeCompare(b.name);
-    }
-
-    if (sortBy === "recent") {
-      return b.createdAt - a.createdAt;
     }
 
     return b.savedAt - a.savedAt;
@@ -70,7 +64,7 @@ export default function DashboardCategoryPage() {
   const categoryLabel = categoryLabels[category] || category.toUpperCase();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState("latest");
+  const [sortBy, setSortBy] = useState("recent");
 
   const { user: clerkUser } = useUser();
   const proEnabled = useProEnabled();
@@ -131,7 +125,6 @@ export default function DashboardCategoryPage() {
       logoId: s.company!.logoId,
       projectImageIds: s.company!.projectImageIds ?? [],
       savedAt: s.savedAt,
-      createdAt: s.company!.createdAt,
     }));
 
   const sortedListings = sortSavedListings(listings, sortBy);

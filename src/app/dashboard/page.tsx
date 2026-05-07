@@ -17,7 +17,6 @@ const DASHBOARD_CATEGORY_PAGE_SIZE = 4;
 const savedListingSortOptions = [
   { value: "az", label: "Sort by: A > Z" },
   { value: "recent", label: "Sort by: Recent" },
-  { value: "latest", label: "Sort by: Latest" },
 ] as const;
 
 type SavedListingSort = typeof savedListingSortOptions[number]["value"];
@@ -32,17 +31,12 @@ type SavedListingCard = {
   imageUrl?: string;
   logoId?: string;
   savedAt: number;
-  createdAt: number;
 };
 
 function sortSavedListings(listings: SavedListingCard[], sortBy: string) {
   return [...listings].sort((a, b) => {
     if (sortBy === "az") {
       return a.name.localeCompare(b.name);
-    }
-
-    if (sortBy === "recent") {
-      return b.createdAt - a.createdAt;
     }
 
     return b.savedAt - a.savedAt;
@@ -127,7 +121,6 @@ export default function DashboardPage() {
         imageUrl: s.company!.imageUrl,
         logoId: s.company!.logoId,
         savedAt: s.savedAt,
-        createdAt: s.company!.createdAt,
       })),
   }));
 
@@ -140,28 +133,31 @@ export default function DashboardPage() {
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         {/* User Info Section */}
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
-            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">{user.name}</h1>
-            <p className="font-bam text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 max-w-full max-w-[440px]">
-              Find your list of saved profiles here. Add-remove profiles by clicking bookmark icon.
-              <br />
-              Temukan daftar profil yang Anda simpan di sini. Tambah-hapus profil dengan mengklik ikon bookmark.
-            </p>
+        <div className="mb-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
+              <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">{user.name}</h1>
+            </div>
+
+            <div className="text-right">
+              <p className="text-[11px] text-[#333] tracking-[0.22px] mb-1">{user.email}</p>
+              {reviewsEnabled && (
+                <Link
+                  href="/reviews"
+                  className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center justify-center"
+                >
+                  Your testimonials
+                </Link>
+              )}
+            </div>
           </div>
 
-          <div className="text-right">
-            <p className="text-[11px] text-[#333] tracking-[0.22px] mb-1">{user.email}</p>
-            {reviewsEnabled && (
-              <Link
-                href="/reviews"
-                className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center justify-center"
-              >
-                Your testimonials
-              </Link>
-            )}
-          </div>
+          <p className="font-bam text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 w-full sm:max-w-[440px]">
+            Find your list of saved profiles here. Add-remove profiles by clicking bookmark icon.
+            <br />
+            Temukan daftar profil yang Anda simpan di sini. Tambah-hapus profil dengan mengklik ikon bookmark.
+          </p>
         </div>
 
         {/* Banner Image */}
@@ -178,7 +174,7 @@ export default function DashboardPage() {
 
         {/* Bookmark sections — dynamic per category */}
         {visibleCategories.map((cat) => {
-          const sortVal = sortByCategory[cat.id] ?? "latest";
+          const sortVal = sortByCategory[cat.id] ?? "recent";
           const sortedListings = sortSavedListings(cat.listings, sortVal);
           const desktopListings = sortedListings.slice(0, DASHBOARD_CATEGORY_PAGE_SIZE);
 
@@ -196,7 +192,7 @@ export default function DashboardPage() {
                         onClick={() => setSortDropdownOpen(sortDropdownOpen === cat.id ? null : cat.id)}
                         className="flex items-center gap-2 text-right text-[11px] text-[#333]/70 tracking-[0.22px]"
                       >
-                        Sort by: <span className="text-[#f14110] font-medium">{sortVal === 'az' ? 'A > Z' : sortVal === 'recent' ? 'Recent' : 'Latest'}</span>
+                        Sort by: <span className="text-[#f14110] font-medium">{sortVal === 'az' ? 'A > Z' : 'Recent'}</span>
                         <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
