@@ -42,7 +42,7 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /const \[setupStage, setSetupStage\] = useState<"method" \| "emailChoice" \| "verify" \| "password" \| "socialFinish">\("method"\);[\s\S]*const \[setupSelectedSocial, setSetupSelectedSocial\] = useState<OAuthStrategy \| null>\(null\);/,
+    /const \[setupStage, setSetupStage\] = useState<"method" \| "emailChoice" \| "verify" \| "password" \| "socialFinish">\("method"\);[\s\S]*const \[setupSelectedSocial, setSetupSelectedSocial\] = useState<SetupOAuthStrategy \| null>\(null\);/,
     'expected the company setup popup to run as its own staged onboarding flow'
   );
 
@@ -60,13 +60,19 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /Continue with Google[\s\S]*Continue with Apple[\s\S]*Continue with Microsoft[\s\S]*Continue with Email/,
-    'expected the initial company setup popup to offer the same social options plus a generic continue-with-email action'
+    /Continue with Google[\s\S]*Continue with Email/,
+    'expected the initial company setup popup to offer Google plus a generic continue-with-email action'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /Continue with Apple|Continue with Microsoft|oauth_apple|oauth_microsoft/,
+    'expected Apple and Microsoft social setup options to be removed'
   );
 
   assert.match(
     source,
-    /const handleSetupSocialAuth = async \(strategy: OAuthStrategy\) => \{[\s\S]*setSetupSelectedSocial\(strategy\);[\s\S]*setSetupLoginEmail\(storedCompanyEmail\);[\s\S]*setSetupStage\("emailChoice"\);/,
+    /const handleSetupSocialAuth = async \(strategy: SetupOAuthStrategy\) => \{[\s\S]*setSetupSelectedSocial\(strategy\);[\s\S]*setSetupLoginEmail\(storedCompanyEmail\);[\s\S]*setSetupStage\("emailChoice"\);/,
     'expected choosing a company social setup method to move into the shared login-email step'
   );
 

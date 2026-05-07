@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useCallback, useEffect, useRef } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { resolveMediaSetting } from "@/lib/platform-settings.mjs";
@@ -38,15 +41,7 @@ export function AdBanner({ imageSrc: propImageSrc, alt = "Advertisement" }: AdBa
       }}
     >
       {displayType === "video" ? (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="h-full w-full object-cover"
-        >
-          <source src={displayUrl} type="video/mp4" />
-        </video>
+        <AutoplayBannerVideo src={displayUrl} />
       ) : (
         <Image
           src={displayUrl}
@@ -58,5 +53,70 @@ export function AdBanner({ imageSrc: propImageSrc, alt = "Advertisement" }: AdBa
         />
       )}
     </div>
+  );
+}
+
+function AutoplayBannerVideo({ src }: { src: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const playVideo = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+
+    const playPromise = video.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        // Mobile browsers may still block autoplay in battery/data saver modes.
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.load();
+    playVideo();
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) playVideo();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    const observer = "IntersectionObserver" in window
+      ? new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) playVideo();
+      }, { threshold: 0.15 })
+      : null;
+
+    observer?.observe(video);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      observer?.disconnect();
+    };
+  }, [playVideo, src]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      autoPlay
+      loop
+      muted
+      defaultMuted
+      playsInline
+      preload="auto"
+      className="h-full w-full object-cover"
+      onCanPlay={playVideo}
+      onLoadedData={playVideo}
+    >
+      <source src={src} type="video/mp4" />
+    </video>
   );
 }

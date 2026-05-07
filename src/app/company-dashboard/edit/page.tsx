@@ -17,6 +17,8 @@ import { Star, X, Upload, Lock } from "lucide-react";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import { useProEnabled } from "@/hooks/useProEnabled";
 
+type SetupOAuthStrategy = Extract<OAuthStrategy, "oauth_google">;
+
 const projectSizeOptions = [
   { id: "any", label: "ANY SIZE" },
   { id: "solo", label: "SOLO/COUPLE (1-2)" },
@@ -158,46 +160,19 @@ function GoogleIcon() {
   );
 }
 
-function AppleIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="#333">
-      <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-    </svg>
-  );
-}
-
-function MicrosoftIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24">
-      <rect x="1" y="1" width="10" height="10" fill="#F25022" />
-      <rect x="13" y="1" width="10" height="10" fill="#7FBA00" />
-      <rect x="1" y="13" width="10" height="10" fill="#00A4EF" />
-      <rect x="13" y="13" width="10" height="10" fill="#FFB900" />
-    </svg>
-  );
-}
-
-function getSocialProviderLabel(strategy: OAuthStrategy | null) {
+function getSocialProviderLabel(strategy: SetupOAuthStrategy | null) {
   switch (strategy) {
     case "oauth_google":
       return "Google";
-    case "oauth_apple":
-      return "Apple";
-    case "oauth_microsoft":
-      return "Microsoft";
     default:
       return "Social";
   }
 }
 
-function getSocialProviderIcon(strategy: OAuthStrategy | null) {
+function getSocialProviderIcon(strategy: SetupOAuthStrategy | null) {
   switch (strategy) {
     case "oauth_google":
       return <GoogleIcon />;
-    case "oauth_apple":
-      return <AppleIcon />;
-    case "oauth_microsoft":
-      return <MicrosoftIcon />;
     default:
       return null;
   }
@@ -311,20 +286,20 @@ export default function EditProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [setupStage, setSetupStage] = useState<"method" | "emailChoice" | "verify" | "password" | "socialFinish">("method");
-  const [setupSelectedSocial, setSetupSelectedSocial] = useState<OAuthStrategy | null>(null);
+  const [setupSelectedSocial, setSetupSelectedSocial] = useState<SetupOAuthStrategy | null>(null);
   const [setupLoginEmail, setSetupLoginEmail] = useState("");
   const [setupPassword, setSetupPassword] = useState("");
   const [setupPasswordConfirm, setSetupPasswordConfirm] = useState("");
   const [setupAccountSaving, setSetupAccountSaving] = useState(false);
   const [setupAccountError, setSetupAccountError] = useState("");
-  const [setupSocialLoading, setSetupSocialLoading] = useState<OAuthStrategy | null>(null);
+  const [setupSocialLoading, setSetupSocialLoading] = useState<SetupOAuthStrategy | null>(null);
   const [setupVerificationCode, setSetupVerificationCode] = useState("");
   const [setupVerificationRequestSubmitted, setSetupVerificationRequestSubmitted] = useState(false);
   const [setupVerificationSent, setSetupVerificationSent] = useState(false);
   const [setupVerificationSending, setSetupVerificationSending] = useState(false);
   const [setupVerificationSubmitting, setSetupVerificationSubmitting] = useState(false);
   const createExternalAccount = useReverification((params: {
-    strategy: OAuthStrategy;
+    strategy: SetupOAuthStrategy;
     redirectUrl: string;
     oidcLoginHint?: string;
   }) => clerkUser?.createExternalAccount(params));
@@ -600,7 +575,7 @@ export default function EditProfilePage() {
     setupEmailResourceRef.current = null;
   };
 
-  const handleSetupSocialAuth = async (strategy: OAuthStrategy) => {
+  const handleSetupSocialAuth = async (strategy: SetupOAuthStrategy) => {
     setSetupSelectedSocial(strategy);
     setSetupLoginEmail(storedCompanyEmail);
     setSetupStage("emailChoice");
@@ -1608,18 +1583,6 @@ export default function EditProfilePage() {
                     label="Continue with Google"
                     icon={<GoogleIcon />}
                     onClick={() => handleSetupSocialAuth("oauth_google")}
-                    disabled={Boolean(setupSocialLoading)}
-                  />
-                  <SetupSocialButton
-                    label="Continue with Apple"
-                    icon={<AppleIcon />}
-                    onClick={() => handleSetupSocialAuth("oauth_apple")}
-                    disabled={Boolean(setupSocialLoading)}
-                  />
-                  <SetupSocialButton
-                    label="Continue with Microsoft"
-                    icon={<MicrosoftIcon />}
-                    onClick={() => handleSetupSocialAuth("oauth_microsoft")}
                     disabled={Boolean(setupSocialLoading)}
                   />
                 </div>

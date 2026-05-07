@@ -20,13 +20,37 @@ test('horizontal ad banner renders uploaded videos with autoplay looping playbac
 
   assert.match(
     source,
-    /displayType === "video"[\s\S]*<video[\s\S]*autoPlay[\s\S]*loop[\s\S]*muted[\s\S]*playsInline/,
+    /displayType === "video"[\s\S]*<AutoplayBannerVideo src=\{displayUrl\} \/>/,
     'expected horizontal ad videos to autoplay, loop, stay muted, and play inline on mobile'
   );
 
   assert.match(
     source,
-    /<source src=\{displayUrl\} type="video\/mp4" \/>/,
+    /video\.muted = true;[\s\S]*video\.defaultMuted = true;[\s\S]*video\.playsInline = true;[\s\S]*video\.play\(\)/,
+    'expected horizontal ad videos to explicitly retry muted inline playback for mobile browsers'
+  );
+
+  assert.match(
+    source,
+    /document\.addEventListener\("visibilitychange", handleVisibilityChange\)/,
+    'expected horizontal ad videos to retry playback when the mobile browser tab becomes visible again'
+  );
+
+  assert.match(
+    source,
+    /new IntersectionObserver\(\(entries\) => \{[\s\S]*entry\.isIntersecting[\s\S]*playVideo\(\)/,
+    'expected horizontal ad videos to retry playback when the banner scrolls into view on mobile'
+  );
+
+  assert.match(
+    source,
+    /<video[\s\S]*autoPlay[\s\S]*loop[\s\S]*muted[\s\S]*defaultMuted[\s\S]*playsInline[\s\S]*preload="auto"/,
+    'expected the horizontal ad video element to keep mobile autoplay-safe media attributes'
+  );
+
+  assert.match(
+    source,
+    /<source src=\{src\} type="video\/mp4" \/>/,
     'expected the horizontal ad video renderer to emit an mp4 source element'
   );
 
