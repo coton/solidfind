@@ -131,7 +131,17 @@ test('individual dashboard intro copy spans the mobile content width', () => {
 
   assert.match(
     source,
-    /<div className="flex items-start justify-between gap-4">[\s\S]*\{user\.email\}[\s\S]*<\/div>\s*<p className="font-bam text-\[10px\][^"]*w-full sm:max-w-\[440px\]"/,
+    /<div className="flex items-start justify-between gap-4">[\s\S]*\{user\.email\}[\s\S]*<\/div>\s*<p className="font-bam text-\[10px\][^"]*w-full max-w-none sm:max-w-\[440px\]"/,
     'expected intro copy to live below the name/email row and use full mobile width'
+  );
+});
+
+test('company dashboard intro copy spans the mobile content width', () => {
+  const source = readProjectFile('src/app/company-dashboard/page.tsx');
+
+  assert.match(
+    source,
+    /<div className="mb-6">\s*<p className="w-full max-w-none text-\[11px\][^"]*sm:max-w-\[600px\]">/,
+    'expected company dashboard intro copy to use full mobile width with desktop max width only on larger screens'
   );
 });

@@ -59,6 +59,7 @@ export default function AuthCompletePage() {
   const pendingCompanyName = typeof window !== "undefined"
     ? sessionStorage.getItem("solidfind_companyName") || undefined
     : undefined;
+  const hasPendingAccountTypeChoice = pendingAccountType === "individual" || pendingAccountType === "company";
   const isCompanyMagicLinkFlow = Boolean(requestedNextPath?.startsWith("/company-dashboard/edit"));
   const requestedSetupAccount = useMemo(() => {
     if (!requestedNextPath || !requestedNextPath.startsWith("/company-dashboard/edit")) {
@@ -131,9 +132,7 @@ export default function AuthCompletePage() {
   useEffect(() => {
     if (!isLoaded || !user || existingAccountType || isSaving || autoPersistAttempted) return;
 
-    const canPersistPendingChoice = pendingAccountType === "individual" || pendingAccountType === "company";
-
-    if (!canPersistPendingChoice) return;
+    if (!hasPendingAccountTypeChoice) return;
 
     setAutoPersistAttempted(true);
     void persistAccountType(pendingAccountType, pendingAccountType === "company" ? pendingCompanyName?.trim() : undefined)
@@ -146,6 +145,7 @@ export default function AuthCompletePage() {
     existingAccountType,
     isLoaded,
     isSaving,
+    hasPendingAccountTypeChoice,
     pendingAccountType,
     pendingCompanyName,
     persistAccountType,
@@ -166,7 +166,7 @@ export default function AuthCompletePage() {
     );
   }
 
-  if (isSaving && !saveError) {
+  if ((isSaving || hasPendingAccountTypeChoice) && !saveError) {
     return (
       <CompletionMessage>
         Completing account setup...

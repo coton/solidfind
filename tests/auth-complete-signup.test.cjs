@@ -31,6 +31,12 @@ test('auth-complete automatically persists pending OAuth signup account type cho
     /requestedNextPath \|\| "\/register-business"/,
     'expected company OAuth signups to continue into company profile setup'
   );
+
+  assert.match(
+    source,
+    /if \(\(isSaving \|\| hasPendingAccountTypeChoice\) && !saveError\)/,
+    'expected auth-complete to keep showing the completion state while pending OAuth account type is being saved'
+  );
 });
 
 test('email signups route companies into company profile setup', () => {

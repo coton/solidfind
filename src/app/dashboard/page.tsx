@@ -153,7 +153,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <p className="font-bam text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 w-full sm:max-w-[440px]">
+          <p className="font-bam text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 w-full max-w-none sm:max-w-[440px]">
             Find your list of saved profiles here. Add-remove profiles by clicking bookmark icon.
             <br />
             Temukan daftar profil yang Anda simpan di sini. Tambah-hapus profil dengan mengklik ikon bookmark.

@@ -167,8 +167,8 @@ export default function CompanyDashboardPage() {
           </div>
         </div>
 
-        <div className="flex items-start justify-between mb-6">
-          <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
+        <div className="mb-6">
+          <p className="w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px] sm:max-w-[600px]">
             Your profile is live on SolidFind. As the platform grows, so does your visibility. Make sure you are showing your best profile : )
             <br />
             Profil Anda sudah aktif di SolidFind. Seiring platform berkembang, begitu pula jangkauan Anda. Pastikan kamu menampilkan profil terbaikmu : )
