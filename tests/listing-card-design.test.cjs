@@ -1,0 +1,78 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('fs');
+const path = require('path');
+
+const projectRoot = path.join(__dirname, '..');
+
+function readProjectFile(relativePath) {
+  return fs.readFileSync(path.join(projectRoot, relativePath), 'utf8');
+}
+
+test('listing cards hide zero-review scores and use refined score/bookmark styling', () => {
+  const source = readProjectFile('src/components/cards/ListingCard.tsx');
+
+  assert.match(
+    source,
+    /reviewCount = 0/,
+    'expected listing cards to default to no reviews instead of showing a fake review score'
+  );
+
+  assert.match(
+    source,
+    /const shouldShowRating = reviewsEnabled && reviewCount > 0;/,
+    'expected listing cards to hide the review score when there are zero reviews'
+  );
+
+  assert.match(
+    source,
+    /shouldShowRating && <div[\s\S]*<span className="text-\[11px\] font-medium leading-\[15px\] text-right"/,
+    'expected listing card review score text to be 2px smaller and medium weight'
+  );
+
+  assert.match(
+    source,
+    /className="absolute top-\[10px\] right-\[10px\] origin-top-right scale-90 hover:opacity-70 transition-opacity"/,
+    'expected the normal-state bookmark button to render at 90% scale'
+  );
+
+  assert.match(
+    source,
+    /className="absolute top-\[10px\] right-\[10px\] origin-top-right scale-90 hover:opacity-80 transition-opacity"/,
+    'expected the hover-state bookmark button to render at 90% scale'
+  );
+});
+
+test('listing card hover state shows service locations instead of address', () => {
+  const source = readProjectFile('src/components/cards/ListingCard.tsx');
+
+  assert.match(
+    source,
+    /const serviceLocations = getServiceLocations/,
+    'expected listing cards to derive service locations for the hover state'
+  );
+
+  assert.match(
+    source,
+    /font-bam text-\[10px\][\s\S]*Projects[\s\S]*font-bam text-\[10px\][\s\S]*Team/,
+    'expected hover metric labels to use Basically A Mono at the current Projects label size'
+  );
+
+  assert.match(
+    source,
+    /Services Location:/,
+    'expected hover state to label the service location section'
+  );
+
+  assert.match(
+    source,
+    /text-\[22px\] font-semibold text-\[#d8d8d8\] leading-\[28px\][\s\S]*\{serviceLocations\}/,
+    'expected service locations to render uppercase in Sora semibold at 22px with 28px line-height'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /font-bam text-\[9px\][\s\S]*\{address\}/,
+    'expected the hover state to stop rendering the company address'
+  );
+});

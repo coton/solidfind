@@ -39,6 +39,12 @@ type SavedListingCard = {
   projects: number;
   team: number;
   address: string;
+  location?: string;
+  constructionLocations: string[];
+  renovationLocations: string[];
+  architectureLocations: string[];
+  interiorLocations: string[];
+  realEstateLocations: string[];
   isPro: boolean;
   isSaved: boolean;
   imageUrl?: string;
@@ -119,6 +125,12 @@ export default function DashboardCategoryPage() {
       projects: s.company!.projects ?? 0,
       team: s.company!.teamSize ?? 0,
       address: s.company!.address ?? "",
+      location: s.company!.location,
+      constructionLocations: s.company!.constructionLocations ?? [],
+      renovationLocations: s.company!.renovationLocations ?? [],
+      architectureLocations: s.company!.architectureLocations ?? [],
+      interiorLocations: s.company!.interiorLocations ?? [],
+      realEstateLocations: s.company!.realEstateLocations ?? [],
       isPro: s.company!.isPro,
       isSaved: true,
       imageUrl: s.company!.imageUrl,

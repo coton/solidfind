@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
@@ -20,6 +19,12 @@ interface ListingCardProps {
   projects?: number;
   team?: number;
   address?: string;
+  location?: string;
+  constructionLocations?: string[];
+  renovationLocations?: string[];
+  architectureLocations?: string[];
+  interiorLocations?: string[];
+  realEstateLocations?: string[];
   isPro?: boolean;
   proEnabled?: boolean;
   reviewsEnabled?: boolean;
@@ -35,12 +40,18 @@ export function ListingCard({
   id,
   name,
   description,
+  category,
   categoryContext,
   rating = 4.5,
-  reviewCount = 23,
+  reviewCount = 0,
   projects = 75,
   team = 25,
-  address = "Jl. Imam Bonjol No.198/249, Pemecutan Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80119",
+  location,
+  constructionLocations = [],
+  renovationLocations = [],
+  architectureLocations = [],
+  interiorLocations = [],
+  realEstateLocations = [],
   isPro = false,
   proEnabled = true,
   reviewsEnabled = false,
@@ -48,13 +59,21 @@ export function ListingCard({
   isSaved = false,
   imageUrl,
   logoId,
-  projectImageIds = [],
   onBookmark,
 }: ListingCardProps) {
   const logoUrl = useQuery(api.files.getUrl, logoId ? { storageId: logoId as Id<"_storage"> } : "skip");
   const resolvedImageUrl = logoUrl ?? imageUrl;
   const [isHovered, setIsHovered] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const shouldShowRating = reviewsEnabled && reviewCount > 0;
+  const serviceLocations = getServiceLocations({
+    category: categoryContext ?? category,
+    fallbackLocation: location,
+    constructionLocations,
+    renovationLocations,
+    architectureLocations,
+    interiorLocations,
+    realEstateLocations,
+  });
   
   // Debug logging
   if (typeof window !== 'undefined' && resolvedImageUrl) {
@@ -125,8 +144,8 @@ export function ListingCard({
           )}
 
           {/* Rating: Number first, then star — star at right-[50px] */}
-          {reviewsEnabled && <div className="absolute top-[12px] right-[50px] flex items-center gap-[4px]">
-            <span className="text-[13px] font-semibold leading-[17px] text-right" style={{ color: starColor(rating) }}>{rating}</span>
+          {shouldShowRating && <div className="absolute top-[12px] right-[50px] flex items-center gap-[4px]">
+            <span className="text-[11px] font-medium leading-[15px] text-right" style={{ color: starColor(rating) }}>{rating}</span>
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6.438 3.067C7.578 1.022 8.148 0 9 0c.852 0 1.422 1.022 2.562 3.067l.295.53c.324.581.486.872.738 1.063.252.192.567.263 1.197.405l.572.13c2.214.5 3.32.75 3.584 1.598.263.846-.491 1.729-2 3.494l-.39.456c-.429.501-.644.752-.74 1.062-.096.31-.064.645.001 1.314l.06.609c.227 2.355.342 3.533-.348 4.055-.689.523-1.726.046-3.798-0.908l-.537-.247c-.589-.272-.883-.407-1.195-.407-.312 0-.607.135-1.195.407l-.537.247c-2.072.954-3.109 1.431-3.798.909-.69-.524-.576-1.701-.348-4.056l.06-.608c.064-.67.097-1.005 0-1.314-.096-.31-.311-.562-.739-1.062l-.39-.457c-1.51-1.764-2.264-2.647-2-3.494.262-.846 1.37-1.097 3.584-1.598l.573-.13c.63-.142.944-.213 1.196-.405.253-.192.414-.482.738-1.063l.296-.53z" fill={starColor(rating)}/>
             </svg>
@@ -134,7 +153,7 @@ export function ListingCard({
 
           {/* Bookmark — top-right, D8D8D8 static */}
           <button
-            className="absolute top-[10px] right-[10px] hover:opacity-70 transition-opacity"
+            className="absolute top-[10px] right-[10px] origin-top-right scale-90 hover:opacity-70 transition-opacity"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -183,7 +202,7 @@ export function ListingCard({
 
           {/* Bookmark — top-right - orange on hover */}
           <button
-            className="absolute top-[10px] right-[10px] hover:opacity-80 transition-opacity"
+            className="absolute top-[10px] right-[10px] origin-top-right scale-90 hover:opacity-80 transition-opacity"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onBookmark?.(); }}
           >
             <svg width="17" height="23" viewBox="0 0 17 22.625" fill={isSaved ? '#f14110' : 'none'} xmlns="http://www.w3.org/2000/svg">
@@ -194,23 +213,61 @@ export function ListingCard({
           {/* Facts: Projects + Team — starting at top:49px */}
           <div className="absolute top-[49px] left-[10px] right-[10px] flex flex-col gap-[10px]">
             <div className="flex items-center justify-between border-b border-[#d8d8d8]/20 pb-[4px]">
-              <span className="text-[10px] text-[#d8d8d8] tracking-[0.2px] leading-[18px]">Projects</span>
+              <span className="font-bam text-[10px] text-[#d8d8d8] tracking-[0.2px] leading-[18px]">Projects</span>
               <span className="text-[16px] font-semibold text-[#d8d8d8] tracking-[0.32px] leading-[18px] text-right">+{projects}</span>
             </div>
             <div className="flex items-center justify-between border-b border-[#d8d8d8]/20 pb-[4px]">
-              <span className="text-[10px] text-[#d8d8d8] tracking-[0.2px] leading-[18px]">Team</span>
+              <span className="font-bam text-[10px] text-[#d8d8d8] tracking-[0.2px] leading-[18px]">Team</span>
               <span className="text-[16px] font-semibold text-[#d8d8d8] tracking-[0.32px] leading-[18px] text-right">+{team}</span>
             </div>
           </div>
 
-          {/* Address — same height as description (20px gap spacing) */}
-          <div className="absolute top-[152px] left-[10px] right-[10px] bottom-[20px]">
-            <p className="font-bam text-[9px] text-[#d8d8d8]/75 leading-[14px] tracking-[0.2px] line-clamp-4">
-              {address}
+          {/* Services location */}
+          <div className="absolute top-[130px] left-[10px] right-[10px] bottom-[16px]">
+            <p className="font-bam text-[10px] text-[#d8d8d8]/75 leading-[14px] tracking-[0.2px] mb-[6px]">
+              Services Location:
+            </p>
+            <p className="text-[22px] font-semibold text-[#d8d8d8] leading-[28px] tracking-[0.44px] uppercase line-clamp-2">
+              {serviceLocations}
             </p>
           </div>
         </div>
       </div>
     </Link>
   );
+}
+
+function getServiceLocations({
+  category,
+  fallbackLocation,
+  constructionLocations,
+  renovationLocations,
+  architectureLocations,
+  interiorLocations,
+  realEstateLocations,
+}: {
+  category?: string;
+  fallbackLocation?: string;
+  constructionLocations: string[];
+  renovationLocations: string[];
+  architectureLocations: string[];
+  interiorLocations: string[];
+  realEstateLocations: string[];
+}) {
+  const locationsByCategory: Record<string, string[]> = {
+    construction: constructionLocations,
+    renovation: renovationLocations,
+    architecture: architectureLocations,
+    interior: interiorLocations,
+    "real-estate": realEstateLocations,
+  };
+
+  const categoryLocations = category ? locationsByCategory[category] : undefined;
+  const locations = categoryLocations?.length ? categoryLocations : fallbackLocation ? [fallbackLocation] : ["bali"];
+
+  return locations
+    .map((item) => item.replace(/-/g, " ").trim())
+    .filter(Boolean)
+    .map((item) => item.toUpperCase())
+    .join(", ");
 }
