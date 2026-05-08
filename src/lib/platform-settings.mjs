@@ -3,6 +3,7 @@
 export const HEADER_MEDIA_PLATFORM_SETTING_KEY = "headerMedia";
 export const FOOTER_MEDIA_PLATFORM_SETTING_KEY = "footerMedia";
 export const AD_VERTICAL_PLATFORM_SETTING_KEY = "adVertical";
+export const DASHBOARD_MEDIA_PLATFORM_SETTING_KEY = "dashboardMedia";
 
 /**
  * @param {string | null | undefined} value

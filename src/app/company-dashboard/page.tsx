@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { DashboardHeroMedia } from "@/components/DashboardHeroMedia";
 import { buildCompanyProfilePath, buildCompanyReviewsPath } from "@/lib/company-profile-url.mjs";
 import { Star } from "lucide-react";
 import { useProEnabled } from "@/hooks/useProEnabled";
@@ -328,16 +328,7 @@ export default function CompanyDashboardPage() {
 
         {/* Banner Image — hidden when reviews are enabled */}
         {!isPro && !reviewsEnabled && (
-          <div className="mb-8 rounded-[6px] overflow-hidden">
-            {/* Desktop: full width */}
-            <div className="hidden sm:block relative w-full" style={{ aspectRatio: '900/200' }}>
-              <Image src="/images/bg-individual-page.png" alt="" fill className="object-cover" />
-            </div>
-            {/* Mobile: cropped from bottom-right */}
-            <div className="sm:hidden relative w-full" style={{ aspectRatio: '2/1' }}>
-              <Image src="/images/bg-individual-page.png" alt="" fill className="object-cover object-right-bottom" />
-            </div>
-          </div>
+          <DashboardHeroMedia className="mb-8" alt="" mobileAspectRatio="2 / 1" />
         )}
 
         {/* Reviews Section */}

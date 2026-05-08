@@ -7,6 +7,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import {
+  DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
   FOOTER_MEDIA_PLATFORM_SETTING_KEY,
   HEADER_MEDIA_PLATFORM_SETTING_KEY,
   parseMediaSetting,
@@ -151,6 +152,10 @@ function parseTermsPreview(text: string) {
   });
 }
 
+function inferMediaTypeFromUrl(url: string, fallback: "image" | "video" = "image") {
+  return /\.(mp4|webm|mov)(\?|#|$)/i.test(url) ? "video" : fallback;
+}
+
 export default function AdminUI() {
   const [s, setS] = useState<UISettings>(DEFAULT);
   const convex = useConvex();
@@ -170,11 +175,16 @@ export default function AdminUI() {
   const [headerMediaSaved, setHeaderMediaSaved] = useState(false);
   const [footerMediaSaved, setFooterMediaSaved] = useState(false);
 
-  // New User image (Convex-backed)
-  const newUserImageValue = useQuery(api.platformSettings.get, { key: "newUserImage" });
-  const [newUserImageDraftUrl, setNewUserImageDraftUrl] = useState("");
-  const [newUserImageHasDraft, setNewUserImageHasDraft] = useState(false);
-  const [newUserImageSaved, setNewUserImageSaved] = useState(false);
+  // Users dashboard media (Convex-backed)
+  const dashboardMediaValue = useQuery(api.platformSettings.get, { key: DASHBOARD_MEDIA_PLATFORM_SETTING_KEY });
+  const parsedDashboardMedia = parseMediaSetting(dashboardMediaValue, { url: "", type: "image" });
+  const [dashboardMediaDraft, setDashboardMediaDraft] = useState<{ url: string; type: "image" | "video" }>({ url: "", type: "image" });
+  const [dashboardMediaHasDraft, setDashboardMediaHasDraft] = useState(false);
+  const [dashboardMediaSaved, setDashboardMediaSaved] = useState(false);
+  const [dashboardMediaUploading, setDashboardMediaUploading] = useState(false);
+  const [dashboardMediaUploadError, setDashboardMediaUploadError] = useState("");
+  const effectiveDashboardMediaUrl = dashboardMediaHasDraft ? dashboardMediaDraft.url : parsedDashboardMedia.url;
+  const effectiveDashboardMediaType = dashboardMediaHasDraft ? dashboardMediaDraft.type : parsedDashboardMedia.type;
 
   // About profile picture (Convex-backed)
   const aboutProfilePictureUrlValue = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
@@ -208,21 +218,6 @@ export default function AdminUI() {
   const [adSpacesUploadError, setAdSpacesUploadError] = useState("");
   const adSpacesLoaded = useRef(false);
 
-  const parsedNewUserImage = (() => {
-    if (!newUserImageValue) return { url: "", type: "image" as const };
-    try {
-      const parsed = JSON.parse(newUserImageValue);
-      return {
-        url: parsed.url ?? "",
-        type: (parsed.type ?? "image") as "image" | "video",
-      };
-    } catch {
-      return { url: newUserImageValue, type: "image" as const };
-    }
-  })();
-
-  const newUserImageUrl = newUserImageHasDraft ? newUserImageDraftUrl : parsedNewUserImage.url;
-  const newUserImageType = "image" as const;
   const effectiveTermsText = s.termsText || termsTextValue || "";
 
   useEffect(() => {
@@ -366,11 +361,15 @@ export default function AdminUI() {
     flashSaved(setLinksSaved);
   };
 
-  const saveNewUserImage = async () => {
-    await setPlatformSetting({ key: "newUserImage", value: JSON.stringify({ url: newUserImageUrl, type: "image" }), updatedBy: "admin" });
-    setNewUserImageHasDraft(false);
-    setNewUserImageDraftUrl("");
-    flashSaved(setNewUserImageSaved);
+  const saveDashboardMedia = async () => {
+    await setPlatformSetting({
+      key: DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
+      value: JSON.stringify({ url: effectiveDashboardMediaUrl, type: effectiveDashboardMediaType }),
+      updatedBy: "admin",
+    });
+    setDashboardMediaDraft({ url: "", type: "image" });
+    setDashboardMediaHasDraft(false);
+    flashSaved(setDashboardMediaSaved);
   };
 
   const saveAdSpaces = async () => {
@@ -442,7 +441,7 @@ export default function AdminUI() {
   };
 
   const saveAllUiSettings = async () => {
-    if (adVerticalUploading || adHorizontalUploading) return;
+    if (dashboardMediaUploading || adVerticalUploading || adHorizontalUploading) return;
 
     const pendingSaves = [
       saveAboutText(),
@@ -452,8 +451,8 @@ export default function AdminUI() {
       saveTermsContent(),
     ];
 
-    if (newUserImageHasDraft) {
-      pendingSaves.push(saveNewUserImage());
+    if (dashboardMediaHasDraft) {
+      pendingSaves.push(saveDashboardMedia());
     }
 
     if (s.headerMediaUrl || s.headerMediaType) {
@@ -483,10 +482,10 @@ export default function AdminUI() {
         <button
           type="button"
           onClick={saveAllUiSettings}
-          disabled={adVerticalUploading || adHorizontalUploading}
+          disabled={dashboardMediaUploading || adVerticalUploading || adHorizontalUploading}
           className="h-9 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors disabled:bg-[#333]/25"
         >
-          {adVerticalUploading || adHorizontalUploading ? "Uploading ad…" : saveAllUiSaved ? "✓ All UI Settings Saved!" : "Save All UI Settings"}
+          {dashboardMediaUploading || adVerticalUploading || adHorizontalUploading ? "Uploading media…" : saveAllUiSaved ? "✓ All UI Settings Saved!" : "Save All UI Settings"}
         </button>
       </div>
 
@@ -608,34 +607,58 @@ export default function AdminUI() {
         </button>
       </div>
 
-      {/* New User Image */}
-      <SectionCard title="New User Image">
+      {/* Users Dashboard Media */}
+      <SectionCard title="Users Dashboard Media">
         <Field
-          label="New User image"
-          hint="Shown on the account type selection page for new users. Use a wide desktop/mobile-safe image. Recommended ratio: 386:96 (about 4.02:1), for example 1608×400px or larger. Keep the important content centered because the image can crop slightly on smaller screens."
+          label="Dashboard media"
+          hint="Shown on both individual and company dashboards. Upload an image or MP4. Recommended size: 1800×400px or larger (same 4.5:1 ratio as 900×200px). Keep important content near the center/right for mobile cropping."
         >
           <MediaUpload
-            label="New User image"
-            url={newUserImageUrl}
-            mediaType={newUserImageType}
+            label="Dashboard media"
+            url={effectiveDashboardMediaUrl}
+            mediaType={effectiveDashboardMediaType}
             onUrl={(v) => {
-              setNewUserImageHasDraft(true);
-              setNewUserImageDraftUrl(v);
+              setDashboardMediaUploadError("");
+              setDashboardMediaHasDraft(true);
+              setDashboardMediaDraft({
+                url: v,
+                type: inferMediaTypeFromUrl(v, effectiveDashboardMediaType),
+              });
             }}
-            onFile={({ previewUrl }) => {
-              setNewUserImageHasDraft(true);
-              setNewUserImageDraftUrl(previewUrl);
+            onFile={async ({ file, type }) => {
+              setDashboardMediaUploadError("");
+              setDashboardMediaUploading(true);
+
+              try {
+                const uploadedUrl = await uploadAdminMediaAsset(file);
+                setDashboardMediaHasDraft(true);
+                setDashboardMediaDraft({ url: uploadedUrl, type });
+              } catch (error) {
+                setDashboardMediaUploadError(error instanceof Error ? error.message : "Failed to upload dashboard media.");
+              } finally {
+                setDashboardMediaUploading(false);
+              }
             }}
-            accept="image/*"
+            accept="image/*,video/*"
           />
         </Field>
+        {dashboardMediaUploading && (
+          <p className="text-[10px] text-[#f14110] mb-2">Uploading dashboard media to Convex storage…</p>
+        )}
+        {dashboardMediaUploadError && (
+          <p className="text-[10px] text-red-600 mb-2">{dashboardMediaUploadError}</p>
+        )}
+        {dashboardMediaHasDraft && (
+          <p className="text-[10px] text-green-600 mb-2">✓ Dashboard media draft loaded — click Save Dashboard Media or Save All UI Settings to publish it.</p>
+        )}
         <div className="mt-2">
           <button
             type="button"
-            onClick={saveNewUserImage}
+            onClick={saveDashboardMedia}
+            disabled={dashboardMediaUploading}
             className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
           >
-            {newUserImageSaved ? "✓ Saved!" : "Save New User Image"}
+            {dashboardMediaUploading ? "Uploading..." : dashboardMediaSaved ? "✓ Saved!" : "Save Dashboard Media"}
           </button>
         </div>
       </SectionCard>

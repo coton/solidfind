@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { DashboardHeroMedia } from "@/components/DashboardHeroMedia";
 import { ListingCard } from "@/components/cards";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
@@ -26,6 +26,15 @@ type SavedListingCard = {
   name: string;
   description: string;
   rating: number;
+  reviewCount: number;
+  projects: number;
+  team: number;
+  location?: string;
+  constructionLocations: string[];
+  renovationLocations: string[];
+  architectureLocations: string[];
+  interiorLocations: string[];
+  realEstateLocations: string[];
   isPro: boolean;
   isSaved: boolean;
   imageUrl?: string;
@@ -116,6 +125,15 @@ export default function DashboardPage() {
         name: s.company!.name,
         description: s.company!.description ?? "",
         rating: s.company!.rating ?? 4.5,
+        reviewCount: s.company!.reviewCount ?? 0,
+        projects: s.company!.projects ?? 0,
+        team: s.company!.teamSize ?? 0,
+        location: s.company!.location,
+        constructionLocations: s.company!.constructionLocations ?? [],
+        renovationLocations: s.company!.renovationLocations ?? [],
+        architectureLocations: s.company!.architectureLocations ?? [],
+        interiorLocations: s.company!.interiorLocations ?? [],
+        realEstateLocations: s.company!.realEstateLocations ?? [],
         isPro: s.company!.isPro,
         isSaved: true,
         imageUrl: s.company!.imageUrl,
@@ -160,17 +178,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Banner Image */}
-        <div className="mb-8 rounded-[6px] overflow-hidden relative" style={{ width: '100%', aspectRatio: '900 / 200' }}>
-          <Image
-            src="/images/bg-individual-page.png"
-            alt="SolidFind"
-            fill
-            sizes="(max-width: 900px) 100vw, 900px"
-            className="object-cover object-right-bottom sm:object-center"
-            priority
-          />
-        </div>
+        <DashboardHeroMedia className="mb-8" priority />
 
         {/* Bookmark sections — dynamic per category */}
         {visibleCategories.map((cat) => {
