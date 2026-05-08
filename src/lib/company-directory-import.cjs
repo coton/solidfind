@@ -1,0 +1,412 @@
+const fs = require('fs');
+const path = require('path');
+const { spawnSync } = require('child_process');
+
+function cleanString(value) {
+  if (value === undefined || value === null) return undefined;
+  const normalized = String(value).replace(/\r\n/g, '\n').trim();
+  return normalized || undefined;
+}
+
+function cleanEmail(value) {
+  const normalized = cleanString(value);
+  return normalized ? normalized.toLowerCase() : undefined;
+}
+
+function parseDelimitedCell(value) {
+  const normalized = cleanString(value);
+  if (!normalized) return [];
+  return normalized
+    .split(/[;,]/)
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function parseOptionalNumber(value) {
+  const normalized = cleanString(value);
+  if (!normalized) return undefined;
+  const numeric = Number.parseInt(normalized.replace(/[^0-9]/g, ''), 10);
+  return Number.isFinite(numeric) ? numeric : undefined;
+}
+
+function inferPrimaryCategory({ sourceName, rowCategoryValue }) {
+  const source = `${sourceName || ''} ${rowCategoryValue || ''}`.toLowerCase();
+  if (source.includes('construction')) return 'construction';
+  if (source.includes('renovation')) return 'renovation';
+  if (source.includes('architecture')) return 'architecture';
+  if (source.includes('interior')) return 'interior';
+  if (source.includes('real estate') || source.includes('real-estate')) return 'real-estate';
+  throw new Error(`Unable to infer primary category from source "${sourceName || ''}" and value "${rowCategoryValue || ''}"`);
+}
+
+const CATEGORY_FIELD_BY_PRIMARY = {
+  construction: 'constructionTypes',
+  renovation: 'renovationTypes',
+  architecture: 'architectureTypes',
+  interior: 'interiorTypes',
+  'real-estate': 'realEstateTypes',
+};
+
+const CATEGORY_ALIASES = {
+  construction: {
+    all: 'all',
+    'all types': 'all',
+    'any type': 'all',
+    'any types': 'all',
+    residential: 'residential',
+    commercial: 'commercial',
+    hospitality: 'hospitality',
+  },
+  renovation: {
+    every: 'every',
+    'every renovation': 'every',
+    'every renovations': 'every',
+    'any renovation': 'every',
+    'any renovations': 'every',
+    'complete house': 'complete',
+    'living room': 'living',
+    kitchen: 'kitchen',
+    bathroom: 'bathroom',
+    bedroom: 'bedroom',
+    electricity: 'electricity',
+    plumbing: 'plumbing',
+    roofing: 'roofing',
+    waterproofing: 'waterproofing',
+    pool: 'pool',
+    'mold treatment': 'mold',
+    mold: 'mold',
+    tiling: 'tiling',
+    painting: 'painting',
+    fencing: 'fencing',
+  },
+  architecture: {
+    all: 'all',
+    'all types': 'all',
+    'any type': 'all',
+    'any types': 'all',
+    residential: 'residential',
+    commercial: 'commercial',
+    'renovations and extensions': 'renovations-extensions',
+    'renovation and extensions': 'renovations-extensions',
+    'renovations extensions': 'renovations-extensions',
+    'sustainable eco archi': 'sustainable-eco',
+    sustainable: 'sustainable-eco',
+    'eco archi': 'sustainable-eco',
+  },
+  interior: {
+    all: 'all',
+    'all types': 'all',
+    'any type': 'all',
+    'any types': 'all',
+    residential: 'residential',
+    commercial: 'commercial',
+    hospitality: 'hospitality',
+    furnitures: 'furnitures',
+    furniture: 'furnitures',
+    lighting: 'lighting',
+    'styling decoration': 'styling-decoration',
+    styling: 'styling-decoration',
+    decoration: 'styling-decoration',
+  },
+  'real-estate': {
+    all: 'all',
+    'all types': 'all',
+    'any type': 'all',
+    'any types': 'all',
+    residential: 'residential',
+    commercial: 'commercial',
+    'land development plots': 'land-development',
+    'land development': 'land-development',
+    'property management': 'property-management',
+    'legal notary services': 'legal-notary',
+    'legal notary': 'legal-notary',
+  },
+};
+
+function normalizeCategoryKeyword(value) {
+  return cleanString(value)
+    ?.toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function mapCategorySelections(primaryCategory, rowCategoryValue) {
+  const raw = cleanString(rowCategoryValue);
+  const categoryField = CATEGORY_FIELD_BY_PRIMARY[primaryCategory];
+  if (!raw || !categoryField) {
+    return {
+      constructionTypes: [],
+      renovationTypes: [],
+      architectureTypes: [],
+      interiorTypes: [],
+      realEstateTypes: [],
+    };
+  }
+
+  const aliases = CATEGORY_ALIASES[primaryCategory] || {};
+  const selections = [...new Set(
+    parseDelimitedCell(raw)
+      .map((token) => aliases[normalizeCategoryKeyword(token)] || normalizeCategoryKeyword(token))
+      .filter(Boolean)
+  )];
+  const normalizedSelections = selections.includes('all')
+    ? ['all']
+    : selections.includes('every')
+      ? ['every']
+      : selections;
+
+  return {
+    constructionTypes: [],
+    renovationTypes: [],
+    architectureTypes: [],
+    interiorTypes: [],
+    realEstateTypes: [],
+    [categoryField]: normalizedSelections,
+  };
+}
+
+function collectPictureUrls(row) {
+  return Object.keys(row)
+    .filter((key) => /^Picture\s+\d+\s+URL$/i.test(key.trim()))
+    .sort((a, b) => {
+      const aNum = Number.parseInt(a.match(/(\d+)/)?.[1] || '0', 10);
+      const bNum = Number.parseInt(b.match(/(\d+)/)?.[1] || '0', 10);
+      return aNum - bNum;
+    })
+    .map((key) => cleanString(row[key]))
+    .filter(Boolean);
+}
+
+function normalizeCompanyDirectoryRow(row, { sourceName } = {}) {
+  const name = cleanString(row['Company Name']);
+  const email = cleanEmail(row.Email);
+  const password = cleanString(row['Password Format']);
+  const primaryCategory = inferPrimaryCategory({
+    sourceName,
+    rowCategoryValue: row.Categories,
+  });
+  const locationSelections = parseDelimitedCell(row.Provinces);
+  const categorySelections = mapCategorySelections(primaryCategory, row.Categories);
+
+  return {
+    name,
+    email,
+    password,
+    description: cleanString(row.Description),
+    primaryCategory,
+    locationSelections,
+    location: locationSelections[0] || 'bali',
+    address: cleanString(row.Address),
+    phone: cleanString(row['Phone Number']),
+    website: cleanString(row.Website),
+    whatsapp: cleanString(row.WhatsApp),
+    facebook: cleanString(row.Facebook),
+    linkedin: cleanString(row.LinkedIn),
+    instagram: cleanString(row.Instagram),
+    projects: parseOptionalNumber(row.Projects),
+    teamSize: parseOptionalNumber(row['Team Size']),
+    since: parseOptionalNumber(row['Since Year']),
+    googleMapsLink: cleanString(row['Google Maps Link']),
+    imageUrl: cleanString(row['Company Logo ']) || cleanString(row['Company Logo']),
+    projectImageUrls: collectPictureUrls(row),
+    projectSizes: ['any'],
+    constructionTypes: categorySelections.constructionTypes,
+    constructionLocations: locationSelections,
+    renovationTypes: categorySelections.renovationTypes,
+    renovationLocations: locationSelections,
+    architectureTypes: categorySelections.architectureTypes,
+    architectureLocations: locationSelections,
+    interiorTypes: categorySelections.interiorTypes,
+    interiorLocations: locationSelections,
+    realEstateTypes: categorySelections.realEstateTypes,
+    realEstateLocations: locationSelections,
+    isPro: false,
+  };
+}
+
+function buildCompanyMutationPayload(normalized) {
+  return {
+    name: normalized.name,
+    description: normalized.description,
+    category: normalized.primaryCategory,
+    location: normalized.location,
+    address: normalized.address,
+    googleMapsLink: normalized.googleMapsLink,
+    isPro: Boolean(normalized.isPro),
+    projects: normalized.projects,
+    teamSize: normalized.teamSize,
+    phone: normalized.phone,
+    email: normalized.email,
+    website: normalized.website,
+    whatsapp: normalized.whatsapp,
+    facebook: normalized.facebook,
+    linkedin: normalized.linkedin,
+    instagram: normalized.instagram,
+    since: normalized.since,
+    imageUrl: normalized.imageUrl,
+    projectImageUrls: normalized.projectImageUrls,
+    projectSizes: normalized.projectSizes,
+    constructionTypes: normalized.constructionTypes,
+    constructionLocations: normalized.constructionLocations,
+    renovationTypes: normalized.renovationTypes,
+    renovationLocations: normalized.renovationLocations,
+    architectureTypes: normalized.architectureTypes,
+    architectureLocations: normalized.architectureLocations,
+    interiorTypes: normalized.interiorTypes,
+    interiorLocations: normalized.interiorLocations,
+    realEstateTypes: normalized.realEstateTypes,
+    realEstateLocations: normalized.realEstateLocations,
+  };
+}
+
+function normalizeUrlList(values) {
+  return (Array.isArray(values) ? values : []).map((value) => cleanString(value)).filter(Boolean);
+}
+
+function arraysEqual(left, right) {
+  if (left.length !== right.length) return false;
+  return left.every((value, index) => value === right[index]);
+}
+
+async function uploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchImpl = fetch }) {
+  const response = await fetchImpl(sourceUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to download remote media: ${sourceUrl}`);
+  }
+
+  const uploadUrl = await generateUploadUrl();
+  const contentType = response.headers?.get?.('content-type') || 'application/octet-stream';
+  const uploadResponse = await fetchImpl(uploadUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': contentType },
+    body: Buffer.from(await response.arrayBuffer()),
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Failed to upload remote media into Convex storage: ${sourceUrl}`);
+  }
+
+  const payload = await uploadResponse.json();
+  if (!payload?.storageId) {
+    throw new Error(`Convex storage upload did not return a storageId for: ${sourceUrl}`);
+  }
+
+  return payload.storageId;
+}
+
+async function resolveStoredCompanyMedia({
+  normalized,
+  existingCompany,
+  generateUploadUrl,
+  fetchImpl = fetch,
+}) {
+  const imageUrl = cleanString(normalized?.imageUrl);
+  const projectImageUrls = normalizeUrlList(normalized?.projectImageUrls);
+
+  const existingImageUrl = cleanString(existingCompany?.imageUrl);
+  const existingProjectImageUrls = normalizeUrlList(existingCompany?.projectImageUrls);
+  const existingProjectImageIds = Array.isArray(existingCompany?.projectImageIds)
+    ? existingCompany.projectImageIds.filter(Boolean)
+    : [];
+
+  const media = {
+    imageUrl,
+    projectImageUrls,
+  };
+
+  if (imageUrl) {
+    media.logoId = imageUrl === existingImageUrl && existingCompany?.logoId
+      ? existingCompany.logoId
+      : await uploadRemoteAssetToStorage({ sourceUrl: imageUrl, generateUploadUrl, fetchImpl });
+  }
+
+  media.projectImageIds = arraysEqual(projectImageUrls, existingProjectImageUrls)
+    && existingProjectImageIds.length === projectImageUrls.length
+    ? existingProjectImageIds
+    : await Promise.all(
+        projectImageUrls.map((sourceUrl) => uploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchImpl }))
+      );
+
+  return media;
+}
+
+function parseCsvText(content) {
+  const rows = [];
+  const lines = content.replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean);
+  if (!lines.length) return rows;
+
+  const parseLine = (line) => {
+    const out = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i += 1) {
+      const char = line[i];
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+        continue;
+      }
+      if (char === ',' && !inQuotes) {
+        out.push(current);
+        current = '';
+        continue;
+      }
+      current += char;
+    }
+    out.push(current);
+    return out;
+  };
+
+  const headers = parseLine(lines[0]);
+  for (const line of lines.slice(1)) {
+    const values = parseLine(line);
+    const row = {};
+    headers.forEach((header, index) => {
+      row[header] = values[index] ?? '';
+    });
+    rows.push(row);
+  }
+  return rows;
+}
+
+function loadRowsFromFile(filePath) {
+  const extension = path.extname(filePath).toLowerCase();
+  if (extension === '.csv') {
+    return parseCsvText(fs.readFileSync(filePath, 'utf8'));
+  }
+  if (extension === '.xlsx') {
+    const script = `import json, re, sys, zipfile, xml.etree.ElementTree as ET\nfrom pathlib import Path\npath = Path(sys.argv[1])\nns = {'main': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}\ncol_re = re.compile(r'([A-Z]+)')\ndef col_to_index(ref):\n    match = col_re.match(ref or '')\n    letters = match.group(1) if match else ''\n    value = 0\n    for ch in letters:\n        value = value * 26 + (ord(ch) - 64)\n    return max(value - 1, 0)\nwith zipfile.ZipFile(path) as z:\n    shared = []\n    if 'xl/sharedStrings.xml' in z.namelist():\n        root = ET.fromstring(z.read('xl/sharedStrings.xml'))\n        for si in root.findall('main:si', ns):\n            texts = [t.text or '' for t in si.findall('.//main:t', ns)]\n            shared.append(''.join(texts))\n    sheet = ET.fromstring(z.read('xl/worksheets/sheet1.xml'))\n    rows = []\n    for row in sheet.findall('.//main:sheetData/main:row', ns):\n        values = []\n        for cell in row.findall('main:c', ns):\n            ref = cell.attrib.get('r', '')\n            idx = col_to_index(ref)\n            while len(values) < idx:\n                values.append('')\n            cell_type = cell.attrib.get('t')\n            v = cell.find('main:v', ns)\n            is_node = cell.find('main:is', ns)\n            if is_node is not None:\n                text = ''.join(t.text or '' for t in is_node.findall('.//main:t', ns))\n            else:\n                text = '' if v is None or v.text is None else v.text\n                if cell_type == 's' and text != '':\n                    text = shared[int(text)]\n            values.append(text)\n        rows.append(values)\n    print(json.dumps(rows))`;
+    const result = spawnSync('python3', ['-c', script, filePath], { encoding: 'utf8' });
+    if (result.status !== 0) {
+      throw new Error(result.stderr || result.stdout || `Failed to parse workbook ${filePath}`);
+    }
+    const parsedRows = JSON.parse(result.stdout);
+    const [headers = [], ...dataRows] = parsedRows;
+    return dataRows
+      .filter((row) => row.some((value) => cleanString(value)))
+      .map((values) => {
+        const row = {};
+        headers.forEach((header, index) => {
+          row[header] = values[index] ?? '';
+        });
+        return row;
+      });
+  }
+  throw new Error(`Unsupported file type: ${filePath}`);
+}
+
+module.exports = {
+  buildCompanyMutationPayload,
+  inferPrimaryCategory,
+  loadRowsFromFile,
+  normalizeCompanyDirectoryRow,
+  parseCsvText,
+  parseDelimitedCell,
+  resolveStoredCompanyMedia,
+  uploadRemoteAssetToStorage,
+};

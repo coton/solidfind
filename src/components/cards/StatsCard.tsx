@@ -1,26 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Star, ArrowRight } from "lucide-react";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
 interface StatsCardProps {
   id?: string;
+  name?: string;
   projects?: number;
   team?: number;
   address?: string;
   rating?: number;
   reviewCount?: number;
+  reviewsEnabled?: boolean;
 }
 
 export function StatsCard({
   id = "stats",
+  name = "stats",
   projects = 75,
   team = 25,
   address = "Jl. Imam Bonjol No.198/249, Pemecutan Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80119",
   rating = 4.5,
   reviewCount = 23,
+  reviewsEnabled = false,
 }: StatsCardProps) {
   return (
-    <Link href={`/profile/${id}`} className="block">
+    <Link href={buildCompanyProfilePath({ _id: id, name })} className="block">
       <div className="relative w-[210px] h-[230px] bg-[#333] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
         {/* Action Buttons */}
         <div className="absolute top-[10px] left-[10px] right-[10px] flex justify-between">
@@ -70,11 +75,11 @@ export function StatsCard({
 
         {/* Rating and Arrow */}
         <div className="absolute bottom-[10px] left-[10px] right-[10px] flex items-center justify-between">
-          <div className="flex items-center gap-1">
+          {reviewsEnabled && <div className="flex items-center gap-1">
             <Star className="w-[18px] h-[18px] fill-[#f4c542] text-[#f4c542]" />
             <span className="text-[13px] font-semibold text-[#d8d8d8]">{rating}</span>
             <span className="text-[14px] text-[#d8d8d8]/50 tracking-[-0.7px]">({reviewCount})</span>
-          </div>
+          </div>}
           <div className="w-[36px] h-[36px] rounded-[6px] border-2 border-[#e4e4e4] flex items-center justify-center hover:bg-white/5 transition-colors">
             <ArrowRight className="w-5 h-5 text-[#d8d8d8]" />
           </div>

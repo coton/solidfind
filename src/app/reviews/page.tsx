@@ -7,8 +7,11 @@ import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Star } from "lucide-react";
+import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
 export default function UserReviewsPage() {
+  const reviewsEnabled = useReviewsEnabled();
   const { user: clerkUser, isLoaded } = useUser();
 
   const currentUser = useQuery(
@@ -20,6 +23,24 @@ export default function UserReviewsPage() {
     api.reviews.listByUser,
     currentUser?._id ? { userId: currentUser._id } : "skip"
   );
+
+  if (!reviewsEnabled) {
+    return (
+      <div className="min-h-screen bg-[#f8f8f8]">
+        <Header />
+        <main className="max-w-[900px] mx-auto px-6 py-8">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors mb-4"
+          >
+            <span>←</span> BACK
+          </Link>
+          <p className="text-[14px] text-[#333]/70 mt-8">Reviews are currently unavailable.</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
@@ -34,7 +55,7 @@ export default function UserReviewsPage() {
             <span>←</span> BACK
           </Link>
           <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">
-            Your reviews
+            Your testimonials
           </h1>
           <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
             Ulasan Anda
@@ -62,7 +83,7 @@ export default function UserReviewsPage() {
             {reviews.map((review) => (
               <div key={review._id} className="bg-white rounded-[6px] p-5">
                 <Link
-                  href={`/profile/${review.companyId}`}
+                  href={buildCompanyProfilePath({ _id: review.companyId, name: review.companyName })}
                   className="text-[13px] font-semibold text-[#f14110] hover:underline mb-2 inline-block"
                 >
                   {review.companyName}

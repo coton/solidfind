@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { starFillColor } from "@/lib/starColors";
 
 interface ReviewCardProps {
   userName: string;
@@ -16,15 +17,14 @@ export function ReviewCard({ userName, rating, content, date }: ReviewCardProps)
           {Array.from({ length: 5 }).map((_, i) => (
             <Star
               key={i}
-              className={`w-3 h-3 ${
-                i < rating ? "fill-yellow-400 text-yellow-400" : "text-zinc-200"
-              }`}
+              className="w-3 h-3"
+              style={{ fill: starFillColor(i, rating), color: starFillColor(i, rating) }}
             />
           ))}
         </div>
       </div>
       <p className="text-xs text-muted-foreground line-clamp-3 mb-2">{content}</p>
-      <span className="text-xs text-zinc-400">{date}</span>
+      <span className="font-bam text-[9px] text-zinc-400">{date}</span>
     </div>
   );
 }

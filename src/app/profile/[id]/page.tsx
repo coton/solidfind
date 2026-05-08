@@ -1,7 +1,8 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { fetchQuery } from "convex/nextjs";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 import ProfilePageClient from "./ProfilePageClient";
 
 type Props = {
@@ -12,8 +13,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
 
   try {
-    const company = await fetchQuery(api.companies.getById, {
-      id: id as Id<"companies">,
+    const company = await fetchQuery(api.companies.getByPublicIdentifier, {
+      identifier: id,
     });
 
     if (!company) {
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const title = company.name;
     const description = company.description
       ? company.description.slice(0, 160)
-      : `${company.name} — ${company.category} professional on SOLIDFIND.ID. View projects, reviews, and contact information.`;
+      : `${company.name} — ${company.category} professional on SOLIDFIND.ID. View projects, testimonials, and contact information.`;
 
     return {
       title,
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: {
         title: `${company.name} | SOLIDFIND.ID`,
         description,
-        url: `https://solidfind.vercel.app/profile/${id}`,
+        url: `https://solidfind.id${buildCompanyProfilePath(company)}`,
         siteName: "SOLIDFIND.ID",
         type: "profile",
       },
@@ -51,5 +52,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function ProfilePage() {
-  return <ProfilePageClient />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#e4e4e4]" />}>
+      <ProfilePageClient />
+    </Suspense>
+  );
 }

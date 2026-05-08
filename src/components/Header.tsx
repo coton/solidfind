@@ -1,12 +1,36 @@
 "use client";
 
-import { Suspense, useState, useCallback, useRef, useEffect } from "react";
+import { Suspense, useState, useCallback, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useClerk } from "@clerk/nextjs";
+import { AuthModal } from "@/components/AuthModal";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import {
+  HEADER_MEDIA_PLATFORM_SETTING_KEY,
+  resolveMediaSetting,
+  resolveTextSetting,
+} from "@/lib/platform-settings.mjs";
+import {
+  encodeSubcategoryParam,
+  getSubcategoryDisplayText,
+  isSubcategoryFilterActive,
+  isSubcategoryOptionSelected,
+  parseSubcategoryParam,
+  toggleSubcategorySelection,
+} from "@/lib/category-filter.mjs";
 
+// Fallback categories shown while DB config is loading or if empty
+// Only include the initially visible ones to prevent flash of hidden tabs
 const mainCategories = [
+  { id: "construction", label: "01. Construction" },
+  { id: "renovation", label: "02. Renovation" },
+];
+
+// All categories (kept for reference / subtitle fallback)
+const allCategories = [
   { id: "construction", label: "01. Construction" },
   { id: "renovation", label: "02. Renovation" },
   { id: "architecture", label: "03. Architecture" },
@@ -110,6 +134,9 @@ interface DropdownProps {
   isOptionSelected?: (optionId: string) => boolean;
   // Align menu to right edge of button
   alignRight?: boolean;
+  menuClassName?: string;
+  isMobileCategoryDropdown?: boolean;
+  closeSignal?: number;
 }
 
 function Dropdown({ 
@@ -124,13 +151,17 @@ function Dropdown({
   displayText,
   isActive = false,
   isOptionSelected,
-  alignRight = false
+  alignRight = false,
+  menuClassName = '',
+  isMobileCategoryDropdown = false,
+  closeSignal = 0,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, right: 0, width: 0 });
-  const [isPositioned, setIsPositioned] = useState(false);
   const selectedOption = options.find(opt => opt.id === value);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [closeSignal]);
 
   // For PROJECT SIZE: remove numbers in parentheses when closed
   const getDisplayLabel = (fullLabel: string) => {
@@ -148,24 +179,9 @@ function Dropdown({
   // Determine if button should show active color
   const buttonIsActive = multiSelect ? isActive : !!value;
 
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const rightPos = window.innerWidth - rect.right;
-      setMenuPos({ top: rect.bottom + 4, left: rect.left, right: rightPos, width: rect.width });
-      // Allow rendering after position is calculated
-      requestAnimationFrame(() => {
-        setIsPositioned(true);
-      });
-    } else {
-      setIsPositioned(false);
-    }
-  }, [isOpen]);
-
   return (
-    <div className={`relative ${width}`}>
+    <div className={`relative ${width} ${isOpen ? 'z-[80]' : ''}`}>
       <button
-        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="h-10 bg-[#f8f8f8] rounded-[6px] flex items-center justify-between px-3 w-full"
         style={{ letterSpacing: '0.12px' }}
@@ -178,18 +194,13 @@ function Dropdown({
 
       {isOpen && (
         <>
-          <div className="fixed inset-0" style={{ zIndex: 9998 }} onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
           <div 
-            className={`fixed bg-white rounded-[6px] shadow-lg transition-opacity duration-75 w-max ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
-            style={{
-              zIndex: 9999,
-              ...(alignRight 
-                ? { top: menuPos.top, right: menuPos.right }
-                : { top: menuPos.top, left: menuPos.left }
-              )
-            }}
+            className={`absolute top-full mt-[2px] z-[70] bg-white rounded-[6px] shadow-lg w-max max-w-[calc(100vw-40px)] ${
+              alignRight ? 'right-0' : 'left-0'
+            } ${menuClassName}`}
           >
-            <div className="pt-2 pb-[10px] px-3">
+            <div className={`pt-2 pb-[10px] px-3 ${isMobileCategoryDropdown ? 'pr-4' : ''}`}>
               {options.map((option, index) => {
                 const isSelected = isOptionSelected 
                   ? isOptionSelected(option.id)
@@ -206,7 +217,7 @@ function Dropdown({
                         setIsOpen(false);
                       }
                     }}
-                    className={`w-full text-left py-2 text-[11px] flex items-center ${
+                    className={`w-full text-left py-2 text-[11px] flex items-center gap-[5px] ${
                       index < options.length - 1 ? 'mb-[2px]' : ''
                     } ${
                       isSelected ? 'text-[#f14110]' : 'text-[#333]'
@@ -218,9 +229,9 @@ function Dropdown({
                       borderBottom: index < options.length - 1 ? '1px solid #e4e4e4' : 'none'
                     }}
                   >
-                    <span className="whitespace-nowrap mr-[40px]">{option.label}</span>
+                    <span className="min-w-0 flex-1 inline-flex items-center min-h-3 leading-[14px]">{option.label}</span>
                     <div 
-                      className={`flex-shrink-0 w-6 h-3 rounded-full ml-auto ${isSelected ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
+                      className={`flex-shrink-0 w-6 h-3 rounded-full ${isSelected ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
                     >
                       <div className={`w-2 h-2 bg-white rounded-full mt-0.5 transition-all ${isSelected ? 'ml-3.5' : 'ml-0.5'}`} />
                     </div>
@@ -244,20 +255,109 @@ export function Header() {
 }
 
 function HeaderInner() {
-  const { user } = useUser();
+  const { user, signOut } = useClerk();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const pageConfigs = useQuery(api.pageConfigs.listVisible);
+  const headerMediaValue = useQuery(api.platformSettings.get, { key: HEADER_MEDIA_PLATFORM_SETTING_KEY });
+  const headerMediaState = resolveMediaSetting(headerMediaValue, { url: "", type: "image" });
+  const headerMedia = headerMediaState.media;
+  const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
+  const igUrlState = resolveTextSetting(igUrl, "#");
+  const igVisible = useQuery(api.platformSettings.get, { key: "ig_visible" });
+  const igVisibleState = resolveTextSetting(igVisible, "true");
+
+  const handleSignOut = async () => {
+    await signOut({ redirectUrl: "/" });
+    router.push("/");
+  };
+
+  // pageConfigs is undefined while loading, [] if loaded but empty
+  const pageConfigsLoaded = pageConfigs !== undefined;
+
+  // Build dynamic categories from pageConfigs, falling back to hardcoded only when loaded empty
+  const dynamicCategories = useMemo(() => {
+    if (!pageConfigsLoaded) return mainCategories; // still loading — use hardcoded as initial render
+    if (pageConfigs.length === 0) return mainCategories; // loaded but empty — fallback
+    return pageConfigs.map((p) => ({ id: p.categoryId, label: p.label }));
+  }, [pageConfigs, pageConfigsLoaded]);
+
+  const dynamicSubtitles = useMemo(() => {
+    if (!pageConfigsLoaded || pageConfigs.length === 0) return categorySubtitles;
+    const subs: Record<string, string> = {};
+    for (const p of pageConfigs) {
+      subs[p.categoryId] = p.subtitle;
+    }
+    return subs;
+  }, [pageConfigs, pageConfigsLoaded]);
+
+  // Build a lookup for filters by categoryId
+  const configFiltersMap = useMemo(() => {
+    if (!pageConfigsLoaded || pageConfigs.length === 0) return null;
+    const map: Record<string, typeof pageConfigs[0]["filters"]> = {};
+    for (const p of pageConfigs) {
+      map[p.categoryId] = p.filters;
+    }
+    return map;
+  }, [pageConfigs, pageConfigsLoaded]);
 
   const [keywords, setKeywords] = useState(searchParams.get("search") ?? "");
   const [projectSize, setProjectSize] = useState(searchParams.get("projectSize") ?? "");
-  const [category, setCategory] = useState(searchParams.get("subcategory") ?? "");
-  // Location now supports multiple values (comma-separated)
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>(
     searchParams.get("location") ? searchParams.get("location")!.split(",") : []
   );
+  const lastCategoryButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [mobileCategoryEndSpacerWidth, setMobileCategoryEndSpacerWidth] = useState(0);
 
-  const activeCategory = searchParams.get("category") ?? "construction";
+  // Auth modal state
+  const [showLogoutPrompt, setShowLogoutPrompt] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalAccountType, setAuthModalAccountType] = useState<"company" | "individual">("individual");
+  const [authModalMode, setAuthModalMode] = useState<"login" | "register">("register");
+  const [dropdownCloseSignal, setDropdownCloseSignal] = useState(0);
+
+  const openAuthModal = (accountType: "company" | "individual" = "individual", mode: "login" | "register" = "register") => {
+    setDropdownCloseSignal((current) => current + 1);
+    setAuthModalAccountType(accountType);
+    setAuthModalMode(mode);
+    setAuthModalOpen(true);
+  };
+
+  const isDashboardPage = pathname.startsWith("/dashboard") || pathname.startsWith("/company-dashboard");
+  const isProfilePage = pathname.startsWith("/profile");
+  const isArticlePage = pathname.startsWith("/article");
+  const fromCategory = searchParams.get("from");
+  
+  // Deactivate category highlighting only for:
+  // - Dashboard pages
+  // - Article pages opened from shared link (no fromCategory)
+  const activeCategory = isDashboardPage || (isArticlePage && !fromCategory)
+    ? null
+    : isProfilePage
+      ? (fromCategory || null)
+      : (searchParams.get("category") ?? "construction");
+
+  useEffect(() => {
+    const updateMobileCategoryEndSpacer = () => {
+      if (typeof window === "undefined" || window.innerWidth >= 640) {
+        setMobileCategoryEndSpacerWidth(0);
+        return;
+      }
+
+      const lastButtonWidth = lastCategoryButtonRef.current?.offsetWidth ?? 0;
+      const horizontalPadding = 16; // matches mobile px-4 on the scroll container
+      const spacerWidth = Math.max(0, window.innerWidth / 2 - horizontalPadding - lastButtonWidth / 2);
+
+      setMobileCategoryEndSpacerWidth(spacerWidth);
+    };
+
+    updateMobileCategoryEndSpacer();
+    window.addEventListener("resize", updateMobileCategoryEndSpacer);
+
+    return () => window.removeEventListener("resize", updateMobileCategoryEndSpacer);
+  }, [dynamicCategories]);
 
   // Determine user type from Clerk metadata (default to "individual")
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
@@ -277,7 +377,7 @@ function HeaderInner() {
 
   const handleCategoryTab = (catId: string) => {
     updateParams({ category: catId, subcategory: null });
-    setCategory("");
+    setSelectedCategories([]);
   };
 
   const handleSearch = () => {
@@ -291,20 +391,51 @@ function HeaderInner() {
   const clearFilters = () => {
     setKeywords("");
     setProjectSize("");
-    setCategory("");
+    setSelectedCategories([]);
     setLocations([]);
-    router.push("/");
+    // Keep the current category tab, only reset filters
+    const params = new URLSearchParams();
+    if (activeCategory && activeCategory !== "construction") {
+      params.set("category", activeCategory);
+    }
+    router.push(params.toString() ? `/?${params.toString()}` : "/");
   };
+
+  // Get dynamic filter options for current category
+  const getDynamicFilter = useCallback((filterId: string) => {
+    if (activeCategory && configFiltersMap && configFiltersMap[activeCategory]) {
+      const filter = configFiltersMap[activeCategory].find((f) => f.id === filterId);
+      if (filter) return filter.options;
+    }
+    return null;
+  }, [activeCategory, configFiltersMap]);
+
+  const currentLocationOptions = getDynamicFilter("location") ?? locationOptions;
+  const currentProjectSizeOptions = getDynamicFilter("project-size") ?? projectSizeOptions;
+  const categoryOptions = useMemo(() => {
+    const dynamicCats = getDynamicFilter("categories");
+    if (dynamicCats) return dynamicCats;
+
+    if (activeCategory === "renovation") return renovationCategories;
+    if (activeCategory === "architecture") return architectureCategories;
+    if (activeCategory === "interior") return interiorCategories;
+    if (activeCategory === "real-estate") return realEstateCategories;
+    return constructionCategories;
+  }, [activeCategory, getDynamicFilter]);
+
+  useEffect(() => {
+    setSelectedCategories(parseSubcategoryParam(searchParams.get("subcategory"), categoryOptions));
+  }, [searchParams, categoryOptions]);
 
   // Handle location multi-select
   const handleLocationChange = (locationId: string) => {
     let newLocations: string[];
-    
+
     if (locationId === "bali") {
       // Toggle BALI: if currently has all regions, clear all; otherwise select all
-      const allRegions = locationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
+      const allRegions = currentLocationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
       const hasAllRegions = allRegions.every(region => locations.includes(region));
-      
+
       if (hasAllRegions || locations.includes("bali")) {
         // Turn off BALI: clear all
         newLocations = [];
@@ -322,7 +453,7 @@ function HeaderInner() {
         newLocations = [...locations.filter(loc => loc !== "bali"), locationId];
       }
     }
-    
+
     setLocations(newLocations);
     updateParams({ location: newLocations.length > 0 ? newLocations.join(",") : null });
   };
@@ -330,58 +461,71 @@ function HeaderInner() {
   // Get location display text
   const getLocationDisplayText = () => {
     if (locations.length === 0) return "LOCATION";
-    
+
     // Check if all regions are selected (BALI mode)
-    const allRegions = locationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
+    const allRegions = currentLocationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
     const hasAllRegions = allRegions.every(region => locations.includes(region));
-    
+
     if (locations.includes("bali") || hasAllRegions) return "BALI";
     if (locations.length === 1) return locations[0].toUpperCase();
     return "LOCATION"; // Multiple locations selected
   };
 
   const isLocationActive = locations.length > 0;
-  
+
   // Check if BALI toggle should appear active (all regions selected)
   const isBaliActive = () => {
-    const allRegions = locationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
+    const allRegions = currentLocationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
     return allRegions.every(region => locations.includes(region)) || locations.includes("bali");
   };
 
-  // Get categories based on active main category
-  const getCategoryOptions = () => {
-    if (activeCategory === "renovation") {
-      return renovationCategories;
-    }
-    if (activeCategory === "architecture") {
-      return architectureCategories;
-    }
-    if (activeCategory === "interior") {
-      return interiorCategories;
-    }
-    if (activeCategory === "real-estate") {
-      return realEstateCategories;
-    }
-    return constructionCategories;
+  const handleCategoryChange = (subcategoryId: string) => {
+    const nextCategories = toggleSubcategorySelection(selectedCategories, subcategoryId, categoryOptions);
+    setSelectedCategories(nextCategories);
+    updateParams({ subcategory: encodeSubcategoryParam(nextCategories, categoryOptions) });
   };
 
   return (
+    <>
     <header className="relative">
-      {/* Gradient Background - Desktop: #E4E4E4 to #F14110, Mobile: #E9A28E to #F14110 */}
-      <div
-        className="absolute inset-0 rounded-b-[6px]"
-        style={{
-          background: "linear-gradient(to right, #E9A28E, #F14110)"
-        }}
-      />
-      <div
-        className="hidden sm:block absolute inset-0 rounded-b-[6px]"
-        style={{
-          background: "linear-gradient(to right, #E4E4E4, #F14110)"
-        }}
-      />
+      {headerMedia.url ? (
+        <>
+          <div className="absolute inset-0 rounded-b-[6px] overflow-hidden">
+            {headerMedia.type === "video" ? (
+              <video src={headerMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
+            ) : (
+              <Image
+                src={headerMedia.url}
+                alt="Header background"
+                fill
+                className="object-cover"
+                unoptimized={headerMedia.url.startsWith("data:")}
+              />
+            )}
+          </div>
+          <div className="absolute inset-0 rounded-b-[6px] bg-black/25" />
+        </>
+      ) : headerMediaState.isLoading ? (
+        <div className="absolute inset-0 rounded-b-[6px] bg-[#e4e4e4]" />
+      ) : (
+        <>
+          {/* Gradient Background - Desktop: #E4E4E4 to #F14110, Mobile: #E9A28E to #F14110 */}
+          <div
+            className="absolute inset-0 rounded-b-[6px]"
+            style={{
+              background: "linear-gradient(to right, #E9A28E, #F14110)"
+            }}
+          />
+          <div
+            className="hidden sm:block absolute inset-0 rounded-b-[6px]"
+            style={{
+              background: "linear-gradient(to right, #E4E4E4, #F14110)"
+            }}
+          />
+        </>
+      )}
 
-      <div className="relative z-10 px-5 sm:px-0 pt-4 sm:pt-6 pb-[10px] sm:pb-8">
+      <div className="relative z-10 px-5 sm:px-0 pt-4 sm:pt-6 pb-[8px] sm:pb-4">
         {/* Top Bar */}
         <div className="max-w-[900px] mx-auto flex items-center justify-between mb-8 sm:mb-6">
           {/* Logo */}
@@ -392,68 +536,89 @@ function HeaderInner() {
           {/* Right Side Buttons */}
           <div className="flex items-center gap-3 sm:gap-5">
             {/* Desktop: IG (first) */}
-            <button className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity">
-              <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
-            </button>
+            {igVisibleState.value !== "false" && (
+              <a href={igUrlState.value || "#"} target="_blank" rel="noopener noreferrer" className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity">
+                <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
+              </a>
+            )}
 
             <SignedIn>
-              {/* Desktop: Account icon (second) */}
+              {/* Account icon (mobile + desktop) */}
               <Link
                 href={userType === "company" ? "/company-dashboard" : "/dashboard"}
-                className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity"
+                className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
                 title="Dashboard"
               >
                 <Image src="/images/icon-account.svg" alt="Dashboard" width={19} height={20} />
               </Link>
-              {/* List your business button (third) */}
-              <Link
-                href="/register-business"
-                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
-              >
-                List your business
-              </Link>
+              {/* Log out button */}
+              {userType === "company" ? (
+                <button
+                  onClick={handleSignOut}
+                  className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
+                >
+                  Log out
+                </button>
+              ) : (
+                <button
+                  onClick={handleSignOut}
+                  className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
+                >
+                  Log out
+                </button>
+              )}
             </SignedIn>
 
             <SignedOut>
-              {/* Desktop: Account icon (second) */}
-              <Link
-                href="/sign-in"
+              {/* Desktop: Account icon → opens LOGIN modal */}
+              <button
+                onClick={() => openAuthModal("individual", "login")}
                 className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity"
               >
                 <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
-              </Link>
-              {/* List your business button (third) */}
-              <Link
-                href="/sign-up"
-                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white/10 transition-colors flex items-center"
+              </button>
+              {/* List your business → opens REGISTER modal, company pre-selected */}
+              <button
+                onClick={() => openAuthModal("company", "register")}
+                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
               >
                 List your business
-              </Link>
+              </button>
             </SignedOut>
           </div>
         </div>
 
         {/* Category Tabs - Horizontal scroll on mobile */}
         <div className="max-w-[900px] mx-auto mb-4">
+          <div className="relative overflow-visible">
           <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-2 min-w-max">
-              {mainCategories.map((cat) => (
+              {dynamicCategories.map((cat, index) => (
                 <button
                   key={cat.id}
+                  ref={index === dynamicCategories.length - 1 ? lastCategoryButtonRef : undefined}
                   onClick={() => handleCategoryTab(cat.id)}
-                  className={`h-10 px-4 sm:px-5 rounded-full text-[11px] sm:text-[12px] font-medium transition-all whitespace-nowrap ${
+                  className={`h-10 px-4 sm:px-5 rounded-full text-[11px] sm:text-[12px] font-medium transition-colors whitespace-nowrap ${
                     activeCategory === cat.id
-                      ? "bg-[#f8f8f8] text-[#f14110]"
+                      ? "bg-white text-[#f14110] hover:bg-white opacity-100 hover:opacity-100"
                       : "text-[#f8f8f8] border border-transparent hover:border-white hover:text-[#FFF]"
                   }`}
                 >
                   {cat.label}
                 </button>
               ))}
+              <div
+                aria-hidden="true"
+                className="sm:hidden flex-shrink-0"
+                style={{ width: mobileCategoryEndSpacerWidth }}
+              />
             </div>
           </div>
-          <p className="text-[#f8f8f8] text-[9px] mt-4 font-medium leading-[12px]">
-            {categorySubtitles[activeCategory] || categorySubtitles.construction}
+          {/* Gradient fade on right edge — mobile only, extends to screen edge past padding */}
+          <div className="sm:hidden pointer-events-none absolute -right-4 top-0 bottom-0 w-20" style={{ background: 'linear-gradient(to right, transparent, #F14110)' }} />
+          </div>
+          <p className="font-bam text-[#f8f8f8] text-[9px] mt-4 leading-[12px]">
+            {(activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction}
           </p>
         </div>
 
@@ -478,26 +643,33 @@ function HeaderInner() {
               {/* Project Size Dropdown */}
               <Dropdown
                 label="PROJECT SIZE"
-                options={projectSizeOptions}
+                options={currentProjectSizeOptions}
                 value={projectSize}
                 onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
                 width="w-[140px]"
                 isProjectSize={true}
+                closeSignal={dropdownCloseSignal}
               />
 
               {/* Categories Dropdown */}
               <Dropdown
                 label="CATEGORIES"
-                options={getCategoryOptions()}
-                value={category}
-                onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
+                options={categoryOptions}
+                value=""
+                onChange={handleCategoryChange}
                 width="w-[140px]"
+                multiSelect={true}
+                selectedValues={selectedCategories}
+                displayText={getSubcategoryDisplayText(selectedCategories, categoryOptions)}
+                isActive={isSubcategoryFilterActive(selectedCategories, categoryOptions)}
+                isOptionSelected={(optionId) => isSubcategoryOptionSelected(selectedCategories, optionId, categoryOptions)}
+                closeSignal={dropdownCloseSignal}
               />
 
               {/* Location Dropdown - multi-select enabled */}
               <Dropdown
                 label="LOCATION"
-                options={locationOptions}
+                options={currentLocationOptions}
                 value="" // Not used in multi-select mode
                 onChange={handleLocationChange}
                 width="w-[120px]"
@@ -509,6 +681,7 @@ function HeaderInner() {
                   if (optionId === "bali") return isBaliActive();
                   return locations.includes(optionId);
                 }}
+                closeSignal={dropdownCloseSignal}
               />
 
               {/* Search Button - 40x40 container with 34x34 icon centered */}
@@ -554,11 +727,12 @@ function HeaderInner() {
                 <div className="flex-1">
                   <Dropdown
                     label="PROJECT SIZE"
-                    options={projectSizeOptions}
+                    options={currentProjectSizeOptions}
                     value={projectSize}
                     onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
                     width="w-full"
                     isProjectSize={true}
+                    closeSignal={dropdownCloseSignal}
                   />
                 </div>
 
@@ -566,10 +740,19 @@ function HeaderInner() {
                 <div className="flex-1">
                   <Dropdown
                     label="CATEGORIES"
-                    options={getCategoryOptions()}
-                    value={category}
-                    onChange={(val) => { setCategory(val); updateParams({ subcategory: val || null }); }}
+                    options={categoryOptions}
+                    value=""
+                    onChange={handleCategoryChange}
                     width="w-full"
+                    multiSelect={true}
+                    selectedValues={selectedCategories}
+                    displayText={getSubcategoryDisplayText(selectedCategories, categoryOptions)}
+                    isActive={isSubcategoryFilterActive(selectedCategories, categoryOptions)}
+                    isOptionSelected={(optionId) => isSubcategoryOptionSelected(selectedCategories, optionId, categoryOptions)}
+                    alignRight={true}
+                    menuClassName={'min-w-[calc(200%+2px)] max-w-none'}
+                    isMobileCategoryDropdown={true}
+                    closeSignal={dropdownCloseSignal}
                   />
                 </div>
 
@@ -577,7 +760,7 @@ function HeaderInner() {
                 <div className="flex-1">
                   <Dropdown
                     label="LOCATION"
-                    options={locationOptions}
+                    options={currentLocationOptions}
                     value="" // Not used in multi-select mode
                     onChange={handleLocationChange}
                     width="w-full"
@@ -590,6 +773,7 @@ function HeaderInner() {
                       return locations.includes(optionId);
                     }}
                     alignRight={true}
+                    closeSignal={dropdownCloseSignal}
                   />
                 </div>
               </div>
@@ -608,5 +792,33 @@ function HeaderInner() {
         </div>
       </div>
     </header>
+
+    {/* Auth modal — rendered outside header so it can overlay everything */}
+    <AuthModal
+      isOpen={authModalOpen}
+      onClose={() => setAuthModalOpen(false)}
+      initialMode={authModalMode}
+      initialAccountType={authModalAccountType}
+    />
+
+    {/* Logout prompt for individuals clicking "List your business" */}
+    {showLogoutPrompt && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/50" onClick={() => setShowLogoutPrompt(false)} />
+        <div className="relative bg-white w-full max-w-[380px] rounded-[6px] p-8 text-center">
+          <h3 className="text-[18px] font-bold text-[#333] mb-3">Register Your Company</h3>
+          <p className="text-[12px] text-[#333]/70 mb-6 leading-[18px]">
+            Log out first to register your company profile.
+          </p>
+          <button
+            onClick={() => setShowLogoutPrompt(false)}
+            className="h-10 min-w-[140px] px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

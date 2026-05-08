@@ -47,7 +47,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <StatCard label="Total Companies" value={totalCompanies} />
         <StatCard label="Total Users" value={totalUsers} />
-        <StatCard label="Total Reviews" value={totalReviews} />
+        <StatCard label="Total Testimonials" value={totalReviews} />
         <StatCard label="Pending Reports" value={pendingReports} />
       </div>
 
@@ -57,7 +57,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-3 gap-4">
           <MiniStat label="New Companies" value={newCompaniesThisMonth} />
           <MiniStat label="New Users" value={newUsersThisMonth} />
-          <MiniStat label="New Reviews" value={newReviewsThisMonth} />
+          <MiniStat label="New Testimonials" value={newReviewsThisMonth} />
         </div>
       </div>
 

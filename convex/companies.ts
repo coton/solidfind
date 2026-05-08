@@ -1,5 +1,7 @@
 import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
+import { ensureUniqueCompanySlug, normalizeCompanySlug } from "../src/lib/company-profile-url.mjs";
 
 export const list = query({
   args: {
@@ -45,6 +47,9 @@ export const list = query({
       );
     }
 
+    // Pro companies listed first
+    companies.sort((a, b) => (b.isPro ? 1 : 0) - (a.isPro ? 1 : 0));
+
     return companies;
   },
 });
@@ -61,6 +66,30 @@ export const getById = query({
   args: { id: v.id("companies") },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
+  },
+});
+
+export const getByPublicIdentifier = query({
+  args: { identifier: v.string() },
+  handler: async (ctx, args) => {
+    const identifier = args.identifier.trim();
+
+    if (!identifier) return null;
+
+    try {
+      const byId = await ctx.db.get(identifier as Id<"companies">);
+      if (byId) return byId;
+    } catch {
+      // Fall through to slug lookup.
+    }
+
+    const companies = await ctx.db.query("companies").collect();
+    return (
+      companies.find((company) => {
+        const slug = company.slug?.trim() || normalizeCompanySlug(company.name);
+        return slug === identifier;
+      }) ?? null
+    );
   },
 });
 
@@ -83,6 +112,8 @@ export const getAdjacentIds = query({
     return {
       prevId: idx > 0 ? all[idx - 1]._id : null,
       nextId: idx < all.length - 1 ? all[idx + 1]._id : null,
+      prevCompany: idx > 0 ? all[idx - 1] : null,
+      nextCompany: idx < all.length - 1 ? all[idx + 1] : null,
     };
   },
 });
@@ -96,6 +127,7 @@ export const create = mutation({
     subcategory: v.optional(v.string()),
     location: v.optional(v.string()),
     address: v.optional(v.string()),
+    googleMapsLink: v.optional(v.string()),
     isPro: v.boolean(),
     projects: v.optional(v.number()),
     teamSize: v.optional(v.number()),
@@ -105,11 +137,34 @@ export const create = mutation({
     whatsapp: v.optional(v.string()),
     facebook: v.optional(v.string()),
     linkedin: v.optional(v.string()),
+    instagram: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
+    logoId: v.optional(v.id("_storage")),
+    projectImageIds: v.optional(v.array(v.id("_storage"))),
+    projectImageUrls: v.optional(v.array(v.string())),
+    projectSizes: v.optional(v.array(v.string())),
+    constructionTypes: v.optional(v.array(v.string())),
+    constructionLocations: v.optional(v.array(v.string())),
+    renovationTypes: v.optional(v.array(v.string())),
+    renovationLocations: v.optional(v.array(v.string())),
+    architectureTypes: v.optional(v.array(v.string())),
+    architectureLocations: v.optional(v.array(v.string())),
+    interiorTypes: v.optional(v.array(v.string())),
+    interiorLocations: v.optional(v.array(v.string())),
+    realEstateTypes: v.optional(v.array(v.string())),
+    realEstateLocations: v.optional(v.array(v.string())),
     since: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const companies = await ctx.db.query("companies").collect();
+    const slug = ensureUniqueCompanySlug(
+      args.name,
+      companies.map((company) => company.slug ?? normalizeCompanySlug(company.name))
+    );
+
     return await ctx.db.insert("companies", {
       ...args,
+      slug,
       rating: 0,
       reviewCount: 0,
       bookmarkCount: 0,
@@ -122,12 +177,15 @@ export const create = mutation({
 export const update = mutation({
   args: {
     id: v.id("companies"),
+    ownerId: v.optional(v.id("users")),
     name: v.optional(v.string()),
+    slug: v.optional(v.string()),
     description: v.optional(v.string()),
     category: v.optional(v.string()),
     subcategory: v.optional(v.string()),
     location: v.optional(v.string()),
     address: v.optional(v.string()),
+    googleMapsLink: v.optional(v.string()),
     isPro: v.optional(v.boolean()),
     projects: v.optional(v.number()),
     teamSize: v.optional(v.number()),
@@ -137,18 +195,30 @@ export const update = mutation({
     whatsapp: v.optional(v.string()),
     facebook: v.optional(v.string()),
     linkedin: v.optional(v.string()),
+    instagram: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
     projectSizes: v.optional(v.array(v.string())),
     constructionTypes: v.optional(v.array(v.string())),
     constructionLocations: v.optional(v.array(v.string())),
     renovationTypes: v.optional(v.array(v.string())),
     renovationLocations: v.optional(v.array(v.string())),
+    architectureTypes: v.optional(v.array(v.string())),
+    architectureLocations: v.optional(v.array(v.string())),
+    interiorTypes: v.optional(v.array(v.string())),
+    interiorLocations: v.optional(v.array(v.string())),
+    realEstateTypes: v.optional(v.array(v.string())),
+    realEstateLocations: v.optional(v.array(v.string())),
     logoId: v.optional(v.id("_storage")),
     projectImageIds: v.optional(v.array(v.id("_storage"))),
+    projectImageUrls: v.optional(v.array(v.string())),
     isFeatured: v.optional(v.boolean()),
     since: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
+    const existingCompany = await ctx.db.get(id);
+    if (!existingCompany) return;
+
     // Filter out undefined values
     const filtered: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(updates)) {
@@ -156,6 +226,18 @@ export const update = mutation({
         filtered[key] = value;
       }
     }
+
+    if (updates.name !== undefined || updates.slug !== undefined) {
+      const companies = await ctx.db.query("companies").collect();
+      filtered.slug = ensureUniqueCompanySlug(
+        updates.name ?? existingCompany.name,
+        companies
+          .filter((company) => company._id !== id)
+          .map((company) => company.slug ?? normalizeCompanySlug(company.name)),
+        existingCompany.slug ?? normalizeCompanySlug(existingCompany.name)
+      );
+    }
+
     await ctx.db.patch(id, filtered);
   },
 });
@@ -220,6 +302,6 @@ export const listIds = query({
   args: {},
   handler: async (ctx) => {
     const companies = await ctx.db.query("companies").collect();
-    return companies.map((c) => ({ id: c._id, createdAt: c.createdAt }));
+    return companies.map((c) => ({ id: c._id, name: c.name, slug: c.slug, createdAt: c.createdAt }));
   },
 });

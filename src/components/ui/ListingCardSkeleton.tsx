@@ -2,27 +2,29 @@ import { Skeleton } from "./skeleton"
 
 export function ListingCardSkeleton() {
   return (
-    <div className="relative w-[210px] h-[230px] rounded-[6px] overflow-hidden bg-[#f8f8f8]">
-      {/* Avatar */}
-      <div className="absolute top-[14px] left-[14px]">
-        <Skeleton className="w-[38px] h-[38px] rounded-full" />
+    <div className="relative w-full h-[220px] rounded-[6px] overflow-hidden bg-[#f8f8f8]">
+      {/* Logo */}
+      <div className="absolute top-[10px] left-[10px]">
+        <Skeleton className="w-[70px] h-[70px] rounded-[6px]" />
       </div>
-      {/* Title & desc */}
-      <div className="absolute top-[14px] left-[62px] right-[14px] space-y-2">
-        <Skeleton className="h-[14px] w-[100px]" />
-        <Skeleton className="h-[10px] w-[120px]" />
-        <Skeleton className="h-[10px] w-[80px]" />
+      {/* Name & category */}
+      <div className="absolute top-[10px] left-[90px] right-[10px] space-y-2">
+        <Skeleton className="h-[13px] w-[80%]" />
+        <Skeleton className="h-[9px] w-[50%]" />
       </div>
-      {/* Stats row */}
-      <div className="absolute bottom-[40px] left-[14px] right-[14px] flex gap-3">
-        <Skeleton className="h-[10px] w-[50px]" />
-        <Skeleton className="h-[10px] w-[50px]" />
+      {/* Description area */}
+      <div className="absolute top-[90px] left-[10px] right-[10px] space-y-[6px]">
+        <Skeleton className="h-[9px] w-full" />
+        <Skeleton className="h-[9px] w-[90%]" />
+        <Skeleton className="h-[9px] w-[70%]" />
       </div>
-      {/* Pro images row */}
-      <div className="absolute bottom-[14px] left-[14px] right-[14px] flex gap-2">
-        <Skeleton className="h-[18px] w-[55px] rounded-sm" />
-        <Skeleton className="h-[18px] w-[55px] rounded-sm" />
-        <Skeleton className="h-[18px] w-[55px] rounded-sm" />
+      {/* Bottom stats row */}
+      <div className="absolute bottom-[10px] left-[10px] right-[10px] flex items-center justify-between">
+        <div className="flex gap-3">
+          <Skeleton className="h-[9px] w-[40px]" />
+          <Skeleton className="h-[9px] w-[40px]" />
+        </div>
+        <Skeleton className="h-[9px] w-[30px]" />
       </div>
     </div>
   )

@@ -1,18 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useUser, SignOutButton, useClerk } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/cards";
+import { useProEnabled } from "@/hooks/useProEnabled";
+import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
+
+const DASHBOARD_CATEGORY_PAGE_SIZE = 4;
+const savedListingSortOptions = [
+  { value: "az", label: "Sort by: A > Z" },
+  { value: "recent", label: "Sort by: Recent" },
+] as const;
+
+type SavedListingSort = typeof savedListingSortOptions[number]["value"];
+
+type SavedListingCard = {
+  id: string;
+  name: string;
+  description: string;
+  rating: number;
+  isPro: boolean;
+  isSaved: boolean;
+  imageUrl?: string;
+  logoId?: string;
+  savedAt: number;
+};
+
+function sortSavedListings(listings: SavedListingCard[], sortBy: string) {
+  return [...listings].sort((a, b) => {
+    if (sortBy === "az") {
+      return a.name.localeCompare(b.name);
+    }
+
+    return b.savedAt - a.savedAt;
+  });
+}
 
 export default function DashboardPage() {
-  const [sortByConstruction, setSortByConstruction] = useState("latest");
-  const [sortByRenovation, setSortByRenovation] = useState("latest");
+  const [sortByCategory, setSortByCategory] = useState<Record<string, SavedListingSort>>({});
   const [sortDropdownOpen, setSortDropdownOpen] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -20,18 +52,25 @@ export default function DashboardPage() {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const deleteAccount = useMutation(api.users.deleteAccount);
+  const proEnabled = useProEnabled();
+  const reviewsEnabled = useReviewsEnabled();
 
-  const handleDeleteAccount = async () => {
-    if (!clerkUser?.id) return;
-    await deleteAccount({ clerkId: clerkUser.id });
-    await signOut();
-    router.push("/");
-  };
-
+  // Check if user has a company and redirect if needed
   const currentUser = useQuery(
     api.users.getCurrentUser,
     clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
   );
+
+  const handleSignOut = async () => {
+    await signOut({ redirectUrl: "/" });
+    router.push("/");
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!clerkUser?.id) return;
+    await deleteAccount({ clerkId: clerkUser.id });
+    await handleSignOut();
+  };
 
   const savedListings = useQuery(
     api.savedListings.listByUser,
@@ -43,198 +82,176 @@ export default function DashboardPage() {
     email: clerkUser?.primaryEmailAddress?.emailAddress || "user@gmail.com",
   };
 
-  // Split saved listings by category
-  const constructionListings = (savedListings ?? [])
-    .filter((s) => s.category === "construction" && s.company)
-    .map((s) => ({
-      id: s.company!._id,
-      name: s.company!.name,
-      description: s.company!.description ?? "",
-      rating: s.company!.rating ?? 4.5,
-      isPro: s.company!.isPro,
-      isSaved: true,
-    }));
+  // Get visible page categories from admin config
+  const pageConfigs = useQuery(api.pageConfigs.listVisible);
 
-  const renovationListings = (savedListings ?? [])
-    .filter((s) => s.category === "renovation" && s.company)
-    .map((s) => ({
-      id: s.company!._id,
-      name: s.company!.name,
-      description: s.company!.description ?? "",
-      rating: s.company!.rating ?? 4.5,
-      isPro: s.company!.isPro,
-      isSaved: true,
-    }));
+  useEffect(() => {
+    if (currentUser?.accountType === "company") {
+      router.push("/company-dashboard");
+    }
+  }, [currentUser?.accountType, router]);
+
+  // Redirect company users to company dashboard based on accountType, not DB company record
+  if (currentUser?.accountType === "company") {
+    return null;
+  }
+
+  // All category definitions — fallback while loading
+  const fallbackCategories = [
+    { id: "construction", label: "CONSTRUCTION" },
+    { id: "renovation", label: "RENOVATION" },
+  ];
+
+  const allCategories = pageConfigs
+    ? pageConfigs.map((p) => ({ id: p.categoryId, label: p.label.replace(/^\d+\.\s*/, "").toUpperCase() }))
+    : fallbackCategories;
+
+  // Group saved listings by category
+  const listingsByCategory = allCategories.map((cat) => ({
+    ...cat,
+    listings: (savedListings ?? [])
+      .filter((s) => s.category === cat.id && s.company)
+      .map((s) => ({
+        id: s.company!._id,
+        name: s.company!.name,
+        description: s.company!.description ?? "",
+        rating: s.company!.rating ?? 4.5,
+        isPro: s.company!.isPro,
+        isSaved: true,
+        imageUrl: s.company!.imageUrl,
+        logoId: s.company!.logoId,
+        savedAt: s.savedAt,
+      })),
+  }));
+
+  // Only show categories that have at least one bookmark
+  const visibleCategories = listingsByCategory.filter((cat) => cat.listings.length > 0);
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
+    <div className="min-h-screen bg-[#ececec] flex flex-col">
       <Header />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         {/* User Info Section */}
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
-            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">{user.name}</h1>
-            <p className="text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 max-w-full max-w-[440px]">
-              Find your list of saved profiles here. Add-remove profiles by clicking bookmark icon.
-              <br />
-              Temukan daftar profil yang Anda simpan di sini. Tambah-hapus profil dengan mengklik ikon bookmark.
-            </p>
+        <div className="mb-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
+              <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">{user.name}</h1>
+            </div>
+
+            <div className="text-right">
+              <p className="text-[11px] text-[#333] tracking-[0.22px] mb-1">{user.email}</p>
+              {reviewsEnabled && (
+                <Link
+                  href="/reviews"
+                  className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center justify-center"
+                >
+                  Your testimonials
+                </Link>
+              )}
+            </div>
           </div>
 
-          <div className="text-right">
-            <p className="text-[11px] text-[#333] tracking-[0.22px] mb-1">{user.email}</p>
-            <div className="flex items-center gap-2 justify-end mb-3">
-              <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                DELETE PROFILE
-              </button>
-              <SignOutButton>
-                <button className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                  LOG OUT
-                </button>
-              </SignOutButton>
-            </div>
-            <Link
-              href="/reviews"
-              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center"
-            >
-              Your reviews
-            </Link>
-          </div>
+          <p className="font-bam text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 w-full max-w-none sm:max-w-[440px]">
+            Find your list of saved profiles here. Add-remove profiles by clicking bookmark icon.
+            <br />
+            Temukan daftar profil yang Anda simpan di sini. Tambah-hapus profil dengan mengklik ikon bookmark.
+          </p>
         </div>
 
-        {/* Construction Section */}
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-baseline gap-4">
-              <h2 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">CONSTRUCTION</h2>
-              <span className="text-[11px] text-[#333]/50 tracking-[0.22px]">
-                {constructionListings.length.toString().padStart(2, '0')} Listings Saved
-              </span>
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setSortDropdownOpen(sortDropdownOpen === 'construction' ? null : 'construction')}
-                className="flex items-center gap-2 text-[11px] text-[#333]/70 tracking-[0.22px]"
-              >
-                Sort by: <span className="text-[#f14110] font-medium">{sortByConstruction === 'latest' ? 'Latest' : 'Favorite'}</span>
-                <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              {sortDropdownOpen === 'construction' && (
+        {/* Banner Image */}
+        <div className="mb-8 rounded-[6px] overflow-hidden relative" style={{ width: '100%', aspectRatio: '900 / 200' }}>
+          <Image
+            src="/images/bg-individual-page.png"
+            alt="SolidFind"
+            fill
+            sizes="(max-width: 900px) 100vw, 900px"
+            className="object-cover object-right-bottom sm:object-center"
+            priority
+          />
+        </div>
+
+        {/* Bookmark sections — dynamic per category */}
+        {visibleCategories.map((cat) => {
+          const sortVal = sortByCategory[cat.id] ?? "recent";
+          const sortedListings = sortSavedListings(cat.listings, sortVal);
+          const desktopListings = sortedListings.slice(0, DASHBOARD_CATEGORY_PAGE_SIZE);
+
+          return (
+            <section key={cat.id} className="mb-10">
+              <div className="mb-4">
+                <h2 className="mb-2 text-[24px] font-bold text-[#333] tracking-[0.48px]">{cat.label}</h2>
+                <div className="flex items-center justify-between gap-4">
+                  <span className={`text-[11px] tracking-[0.22px] ${cat.listings.length > 0 ? 'text-[#f14110]' : 'text-[#333]/50'}`}>
+                    {cat.listings.length.toString().padStart(2, '0')} Listings Saved
+                  </span>
+                  {cat.listings.length > 0 && (
+                    <div className="relative">
+                      <button
+                        onClick={() => setSortDropdownOpen(sortDropdownOpen === cat.id ? null : cat.id)}
+                        className="flex items-center gap-2 text-right text-[11px] text-[#333]/70 tracking-[0.22px]"
+                      >
+                        Sort by: <span className="text-[#f14110] font-medium">{sortVal === 'az' ? 'A > Z' : 'Recent'}</span>
+                        <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                      {sortDropdownOpen === cat.id && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
+                          <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
+                            {savedListingSortOptions.map((option) => (
+                              <button
+                                key={option.value}
+                                onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: option.value })); setSortDropdownOpen(null); }}
+                                className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === option.value ? 'text-[#f14110]' : 'text-[#333]'}`}
+                              >
+                                {option.label.replace("Sort by: ", "")}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {cat.listings.length > 0 ? (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
-                  <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
-                    <button
-                      onClick={() => { setSortByConstruction('latest'); setSortDropdownOpen(null); }}
-                      className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortByConstruction === 'latest' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                    >
-                      Latest
-                    </button>
-                    <button
-                      onClick={() => { setSortByConstruction('favorite'); setSortDropdownOpen(null); }}
-                      className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortByConstruction === 'favorite' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                    >
-                      Favorite
-                    </button>
+                  <div className="sm:hidden overflow-x-auto overscroll-x-contain scrollbar-hide -mx-4 px-4">
+                    <div className="flex gap-5 pb-2">
+                      {sortedListings.map((listing) => (
+                        <div key={listing.id} className="flex-shrink-0">
+                          <ListingCard {...listing} proEnabled={proEnabled} categoryContext={cat.id} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </>
-              )}
-            </div>
-          </div>
 
-          <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
-            {constructionListings.length > 0 ? (
-              constructionListings.map((listing) => (
-                <ListingCard key={listing.id} {...listing} />
-              ))
-            ) : (
-              <p className="text-[11px] text-[#333]/50 col-span-4">No saved construction listings yet.</p>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-6">
-              <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
-                ← PREVIOUS
-              </button>
-              <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-                NEXT →
-              </button>
-            </div>
-            <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-              SEE ALL
-            </button>
-          </div>
-        </section>
-
-        {/* Renovation Section */}
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-baseline gap-4">
-              <h2 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">RENOVATION</h2>
-              <span className="text-[11px] text-[#333]/50 tracking-[0.22px]">
-                {renovationListings.length.toString().padStart(2, '0')} Listings Saved
-              </span>
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setSortDropdownOpen(sortDropdownOpen === 'renovation' ? null : 'renovation')}
-                className="flex items-center gap-2 text-[11px] text-[#333]/70 tracking-[0.22px]"
-              >
-                Sort by: <span className="text-[#f14110] font-medium">{sortByRenovation === 'latest' ? 'Latest' : 'Favorite'}</span>
-                <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              {sortDropdownOpen === 'renovation' && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
-                  <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
-                    <button
-                      onClick={() => { setSortByRenovation('latest'); setSortDropdownOpen(null); }}
-                      className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortByRenovation === 'latest' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                    >
-                      Latest
-                    </button>
-                    <button
-                      onClick={() => { setSortByRenovation('favorite'); setSortDropdownOpen(null); }}
-                      className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortByRenovation === 'favorite' ? 'text-[#f14110]' : 'text-[#333]'}`}
-                    >
-                      Favorite
-                    </button>
+                  <div className="hidden sm:grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
+                    {desktopListings.map((listing) => (
+                      <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} categoryContext={cat.id} />
+                    ))}
                   </div>
+                  {cat.listings.length > 4 && (
+                    <div className="hidden sm:flex items-center justify-end mt-4">
+                      <Link
+                        href={`/dashboard/${cat.id}`}
+                        className="h-[32px] px-5 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
+                      >
+                        See all
+                      </Link>
+                    </div>
+                  )}
                 </>
+              ) : (
+                <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved {cat.label.toLowerCase()} listings yet. Start bookmarking company profiles you would be interested to work with.</p>
               )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
-            {renovationListings.length > 0 ? (
-              renovationListings.map((listing) => (
-                <ListingCard key={listing.id} {...listing} />
-              ))
-            ) : (
-              <p className="text-[11px] text-[#333]/50 col-span-4">No saved renovation listings yet.</p>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-6">
-              <button className="text-[11px] text-[#333]/50 tracking-[0.22px] hover:text-[#333]">
-                ← PREVIOUS
-              </button>
-              <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-                NEXT →
-              </button>
-            </div>
-            <button className="text-[11px] text-[#333] font-medium tracking-[0.22px] hover:text-[#f14110]">
-              SEE ALL
-            </button>
-          </div>
-        </section>
+            </section>
+          );
+        })}
       </main>
 
       <Footer />

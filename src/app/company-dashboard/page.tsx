@@ -2,20 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { buildCompanyProfilePath, buildCompanyReviewsPath } from "@/lib/company-profile-url.mjs";
 import { Star } from "lucide-react";
+import { useProEnabled } from "@/hooks/useProEnabled";
+import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 
 const proFeatures = [
   { icon: "star", title: "Top search ranking", subtitle: "Peringkat pencarian teratas" },
   { icon: "ai", title: "AI search optimisation", subtitle: "Optimasi pencarian AI" },
   { icon: "stats", title: "Statistics", subtitle: "Statistik" },
-  { icon: "photos", title: "12 project pictures", subtitle: "12 gambar proyek" },
-  { icon: "ad", title: "Possibility to buy ad space", subtitle: "Boleh untuk membeli iklan" },
+  { icon: "pics", title: "12 project pictures or videos", subtitle: "12 gambar proyek atau Video" },
+  { icon: "ads", title: "Possibility to buy ad space", subtitle: "Boleh untuk membeli iklan" },
 ];
 
 function ReviewCard({ userName, rating, content, date }: {
@@ -44,21 +48,29 @@ function ReviewCard({ userName, rating, content, date }: {
 }
 
 export default function CompanyDashboardPage() {
+  const proEnabled = useProEnabled();
+  const reviewsEnabled = useReviewsEnabled();
   const [showAdModal, setShowAdModal] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [redirected, setRedirected] = useState(false);
   const router = useRouter();
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const deleteAccount = useMutation(api.users.deleteAccount);
 
-  const handleDeleteAccount = async () => {
-    if (!clerkUser?.id) return;
-    await deleteAccount({ clerkId: clerkUser.id });
-    await signOut();
+  const handleSignOut = async () => {
+    await signOut({ redirectUrl: "/" });
     router.push("/");
   };
 
+  const handleDeleteAccount = async () => {
+    if (!clerkUser?.id) return;
+    await deleteAccount({ clerkId: clerkUser.id });
+    await handleSignOut();
+  };
+
+  // Check if user has a company and redirect if needed
   const currentUser = useQuery(
     api.users.getCurrentUser,
     clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
@@ -74,39 +86,29 @@ export default function CompanyDashboardPage() {
     company?._id ? { companyId: company._id } : "skip"
   );
 
-  const monthlyViews = [
-    { month: "January", views: 32 },
-    { month: "February", views: 36 },
-    { month: "March", views: 48 },
-    { month: "April", views: 32 },
-  ];
+  const monthlyViews = useQuery(
+    api.profileViews.getMonthlyStats,
+    company?._id ? { companyId: company._id } : "skip"
+  ) ?? [];
+
+  const viewsLastMonth = useQuery(
+    api.profileViews.getViewsLastMonth,
+    company?._id ? { companyId: company._id } : "skip"
+  ) ?? 0;
 
   const isPro = company?.isPro ?? false;
 
-  // If user has no company yet, show onboarding prompt
-  if (currentUser && company === null) {
-    return (
-      <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
-        <Header />
-        <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
-          <div className="text-center py-20">
-            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-4">
-              Welcome!
-            </h1>
-            <p className="text-[14px] text-[#333]/70 mb-8 max-w-[400px] mx-auto">
-              {"You haven't listed your business yet. Register your company to get discovered on SolidFind."}
-            </p>
-            <Link
-              href="/register-business"
-              className="inline-flex items-center h-10 px-8 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
-            >
-              Register your business
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+    // Redirect based on account type when no company exists
+  if (currentUser && company === null && !redirected) {
+    setRedirected(true);
+    if (currentUser.accountType === "company") {
+      // Company user with no company record yet → create one
+      router.push("/register-business");
+    } else {
+      // Individual user somehow landed here → send to individual dashboard
+      router.push("/dashboard");
+    }
+    return null;
   }
 
   const data = {
@@ -114,7 +116,7 @@ export default function CompanyDashboardPage() {
     accountType: isPro ? "PRO" : "FREE",
     stats: {
       bookmarked: company?.bookmarkCount ?? 0,
-      viewsLastMonth: company?.viewsLastMonth ?? 0,
+      viewsLastMonth,
       mostSearchedLocation: "KARANGASEM",
     },
     monthlyViews,
@@ -128,7 +130,7 @@ export default function CompanyDashboardPage() {
     })),
   };
 
-  const maxViews = Math.max(...data.monthlyViews.map(m => m.views));
+  const maxViews = Math.max(1, ...data.monthlyViews.map(m => m.views));
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -136,78 +138,88 @@ export default function CompanyDashboardPage() {
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         {/* Header Row */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start justify-between mb-[5px]">
           <div>
-            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2">
-              Company profile
+            <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
+            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-0">
+              {company?._id ? (
+                <Link href={buildCompanyProfilePath(company)} className="hover:text-[#f14110] transition-colors">
+                  {data.name}
+                </Link>
+              ) : (
+                data.name
+              )}
             </h1>
-            <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
-              Here are the latest statistics about your company page. Check the latest reviews.
-            </p>
           </div>
 
           <div className="text-right">
-            <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">
-              {isPro ? "PRO ACCOUNT" : "FREE ACCOUNT"}
-            </p>
-            {isPro ? (
-              <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                DELETE PROFILE
-              </button>
-            ) : (
-              <Link
-                href="/upgrade"
-                className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]"
-              >
-                UPGRADE FOR MORE
-              </Link>
+            {isPro && proEnabled ? (
+              <p className="text-[11px] font-medium tracking-[0.22px] mb-1 text-[#f14110]">PRO ACCOUNT</p>
+            ) : proEnabled ? (
+              <p className="text-[11px] font-medium tracking-[0.22px] mb-1 text-[#333]/60">FREE ACCOUNT</p>
+            ) : null}
+            {clerkUser?.emailAddresses?.[0]?.emailAddress && (
+              <p className="text-[10px] text-[#333]/60 tracking-[0.2px] mb-1">
+                {clerkUser.emailAddresses[0].emailAddress}
+              </p>
             )}
+
           </div>
+        </div>
+
+        <div className="mb-6">
+          <p className="w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px] sm:max-w-[600px]">
+            Your profile is live on SolidFind. As the platform grows, so does your visibility. Make sure you are showing your best profile : )
+            <br />
+            Profil Anda sudah aktif di SolidFind. Seiring platform berkembang, begitu pula jangkauan Anda. Pastikan kamu menampilkan profil terbaikmu : )
+          </p>
         </div>
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
-          {isPro ? (
-            <button
-              onClick={() => setShowAdModal(true)}
-              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors"
-            >
-              Get AD space
-            </button>
-          ) : (
-            <Link
-              href="/upgrade"
-              className="h-10 px-6 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors flex items-center"
-            >
-              Upgrade to Pro
-            </Link>
-          )}
           <Link
             href="/company-dashboard/edit"
-            className="h-10 px-6 rounded-full bg-[#333] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#444] transition-colors flex items-center"
+            className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
+            style={{ minWidth: '140px' }}
           >
             Edit profile
           </Link>
+          {isPro && proEnabled && (
+            <button
+              onClick={() => setShowAdModal(true)}
+              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors ml-auto"
+            >
+              Get AD space
+            </button>
+          )}
+          {!isPro && proEnabled && (
+            <button
+              onClick={() => setShowProModal(true)}
+              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors ml-auto"
+            >
+              Get PRO
+            </button>
+          )}
         </div>
 
         {/* Stats Grid */}
-        <div className={`grid ${isPro ? 'grid-cols-4' : 'grid-cols-1 justify-items-end'} gap-6 mb-8`}>
-          {isPro && (
-            <>
-              {/* Bookmarked */}
-              <div>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Company bookmarked /
-                </p>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-                  Perusahaan favorit sebanyak
-                </p>
-                <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px]">
-                  {data.stats.bookmarked}
-                  <span className="text-[14px] font-normal ml-1">Times</span>
-                </p>
-              </div>
+        <div className={`grid ${isPro && proEnabled ? 'grid-cols-4' : proEnabled ? 'grid-cols-2' : 'grid-cols-1'} gap-6 mb-8`}>
+          {/* Bookmarked — always visible */}
+          <div>
+            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+              Company bookmarked /
+            </p>
+            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
+              Perusahaan favorit sebanyak
+            </p>
+            <p className={`text-[32px] font-bold tracking-[0.64px] ${data.stats.bookmarked === 0 ? 'text-[#666]' : 'text-[#f14110]'}`}>
+              {data.stats.bookmarked}
+              <span className="text-[14px] font-normal ml-1">Times</span>
+            </p>
+          </div>
 
+          {isPro && proEnabled && (
+            <>
               {/* Views Last Month */}
               <div>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
@@ -237,58 +249,52 @@ export default function CompanyDashboardPage() {
             </>
           )}
 
-          {/* PRO Features */}
-          <div className="bg-white rounded-[6px] p-4">
-            <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-3">
-              Services included with PRO account
-              <br />
-              Layanan dengan akun PRO
-            </p>
-            <div className="space-y-2">
-              {proFeatures.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-4 h-4 flex items-center justify-center text-[#f14110]">
-                    {feature.icon === "star" && <Star className="w-4 h-4" />}
-                    {feature.icon === "ai" && (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
-                      </svg>
-                    )}
-                    {feature.icon === "stats" && (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <rect x="1" y="8" width="3" height="7"/>
-                        <rect x="6" y="4" width="3" height="11"/>
-                        <rect x="11" y="1" width="3" height="14"/>
-                      </svg>
-                    )}
-                    {feature.icon === "photos" && (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <rect x="1" y="3" width="14" height="10" rx="1"/>
-                        <circle cx="5" cy="7" r="1.5"/>
-                        <path d="M4 11L7 8L9 10L12 7L14 9V12H2V11H4Z"/>
-                      </svg>
-                    )}
-                    {feature.icon === "ad" && (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <rect x="1" y="1" width="14" height="14" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M4 11L8 5L12 11H4Z"/>
-                      </svg>
-                    )}
+          {/* PRO Features — only when proEnabled */}
+          {proEnabled && (
+            <div className="bg-white rounded-[6px] p-4">
+              <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-3">
+                Services included with PRO account
+                <br />
+                Layanan dengan akun PRO
+              </p>
+              <div className="space-y-2">
+                {proFeatures.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="w-4 h-4 flex items-center justify-center text-[#f14110]">
+                      {feature.icon === "star" && <Star className="w-4 h-4" />}
+                      {feature.icon === "ai" && (
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
+                        </svg>
+                      )}
+                      {feature.icon === "stats" && (
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <rect x="1" y="8" width="3" height="7"/>
+                          <rect x="6" y="4" width="3" height="11"/>
+                          <rect x="11" y="1" width="3" height="14"/>
+                        </svg>
+                      )}
+                      {feature.icon === "pics" && (
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M17.5 0C18.163 0 18.7987 0.263581 19.2676 0.732422C19.7364 1.20126 20 1.83696 20 2.5V17.5C20 18.163 19.7364 18.7987 19.2676 19.2676C18.7987 19.7364 18.163 20 17.5 20H2.5C1.83696 20 1.20126 19.7364 0.732422 19.2676C0.263581 18.7987 0 18.163 0 17.5V2.5C0 1.83696 0.263581 1.20126 0.732422 0.732422C1.20126 0.263581 1.83696 0 2.5 0H17.5ZM7.99512 18H17.084L12.6963 11.709L7.99512 18ZM2.5 2C2.36739 2 2.24025 2.05272 2.14648 2.14648C2.05272 2.24025 2 2.36739 2 2.5V17.5C2 17.6326 2.05272 17.7597 2.14648 17.8535C2.24025 17.9473 2.36739 18 2.5 18H5.49902L11.0938 10.5117C11.2832 10.258 11.5302 10.0527 11.8145 9.91309C12.0986 9.77355 12.412 9.70387 12.7285 9.70898C13.0452 9.71416 13.3562 9.79456 13.6357 9.94336C13.9153 10.0922 14.1558 10.3047 14.3369 10.5645L18 15.8164V2.5C18 2.36739 17.9473 2.24025 17.8535 2.14648C17.7597 2.05272 17.6326 2 17.5 2H2.5ZM7 3.5C7.92826 3.5 8.81823 3.86901 9.47461 4.52539C10.131 5.18177 10.5 6.07174 10.5 7C10.5 7.92826 10.131 8.81823 9.47461 9.47461C8.81823 10.131 7.92826 10.5 7 10.5C6.07174 10.5 5.18177 10.131 4.52539 9.47461C3.86901 8.81823 3.5 7.92826 3.5 7C3.5 6.07174 3.86901 5.18177 4.52539 4.52539C5.18177 3.86901 6.07174 3.5 7 3.5ZM7 5.5C6.60218 5.5 6.22076 5.65815 5.93945 5.93945C5.65815 6.22076 5.5 6.60218 5.5 7C5.5 7.39782 5.65815 7.77924 5.93945 8.06055C6.22076 8.34185 6.60218 8.5 7 8.5C7.39782 8.5 7.77924 8.34185 8.06055 8.06055C8.34185 7.77924 8.5 7.39782 8.5 7C8.5 6.60218 8.34185 6.22076 8.06055 5.93945C7.77924 5.65815 7.39782 5.5 7 5.5Z" fill="#F14110"/>
+                        </svg>
+                      )}
+                      {feature.icon === "ads" && (
+                        <svg width="16" height="16" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072ZM1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125Z" fill="#F14110"/>
+                          <path d="M1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125ZM1.72645 3.48125V1.75M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072Z" stroke="#F14110"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-medium text-[#333] tracking-[0.18px]">{feature.title}</p>
+                      <p className="text-[8px] text-[#333]/50 tracking-[0.16px]">{feature.subtitle}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[9px] font-medium text-[#333] tracking-[0.18px]">{feature.title}</p>
-                    <p className="text-[8px] text-[#333]/50 tracking-[0.16px]">{feature.subtitle}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-            <button
-              onClick={() => setShowProModal(true)}
-              className="mt-4 w-full h-8 rounded-full bg-[#333] text-white text-[10px] font-medium tracking-[0.2px] hover:bg-[#444] transition-colors"
-            >
-              See all
-            </button>
-          </div>
+          )}
         </div>
 
         {/* Monthly Views Chart */}
@@ -303,7 +309,7 @@ export default function CompanyDashboardPage() {
             <div className="space-y-3">
               {data.monthlyViews.map((item) => (
                 <div key={item.month} className="flex items-center gap-4">
-                  <span className="text-[10px] text-[#333]/70 w-16 tracking-[0.2px]">{item.month}</span>
+                  <span className="text-[10px] text-[#333]/70 w-20 shrink-0 tracking-[0.2px]">{item.month}</span>
                   <div className="flex-1 h-4 bg-[#f8f8f8] rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full"
@@ -320,22 +326,47 @@ export default function CompanyDashboardPage() {
           </div>
         </div>}
 
+        {/* Banner Image — hidden when reviews are enabled */}
+        {!isPro && !reviewsEnabled && (
+          <div className="mb-8 rounded-[6px] overflow-hidden">
+            {/* Desktop: full width */}
+            <div className="hidden sm:block relative w-full" style={{ aspectRatio: '900/200' }}>
+              <Image src="/images/bg-individual-page.png" alt="" fill className="object-cover" />
+            </div>
+            {/* Mobile: cropped from bottom-right */}
+            <div className="sm:hidden relative w-full" style={{ aspectRatio: '2/1' }}>
+              <Image src="/images/bg-individual-page.png" alt="" fill className="object-cover object-right-bottom" />
+            </div>
+          </div>
+        )}
+
         {/* Reviews Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div>
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
-                Latest reviews /
-              </p>
-              <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
-                Ulasan terbaru
-              </p>
+        {reviewsEnabled && <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <div>
+                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
+                  Latest testimonials /
+                </p>
+                <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
+                  Ulasan terbaru
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Star className="w-5 h-5 fill-[#f14110] text-[#f14110]" />
+                <span className="text-[16px] font-bold text-[#f14110]">{data.rating}</span>
+                <span className="text-[12px] text-[#333]/50">({data.reviewCount})</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Star className="w-5 h-5 fill-[#f14110] text-[#f14110]" />
-              <span className="text-[16px] font-bold text-[#f14110]">{data.rating}</span>
-              <span className="text-[12px] text-[#333]/50">({data.reviewCount})</span>
-            </div>
+            {company?._id && (
+              <Link
+                href={buildCompanyReviewsPath(company)}
+                className="rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
+                style={{ width: '140px', height: '40px' }}
+              >
+                See all
+              </Link>
+            )}
           </div>
 
           <div className="grid grid-cols-4 gap-4">
@@ -343,7 +374,7 @@ export default function CompanyDashboardPage() {
               <ReviewCard key={index} {...review} />
             ))}
           </div>
-        </div>
+        </div>}
       </main>
 
       <Footer />
@@ -408,7 +439,7 @@ export default function CompanyDashboardPage() {
             </div>
 
             <p className="text-[11px] text-[#333]/70 text-center mb-6 leading-[18px]">
-              Your Ads will be visible throughout the website, in essential pages offering instant visibility across the entirety of Struct.id / Iklan Anda akan terlihat di seluruh situs web, di halaman-halaman penting yang menawarkan visibilitas instan di seluruh Struct.id.
+              Your Ads will be visible throughout the website, in essential pages offering instant visibility across the entirety of Solidfind.id / Iklan Anda akan terlihat di seluruh situs web, di halaman-halaman penting yang menawarkan visibilitas instan di seluruh Solidfind.id.
             </p>
 
             <p className="text-[12px] text-[#f14110] text-center mb-4">
@@ -417,12 +448,13 @@ export default function CompanyDashboardPage() {
               Hubungi kami untuk mengetahui pilihan harga.
             </p>
 
-            <button
-              onClick={() => setShowAdModal(false)}
-              className="mx-auto block h-10 px-10 rounded-full border-2 border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors"
+            <a
+              href={`mailto:getadspace@solidfind.id?subject=${encodeURIComponent(`"${company?.name || 'Company'}" wants ad space`)}&body=${encodeURIComponent(`Company: ${company?.name || 'N/A'}\nEmail: ${company?.email || clerkUser?.emailAddresses?.[0]?.emailAddress || 'N/A'}\nDate: ${new Date().toLocaleString('en-GB', { timeZone: 'Asia/Jakarta' })}`)}`}
+              className="mx-auto block h-10 rounded-full border border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors text-center leading-[40px]"
+              style={{ width: '140px' }}
             >
               Get in touch
-            </button>
+            </a>
           </div>
         </div>
       )}
@@ -517,19 +549,19 @@ export default function CompanyDashboardPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <svg width="20" height="20" viewBox="0 0 16 16" fill="#f14110">
-                  <rect x="1" y="3" width="14" height="10" rx="1"/>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="#f14110">
+                  <path d="M17.5 0C18.163 0 18.7987 0.263581 19.2676 0.732422C19.7364 1.20126 20 1.83696 20 2.5V17.5C20 18.163 19.7364 18.7987 19.2676 19.2676C18.7987 19.7364 18.163 20 17.5 20H2.5C1.83696 20 1.20126 19.7364 0.732422 19.2676C0.263581 18.7987 0 18.163 0 17.5V2.5C0 1.83696 0.263581 1.20126 0.732422 0.732422C1.20126 0.263581 1.83696 0 2.5 0H17.5ZM7.99512 18H17.084L12.6963 11.709L7.99512 18ZM2.5 2C2.36739 2 2.24025 2.05272 2.14648 2.14648C2.05272 2.24025 2 2.36739 2 2.5V17.5C2 17.6326 2.05272 17.7597 2.14648 17.8535C2.24025 17.9473 2.36739 18 2.5 18H5.49902L11.0938 10.5117C11.2832 10.258 11.5302 10.0527 11.8145 9.91309C12.0986 9.77355 12.412 9.70387 12.7285 9.70898C13.0452 9.71416 13.3562 9.79456 13.6357 9.94336C13.9153 10.0922 14.1558 10.3047 14.3369 10.5645L18 15.8164V2.5C18 2.36739 17.9473 2.24025 17.8535 2.14648C17.7597 2.05272 17.6326 2 17.5 2H2.5ZM7 3.5C7.92826 3.5 8.81823 3.86901 9.47461 4.52539C10.131 5.18177 10.5 6.07174 10.5 7C10.5 7.92826 10.131 8.81823 9.47461 9.47461C8.81823 10.131 7.92826 10.5 7 10.5C6.07174 10.5 5.18177 10.131 4.52539 9.47461C3.86901 8.81823 3.5 7.92826 3.5 7C3.5 6.07174 3.86901 5.18177 4.52539 4.52539C5.18177 3.86901 6.07174 3.5 7 3.5ZM7 5.5C6.60218 5.5 6.22076 5.65815 5.93945 5.93945C5.65815 6.22076 5.5 6.60218 5.5 7C5.5 7.39782 5.65815 7.77924 5.93945 8.06055C6.22076 8.34185 6.60218 8.5 7 8.5C7.39782 8.5 7.77924 8.34185 8.06055 8.06055C8.34185 7.77924 8.5 7.39782 8.5 7C8.5 6.60218 8.34185 6.22076 8.06055 5.93945C7.77924 5.65815 7.39782 5.5 7 5.5Z" fill="#F14110"/>
                 </svg>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#333]">12 project pictures</p>
-                  <p className="text-[10px] text-[#333]/50">12 gambar proyek</p>
+                  <p className="text-[12px] font-semibold text-[#333]">12 project pictures or videos</p>
+                  <p className="text-[10px] text-[#333]/50">12 gambar proyek atau Video</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 col-span-2">
-                <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#f14110" strokeWidth="1.5">
-                  <rect x="1" y="1" width="14" height="14" rx="1"/>
-                  <path d="M5 10L8 6L11 10" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg width="20" height="20" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072ZM1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125Z" fill="#F14110"/>
+                  <path d="M1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125ZM1.72645 3.48125V1.75M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072Z" stroke="#F14110"/>
                 </svg>
                 <div>
                   <p className="text-[12px] font-semibold text-[#333]">Possibility to buy ad space</p>

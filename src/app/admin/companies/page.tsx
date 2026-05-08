@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import Pagination, { PAGE_SIZE } from "../components/Pagination";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
 const CATEGORIES = ["all", "construction", "renovation", "architecture", "interior", "real-estate"] as const;
 const STATUS_OPTIONS = ["all", "pro", "free"] as const;
@@ -123,7 +124,7 @@ export default function AdminCompanies() {
                 <tr key={company._id} className="border-b border-[#f0f0f0] hover:bg-[#fafafa]">
                   <td className="px-4 py-3">
                     <Link
-                      href={`/profile/${company._id}`}
+                      href={buildCompanyProfilePath(company)}
                       className="text-[12px] font-medium text-[#333] hover:text-[#f14110] transition-colors"
                     >
                       {company.name}

@@ -42,3 +42,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# clerk configuration (can include secrets)
+/.clerk/
+/.claude/
+
+# generated auth links can grant account access
+/excel-files/*magic-links*.csv
+/excel-files/*magic-links*.xlsx

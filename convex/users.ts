@@ -1,6 +1,31 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+// Check if an email is already registered with a different account type
+export const checkEmailAccountType = query({
+  args: { email: v.string(), accountType: v.union(v.literal("company"), v.literal("individual")) },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .first();
+
+    if (!existing) return { available: true };
+
+    if (existing.accountType !== args.accountType) {
+      return {
+        available: false,
+        existingType: existing.accountType,
+        message: existing.accountType === "company"
+          ? "This email is already registered as a Company account. Please use a different email for Individual registration. / Email ini sudah terdaftar sebagai akun Perusahaan."
+          : "This email is already registered as an Individual account. Please use a different email for Company registration. / Email ini sudah terdaftar sebagai akun Individual.",
+      };
+    }
+
+    return { available: true };
+  },
+});
+
 export const createOrGetUser = mutation({
   args: {
     clerkId: v.string(),
@@ -17,6 +42,14 @@ export const createOrGetUser = mutation({
       .unique();
 
     if (existing) {
+      // Update fields that may have changed (e.g. accountType after publicMetadata refresh)
+      await ctx.db.patch(existing._id, {
+        email: args.email,
+        name: args.name,
+        accountType: args.accountType,
+        companyName: args.companyName,
+        imageUrl: args.imageUrl,
+      });
       return existing._id;
     }
 

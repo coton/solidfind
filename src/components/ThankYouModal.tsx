@@ -16,7 +16,7 @@ export function ThankYouModal({ isOpen, onClose }: ThankYouModalProps) {
       <div className="relative bg-white rounded-[12px] w-[360px] p-8 text-center">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333] transition-colors"
+          className="absolute top-4 right-4 text-[#333]/50 hover:text-[#f14110] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -24,7 +24,7 @@ export function ThankYouModal({ isOpen, onClose }: ThankYouModalProps) {
         <div className="text-[48px] mb-4">🎉</div>
         <h2 className="text-[20px] font-semibold text-[#333] mb-2">Thank You!</h2>
         <p className="text-[11px] text-[#333]/50 mb-6 tracking-[0.22px]">
-          Thank you for your review! Your feedback helps the community make better decisions.
+          Thank you for your testimonial! Your feedback helps the community make better decisions.
         </p>
 
         <button
