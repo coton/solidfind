@@ -11,15 +11,12 @@ Both paths converge on the same post-auth pipeline.
 
 ---
 
-## Path A: Social OAuth (Google / Apple / Microsoft)
+## Path A: Social OAuth (Google)
 
 ### 1. `AuthModal` (`src/components/AuthModal.tsx`) — Step 1: Method Selection
 
 - User chooses **Company** or **Individual** via toggle switches
-- User clicks one of:
-  - `Continue with Google`
-  - `Continue with Apple`
-  - `Continue with Microsoft`
+- User clicks `Continue with Google`
 - The chosen account type (and company name, if provided) is saved to `sessionStorage` as:
   - `solidfind_accountType`
   - `solidfind_companyName`
