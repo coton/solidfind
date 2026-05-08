@@ -223,8 +223,8 @@ test('Save All UI Settings only re-saves media sections that still have unsaved 
 
   assert.match(
     adminUiSource,
-    /if \(newUserImageHasDraft\) \{\s*pendingSaves\.push\(saveNewUserImage\(\)\);\s*\}/,
-    'expected Save All to avoid overwriting the New User image after an individual save clears its draft state'
+    /if \(dashboardMediaHasDraft\) \{\s*pendingSaves\.push\(saveDashboardMedia\(\)\);\s*\}/,
+    'expected Save All to avoid overwriting the dashboard media after an individual save clears its draft state'
   );
 
   assert.match(
@@ -243,5 +243,61 @@ test('Save All UI Settings only re-saves media sections that still have unsaved 
     adminUiSource,
     /if \(s\.footerMediaUrl \|\| s\.footerMediaType\) \{\s*pendingSaves\.push\(saveFooterMedia\(\)\);\s*\}/,
     'expected Save All to only persist footer media when there is unsaved local media draft state'
+  );
+});
+
+test('admin UI replaces New User Image with dashboard media upload for images and videos', () => {
+  const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
+  const dashboardSource = readProjectFile('src/app/dashboard/page.tsx');
+  const companyDashboardSource = readProjectFile('src/app/company-dashboard/page.tsx');
+  const dashboardMediaSource = readProjectFile('src/components/DashboardHeroMedia.tsx');
+  const platformSettingsSource = readProjectFile('src/lib/platform-settings.mjs');
+
+  assert.doesNotMatch(
+    adminUiSource,
+    /SectionCard title="New User Image"|Save New User Image|key: "newUserImage"/,
+    'expected the old New User Image field to be removed from the UI tab'
+  );
+
+  assert.match(
+    adminUiSource,
+    /SectionCard title="Users Dashboard Media"[\s\S]*accept="image\/\*,video\/\*"/,
+    'expected the UI tab to expose a dashboard media uploader that accepts images and videos'
+  );
+
+  assert.match(
+    adminUiSource,
+    /uploadAdminMediaAsset\(file\)[\s\S]*setDashboardMediaDraft\(\{ url: uploadedUrl, type \}\)/,
+    'expected dashboard media uploads to use Convex storage and preserve the uploaded media type'
+  );
+
+  assert.match(
+    platformSettingsSource,
+    /DASHBOARD_MEDIA_PLATFORM_SETTING_KEY = "dashboardMedia"/,
+    'expected dashboard media to use a dedicated platform setting key'
+  );
+
+  assert.match(
+    dashboardMediaSource,
+    /api\.platformSettings\.get, \{ key: DASHBOARD_MEDIA_PLATFORM_SETTING_KEY \}/,
+    'expected dashboard media to load from platform settings'
+  );
+
+  assert.match(
+    dashboardMediaSource,
+    /type === "video"[\s\S]*<video[\s\S]*autoPlay[\s\S]*loop[\s\S]*muted[\s\S]*playsInline/,
+    'expected dashboard MP4 media to autoplay, loop, stay muted, and play inline'
+  );
+
+  assert.match(
+    dashboardSource,
+    /<DashboardHeroMedia className="mb-8" priority \/>/,
+    'expected the individual dashboard to use the configurable dashboard media'
+  );
+
+  assert.match(
+    companyDashboardSource,
+    /<DashboardHeroMedia className="mb-8" alt="" mobileAspectRatio="2 \/ 1" \/>/,
+    'expected the company dashboard to use the configurable dashboard media'
   );
 });

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { DashboardHeroMedia } from "@/components/DashboardHeroMedia";
 import { ListingCard } from "@/components/cards";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
@@ -160,17 +160,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Banner Image */}
-        <div className="mb-8 rounded-[6px] overflow-hidden relative" style={{ width: '100%', aspectRatio: '900 / 200' }}>
-          <Image
-            src="/images/bg-individual-page.png"
-            alt="SolidFind"
-            fill
-            sizes="(max-width: 900px) 100vw, 900px"
-            className="object-cover object-right-bottom sm:object-center"
-            priority
-          />
-        </div>
+        <DashboardHeroMedia className="mb-8" priority />
 
         {/* Bookmark sections — dynamic per category */}
         {visibleCategories.map((cat) => {
