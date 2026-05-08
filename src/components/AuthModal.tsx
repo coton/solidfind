@@ -22,6 +22,7 @@ import {
 type AuthMode = "login" | "register";
 type AccountType = "company" | "individual";
 type AuthStep = "method" | "email";
+type AuthOAuthStrategy = Extract<OAuthStrategy, "oauth_google">;
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -175,7 +176,7 @@ export function AuthModal({
 
   if (!isOpen) return null;
 
-  const handleSocialAuth = async (strategy: OAuthStrategy) => {
+  const handleSocialAuth = async (strategy: AuthOAuthStrategy) => {
     if (!isSignInLoaded || !isSignUpLoaded) return;
 
     setIsLoading(true);
