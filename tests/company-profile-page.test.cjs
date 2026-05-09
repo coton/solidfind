@@ -5,9 +5,14 @@ const path = require('path');
 
 const projectRoot = path.join(__dirname, '..');
 const profilePagePath = path.join(projectRoot, 'src/app/profile/[id]/ProfilePageClient.tsx');
+const profileReviewsPagePath = path.join(projectRoot, 'src/app/profile/[id]/reviews/page.tsx');
 
 function readProfilePage() {
   return fs.readFileSync(profilePagePath, 'utf8');
+}
+
+function readProfileReviewsPage() {
+  return fs.readFileSync(profileReviewsPagePath, 'utf8');
 }
 
 test('company profile page avoids invalid nested Convex hooks so profile content can render', () => {
@@ -48,14 +53,36 @@ test('company profile testimonial score uses the project mono font at 18px', () 
 
   assert.match(
     source,
-    /<span className="font-bam text-\[18px\] font-bold"[\s\S]*\{company\.rating \?\? 0\}/,
-    'Expected the company profile testimonial score to use the project mono font, bold weight, and 18px size without tightened tracking'
+    /<span className="font-bam text-\[18px\] font-bold tracking-\[-0\.2em\]"[\s\S]*\{company\.rating \?\? 0\}/,
+    'Expected the company profile testimonial score to use the project mono font, bold weight, 18px size, and 20% tightened tracking'
   );
 
   assert.match(
     source,
     /<svg width="16" height="15" viewBox="0 0 18 17"[\s\S]*M7\.93511 0\.71955/,
     'Expected the company profile testimonial score to use the supplied star SVG shape at 16px width'
+  );
+});
+
+test('all reviews page uses divider rows instead of white review cards', () => {
+  const source = readProfileReviewsPage();
+
+  assert.match(
+    source,
+    /<div key=\{review\._id\} className="border-b border-\[#333\]\/10 py-5">/,
+    'Expected all reviews to render as divider rows'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /bg-white rounded-\[6px\] p-5/,
+    'Expected all reviews page to remove the white card background behind each review'
+  );
+
+  assert.match(
+    source,
+    /font-bam text-\[18px\] font-bold tracking-\[-0\.2em\] text-\[#f14110\]/,
+    'Expected all reviews page score to use the same tightened mono score style'
   );
 });
 

@@ -62,7 +62,7 @@ export default function CompanyReviewsPage() {
               <svg width="16" height="15" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7.93511 0.71955C8.31202 -0.239851 9.68798 -0.23985 10.0649 0.719551L11.6204 4.67914C11.7825 5.09161 12.1742 5.37238 12.6219 5.39695L16.9196 5.63291C17.9609 5.69008 18.3861 6.98113 17.5777 7.63124L14.2414 10.3144C13.8938 10.5939 13.7442 11.0481 13.8589 11.4758L14.9595 15.5812C15.2262 16.576 14.113 17.3739 13.2364 16.8163L9.61892 14.5149C9.24208 14.2752 8.75792 14.2752 8.38108 14.5149L4.76355 16.8163C3.88703 17.3739 2.77385 16.576 3.04053 15.5812L4.14114 11.4758C4.25579 11.0481 4.10618 10.5939 3.75863 10.3144L0.422255 7.63124C-0.386142 6.98113 0.0390565 5.69008 1.08039 5.63291L5.37814 5.39695C5.82584 5.37238 6.21753 5.09161 6.37957 4.67914L7.93511 0.71955Z" fill="#f14110"/>
               </svg>
-              <span className="font-bam text-[18px] font-bold text-[#f14110]">{company.rating ?? 0}</span>
+              <span className="font-bam text-[18px] font-bold tracking-[-0.2em] text-[#f14110]">{company.rating ?? 0}</span>
               <span className="text-[10px] text-[#f14110]/70">({company.reviewCount ?? 0})</span>
             </div>
           )}
@@ -73,9 +73,9 @@ export default function CompanyReviewsPage() {
         ) : reviews.length === 0 ? (
           <p className="text-[#333]/50 text-[12px]">No reviews yet.</p>
         ) : (
-          <div className="space-y-4">
+          <div>
             {reviews.map((review) => (
-              <div key={review._id} className="bg-white rounded-[6px] p-5">
+              <div key={review._id} className="border-b border-[#333]/10 py-5">
                 <p className="text-[12px] font-semibold text-[#333] mb-2">{review.userName}</p>
                 <div className="flex gap-0.5 mb-2">
                   {[1, 2, 3, 4, 5].map((star) => (

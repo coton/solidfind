@@ -26,8 +26,8 @@ test('listing cards hide zero-review scores and use refined score/bookmark styli
 
   assert.match(
     source,
-    /shouldShowRating && <div[\s\S]*<span className="font-bam text-\[11px\] font-bold leading-\[15px\] text-right"/,
-    'expected listing card review score text to be mono, bold, and 2px smaller without tightened tracking'
+    /shouldShowRating && <div[\s\S]*<span className="font-bam text-\[11px\] font-bold leading-\[15px\] tracking-\[-0\.2em\] text-right"/,
+    'expected listing card review score text to be mono, bold, 2px smaller, and tightened by 20%'
   );
 
   assert.match(
