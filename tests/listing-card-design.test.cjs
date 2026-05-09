@@ -26,8 +26,14 @@ test('listing cards hide zero-review scores and use refined score/bookmark styli
 
   assert.match(
     source,
-    /shouldShowRating && <div[\s\S]*<span className="font-bam text-\[11px\] font-medium leading-\[15px\] text-right"/,
-    'expected listing card review score text to be mono, 2px smaller, and medium weight'
+    /shouldShowRating && <div[\s\S]*<span className="font-bam text-\[11px\] font-bold leading-\[15px\] tracking-\[0\.08px\] text-right"/,
+    'expected listing card review score text to be mono, bold, tightly tracked, and 2px smaller'
+  );
+
+  assert.match(
+    source,
+    /viewBox="0 0 18 17"[\s\S]*M7\.93511 0\.71955/,
+    'expected listing card scores to use the supplied star SVG shape'
   );
 
   assert.match(
@@ -66,8 +72,14 @@ test('listing card hover state shows service locations instead of address', () =
 
   assert.match(
     source,
-    /text-\[18px\] font-semibold text-\[#d8d8d8\] leading-\[24px\][\s\S]*\{serviceLocations\}/,
-    'expected service locations to render uppercase in Sora semibold at a smaller 18px size'
+    /text-\[16px\] font-semibold text-\[#d8d8d8\] leading-\[22px\][\s\S]*\{serviceLocations\}/,
+    'expected service locations to render uppercase in Sora semibold at a smaller 16px size'
+  );
+
+  assert.match(
+    source,
+    /\{projects > 0 && <div[\s\S]*Projects[\s\S]*\{team > 0 && <div[\s\S]*Team/,
+    'expected hover metrics to hide projects and team rows when their values are zero'
   );
 
   assert.doesNotMatch(
