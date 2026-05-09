@@ -30,3 +30,13 @@ test('public auth modal offers only Google and email sign-in methods', () => {
     'expected Apple and Microsoft social auth to be removed from the public auth modal'
   );
 });
+
+test('email verification popup shows the target email 4px larger', () => {
+  const source = readProjectFile('src/components/AuthModal.tsx');
+
+  assert.match(
+    source,
+    /We sent a verification code to<br \/><strong style=\{\{ color: '#333', fontSize: '13px' \}\}>\{email\}<\/strong>/,
+    'expected the verification email address to be 13px, four pixels larger than the 9px helper text'
+  );
+});

@@ -554,7 +554,7 @@ export function AuthModal({
           </h2>
 
           <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '20px', marginTop: 0 }}>
-            We sent a verification code to<br /><strong style={{ color: '#333' }}>{email}</strong>
+            We sent a verification code to<br /><strong style={{ color: '#333', fontSize: '13px' }}>{email}</strong>
           </p>
 
           <div style={{ marginBottom: '14px' }}>
