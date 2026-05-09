@@ -44,7 +44,7 @@ test('horizontal ad banner renders uploaded videos with autoplay looping playbac
 
   assert.match(
     source,
-    /<video[\s\S]*autoPlay[\s\S]*loop[\s\S]*muted[\s\S]*defaultMuted[\s\S]*playsInline[\s\S]*preload="auto"/,
+    /<video[\s\S]*autoPlay[\s\S]*loop[\s\S]*muted[\s\S]*playsInline[\s\S]*preload="auto"/,
     'expected the horizontal ad video element to keep mobile autoplay-safe media attributes'
   );
 

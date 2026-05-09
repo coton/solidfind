@@ -109,7 +109,6 @@ function AutoplayBannerVideo({ src }: { src: string }) {
       autoPlay
       loop
       muted
-      defaultMuted
       playsInline
       preload="auto"
       className="h-full w-full object-cover"
