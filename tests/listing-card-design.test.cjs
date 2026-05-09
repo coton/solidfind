@@ -26,26 +26,26 @@ test('listing cards hide zero-review scores and use refined score/bookmark styli
 
   assert.match(
     source,
-    /shouldShowRating && <div[\s\S]*<span className="font-bam text-\[11px\] font-bold leading-\[15px\] tracking-\[0\.08px\] text-right"/,
-    'expected listing card review score text to be mono, bold, tightly tracked, and 2px smaller'
+    /shouldShowRating && <div[\s\S]*<span className="font-bam text-\[11px\] font-bold leading-\[15px\] text-right"/,
+    'expected listing card review score text to be mono, bold, and 2px smaller without tightened tracking'
   );
 
   assert.match(
     source,
-    /viewBox="0 0 18 17"[\s\S]*M7\.93511 0\.71955/,
-    'expected listing card scores to use the supplied star SVG shape'
+    /<svg width="16" height="15" viewBox="0 0 18 17"[\s\S]*M7\.93511 0\.71955/,
+    'expected listing card scores to use the supplied star SVG shape at 16px width'
   );
 
   assert.match(
     source,
-    /className="absolute top-\[10px\] right-\[10px\] origin-top-right scale-90 hover:opacity-70 transition-opacity"/,
-    'expected the normal-state bookmark button to render at 90% scale'
+    /className="absolute top-\[10px\] right-\[10px\] origin-top-right scale-90 hover:opacity-70 transition-opacity"[\s\S]*<svg width="16" height="21"/,
+    'expected the normal-state bookmark button icon to render at 16px width'
   );
 
   assert.match(
     source,
-    /className="absolute top-\[10px\] right-\[10px\] origin-top-right scale-90 hover:opacity-80 transition-opacity"/,
-    'expected the hover-state bookmark button to render at 90% scale'
+    /className="absolute top-\[10px\] right-\[10px\] origin-top-right scale-90 hover:opacity-80 transition-opacity"[\s\S]*<svg width="16" height="21"/,
+    'expected the hover-state bookmark button icon to render at 16px width'
   );
 });
 

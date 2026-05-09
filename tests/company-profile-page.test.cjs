@@ -43,19 +43,19 @@ test('company profile testimonial actions keep the 140px website button width', 
   );
 });
 
-test('company profile testimonial score uses Basically A Mono at 18px', () => {
+test('company profile testimonial score uses the project mono font at 18px', () => {
   const source = readProfilePage();
 
   assert.match(
     source,
-    /<span className="font-bam text-\[18px\] font-bold tracking-\[0\.08px\]"[\s\S]*\{company\.rating \?\? 0\}/,
-    'Expected the company profile testimonial score to use Basically A Mono, bold weight, tight tracking, and 18px size'
+    /<span className="font-bam text-\[18px\] font-bold"[\s\S]*\{company\.rating \?\? 0\}/,
+    'Expected the company profile testimonial score to use the project mono font, bold weight, and 18px size without tightened tracking'
   );
 
   assert.match(
     source,
-    /viewBox="0 0 18 17"[\s\S]*M7\.93511 0\.71955/,
-    'Expected the company profile testimonial score to use the supplied star SVG shape'
+    /<svg width="16" height="15" viewBox="0 0 18 17"[\s\S]*M7\.93511 0\.71955/,
+    'Expected the company profile testimonial score to use the supplied star SVG shape at 16px width'
   );
 });
 

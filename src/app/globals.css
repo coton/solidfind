@@ -3,15 +3,23 @@
 @import "shadcn/tailwind.css";
 
 @font-face {
-  font-family: 'BasicallyAMono';
-  src: url('/fonts/BasicallyAMono-Medium.otf') format('opentype');
-  font-weight: 500;
+  font-family: 'JetBrainsMono';
+  src: url('/fonts/JetBrainsMono-wght.ttf') format('truetype');
+  font-weight: 100 800;
   font-style: normal;
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'JetBrainsMono';
+  src: url('/fonts/JetBrainsMono-Italic-wght.ttf') format('truetype');
+  font-weight: 100 800;
+  font-style: italic;
+  font-display: swap;
+}
+
 .font-bam {
-  font-family: 'BasicallyAMono', monospace;
+  font-family: 'JetBrainsMono', monospace;
 }
 
 @custom-variant dark (&:is(.dark *));
