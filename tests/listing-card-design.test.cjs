@@ -26,8 +26,8 @@ test('listing cards hide zero-review scores and use refined score/bookmark styli
 
   assert.match(
     source,
-    /shouldShowRating && <div[\s\S]*<span className="text-\[11px\] font-medium leading-\[15px\] text-right"/,
-    'expected listing card review score text to be 2px smaller and medium weight'
+    /shouldShowRating && <div[\s\S]*<span className="font-bam text-\[11px\] font-medium leading-\[15px\] text-right"/,
+    'expected listing card review score text to be mono, 2px smaller, and medium weight'
   );
 
   assert.match(
@@ -54,8 +54,8 @@ test('listing card hover state shows service locations instead of address', () =
 
   assert.match(
     source,
-    /font-bam text-\[10px\][\s\S]*Projects[\s\S]*font-bam text-\[10px\][\s\S]*Team/,
-    'expected hover metric labels to use Basically A Mono at the current Projects label size'
+    /font-bam text-\[11px\] text-\[#d8d8d8\][\s\S]*Projects[\s\S]*font-bam text-\[11px\] text-\[#d8d8d8\][\s\S]*Team[\s\S]*font-bam text-\[11px\] text-\[#d8d8d8\][\s\S]*Services Location:/,
+    'expected hover labels to share Basically A Mono, color, and the increased 11px size'
   );
 
   assert.match(
@@ -66,8 +66,8 @@ test('listing card hover state shows service locations instead of address', () =
 
   assert.match(
     source,
-    /text-\[22px\] font-semibold text-\[#d8d8d8\] leading-\[28px\][\s\S]*\{serviceLocations\}/,
-    'expected service locations to render uppercase in Sora semibold at 22px with 28px line-height'
+    /text-\[18px\] font-semibold text-\[#d8d8d8\] leading-\[24px\][\s\S]*\{serviceLocations\}/,
+    'expected service locations to render uppercase in Sora semibold at a smaller 18px size'
   );
 
   assert.doesNotMatch(

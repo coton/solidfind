@@ -43,6 +43,16 @@ test('company profile testimonial actions keep the 140px website button width', 
   );
 });
 
+test('company profile testimonial score uses Basically A Mono at 18px', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /<span className="font-bam text-\[18px\] font-semibold tracking-\[0\.36px\]"[\s\S]*\{company\.rating \?\? 0\}/,
+    'Expected the company profile testimonial score to use Basically A Mono at 18px'
+  );
+});
+
 test('company profile image viewer supports previous/next controls and mobile swipe navigation', () => {
   const source = readProfilePage();
 

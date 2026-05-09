@@ -617,7 +617,7 @@ function HeaderInner() {
           {/* Gradient fade on right edge — mobile only, extends to screen edge past padding */}
           <div className="sm:hidden pointer-events-none absolute -right-4 top-0 bottom-0 w-20" style={{ background: 'linear-gradient(to right, transparent, #F14110)' }} />
           </div>
-          <p className="font-bam text-[#f8f8f8] text-[9px] mt-4 leading-[12px]">
+          <p className="font-bam text-[#f8f8f8] text-[11px] mt-4 leading-[15px]">
             {(activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction}
           </p>
         </div>

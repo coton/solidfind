@@ -60,7 +60,7 @@ export default function CompanyReviewsPage() {
           {company && (
             <div className="flex items-center gap-1">
               <Star className="w-5 h-5 fill-[#f14110] text-[#f14110]" />
-              <span className="text-[22px] font-semibold text-[#f14110]">{company.rating ?? 0}</span>
+              <span className="font-bam text-[18px] font-semibold text-[#f14110]">{company.rating ?? 0}</span>
               <span className="text-[10px] text-[#f14110]/70">({company.reviewCount ?? 0})</span>
             </div>
           )}
