@@ -349,7 +349,7 @@ export default function CompanyDashboardPage() {
                 <span className="text-[12px] text-[#333]/50">({data.reviewCount})</span>
               </div>
             </div>
-            {company?._id && (
+            {company?._id && data.reviewCount > 0 && (
               <Link
                 href={buildCompanyReviewsPath(company)}
                 className="rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"

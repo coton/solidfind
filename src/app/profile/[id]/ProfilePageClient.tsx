@@ -847,13 +847,15 @@ export default function ProfilePageClient() {
                   Write a Testimonial
                 </button>
               )}
-              <Link
-                href={company ? buildCompanyReviewsPath(company) : "/"}
-                className="rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
-                style={{ width: '140px', height: '40px' }}
-              >
-                See all
-              </Link>
+              {(company.reviewCount ?? 0) > 0 && (
+                <Link
+                  href={company ? buildCompanyReviewsPath(company) : "/"}
+                  className="rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
+                  style={{ width: '140px', height: '40px' }}
+                >
+                  See all
+                </Link>
+              )}
             </div>
           </div>
 

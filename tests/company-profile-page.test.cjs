@@ -6,6 +6,7 @@ const path = require('path');
 const projectRoot = path.join(__dirname, '..');
 const profilePagePath = path.join(projectRoot, 'src/app/profile/[id]/ProfilePageClient.tsx');
 const profileReviewsPagePath = path.join(projectRoot, 'src/app/profile/[id]/reviews/page.tsx');
+const companyDashboardPagePath = path.join(projectRoot, 'src/app/company-dashboard/page.tsx');
 
 function readProfilePage() {
   return fs.readFileSync(profilePagePath, 'utf8');
@@ -13,6 +14,10 @@ function readProfilePage() {
 
 function readProfileReviewsPage() {
   return fs.readFileSync(profileReviewsPagePath, 'utf8');
+}
+
+function readCompanyDashboardPage() {
+  return fs.readFileSync(companyDashboardPagePath, 'utf8');
 }
 
 test('company profile page avoids invalid nested Convex hooks so profile content can render', () => {
@@ -83,6 +88,23 @@ test('all reviews page uses divider rows instead of white review cards', () => {
     source,
     /font-bam text-\[18px\] font-bold tracking-\[-0\.2em\] text-\[#f14110\]/,
     'Expected all reviews page score to use the same tightened mono score style'
+  );
+});
+
+test('testimonial see all links only show when reviews exist', () => {
+  const profileSource = readProfilePage();
+  const dashboardSource = readCompanyDashboardPage();
+
+  assert.match(
+    profileSource,
+    /\{\(company\.reviewCount \?\? 0\) > 0 && \([\s\S]*See all[\s\S]*<\/Link>[\s\S]*\)\}/,
+    'Expected the public company profile to hide the See all testimonial link when there are zero reviews'
+  );
+
+  assert.match(
+    dashboardSource,
+    /\{company\?\._id && data\.reviewCount > 0 && \([\s\S]*See all[\s\S]*<\/Link>[\s\S]*\)\}/,
+    'Expected the company dashboard to hide the See all testimonial link when there are zero reviews'
   );
 });
 
