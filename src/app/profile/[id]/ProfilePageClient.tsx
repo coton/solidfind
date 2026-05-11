@@ -316,6 +316,10 @@ export default function ProfilePageClient() {
   const isFirstImage = currentImageIndex === 0;
   const isLastImage = currentImageIndex === projectImages.length - 1;
   const profileAddress = formatProfileAddress(company?.address);
+  const hasReviewedThisCompany = Boolean(
+    currentUser && reviews?.some((review) => review.userId === currentUser._id)
+  );
+  const canWriteReview = reviews !== undefined && currentUser?.accountType === "individual" && !hasReviewedThisCompany;
 
   const closeImageViewer = () => {
     setShowImageViewer(false);
@@ -838,7 +842,7 @@ export default function ProfilePageClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {clerkUser && currentUser && (
+              {clerkUser && canWriteReview && (
                 <button
                   onClick={() => setShowReviewModal(true)}
                   className="hidden sm:flex rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors items-center justify-center"
@@ -872,7 +876,7 @@ export default function ProfilePageClient() {
             ))}
           </div>
           {/* Mobile: Write a Testimonial button */}
-          {clerkUser && currentUser && (
+          {clerkUser && canWriteReview && (
             <button
               onClick={() => setShowReviewModal(true)}
               className="sm:hidden mt-4 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors inline-flex items-center justify-center"
@@ -959,7 +963,7 @@ export default function ProfilePageClient() {
       <Footer />
 
       {/* Testimonial Modals */}
-      {reviewsEnabled && validId && currentUser && (
+      {reviewsEnabled && validId && currentUser && canWriteReview && (
         <WriteReviewModal
           isOpen={showReviewModal}
           onClose={() => setShowReviewModal(false)}

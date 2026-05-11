@@ -64,3 +64,32 @@ test('auth-complete fallback uses the coming-soon background treatment', () => {
     'expected auth-complete background to keep the same margin and rounded corners as coming soon'
   );
 });
+
+test('account type choice is protected after initial setup', () => {
+  const usersSource = readProjectFile('convex/users.ts');
+  const routeSource = readProjectFile('src/app/api/set-account-type/route.ts');
+
+  assert.match(
+    usersSource,
+    /if \(existing\) \{[\s\S]*await ctx\.db\.patch\(existing\._id, \{\s*email: args\.email,\s*name: args\.name,\s*companyName: existing\.companyName \?\? args\.companyName,\s*imageUrl: args\.imageUrl,\s*\}\);[\s\S]*return existing\._id;/,
+    'expected createOrGetUser to update profile fields without overwriting accountType for existing users'
+  );
+
+  assert.match(
+    usersSource,
+    /if \(user\.accountType !== args\.accountType\) \{[\s\S]*throw new Error\("Account type cannot be changed after setup\."\);/,
+    'expected updateAccountType to reject attempts to change an established account type'
+  );
+
+  assert.match(
+    routeSource,
+    /const existingAccountType = user\.publicMetadata\?\.accountType;[\s\S]*existingAccountType !== accountType[\s\S]*status: 409/,
+    'expected the set-account-type API to reject changing existing Clerk account type metadata'
+  );
+
+  assert.match(
+    routeSource,
+    /publicMetadata: \{\s*\.\.\.user\.publicMetadata,\s*accountType,/,
+    'expected the set-account-type API to preserve existing metadata when saving the initial account type'
+  );
+});

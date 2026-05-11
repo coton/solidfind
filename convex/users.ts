@@ -42,12 +42,11 @@ export const createOrGetUser = mutation({
       .unique();
 
     if (existing) {
-      // Update fields that may have changed (e.g. accountType after publicMetadata refresh)
+      // Account type is chosen once during setup and must not change later.
       await ctx.db.patch(existing._id, {
         email: args.email,
         name: args.name,
-        accountType: args.accountType,
-        companyName: args.companyName,
+        companyName: existing.companyName ?? args.companyName,
         imageUrl: args.imageUrl,
       });
       return existing._id;
@@ -86,6 +85,9 @@ export const updateAccountType = mutation({
       .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
       .unique();
     if (!user) return;
+    if (user.accountType !== args.accountType) {
+      throw new Error("Account type cannot be changed after setup.");
+    }
     await ctx.db.patch(user._id, { accountType: args.accountType });
   },
 });

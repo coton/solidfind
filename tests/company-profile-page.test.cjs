@@ -69,6 +69,34 @@ test('company profile testimonial score uses the project mono font at 18px', () 
   );
 });
 
+test('company profile only lets individual accounts write one testimonial per company', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /const hasReviewedThisCompany = Boolean\(\s*currentUser && reviews\?\.some\(\(review\) => review\.userId === currentUser\._id\)\s*\);/,
+    'Expected the profile page to detect whether the current user already reviewed this company'
+  );
+
+  assert.match(
+    source,
+    /const canWriteReview = reviews !== undefined && currentUser\?\.accountType === "individual" && !hasReviewedThisCompany;/,
+    'Expected the Write a Testimonial CTA to be limited to individual accounts without an existing company review'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /\{clerkUser && currentUser && \([\s\S]*Write a Testimonial/,
+    'Expected company accounts and already-reviewed users to stop seeing the testimonial CTA'
+  );
+
+  assert.match(
+    source,
+    /\{reviewsEnabled && validId && currentUser && canWriteReview && \([\s\S]*<WriteReviewModal/,
+    'Expected the testimonial modal itself to be gated behind the same individual-only review rule'
+  );
+});
+
 test('all reviews page uses divider rows instead of white review cards', () => {
   const source = readProfileReviewsPage();
 
@@ -88,6 +116,16 @@ test('all reviews page uses divider rows instead of white review cards', () => {
     source,
     /font-bam text-\[18px\] font-bold tracking-\[-0\.2em\] text-\[#f14110\]/,
     'Expected all reviews page score to use the same tightened mono score style'
+  );
+});
+
+test('all reviews page aligns the score with the company name row', () => {
+  const source = readProfileReviewsPage();
+
+  assert.match(
+    source,
+    /<div className="mb-8">\s*<div className="flex flex-wrap items-center gap-4">\s*<h1 className="text-\[26px\] font-semibold text-\[#333\] leading-\[30px\]">[\s\S]*?\{company\?\.name \?\? "Loading\.\.\."\}[\s\S]*?\{company && \([\s\S]*?font-bam text-\[18px\] font-bold tracking-\[-0\.2em\] text-\[#f14110\][\s\S]*?<\/div>\s*\)\}\s*<\/div>\s*<p className="text-\[11px\] text-\[#333\]\/70 tracking-\[0\.22px\]">/,
+    'Expected the all reviews score to sit in the same flex row as the company name, with the subtitle below'
   );
 });
 

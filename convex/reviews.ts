@@ -54,6 +54,24 @@ export const create = mutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    if (user.accountType !== "individual") {
+      throw new Error("Only individual accounts can leave testimonials.");
+    }
+
+    const existingUserReviews = await ctx.db
+      .query("reviews")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    if (existingUserReviews.some((review) => review.companyId === args.companyId)) {
+      throw new Error("You have already left a testimonial for this company.");
+    }
+
     // Spam detection
     const lowerContent = args.content.toLowerCase();
     const isFlagged = SPAM_KEYWORDS.some((kw) => lowerContent.includes(kw));

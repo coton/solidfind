@@ -15,8 +15,22 @@ export async function POST(req: NextRequest) {
   }
 
   const client = await clerkClient();
+  const user = await client.users.getUser(userId);
+  const existingAccountType = user.publicMetadata?.accountType;
+
+  if (
+    (existingAccountType === "company" || existingAccountType === "individual") &&
+    existingAccountType !== accountType
+  ) {
+    return NextResponse.json(
+      { error: "Account type cannot be changed after setup" },
+      { status: 409 }
+    );
+  }
+
   await client.users.updateUserMetadata(userId, {
     publicMetadata: {
+      ...user.publicMetadata,
       accountType,
       ...(companyName ? { companyName } : {}),
     },

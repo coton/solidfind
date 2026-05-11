@@ -78,3 +78,31 @@ test("company dashboard mirrors the individual dashboard greeting UI while keepi
     "Expected the old combined Hello + company name heading to remain removed"
   );
 });
+
+test("company dashboard testimonial score matches the public profile typography", () => {
+  const source = read(dashboardPagePath);
+
+  assert.match(
+    source,
+    /import \{ starColor \} from "@\/lib\/starColors";/,
+    "Expected the company dashboard to use the same testimonial star color helper as the public profile"
+  );
+
+  assert.match(
+    source,
+    /<svg width="16" height="15" viewBox="0 0 18 17"[\s\S]*M7\.93511 0\.71955[\s\S]*fill=\{starColor\(data\.rating\)\}/,
+    "Expected the company dashboard testimonial score to use the same custom star shape as the public profile"
+  );
+
+  assert.match(
+    source,
+    /<span className="font-bam text-\[18px\] font-bold tracking-\[-0\.2em\]" style=\{\{ color: starColor\(data\.rating\) \}\}>\{data\.rating\}<\/span>/,
+    "Expected the company dashboard score to use the JetBrains-backed font-bam profile typography"
+  );
+
+  assert.match(
+    source,
+    /<span className="text-\[10px\] tracking-\[0\.2px\]" style=\{\{ color: starColor\(data\.rating\) \+ 'B3' \}\}>\(\{data\.reviewCount\}\)<\/span>/,
+    "Expected the company dashboard review count to use the same small tracked formatting as the public profile"
+  );
+});
