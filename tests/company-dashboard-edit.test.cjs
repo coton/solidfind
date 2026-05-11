@@ -74,6 +74,84 @@ test('company edit page stays on the editor after saving profile changes', () =>
   );
 });
 
+test('company edit page keeps legacy location field in sync with selected locations', () => {
+  const source = read(editPagePath);
+
+  assert.match(
+    source,
+    /location: selectedLocations\.join\(","\) \|\| undefined,[\s\S]*constructionLocations: selectedLocations,[\s\S]*renovationLocations: selectedLocations,[\s\S]*architectureLocations: selectedLocations,[\s\S]*interiorLocations: selectedLocations,[\s\S]*realEstateLocations: selectedLocations,/,
+    'Expected saving company edits to update both the legacy location field and category location arrays'
+  );
+});
+
+test('company edit page validates address format before saving', () => {
+  const source = read(editPagePath);
+
+  assert.match(
+    source,
+    /import \{ COMPANY_ADDRESS_VALIDATION_MESSAGE, isLikelyCompanyAddress, normalizeCompanyAddress \} from "@\/lib\/company-address-validation\.mjs";/,
+    'Expected company edit page to use the shared address validator'
+  );
+
+  assert.match(
+    source,
+    /const normalizedAddress = normalizeCompanyAddress\(address\);[\s\S]*const invalidAddress = Boolean\(normalizedAddress && !isLikelyCompanyAddress\(normalizedAddress\)\);/,
+    'Expected company edit page to detect invalid non-empty addresses'
+  );
+
+  assert.match(
+    source,
+    /const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingAddress && !invalidAddress && !invalidFoundedYear;/,
+    'Expected invalid addresses to block saving'
+  );
+
+  assert.match(
+    source,
+    /address: normalizedAddress \|\| undefined/,
+    'Expected saved company addresses to be normalized before mutation'
+  );
+
+  assert.match(
+    source,
+    /aria-invalid=\{invalidAddress\}/,
+    'Expected address input to expose invalid state to the UI'
+  );
+});
+
+test('company edit page only accepts four-digit founded years from 1980 to present', () => {
+  const source = read(editPagePath);
+
+  assert.match(
+    source,
+    /import \{ MIN_COMPANY_SINCE_YEAR, getMaxCompanySinceYear, isValidCompanySinceYear, normalizeCompanySinceYearInput \} from "@\/lib\/company-since-year-validation\.mjs";/,
+    'Expected company edit page to use the shared founded-year validator'
+  );
+
+  assert.match(
+    source,
+    /const invalidFoundedYear = Boolean\(foundedYear && !isValidCompanySinceYear\(foundedYear, maxCompanySinceYear\)\);/,
+    'Expected company edit page to reject out-of-range or incomplete founded years'
+  );
+
+  assert.match(
+    source,
+    /const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingAddress && !invalidAddress && !invalidFoundedYear;/,
+    'Expected invalid founded years to block saving'
+  );
+
+  assert.match(
+    source,
+    /type="text"[\s\S]*inputMode="numeric"[\s\S]*pattern="\[0-9\]\{4\}"[\s\S]*maxLength=\{4\}/,
+    'Expected the founded year field to accept only four numeric characters'
+  );
+
+  assert.match(
+    source,
+    /setFoundedYear\(normalizeCompanySinceYearInput\(e\.target\.value\)\);/,
+    'Expected founded year input to strip non-digits and cap at four characters'
+  );
+});
+
 test("company dashboard mirrors the individual dashboard greeting UI while keeping the company name clickable", () => {
   const source = read(dashboardPagePath);
 

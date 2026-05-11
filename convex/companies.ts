@@ -2,6 +2,15 @@ import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { ensureUniqueCompanySlug, normalizeCompanySlug } from "../src/lib/company-profile-url.mjs";
+import { COMPANY_ADDRESS_VALIDATION_MESSAGE, isLikelyCompanyAddress, normalizeCompanyAddress } from "../src/lib/company-address-validation.mjs";
+import { MIN_COMPANY_SINCE_YEAR, getMaxCompanySinceYear, isValidCompanySinceYear } from "../src/lib/company-since-year-validation.mjs";
+
+function ensureValidSinceYear(since: number | undefined) {
+  if (since === undefined) return;
+  if (!isValidCompanySinceYear(String(since), getMaxCompanySinceYear())) {
+    throw new Error(`Founded year must be 4 digits from ${MIN_COMPANY_SINCE_YEAR} to ${getMaxCompanySinceYear()}.`);
+  }
+}
 
 export const list = query({
   args: {
@@ -156,6 +165,12 @@ export const create = mutation({
     since: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const normalizedAddress = args.address === undefined ? undefined : normalizeCompanyAddress(args.address);
+    if (normalizedAddress !== undefined && !isLikelyCompanyAddress(normalizedAddress)) {
+      throw new Error(COMPANY_ADDRESS_VALIDATION_MESSAGE);
+    }
+    ensureValidSinceYear(args.since);
+
     const companies = await ctx.db.query("companies").collect();
     const slug = ensureUniqueCompanySlug(
       args.name,
@@ -164,6 +179,7 @@ export const create = mutation({
 
     return await ctx.db.insert("companies", {
       ...args,
+      address: normalizedAddress,
       slug,
       rating: 0,
       reviewCount: 0,
@@ -218,6 +234,15 @@ export const update = mutation({
     const { id, ...updates } = args;
     const existingCompany = await ctx.db.get(id);
     if (!existingCompany) return;
+
+    if (updates.address !== undefined) {
+      const normalizedAddress = normalizeCompanyAddress(updates.address);
+      if (!isLikelyCompanyAddress(normalizedAddress)) {
+        throw new Error(COMPANY_ADDRESS_VALIDATION_MESSAGE);
+      }
+      updates.address = normalizedAddress;
+    }
+    ensureValidSinceYear(updates.since);
 
     // Filter out undefined values
     const filtered: Record<string, unknown> = {};

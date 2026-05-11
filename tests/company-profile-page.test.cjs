@@ -58,7 +58,7 @@ test('company profile testimonial score uses the project mono font at 18px', () 
 
   assert.match(
     source,
-    /<span className="font-bam text-\[18px\] font-bold tracking-\[-0\.2em\]"[\s\S]*\{company\.rating \?\? 0\}/,
+    /\{\(company\.reviewCount \?\? 0\) > 0 && \([\s\S]*<span className="font-bam text-\[18px\] font-bold tracking-\[-0\.2em\]"[\s\S]*\{company\.rating \?\? 0\}/,
     'Expected the company profile testimonial score to use the project mono font, bold weight, 18px size, and 20% tightened tracking'
   );
 
@@ -66,6 +66,22 @@ test('company profile testimonial score uses the project mono font at 18px', () 
     source,
     /<svg width="16" height="15" viewBox="0 0 18 17"[\s\S]*M7\.93511 0\.71955/,
     'Expected the company profile testimonial score to use the supplied star SVG shape at 16px width'
+  );
+});
+
+test('company profile hides testimonial score and count when there are no reviews', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /\{\(company\.reviewCount \?\? 0\) > 0 && \(\s*<div className="flex items-center gap-1">[\s\S]*\{company\.rating \?\? 0\}[\s\S]*\(\{company\.reviewCount \?\? 0\}\)[\s\S]*<\/div>\s*\)\}/,
+    'Expected the public profile to only show the testimonial score/count after at least one review exists'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /<span className="font-bam text-\[18px\] font-bold tracking-\[-0\.2em\]"[\s\S]*\{company\.rating \?\? 0\}[\s\S]*<\/span>\s*<span className="text-\[10px\] tracking-\[0\.2px\]"[\s\S]*>\(\{company\.reviewCount \?\? 0\}\)<\/span>\s*<\/div>\s*<\/div>/,
+    'Expected the testimonial score/count cluster to no longer render unconditionally'
   );
 });
 
@@ -140,7 +156,25 @@ test('company profile services use body-width rows with four desktop columns', (
 
   assert.match(
     source,
-    /const profileMetaServices = \[[\s\S]*PROJECT SIZE[\s\S]*LOCATION[\s\S]*\]\.filter\(Boolean\)/,
+    /function uniqueValues\(values: string\[\]\): string\[\][\s\S]*new Set\(values\.filter\(Boolean\)\)/,
+    'Expected profile service values to de-duplicate repeated category locations'
+  );
+
+  assert.match(
+    source,
+    /const profileLocations = uniqueValues\(\[[\s\S]*company\.constructionLocations[\s\S]*company\.renovationLocations[\s\S]*company\.architectureLocations[\s\S]*company\.interiorLocations[\s\S]*company\.realEstateLocations[\s\S]*\]\);/,
+    'Expected profile location display to use the saved category location arrays from company edit'
+  );
+
+  assert.match(
+    source,
+    /const profileLocationValue = profileLocations\.length > 0[\s\S]*capitalizeJoin\(profileLocations\)[\s\S]*capitalizeJoin\(\[company\.location \?\? "bali"\]\)/,
+    'Expected profile location display to fall back to the legacy single location only when category locations are missing'
+  );
+
+  assert.match(
+    source,
+    /const profileMetaServices = \[[\s\S]*PROJECT SIZE[\s\S]*LOCATION", value: profileLocationValue[\s\S]*\]\.filter\(Boolean\)/,
     'Expected project size and location to be grouped into the first services row'
   );
 
@@ -358,8 +392,20 @@ test('company profile address stacks the pin above a three-line clamped address'
 
   assert.match(
     source,
-    /className="flex flex-col mt-auto -translate-y-3 lg:translate-y-0"/,
-    'Expected the address block to move up on mobile only while preserving the desktop position'
+    /className="w-full flex flex-col h-\[160px\] lg:h-\[210px\] lg:self-start"/,
+    'Expected the mobile contact column to stop adding the extra vertical address padding from the desktop height'
+  );
+
+  assert.match(
+    source,
+    /className="flex items-center gap-5 mb-2 lg:mb-6"/,
+    'Expected the mobile address to sit after one short gap below the social icons'
+  );
+
+  assert.match(
+    source,
+    /className="flex flex-col lg:mt-auto"/,
+    'Expected the address block to move higher on mobile while preserving the desktop bottom alignment'
   );
 
   assert.match(

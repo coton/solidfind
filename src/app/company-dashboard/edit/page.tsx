@@ -13,6 +13,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MagicLinkLoadingPage } from "@/components/MagicLinkLoadingPage";
 import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
+import { COMPANY_ADDRESS_VALIDATION_MESSAGE, isLikelyCompanyAddress, normalizeCompanyAddress } from "@/lib/company-address-validation.mjs";
+import { MIN_COMPANY_SINCE_YEAR, getMaxCompanySinceYear, isValidCompanySinceYear, normalizeCompanySinceYearInput } from "@/lib/company-since-year-validation.mjs";
 import { Star, X, Upload, Lock } from "lucide-react";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import { useProEnabled } from "@/hooks/useProEnabled";
@@ -319,6 +321,11 @@ export default function EditProfilePage() {
   const missingProjectSize = selectedProjectSizes.length === 0;
   const missingLocation = selectedLocations.length === 0;
   const missingDescription = !description.trim();
+  const normalizedAddress = normalizeCompanyAddress(address);
+  const missingAddress = !normalizedAddress;
+  const invalidAddress = Boolean(normalizedAddress && !isLikelyCompanyAddress(normalizedAddress));
+  const maxCompanySinceYear = getMaxCompanySinceYear();
+  const invalidFoundedYear = Boolean(foundedYear && !isValidCompanySinceYear(foundedYear, maxCompanySinceYear));
 
   // Determine the bottom hint text and whether it's a warning (orange)
   let bottomHintText = "*Select at least 1 category before saving\n*Pilih setidaknya 1 kategori sebelum menyimpan";
@@ -340,9 +347,18 @@ export default function EditProfilePage() {
   } else if (missingDescription) {
     bottomHintText = "*Company description is required\n*Deskripsi perusahaan wajib diisi";
     bottomHintIsWarning = true;
+  } else if (missingAddress) {
+    bottomHintText = "*Company address is required\n*Alamat perusahaan wajib diisi";
+    bottomHintIsWarning = true;
+  } else if (invalidAddress) {
+    bottomHintText = `*${COMPANY_ADDRESS_VALIDATION_MESSAGE}\n*Masukkan alamat yang valid`;
+    bottomHintIsWarning = true;
+  } else if (invalidFoundedYear) {
+    bottomHintText = `*Founded year must be 4 digits from ${MIN_COMPANY_SINCE_YEAR} to ${maxCompanySinceYear}\n*Tahun berdiri harus 4 angka dari ${MIN_COMPANY_SINCE_YEAR} sampai ${maxCompanySinceYear}`;
+    bottomHintIsWarning = true;
   }
 
-  const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription;
+  const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingAddress && !invalidAddress && !invalidFoundedYear;
   const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
   const hasSetupAccountQuery = searchParams.get("setupAccount") === "1";
   const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;
@@ -505,7 +521,8 @@ export default function EditProfilePage() {
           id: company._id,
           name: companyName || undefined,
           description: description || undefined,
-          address: address || undefined,
+          location: selectedLocations.join(",") || undefined,
+          address: normalizedAddress || undefined,
           projects: projectsNumber ? parseInt(projectsNumber) : undefined,
           teamSize: teamSize ? parseInt(teamSize) : undefined,
           phone: phone || undefined,
@@ -538,7 +555,7 @@ export default function EditProfilePage() {
           description: description || undefined,
           category: selectedConstruction.length > 0 ? "construction" : "renovation",
           location: selectedLocations[0] || "bali",
-          address: address || undefined,
+          address: normalizedAddress || undefined,
           isPro: false,
           projects: projectsNumber ? parseInt(projectsNumber) : undefined,
           teamSize: teamSize ? parseInt(teamSize) : undefined,
@@ -900,9 +917,19 @@ export default function EditProfilePage() {
               <input
                 type="text"
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
+                onChange={(e) => {
+                  setAddress(e.target.value);
+                  setIsDirty(true);
+                }}
+                placeholder="Jl. Raya Seminyak No.17, Badung, Bali"
+                aria-invalid={invalidAddress}
+                className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidAddress ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
               />
+              {invalidAddress && (
+                <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">
+                  {COMPANY_ADDRESS_VALIDATION_MESSAGE}
+                </p>
+              )}
             </div>
 
             {/* Phone & Email */}
@@ -1047,14 +1074,25 @@ export default function EditProfilePage() {
                 Founded year / Tahun berdiri
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]{4}"
                 value={foundedYear}
-                onChange={(e) => setFoundedYear(e.target.value)}
+                onChange={(e) => {
+                  setFoundedYear(normalizeCompanySinceYearInput(e.target.value));
+                  setIsDirty(true);
+                }}
                 placeholder="e.g. 2015"
-                min="1900"
-                max={new Date().getFullYear()}
-                className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
+                minLength={4}
+                maxLength={4}
+                aria-invalid={invalidFoundedYear}
+                className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidFoundedYear ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
               />
+              {invalidFoundedYear && (
+                <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">
+                  Enter 4 digits from {MIN_COMPANY_SINCE_YEAR} to {maxCompanySinceYear}.
+                </p>
+              )}
             </div>
 
             {/* Project Pictures Upload */}
