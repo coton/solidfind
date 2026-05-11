@@ -80,7 +80,7 @@ function ProjectStorageImageTile({
           alt={image.alt}
           fill
           unoptimized
-          sizes="(max-width: 640px) 33vw, 210px"
+          sizes="(max-width: 640px) 23vw, 105px"
           className="object-cover"
         />
       ) : null}
@@ -98,7 +98,7 @@ function ProjectImagesGrid({
   if (items.length === 0) return <div />;
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5">
+    <div className="grid grid-cols-4 gap-2 sm:gap-3">
       {items.map((image, index) =>
         image.kind === "external" ? (
           <div
@@ -111,7 +111,7 @@ function ProjectImagesGrid({
               alt={image.alt}
               fill
               unoptimized
-              sizes="(max-width: 640px) 33vw, 210px"
+              sizes="(max-width: 640px) 23vw, 105px"
               className="object-cover"
             />
           </div>
@@ -509,33 +509,140 @@ export default function ProfilePageClient() {
           {company.name}
         </h1>
 
-        {/* Main Content Grid - Mobile: 2-col (logo+contact), Desktop: 4 columns */}
-        <div className="grid grid-cols-[160px_1fr] lg:grid-cols-[210px_210px_1fr_70px] gap-4 lg:gap-5 mb-0 lg:mb-8">
-          {/* Column 1: Logo */}
-          <div className="w-full lg:self-start">
-            <div className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
-              {company.logoId ? (
-                <StorageImage storageId={company.logoId} alt={company.name} fill className="object-cover w-full h-full" />
-              ) : company.imageUrl ? (
-                <Image
-                  src={company.imageUrl}
-                  alt={company.name}
-                  width={210}
-                  height={210}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <div
-                  className="w-full h-full"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3C/svg%3E")`,
-                    backgroundSize: '20px 20px'
-                  }}
-                />
-              )}
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[440px_1fr_70px] lg:gap-5 mb-8">
+          <div className="space-y-3 lg:self-start">
+            <div className="grid grid-cols-[160px_1fr] gap-4 lg:grid-cols-2 lg:gap-5">
+              {/* Logo */}
+              <div className="w-full lg:self-start">
+                <div className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
+                  {company.logoId ? (
+                    <StorageImage storageId={company.logoId} alt={company.name} fill className="object-cover w-full h-full" />
+                  ) : company.imageUrl ? (
+                    <Image
+                      src={company.imageUrl}
+                      alt={company.name}
+                      width={210}
+                      height={210}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3C/svg%3E")`,
+                        backgroundSize: '20px 20px'
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="w-full flex flex-col h-[210px] lg:self-start">
+                <div className="h-[32px] flex items-center border-b border-[#333]/10">
+                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
+                    Tel. {company.phone || "-"}
+                  </p>
+                </div>
+
+                <div className="h-[32px] flex items-center border-b border-[#333]/10 mb-4">
+                  {company.website ? (
+                    <a
+                      href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-medium text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
+                    >
+                      WEBSITE
+                    </a>
+                  ) : (
+                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">WEBSITE -</p>
+                  )}
+                </div>
+
+                {/* Social Icons */}
+                <div className="flex items-center gap-5 mb-6" style={{ height: 20 }}>
+                  {company.email && (
+                    <a href={`mailto:${company.email}`} className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
+                      <svg height="20" viewBox="0 0 24 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="1" width="22" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M1 3L12 10L23 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </a>
+                  )}
+                  {company.whatsapp && (
+                    <a href={`https://wa.me/${formatWhatsApp(company.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.99023 1H9.99316C11.1636 0.996123 12.3233 1.2251 13.4043 1.67383C14.485 2.12248 15.4656 2.7819 16.2891 3.61328L16.293 3.61719C17.9749 5.29915 18.9004 7.53456 18.9004 9.91992C18.9004 14.8276 14.8978 18.83 9.99023 18.8301C8.49894 18.8301 7.03299 18.4529 5.72852 17.7422L5.37988 17.5518L4.99609 17.6533L1.41895 18.5928L2.36523 15.123L2.47363 14.7227L2.26758 14.3623C1.49363 13.0123 1.0801 11.4838 1.08008 9.91016C1.08008 5.00244 5.08252 1 9.99023 1Z" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M12.82 11.1801C13.04 11.2701 14.26 11.8701 14.51 11.9901C14.76 12.1101 14.91 12.1601 14.98 12.2701C15.05 12.3801 15.05 12.8701 14.84 13.4501C14.64 14.0301 13.65 14.5601 13.17 14.6301C12.74 14.6901 12.2 14.7201 11.61 14.5301C11.25 14.4201 10.79 14.2701 10.2 14.0101C7.72002 12.9401 6.09002 10.4401 5.97002 10.2701L5.96808 10.2675C5.84074 10.0977 4.96002 8.9237 4.96002 7.71008C4.96002 6.49008 5.60002 5.89008 5.82002 5.64008C6.05002 5.39008 6.31002 5.33008 6.48002 5.33008H6.96002C7.11002 5.34008 7.32002 5.28008 7.52002 5.76008C7.72002 6.26008 8.22002 7.48008 8.28002 7.60008C8.34002 7.72008 8.38002 7.86008 8.30002 8.03008C8.22002 8.19008 8.17002 8.30008 8.05002 8.44008C7.93002 8.58008 7.79002 8.76008 7.68002 8.87008C7.55002 9.00008 7.43002 9.13008 7.57002 9.38008C7.72002 9.63008 8.21002 10.4401 8.95002 11.1001C9.89002 11.9401 10.69 12.2101 10.94 12.3301C11.19 12.4601 11.34 12.4401 11.48 12.2701C11.62 12.1101 12.09 11.5501 12.26 11.3001C12.43 11.0601 12.59 11.1001 12.82 11.1801Z" fill="currentColor"/>
+                      </svg>
+                    </a>
+                  )}
+                  {company.instagram && (
+                    <a href={company.instagram.startsWith("http") ? company.instagram : `https://instagram.com/${company.instagram}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.7998 1H14.2002C16.8478 1.00011 18.9999 3.15224 19 5.7998V14.2002C18.9999 15.4732 17.4939 16.6936 16.5938 17.5938C15.6936 18.4939 14.4732 18.9999 13.2002 19H5.7998C3.15224 18.9999 1.00011 16.8478 1 14.2002V5.7998C1.00005 4.52684 1.50612 3.30638 2.40625 2.40625C3.30638 1.50612 4.52684 1.00005 5.7998 1Z" stroke="currentColor" strokeWidth="2"/>
+                        <circle cx="10" cy="10" r="4" stroke="currentColor" strokeWidth="2"/>
+                        <circle cx="15.5" cy="4.5" r="1.5" fill="currentColor"/>
+                      </svg>
+                    </a>
+                  )}
+                  {company.facebook && (
+                    <a href={company.facebook.startsWith("http") ? company.facebook : `https://${company.facebook}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="1" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M8 11.0793H10.2866V18H12.5731V11.0793L14.6465 11.0735L14.9733 8.71666H12.5745V7.70884C12.5731 7.553 12.5839 7.3973 12.6068 7.24325C12.7022 6.65186 13.0164 6.35833 13.6814 6.35833H15V4.10266L14.986 4.10122C14.7545 4.06796 14.2663 4 13.3587 4C11.42 4 10.2866 5.05554 10.2866 7.4558V8.72245H8V11.0793Z" fill="currentColor"/>
+                      </svg>
+                    </a>
+                  )}
+                  {company.linkedin && (
+                    <a href={company.linkedin.startsWith("http") ? company.linkedin : `https://${company.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="1" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2"/>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M4 11.1942H6.31836V19H4V11.1942ZM11.4785 13.1344C10.2734 13.1344 10.0879 14.1199 10.0879 15.138V19H7.77148V11.1942H9.99609V12.2614H10.0273C10.3379 11.6481 11.0938 11 12.2207 11C14.5664 11 15 12.6172 15 14.7189V19H12.6836V15.2034C12.6836 14.2977 12.666 13.1344 11.4785 13.1344Z" fill="currentColor"/>
+                        <circle cx="5" cy="9" r="1" fill="currentColor" stroke="currentColor"/>
+                      </svg>
+                    </a>
+                  )}
+                </div>
+
+                {/* Address */}
+                <div className="flex flex-col mt-auto -translate-y-3 lg:translate-y-0">
+                  <a
+                    href={buildCompanyAddressHref(company)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex w-full cursor-pointer flex-col items-start gap-1.5"
+                  >
+                    <svg width="14" height="17" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333] group-hover:text-[#f14110] transition-colors flex-shrink-0">
+                      <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
+                    </svg>
+                    <span
+                      className="font-bam w-full break-words text-[9px] leading-[14px] text-[#333]/50 transition-colors group-hover:text-[#f14110]"
+                      style={{
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 3,
+                        overflow: "hidden",
+                      }}
+                    >
+                      {profileAddress}
+                    </span>
+                  </a>
+                </div>
+              </div>
             </div>
 
-            {/* Mobile only: Save/Share/Report directly below the company picture */}
+            {projectImages.length > 0 && (
+              <ProjectImagesGrid
+                items={projectImages}
+                onImageClick={handleImageClick}
+              />
+            )}
+
+            {/* Mobile only: Save/Share/Report directly below the project thumbnails */}
             <div className="mt-3 flex lg:hidden items-center gap-2">
               <button onClick={handleToggleSave} className="group flex items-center gap-1.5 text-[#333]/35 transition-colors">
                 <span className={`font-bam text-[9px] ${company.bookmarkCount ? 'text-[#F14110]' : '#666'}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
@@ -573,184 +680,77 @@ export default function ProfilePageClient() {
             </div>
           </div>
 
-          {/* Column 2: Contact Info */}
-          <div className="w-full lg:max-w-[210px] flex flex-col h-[210px] lg:self-start">
-            <div className="h-[32px] flex items-center border-b border-[#333]/20">
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
-                Tel. {company.phone || "-"}
-              </p>
-            </div>
+          {/* Profile stats and description */}
+          <div className="lg:self-start">
 
-            <div className="h-[32px] flex items-center border-b border-[#333]/20 mb-4">
-              {company.website ? (
-                <a
-                  href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] font-medium text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
-                >
-                  WEBSITE
-                </a>
-              ) : (
-                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">WEBSITE -</p>
-              )}
-            </div>
-
-            {/* Social Icons */}
-            <div className="flex items-center gap-5 mb-6" style={{ height: 20 }}>
-              {company.email && (
-                <a href={`mailto:${company.email}`} className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                  <svg height="20" viewBox="0 0 24 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1" y="1" width="22" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M1 3L12 10L23 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </a>
-              )}
-              {company.whatsapp && (
-                <a href={`https://wa.me/${formatWhatsApp(company.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9.99023 1H9.99316C11.1636 0.996123 12.3233 1.2251 13.4043 1.67383C14.485 2.12248 15.4656 2.7819 16.2891 3.61328L16.293 3.61719C17.9749 5.29915 18.9004 7.53456 18.9004 9.91992C18.9004 14.8276 14.8978 18.83 9.99023 18.8301C8.49894 18.8301 7.03299 18.4529 5.72852 17.7422L5.37988 17.5518L4.99609 17.6533L1.41895 18.5928L2.36523 15.123L2.47363 14.7227L2.26758 14.3623C1.49363 13.0123 1.0801 11.4838 1.08008 9.91016C1.08008 5.00244 5.08252 1 9.99023 1Z" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M12.82 11.1801C13.04 11.2701 14.26 11.8701 14.51 11.9901C14.76 12.1101 14.91 12.1601 14.98 12.2701C15.05 12.3801 15.05 12.8701 14.84 13.4501C14.64 14.0301 13.65 14.5601 13.17 14.6301C12.74 14.6901 12.2 14.7201 11.61 14.5301C11.25 14.4201 10.79 14.2701 10.2 14.0101C7.72002 12.9401 6.09002 10.4401 5.97002 10.2701L5.96808 10.2675C5.84074 10.0977 4.96002 8.9237 4.96002 7.71008C4.96002 6.49008 5.60002 5.89008 5.82002 5.64008C6.05002 5.39008 6.31002 5.33008 6.48002 5.33008H6.96002C7.11002 5.34008 7.32002 5.28008 7.52002 5.76008C7.72002 6.26008 8.22002 7.48008 8.28002 7.60008C8.34002 7.72008 8.38002 7.86008 8.30002 8.03008C8.22002 8.19008 8.17002 8.30008 8.05002 8.44008C7.93002 8.58008 7.79002 8.76008 7.68002 8.87008C7.55002 9.00008 7.43002 9.13008 7.57002 9.38008C7.72002 9.63008 8.21002 10.4401 8.95002 11.1001C9.89002 11.9401 10.69 12.2101 10.94 12.3301C11.19 12.4601 11.34 12.4401 11.48 12.2701C11.62 12.1101 12.09 11.5501 12.26 11.3001C12.43 11.0601 12.59 11.1001 12.82 11.1801Z" fill="currentColor"/>
-                  </svg>
-                </a>
-              )}
-              {company.instagram && (
-                <a href={company.instagram.startsWith("http") ? company.instagram : `https://instagram.com/${company.instagram}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5.7998 1H14.2002C16.8478 1.00011 18.9999 3.15224 19 5.7998V14.2002C18.9999 15.4732 17.4939 16.6936 16.5938 17.5938C15.6936 18.4939 14.4732 18.9999 13.2002 19H5.7998C3.15224 18.9999 1.00011 16.8478 1 14.2002V5.7998C1.00005 4.52684 1.50612 3.30638 2.40625 2.40625C3.30638 1.50612 4.52684 1.00005 5.7998 1Z" stroke="currentColor" strokeWidth="2"/>
-                    <circle cx="10" cy="10" r="4" stroke="currentColor" strokeWidth="2"/>
-                    <circle cx="15.5" cy="4.5" r="1.5" fill="currentColor"/>
-                  </svg>
-                </a>
-              )}
-              {company.facebook && (
-                <a href={company.facebook.startsWith("http") ? company.facebook : `https://${company.facebook}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1" y="1" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M8 11.0793H10.2866V18H12.5731V11.0793L14.6465 11.0735L14.9733 8.71666H12.5745V7.70884C12.5731 7.553 12.5839 7.3973 12.6068 7.24325C12.7022 6.65186 13.0164 6.35833 13.6814 6.35833H15V4.10266L14.986 4.10122C14.7545 4.06796 14.2663 4 13.3587 4C11.42 4 10.2866 5.05554 10.2866 7.4558V8.72245H8V11.0793Z" fill="currentColor"/>
-                  </svg>
-                </a>
-              )}
-              {company.linkedin && (
-                <a href={company.linkedin.startsWith("http") ? company.linkedin : `https://${company.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1" y="1" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2"/>
-                    <path fillRule="evenodd" clipRule="evenodd" d="M4 11.1942H6.31836V19H4V11.1942ZM11.4785 13.1344C10.2734 13.1344 10.0879 14.1199 10.0879 15.138V19H7.77148V11.1942H9.99609V12.2614H10.0273C10.3379 11.6481 11.0938 11 12.2207 11C14.5664 11 15 12.6172 15 14.7189V19H12.6836V15.2034C12.6836 14.2977 12.666 13.1344 11.4785 13.1344Z" fill="currentColor"/>
-                    <circle cx="5" cy="9" r="1" fill="currentColor" stroke="currentColor"/>
-                  </svg>
-                </a>
-              )}
-            </div>
-
-            {/* Address */}
-            <div className="flex flex-col mt-auto -translate-y-3 lg:translate-y-0">
-              <a 
-                href={buildCompanyAddressHref(company)}
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="group flex w-full cursor-pointer flex-col items-start gap-1.5"
-              >
-                <svg width="14" height="17" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333] group-hover:text-[#f14110] transition-colors flex-shrink-0">
-                  <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
-                </svg>
-                <span
-                  className="font-bam w-full break-words text-[9px] leading-[14px] text-[#333]/50 transition-colors group-hover:text-[#f14110]"
-                  style={{
-                    display: "-webkit-box",
-                    WebkitBoxOrient: "vertical",
-                    WebkitLineClamp: 3,
-                    overflow: "hidden",
-                  }}
-                >
-                  {profileAddress}
-                </span>
-              </a>
-            </div>
-          </div>
-
-          {/* Column 3+4 merged: stats+save side-by-side on top, description full-width below */}
-          <div className="col-span-2 lg:col-span-2">
-
-            {/* Desktop: stats (left) + save/share/report (right) in a flex row */}
-            {/* Mobile: stats only here, save buttons appear below description */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1 lg:max-w-[300px] lg:mr-4">
-                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/20">
+            <div className="mb-4">
+              <div className="w-full">
+                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/10">
                   <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Projects</span>
                   <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.projects ?? 0}</span>
                 </div>
-                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/20">
+                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/10">
                   <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Team</span>
                   <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.teamSize ?? 0}</span>
                 </div>
-                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/20">
+                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/10">
                   <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Since</span>
                   <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">{company.since ?? new Date(company.createdAt).getFullYear()}</span>
                 </div>
               </div>
-
-              {/* Desktop: Save/Share/Report beside stats */}
-              <div className="hidden lg:flex flex-col items-end gap-4 flex-shrink-0">
-                {/* Bookmark: ON=orange fill, OFF=grey outline; hover swaps state preview */}
-                <button onClick={handleToggleSave} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
-                  <span className={`font-bam text-[9px] ${company.bookmarkCount ? 'text-[#F14110]' : '#666'}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
-                  <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
-                    className={`transition-colors ${isBookmarked
-                      ? 'fill-[#f14110] stroke-[#f14110] group-hover:fill-transparent group-hover:stroke-[#D8D8D8]'
-                      : 'fill-transparent stroke-[#D8D8D8] group-hover:fill-[#f14110] group-hover:stroke-[#f14110]'
-                    }`}
-                    style={{ strokeWidth: 2, strokeLinejoin: 'round' as const }}
-                  >
-                    <path d="M1 1H14.2353V19.1985L7.61765 14.2353L1 19.1985V1Z" />
-                  </svg>
-                </button>
-                {/* Share: grey outline → orange on hover, text stays grey */}
-                <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
-                  <span className="font-bam text-[9px]">Share</span>
-                  <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
-                    className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                    style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-                  >
-                    <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
-                  </svg>
-                  {showCopiedToast && (
-                    <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
-                  )}
-                </button>
-                {/* Report: grey outline → orange on hover, text stays grey */}
-                <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
-                  <span className="font-bam text-[9px]">Report</span>
-                  <svg width="15" height="17" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"
-                    className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                    style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-                  >
-                    <path d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
-                  </svg>
-                </button>
-              </div>
             </div>
 
-            {/* Description — full width of col3+col4 */}
+            {/* Description */}
             <p className="text-[10px] text-[#333] leading-[18px] tracking-[0.2px] whitespace-pre-line mb-4" style={{ wordBreak: "break-word", overflowWrap: "break-word" }}>
               {company.description ?? ""}
             </p>
 
           </div>
+
+          {/* Desktop: Save/Share/Report actions */}
+          <div className="hidden lg:flex flex-col items-end gap-4 lg:self-start">
+            {/* Bookmark: ON=orange fill, OFF=grey outline; hover swaps state preview */}
+            <button onClick={handleToggleSave} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
+              <span className={`font-bam text-[9px] ${company.bookmarkCount ? 'text-[#F14110]' : '#666'}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
+              <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
+                className={`transition-colors ${isBookmarked
+                  ? 'fill-[#f14110] stroke-[#f14110] group-hover:fill-transparent group-hover:stroke-[#D8D8D8]'
+                  : 'fill-transparent stroke-[#D8D8D8] group-hover:fill-[#f14110] group-hover:stroke-[#f14110]'
+                }`}
+                style={{ strokeWidth: 2, strokeLinejoin: 'round' as const }}
+              >
+                <path d="M1 1H14.2353V19.1985L7.61765 14.2353L1 19.1985V1Z" />
+              </svg>
+            </button>
+            {/* Share: grey outline -> orange on hover, text stays grey */}
+            <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative">
+              <span className="font-bam text-[9px]">Share</span>
+              <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+              >
+                <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
+              </svg>
+              {showCopiedToast && (
+                <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
+              )}
+            </button>
+            {/* Report: grey outline -> orange on hover, text stays grey */}
+            <button onClick={() => setShowReportModal(true)} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
+              <span className="font-bam text-[9px]">Report</span>
+              <svg width="15" height="17" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"
+                className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+              >
+                <path d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        {/* Photos Grid + Services */}
-        <div className="mb-8 space-y-8">
-          {projectImages.length > 0 && (
-            <ProjectImagesGrid
-              items={projectImages}
-              onImageClick={handleImageClick}
-            />
-          )}
-
+        {/* Services */}
+        <div className="mb-8">
           {proEnabled && (
-          <div>
-            <p className="font-bam text-[9px] text-[#333] mb-4">Services provided:</p>
             <div className="space-y-6">
               {profileMetaServices.length > 0 && (
                 <div className="grid grid-cols-2 gap-x-5 gap-y-5 lg:grid-cols-4">
@@ -773,12 +773,11 @@ export default function ProfilePageClient() {
                 </div>
               )}
             </div>
-          </div>
           )}
         </div>
 
         {/* Testimonials Section */}
-        {reviewsEnabled && <div className="mb-8">
+        {reviewsEnabled && <div className="mb-8 border-t border-[#333]/10 pt-4">
           <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3 sm:gap-4">
               <div>

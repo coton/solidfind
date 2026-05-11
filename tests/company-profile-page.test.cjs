@@ -102,14 +102,36 @@ test('company profile displays project images even when reviews are enabled', ()
 
   assert.match(
     source,
-    /<div className="mb-8 space-y-8">[\s\S]*\{projectImages\.length > 0 && \([\s\S]*<ProjectImagesGrid/,
-    'Expected project images to render from projectImages whenever images exist'
+    /<div className="grid grid-cols-1 gap-6 lg:grid-cols-\[440px_1fr_70px\] lg:gap-5 mb-8">[\s\S]*\{projectImages\.length > 0 && \([\s\S]*<ProjectImagesGrid[\s\S]*\/\* Mobile only: Save\/Share\/Report directly below the project thumbnails \*\//,
+    'Expected project images to render in the left profile block whenever images exist'
   );
 
   assert.doesNotMatch(
     source,
     /\{!reviewsEnabled && \([\s\S]*<ProjectImagesGrid/,
     'Expected the project image grid to no longer be hidden by the reviews feature flag'
+  );
+});
+
+test('company profile project thumbnails use the compact four-column treatment', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /function ProjectImagesGrid[\s\S]*className="grid grid-cols-4 gap-2 sm:gap-3"/,
+    'Expected project thumbnails to render as four compact columns'
+  );
+
+  assert.match(
+    source,
+    /sizes="\(max-width: 640px\) 23vw, 105px"/,
+    'Expected project thumbnail image sizing to be roughly half the previous desktop thumbnail size'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /<div className="mb-8 space-y-8">[\s\S]*<ProjectImagesGrid/,
+    'Expected the old full-width thumbnail row below the description to be removed'
   );
 });
 
@@ -144,6 +166,42 @@ test('company profile services use body-width rows with four desktop columns', (
     source,
     /hidden lg:block space-y-4/,
     'Expected the old vertical desktop services list to be removed'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /Services provided:/,
+    'Expected the profile page to remove the Services provided label'
+  );
+});
+
+test('company profile top detail rows and testimonials use the same divider treatment', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /Tel\. \{company\.phone \|\| "-"\}[\s\S]{0,180}border-b border-\[#333\]\/10|border-b border-\[#333\]\/10[\s\S]{0,180}Tel\. \{company\.phone \|\| "-"\}/,
+    'Expected the telephone row to use the shared subtle divider color'
+  );
+
+  assert.match(
+    source,
+    /<div className="h-\[32px\] flex items-center border-b border-\[#333\]\/10 mb-4">[\s\S]*WEBSITE/,
+    'Expected the website row to use the shared subtle divider color'
+  );
+
+  for (const label of ['Projects', 'Team', 'Since']) {
+    assert.match(
+      source,
+      new RegExp(`border-b border-\\[#333\\]\\/10[\\s\\S]{0,180}>${label}<`),
+      `Expected the ${label} row to use the shared subtle divider color`
+    );
+  }
+
+  assert.match(
+    source,
+    /\{reviewsEnabled && <div className="mb-8 border-t border-\[#333\]\/10 pt-4">/,
+    'Expected latest testimonials to start with the same subtle divider treatment'
   );
 });
 
@@ -254,13 +312,13 @@ test('company profile image viewer supports previous/next controls and mobile sw
   );
 });
 
-test('company profile mobile actions sit directly below the company picture', () => {
+test('company profile mobile actions sit directly below the project thumbnails', () => {
   const source = readProfilePage();
 
   assert.match(
     source,
-    /\/\* Mobile only: Save\/Share\/Report directly below the company picture \*\/[\s\S]*className="mt-3 flex lg:hidden items-center gap-2"/,
-    'Expected mobile bookmark/share/report actions to render directly below the company picture'
+    /\/\* Mobile only: Save\/Share\/Report directly below the project thumbnails \*\/[\s\S]*className="mt-3 flex lg:hidden items-center gap-2"/,
+    'Expected mobile bookmark/share/report actions to render directly below the project thumbnails'
   );
 
   assert.doesNotMatch(
