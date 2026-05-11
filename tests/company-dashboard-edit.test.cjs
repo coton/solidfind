@@ -51,6 +51,29 @@ test('company edit page keeps imported external media visible and editable', () 
   );
 });
 
+test('company edit page stays on the editor after saving profile changes', () => {
+  const source = read(editPagePath);
+  const handleSaveStart = source.indexOf('const handleSave = async () => {');
+  const maxImagesStart = source.indexOf('const maxImages = company?.isPro ? 12 : 4;');
+
+  assert.ok(handleSaveStart !== -1, 'Expected the edit page save handler to exist');
+  assert.ok(maxImagesStart !== -1, 'Expected the edit page image-slot section to follow the save handler');
+
+  const handleSaveSource = source.slice(handleSaveStart, maxImagesStart);
+
+  assert.match(
+    handleSaveSource,
+    /setIsDirty\(false\);/,
+    'Expected saving to still mark the form as clean'
+  );
+
+  assert.doesNotMatch(
+    handleSaveSource,
+    /router\.push\("\/company-dashboard"\)|router\.replace\("\/company-dashboard"\)/,
+    'Expected saving profile edits to stay on the edit page instead of redirecting to the dashboard'
+  );
+});
+
 test("company dashboard mirrors the individual dashboard greeting UI while keeping the company name clickable", () => {
   const source = read(dashboardPagePath);
 

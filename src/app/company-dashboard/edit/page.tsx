@@ -549,7 +549,6 @@ export default function EditProfilePage() {
         });
       }
       setIsDirty(false);
-      router.push("/company-dashboard");
     } finally {
       setSaving(false);
     }

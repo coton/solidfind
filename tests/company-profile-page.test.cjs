@@ -97,6 +97,56 @@ test('company profile only lets individual accounts write one testimonial per co
   );
 });
 
+test('company profile displays project images even when reviews are enabled', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /<div className="mb-8 space-y-8">[\s\S]*\{projectImages\.length > 0 && \([\s\S]*<ProjectImagesGrid/,
+    'Expected project images to render from projectImages whenever images exist'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /\{!reviewsEnabled && \([\s\S]*<ProjectImagesGrid/,
+    'Expected the project image grid to no longer be hidden by the reviews feature flag'
+  );
+});
+
+test('company profile services use body-width rows with four desktop columns', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /const profileMetaServices = \[[\s\S]*PROJECT SIZE[\s\S]*LOCATION[\s\S]*\]\.filter\(Boolean\)/,
+    'Expected project size and location to be grouped into the first services row'
+  );
+
+  assert.match(
+    source,
+    /const workCategoryServices = \[[\s\S]*CONSTRUCTION[\s\S]*RENOVATION[\s\S]*ARCHITECTURE[\s\S]*INTERIOR[\s\S]*REAL ESTATE[\s\S]*\]\.filter\(Boolean\)/,
+    'Expected active work categories to render in order so the fifth category wraps below the first column'
+  );
+
+  assert.match(
+    source,
+    /className="grid grid-cols-2 gap-x-5 gap-y-5 lg:grid-cols-4"[\s\S]*profileMetaServices\.map\(\(service\) => \(/,
+    'Expected project size and location to use the same four-column desktop grid width'
+  );
+
+  assert.match(
+    source,
+    /workCategoryServices\.map\(\(service\) => \([\s\S]*className="grid grid-cols-2 gap-x-5 gap-y-6 lg:grid-cols-4"|className="grid grid-cols-2 gap-x-5 gap-y-6 lg:grid-cols-4"[\s\S]*workCategoryServices\.map\(\(service\) => \(/,
+    'Expected work categories to use a four-column desktop grid'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /hidden lg:block space-y-4/,
+    'Expected the old vertical desktop services list to be removed'
+  );
+});
+
 test('all reviews page uses divider rows instead of white review cards', () => {
   const source = readProfileReviewsPage();
 
@@ -124,8 +174,8 @@ test('all reviews page aligns the score with the company name row', () => {
 
   assert.match(
     source,
-    /<div className="mb-8">\s*<div className="flex flex-wrap items-center gap-4">\s*<h1 className="text-\[26px\] font-semibold text-\[#333\] leading-\[30px\]">[\s\S]*?\{company\?\.name \?\? "Loading\.\.\."\}[\s\S]*?\{company && \([\s\S]*?font-bam text-\[18px\] font-bold tracking-\[-0\.2em\] text-\[#f14110\][\s\S]*?<\/div>\s*\)\}\s*<\/div>\s*<p className="text-\[11px\] text-\[#333\]\/70 tracking-\[0\.22px\]">/,
-    'Expected the all reviews score to sit in the same flex row as the company name, with the subtitle below'
+    /<div className="mb-8">\s*<div className="flex items-center justify-between gap-4">\s*<h1 className="text-\[26px\] font-semibold text-\[#333\] leading-\[30px\]">[\s\S]*?\{company\?\.name \?\? "Loading\.\.\."\}[\s\S]*?\{company && \(\s*<div className="flex shrink-0 items-center gap-1">[\s\S]*?font-bam text-\[18px\] font-bold tracking-\[-0\.2em\] text-\[#f14110\][\s\S]*?<\/div>\s*\)\}\s*<\/div>\s*<p className="text-\[11px\] text-\[#333\]\/70 tracking-\[0\.22px\]">/,
+    'Expected the all reviews score to sit on the right side of the same row as the company name, with the subtitle below'
   );
 });
 

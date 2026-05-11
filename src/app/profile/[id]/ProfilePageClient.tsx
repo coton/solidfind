@@ -320,7 +320,6 @@ export default function ProfilePageClient() {
     currentUser && reviews?.some((review) => review.userId === currentUser._id)
   );
   const canWriteReview = reviews !== undefined && currentUser?.accountType === "individual" && !hasReviewedThisCompany;
-
   const closeImageViewer = () => {
     setShowImageViewer(false);
     setCurrentImageIndex(null);
@@ -449,6 +448,30 @@ export default function ProfilePageClient() {
       </div>
     );
   }
+
+  const profileMetaServices = [
+    (company.projectSizes?.length ?? 0) > 0
+      ? { label: "PROJECT SIZE", value: capitalizeJoin(company.projectSizes!) }
+      : null,
+    { label: "LOCATION", value: company.location ?? "Bali" },
+  ].filter(Boolean) as Array<{ label: string; value: string }>;
+  const workCategoryServices = [
+    (company.constructionTypes?.length ?? 0) > 0
+      ? { label: "CONSTRUCTION", value: capitalizeJoin(company.constructionTypes!) }
+      : null,
+    (company.renovationTypes?.length ?? 0) > 0
+      ? { label: "RENOVATION", value: capitalizeJoin(company.renovationTypes!) }
+      : null,
+    (company.architectureTypes?.length ?? 0) > 0
+      ? { label: "ARCHITECTURE", value: capitalizeJoin(company.architectureTypes!) }
+      : null,
+    (company.interiorTypes?.length ?? 0) > 0
+      ? { label: "INTERIOR", value: capitalizeJoin(company.interiorTypes!) }
+      : null,
+    (company.realEstateTypes?.length ?? 0) > 0
+      ? { label: "REAL ESTATE", value: capitalizeJoin(company.realEstateTypes!) }
+      : null,
+  ].filter(Boolean) as Array<{ label: string; value: string }>;
 
   const reviewsList = (reviews ?? []).map((r) => ({
     name: r.userName,
@@ -716,10 +739,9 @@ export default function ProfilePageClient() {
           </div>
         </div>
 
-        {/* Photos Grid + Services - Mobile: stack, Desktop: side by side */}
-        <div className={`grid grid-cols-1 ${!reviewsEnabled ? 'lg:grid-cols-[440px_1fr]' : ''} gap-6 lg:gap-5 mb-8`}>
-          {/* Only render grid if there are actual images and reviews are not enabled */}
-          {!reviewsEnabled && (
+        {/* Photos Grid + Services */}
+        <div className="mb-8 space-y-8">
+          {projectImages.length > 0 && (
             <ProjectImagesGrid
               items={projectImages}
               onImageClick={handleImageClick}
@@ -729,97 +751,27 @@ export default function ProfilePageClient() {
           {proEnabled && (
           <div>
             <p className="font-bam text-[9px] text-[#333] mb-4">Services provided:</p>
-            {/* Mobile: horizontal scroll cards */}
-            <div className="lg:hidden">
-              <div className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
-                {(company.projectSizes?.length ?? 0) > 0 && (
-                  <div className="min-w-[160px] flex-shrink-0">
-                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">PROJECT SIZE</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.projectSizes!)}</p>
-                  </div>
-                )}
-                {(company.constructionTypes?.length ?? 0) > 0 && (
-                  <div className="min-w-[160px] flex-shrink-0">
-                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">CONSTRUCTION</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.constructionTypes!)}</p>
-                  </div>
-                )}
-                {(company.renovationTypes?.length ?? 0) > 0 && (
-                  <div className="min-w-[160px] flex-shrink-0">
-                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">RENOVATION</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.renovationTypes!)}</p>
-                  </div>
-                )}
-                {(company.architectureTypes?.length ?? 0) > 0 && (
-                  <div className="min-w-[160px] flex-shrink-0">
-                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">ARCHITECTURE</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.architectureTypes!)}</p>
-                  </div>
-                )}
-                {(company.interiorTypes?.length ?? 0) > 0 && (
-                  <div className="min-w-[160px] flex-shrink-0">
-                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">INTERIOR</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.interiorTypes!)}</p>
-                  </div>
-                )}
-                {(company.realEstateTypes?.length ?? 0) > 0 && (
-                  <div className="min-w-[160px] flex-shrink-0">
-                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">REAL ESTATE</p>
-                    <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.realEstateTypes!)}</p>
-                  </div>
-                )}
-                <div className="min-w-[160px] flex-shrink-0">
-                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">LOCATION</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.location ?? "Bali"}</p>
-                </div>
-              </div>
-              {/* Scroll indicator */}
-              <div className="flex justify-center mt-2">
-                <div className="w-[20px] h-[2px] rounded-full bg-[#f14110]" />
-              </div>
-            </div>
-            {/* Desktop: vertical list */}
-            <div className="hidden lg:block space-y-4">
-              {(company.projectSizes?.length ?? 0) > 0 && (
-                <div>
-                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">PROJECT SIZE</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.projectSizes!)}</p>
+            <div className="space-y-6">
+              {profileMetaServices.length > 0 && (
+                <div className="grid grid-cols-2 gap-x-5 gap-y-5 lg:grid-cols-4">
+                  {profileMetaServices.map((service) => (
+                    <div key={service.label}>
+                      <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">{service.label}</p>
+                      <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{service.value}</p>
+                    </div>
+                  ))}
                 </div>
               )}
-              {(company.constructionTypes?.length ?? 0) > 0 && (
-                <div>
-                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">CONSTRUCTION</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.constructionTypes!)}</p>
+              {workCategoryServices.length > 0 && (
+                <div className="grid grid-cols-2 gap-x-5 gap-y-6 lg:grid-cols-4">
+                  {workCategoryServices.map((service) => (
+                    <div key={service.label}>
+                      <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">{service.label}</p>
+                      <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{service.value}</p>
+                    </div>
+                  ))}
                 </div>
               )}
-              {(company.renovationTypes?.length ?? 0) > 0 && (
-                <div>
-                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">RENOVATION</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.renovationTypes!)}</p>
-                </div>
-              )}
-              {(company.architectureTypes?.length ?? 0) > 0 && (
-                <div>
-                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">ARCHITECTURE</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.architectureTypes!)}</p>
-                </div>
-              )}
-              {(company.interiorTypes?.length ?? 0) > 0 && (
-                <div>
-                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">INTERIOR</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.interiorTypes!)}</p>
-                </div>
-              )}
-              {(company.realEstateTypes?.length ?? 0) > 0 && (
-                <div>
-                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">REAL ESTATE</p>
-                  <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{capitalizeJoin(company.realEstateTypes!)}</p>
-                </div>
-              )}
-              <div>
-                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">LOCATION</p>
-                <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{company.location ?? "Bali"}</p>
-              </div>
             </div>
           </div>
           )}
