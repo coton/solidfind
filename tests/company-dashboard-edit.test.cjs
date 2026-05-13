@@ -187,8 +187,8 @@ test('company edit page requires email and shows the public profile explainer in
 
   assert.match(
     source,
-    /<div className="self-end text-right md:self-start">/,
-    'Expected the account status/delete controls to align right on mobile'
+    /<span className="block sm:inline">Company<\/span>[\s\S]*<span className="block sm:inline sm:ml-2">profile<\/span>[\s\S]*shrink-0 pt-1 text-right[\s\S]*PRO ACCOUNT[\s\S]*DELETE PROFILE/,
+    'Expected the mobile title to split into two lines opposite account status/delete controls'
   );
 });
 
@@ -236,6 +236,59 @@ test('company dashboard replaces included pro services with profile completion r
     source,
     /Services included with PRO account[\s\S]*proFeatures\.map/,
     'Expected the old included PRO services dashboard block to be removed'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /company\?\.profileCompletionScore \?\?/,
+    'Expected dashboard and editor scores to use the same live completion calculation instead of stale stored score'
+  );
+});
+
+test('company dashboard aligns most frequent location with numeric stats', () => {
+  const source = read(dashboardPagePath);
+
+  assert.match(
+    source,
+    /h-\[42px\][\s\S]*Most frequent location searched\/[\s\S]*text-\[32px\] font-bold text-\[#f14110\] tracking-\[0\.64px\] leading-\[38px\]/,
+    'Expected most frequent location value to use the same visual height as the views stat'
+  );
+});
+
+test('company edit header uses score and accordion columns', () => {
+  const source = read(editPagePath);
+
+  assert.match(
+    source,
+    /grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8[\s\S]*Profile completion \/ Penyelesaian profil[\s\S]*ProfileAccordion/,
+    'Expected score and description accordions to sit in two columns on desktop'
+  );
+});
+
+test('profile completion bars use the monthly recap gradient', () => {
+  const editSource = read(editPagePath);
+  const dashboardSource = read(dashboardPagePath);
+
+  assert.match(
+    editSource,
+    /width: `\$\{profileCompletionScore\}%`,[\s\S]*background: "linear-gradient\(to right, #e9a28e, #f14110\)"/,
+    'Expected edit page profile completion bar to use the monthly recap gradient'
+  );
+
+  assert.match(
+    dashboardSource,
+    /width: `\$\{profileCompletionScore\}%`,[\s\S]*background: "linear-gradient\(to right, #e9a28e, #f14110\)"/,
+    'Expected dashboard profile completion bar to use the monthly recap gradient'
+  );
+});
+
+test('company edit project size switches to any size when all concrete sizes are active', () => {
+  const source = read(editPagePath);
+
+  assert.match(
+    source,
+    /const concreteProjectSizeIds = projectSizeOptions[\s\S]*option\.id !== "any"[\s\S]*const hasAllConcreteSizes = concreteProjectSizeIds\.every\(\(id\) => next\.includes\(id\)\);[\s\S]*setSelectedProjectSizes\(hasAllConcreteSizes \? \["any"\] : next\);/,
+    'Expected selecting solo, family, and shared to collapse project size to any'
   );
 });
 

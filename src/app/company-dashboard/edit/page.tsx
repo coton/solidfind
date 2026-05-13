@@ -28,6 +28,9 @@ const projectSizeOptions = [
   { id: "family", label: "FAMILY/CO-HOSTING (3-6)" },
   { id: "shared", label: "SHARED/COMMUNITY (7+)" },
 ];
+const concreteProjectSizeIds = projectSizeOptions
+  .filter((option) => option.id !== "any")
+  .map((option) => option.id);
 
 const constructionServices = [
   { id: "all", label: "ALL TYPES" },
@@ -892,19 +895,38 @@ export default function EditProfilePage() {
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         {/* Header Row */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-6">
-          <div className="flex-1">
+        <div className="mb-6">
+          <div className="mb-5 flex items-start justify-between gap-4">
             {company ? (
-              <Link href={buildCompanyProfilePath(company)} className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2 block hover:text-[#f14110] transition-colors">
-                Company profile
+              <Link href={buildCompanyProfilePath(company)} className="block text-[40px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px] leading-[42px] sm:leading-[36px] hover:text-[#f14110] transition-colors">
+                <span className="block sm:inline">Company</span>
+                <span className="block sm:inline sm:ml-2">profile</span>
               </Link>
             ) : (
-              <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2">
-                Company profile
+              <h1 className="text-[40px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px] leading-[42px] sm:leading-[36px]">
+                <span className="block sm:inline">Company</span>
+                <span className="block sm:inline sm:ml-2">profile</span>
               </h1>
             )}
-            <div className="max-w-[680px] space-y-3">
-              <div>
+
+            <div className="shrink-0 pt-1 text-right">
+              {company?.isPro && proEnabled ? (
+                <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">PRO ACCOUNT</p>
+              ) : proEnabled ? (
+                <p className="text-[11px] text-[#333]/60 font-medium tracking-[0.22px] mb-1">FREE ACCOUNT</p>
+              ) : null}
+
+              <div className="flex items-center gap-4 justify-end">
+                <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
+                  DELETE PROFILE
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
+            <div>
+              <div className="max-w-[360px]">
                 <p className="text-[10px] font-semibold text-[#333] tracking-[0.2px]">Profile completion / Penyelesaian profil</p>
                 <div className="mt-1 flex items-end gap-1">
                   <span className="text-[32px] font-bold text-[#f14110] leading-none tracking-[0.64px]">{profileCompletionScore}</span>
@@ -912,13 +934,21 @@ export default function EditProfilePage() {
                   <span className="pb-1.5 text-[11px] font-medium text-[#333]">{profileCompletionStatus.label}</span>
                 </div>
                 <div className="mt-2 h-1.5 w-full max-w-[320px] overflow-hidden rounded-full bg-[#333]/10">
-                  <div className="h-full rounded-full bg-[#f14110]" style={{ width: `${profileCompletionScore}%` }} />
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${profileCompletionScore}%`,
+                      background: "linear-gradient(to right, #e9a28e, #f14110)",
+                    }}
+                  />
                 </div>
                 <p className="mt-2 max-w-[560px] text-[9px] leading-[14px] text-[#333]/50 tracking-[0.18px]">
                   {profileCompletionStatus.legend}
                 </p>
               </div>
+            </div>
 
+            <div>
               <div className="max-w-[560px]">
                 <ProfileAccordion
                   title="What appears on your public profile:"
@@ -956,20 +986,6 @@ export default function EditProfilePage() {
                   </p>
                 </ProfileAccordion>
               </div>
-            </div>
-          </div>
-
-          <div className="self-end text-right md:self-start">
-            {company?.isPro && proEnabled ? (
-              <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">PRO ACCOUNT</p>
-            ) : proEnabled ? (
-              <p className="text-[11px] text-[#333]/60 font-medium tracking-[0.22px] mb-1">FREE ACCOUNT</p>
-            ) : null}
-
-            <div className="flex items-center gap-4 justify-end">
-              <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                DELETE PROFILE
-              </button>
             </div>
           </div>
         </div>
@@ -1342,7 +1358,8 @@ export default function EditProfilePage() {
                             const next = selectedProjectSizes.includes(size.id)
                               ? selectedProjectSizes.filter(s => s !== size.id)
                               : [...selectedProjectSizes.filter(s => s !== "any"), size.id];
-                            setSelectedProjectSizes(next);
+                            const hasAllConcreteSizes = concreteProjectSizeIds.every((id) => next.includes(id));
+                            setSelectedProjectSizes(hasAllConcreteSizes ? ["any"] : next);
                           }
                         }}
                       />

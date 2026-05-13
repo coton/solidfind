@@ -101,7 +101,7 @@ export default function CompanyDashboardPage() {
     ].filter(Boolean)
     : [];
   const companyProjectImageCount = (company?.projectImageIds?.length ?? 0) + (company?.projectImageUrls?.length ?? 0);
-  const profileCompletionScore = company?.profileCompletionScore ?? calculateProfileCompletionScore(
+  const profileCompletionScore = calculateProfileCompletionScore(
     {
       companyName: company?.name,
       categories: activeCategories,
@@ -233,13 +233,15 @@ export default function CompanyDashboardPage() {
         <div className={`grid ${isPro && proEnabled ? 'grid-cols-4' : proEnabled ? 'grid-cols-2' : 'grid-cols-1'} gap-6 mb-8`}>
           {/* Bookmarked — always visible */}
           <div>
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-              Company bookmarked /
-            </p>
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-              Perusahaan favorit sebanyak
-            </p>
-            <p className={`text-[32px] font-bold tracking-[0.64px] ${data.stats.bookmarked === 0 ? 'text-[#666]' : 'text-[#f14110]'}`}>
+            <div className="h-[42px]">
+              <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                Company bookmarked /
+              </p>
+              <p className="text-[10px] text-[#333]/70 tracking-[0.2px]">
+                Perusahaan favorit sebanyak
+              </p>
+            </div>
+            <p className={`text-[32px] font-bold tracking-[0.64px] leading-[38px] ${data.stats.bookmarked === 0 ? 'text-[#666]' : 'text-[#f14110]'}`}>
               {data.stats.bookmarked}
               <span className="text-[14px] font-normal ml-1">Times</span>
             </p>
@@ -249,27 +251,31 @@ export default function CompanyDashboardPage() {
             <>
               {/* Views Last Month */}
               <div>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  View within the last month /
-                </p>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-                  Lihat dalam sebulan terakhir
-                </p>
-                <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px]">
+                <div className="h-[42px]">
+                  <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                    View within the last month /
+                  </p>
+                  <p className="text-[10px] text-[#333]/70 tracking-[0.2px]">
+                    Lihat dalam sebulan terakhir
+                  </p>
+                </div>
+                <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px] leading-[38px]">
                   {data.stats.viewsLastMonth}
                   <span className="text-[14px] font-normal ml-1">Views</span>
                 </p>
               </div>
 
               {/* Most Searched Location */}
-              <div>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Most frequent location searched/
-                </p>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-                  Lokasi yang paling sering lokasi
-                </p>
-                <p className="text-[24px] font-bold text-[#f14110] tracking-[0.48px]">
+              <div className="flex flex-col">
+                <div className="h-[42px]">
+                  <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                    Most frequent location searched/
+                  </p>
+                  <p className="text-[10px] text-[#333]/70 tracking-[0.2px]">
+                    Lokasi yang paling sering lokasi
+                  </p>
+                </div>
+                <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px] leading-[38px]">
                   {data.stats.mostSearchedLocation}
                 </p>
               </div>
@@ -286,7 +292,13 @@ export default function CompanyDashboardPage() {
               <span className="pb-1.5 text-[11px] font-medium text-[#333]">{profileCompletionStatus.label}</span>
             </div>
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#333]/10">
-              <div className="h-full rounded-full bg-[#f14110]" style={{ width: `${profileCompletionScore}%` }} />
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${profileCompletionScore}%`,
+                  background: "linear-gradient(to right, #e9a28e, #f14110)",
+                }}
+              />
             </div>
             <p className="mt-3 text-[9px] leading-[14px] text-[#333]/50 tracking-[0.18px]">
               {profileCompletionStatus.legend}
