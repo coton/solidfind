@@ -15,9 +15,10 @@ import { MagicLinkLoadingPage } from "@/components/MagicLinkLoadingPage";
 import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 import { COMPANY_ADDRESS_VALIDATION_MESSAGE, isLikelyCompanyAddress, normalizeCompanyAddress } from "@/lib/company-address-validation.mjs";
 import { MIN_COMPANY_SINCE_YEAR, getMaxCompanySinceYear, isValidCompanySinceYear, normalizeCompanySinceYearInput } from "@/lib/company-since-year-validation.mjs";
-import { Star, X, Upload, Lock } from "lucide-react";
+import { Star, X, Upload, Lock, Check, ChevronDown } from "lucide-react";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import { useProEnabled } from "@/hooks/useProEnabled";
+import { calculateProfileCompletionScore, getProfileCompletionStatus } from "@/lib/profile-completion.mjs";
 
 type SetupOAuthStrategy = Extract<OAuthStrategy, "oauth_google">;
 
@@ -127,6 +128,47 @@ function ExternalProjectImage({ src }: { src: string }) {
   return <Image src={src} alt="Project" fill className="object-cover" />;
 }
 
+function RequiredStar() {
+  return <span className="text-[#f14110]">*</span>;
+}
+
+function CompletionLine({ complete, children }: { complete: boolean; children: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-2">
+      <span className={`mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border ${complete ? "border-[#f14110] bg-[#f14110] text-white" : "border-[#333]/20 text-transparent"}`}>
+        <Check className="h-2.5 w-2.5" />
+      </span>
+      <span>{children}</span>
+    </li>
+  );
+}
+
+function ProfileAccordion({
+  title,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border-t border-[#333]/10 py-2">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-3 text-left text-[10px] font-semibold text-[#333] tracking-[0.2px]"
+      >
+        {title}
+        <ChevronDown className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && <div className="pt-3">{children}</div>}
+    </div>
+  );
+}
+
 function SetupSocialButton({ label, icon, onClick, disabled }: {
   label: string;
   icon: React.ReactNode;
@@ -207,6 +249,7 @@ export default function EditProfilePage() {
   const proEnabled = useProEnabled();
   const [showProModal, setShowProModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [openProfileExplainer, setOpenProfileExplainer] = useState<"english" | "indonesian" | null>(null);
   const [redirected, setRedirected] = useState(false);
   const [isDirty, setIsDirty] = useState(true);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -381,6 +424,48 @@ export default function EditProfilePage() {
   const logoUrl = useStorageUrl(logoId);
   const logoPreviewUrl = logoUrl ?? company?.imageUrl;
   const totalProjectImages = projectImageUrls.length + projectImageIds.length;
+  const profileCompletionItems = {
+    identity: companyName.trim().length >= 2 && selectedLocations.length > 0 && description.trim().length > 0,
+    contact: Boolean(phone.trim() || whatsapp.trim()),
+    projectScope: selectedProjectSizes.length > 0 && hasCategory,
+    onlinePresence: Boolean(website.trim() || instagram.trim() || facebook.trim() || linkedin.trim()),
+    profileDetails: Boolean(
+      foundedYear
+      && isValidCompanySinceYear(foundedYear, maxCompanySinceYear)
+      && Number(teamSize) >= 1
+    ),
+    projectMedia: totalProjectImages > 0,
+  };
+  const activeCategories = [
+    constructionEnabled && selectedConstruction.length > 0 ? "construction" : null,
+    renovationEnabled && selectedRenovation.length > 0 ? "renovation" : null,
+    architectureEnabled && selectedArchitecture.length > 0 ? "architecture" : null,
+    interiorEnabled && selectedInterior.length > 0 ? "interior" : null,
+    realEstateEnabled && selectedRealEstate.length > 0 ? "real-estate" : null,
+  ].filter(Boolean) as string[];
+  const profileCompletionScore = calculateProfileCompletionScore(
+    {
+      companyName,
+      categories: activeCategories,
+      locations: selectedLocations,
+      description,
+      phone,
+      whatsapp,
+      email,
+      website,
+      instagram,
+      facebook,
+      linkedin,
+      foundedYear,
+      teamSize,
+      projects: projectsNumber,
+      hasLogo: Boolean(logoPreviewUrl),
+      projectPhotoCount: totalProjectImages,
+      isReviewed: company?.isReviewed,
+    },
+    Boolean(company?.isPro)
+  );
+  const profileCompletionStatus = getProfileCompletionStatus(profileCompletionScore);
 
   // Populate form when company data loads
   useEffect(() => {
@@ -550,6 +635,8 @@ export default function EditProfilePage() {
           logoId: logoId ?? undefined,
           projectImageIds,
           projectImageUrls,
+          profileCompletionScore,
+          profileCompletionStatus: profileCompletionStatus.key,
           since: foundedYear ? parseInt(foundedYear) : undefined,
         });
       } else {
@@ -567,6 +654,8 @@ export default function EditProfilePage() {
           email: email || undefined,
           website: website || undefined,
           whatsapp: whatsapp || undefined,
+          profileCompletionScore,
+          profileCompletionStatus: profileCompletionStatus.key,
         });
       }
       setIsDirty(false);
@@ -814,28 +903,58 @@ export default function EditProfilePage() {
                 Company profile
               </h1>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[680px]">
-              <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[15px]">
-                <p className="font-semibold text-[#333] mb-1">What appears on your public profile:</p>
-                <p>Company name, location, and a brief description of your work*</p>
-                <p>Phone or WhatsApp contact*</p>
-                <p>Project size and areas you operate in*</p>
-                <p>Website, Instagram, or other online presence</p>
-                <p>Year founded and team size</p>
-                <p>Project photos or videos</p>
-                <p className="mt-2 text-[#333]/50">* Required fields. Fields marked optional may not be available for all company types — SolidFind welcomes specialists.</p>
-                <p className="text-[#333]/50">Only filled fields are shown on your public profile. The more complete your profile, the more visible it is in search.</p>
+            <div className="max-w-[680px] space-y-3">
+              <div>
+                <p className="text-[10px] font-semibold text-[#333] tracking-[0.2px]">Profile completion / Penyelesaian profil</p>
+                <div className="mt-1 flex items-end gap-1">
+                  <span className="text-[32px] font-bold text-[#f14110] leading-none tracking-[0.64px]">{profileCompletionScore}</span>
+                  <span className="pb-1 text-[14px] text-[#f14110]">%</span>
+                  <span className="pb-1.5 text-[11px] font-medium text-[#333]">{profileCompletionStatus.label}</span>
+                </div>
+                <div className="mt-2 h-1.5 w-full max-w-[320px] overflow-hidden rounded-full bg-[#333]/10">
+                  <div className="h-full rounded-full bg-[#f14110]" style={{ width: `${profileCompletionScore}%` }} />
+                </div>
+                <p className="mt-2 max-w-[560px] text-[9px] leading-[14px] text-[#333]/50 tracking-[0.18px]">
+                  {profileCompletionStatus.legend}
+                </p>
               </div>
-              <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[15px]">
-                <p className="font-semibold text-[#333] mb-1">Yang ditampilkan di profil publik Anda:</p>
-                <p>Nama perusahaan, lokasi, dan deskripsi singkat pekerjaan Anda*</p>
-                <p>Nomor telepon atau WhatsApp*</p>
-                <p>Ukuran proyek dan area operasional*</p>
-                <p>Website, Instagram, atau kehadiran online lainnya</p>
-                <p>Tahun berdiri dan ukuran tim</p>
-                <p>Foto atau video proyek</p>
-                <p className="mt-2 text-[#333]/50">* Kolom wajib diisi. Kolom opsional mungkin tidak tersedia untuk semua jenis perusahaan — SolidFind menyambut para spesialis.</p>
-                <p className="text-[#333]/50">Hanya kolom yang diisi yang akan ditampilkan di profil publik Anda. Semakin lengkap profil Anda, semakin terlihat di hasil pencarian.</p>
+
+              <div className="max-w-[560px]">
+                <ProfileAccordion
+                  title="What appears on your public profile:"
+                  open={openProfileExplainer === "english"}
+                  onToggle={() => setOpenProfileExplainer(openProfileExplainer === "english" ? null : "english")}
+                >
+                  <ul className="space-y-2 text-[10px] leading-[18px] text-[#333]/70 tracking-[0.2px]">
+                    <CompletionLine complete={profileCompletionItems.identity}>Company name, location, and a brief description of your work<RequiredStar /></CompletionLine>
+                    <CompletionLine complete={profileCompletionItems.contact}>Phone or WhatsApp contact<RequiredStar /></CompletionLine>
+                    <CompletionLine complete={profileCompletionItems.projectScope}>Project size and areas you operate in<RequiredStar /></CompletionLine>
+                    <CompletionLine complete={profileCompletionItems.onlinePresence}>Website, Instagram, or other online presence</CompletionLine>
+                    <CompletionLine complete={profileCompletionItems.profileDetails}>Year founded and team size</CompletionLine>
+                    <CompletionLine complete={profileCompletionItems.projectMedia}>Project photos or videos</CompletionLine>
+                  </ul>
+                  <p className="mt-3 text-[9px] leading-[15px] text-[#333]/50 tracking-[0.18px]">
+                    <RequiredStar /> Required fields. Only edited fields are shown on your public profile. The more complete your profile, the more visible it is in search. Also, SolidFind welcomes specialists, dig into the specifics of what you do best.
+                  </p>
+                </ProfileAccordion>
+
+                <ProfileAccordion
+                  title="Yang ditampilkan di profil publik Anda:"
+                  open={openProfileExplainer === "indonesian"}
+                  onToggle={() => setOpenProfileExplainer(openProfileExplainer === "indonesian" ? null : "indonesian")}
+                >
+                  <ul className="space-y-2 text-[10px] leading-[18px] text-[#333]/70 tracking-[0.2px]">
+                    <CompletionLine complete={profileCompletionItems.identity}>Nama perusahaan, lokasi, dan deskripsi singkat pekerjaan Anda<RequiredStar /></CompletionLine>
+                    <CompletionLine complete={profileCompletionItems.contact}>Nomor telepon atau WhatsApp<RequiredStar /></CompletionLine>
+                    <CompletionLine complete={profileCompletionItems.projectScope}>Ukuran proyek dan area operasional<RequiredStar /></CompletionLine>
+                    <CompletionLine complete={profileCompletionItems.onlinePresence}>Website, Instagram, atau kehadiran online lainnya</CompletionLine>
+                    <CompletionLine complete={profileCompletionItems.profileDetails}>Tahun berdiri dan ukuran tim</CompletionLine>
+                    <CompletionLine complete={profileCompletionItems.projectMedia}>Foto atau video proyek</CompletionLine>
+                  </ul>
+                  <p className="mt-3 text-[9px] leading-[15px] text-[#333]/50 tracking-[0.18px]">
+                    <RequiredStar /> Bidang yang wajib diisi. Hanya bidang yang diedit yang ditampilkan di profil publik Anda. Semakin lengkap profil Anda, semakin terlihat dalam pencarian. Selain itu, SolidFind menyambut para spesialis, gali secara spesifik hal terbaik yang Anda lakukan.
+                  </p>
+                </ProfileAccordion>
               </div>
             </div>
           </div>

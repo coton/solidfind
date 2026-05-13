@@ -169,14 +169,73 @@ test('company edit page requires email and shows the public profile explainer in
 
   assert.match(
     source,
-    /grid grid-cols-1 sm:grid-cols-2[\s\S]*What appears on your public profile:[\s\S]*Yang ditampilkan di profil publik Anda:/,
-    'Expected the edit page explainer to be split into English and Indonesian columns'
+    /ProfileAccordion[\s\S]*What appears on your public profile:[\s\S]*Yang ditampilkan di profil publik Anda:/,
+    'Expected the edit page explainer to use stacked English and Indonesian accordions'
+  );
+
+  assert.match(
+    source,
+    /CompletionLine complete=\{profileCompletionItems\.identity\}[\s\S]*RequiredStar[\s\S]*CompletionLine complete=\{profileCompletionItems\.projectMedia\}/,
+    'Expected profile explainer list items to show completion ticks and orange required stars'
+  );
+
+  assert.match(
+    source,
+    /Profile completion \/ Penyelesaian profil[\s\S]*\{profileCompletionScore\}[\s\S]*\{profileCompletionStatus\.label\}/,
+    'Expected the edit page to show a live profile completion score above the accordions'
   );
 
   assert.match(
     source,
     /<div className="self-end text-right md:self-start">/,
     'Expected the account status/delete controls to align right on mobile'
+  );
+});
+
+test('company edit page calculates and stores profile completion score', () => {
+  const source = read(editPagePath);
+  const schemaSource = read('convex/schema.ts');
+  const mutationSource = read('convex/companies.ts');
+  const scoreSource = read('src/lib/profile-completion.mjs');
+
+  assert.match(
+    scoreSource,
+    /export function calculateProfileCompletionScore[\s\S]*return Math\.min\(isPro \? 100 : 85, score\);/,
+    'Expected completion score helper to cap free accounts at 85 and pro accounts at 100'
+  );
+
+  assert.match(
+    source,
+    /calculateProfileCompletionScore\([\s\S]*profileCompletionScore[\s\S]*profileCompletionStatus: profileCompletionStatus\.key/,
+    'Expected company edit saves to calculate and persist completion score and status'
+  );
+
+  assert.match(
+    schemaSource,
+    /profileCompletionScore: v\.optional\(v\.number\(\)\),[\s\S]*profileCompletionStatus: v\.optional\(v\.string\(\)\),/,
+    'Expected company records to store completion score and status'
+  );
+
+  assert.match(
+    mutationSource,
+    /profileCompletionScore: v\.optional\(v\.number\(\)\),[\s\S]*profileCompletionStatus: v\.optional\(v\.string\(\)\),/,
+    'Expected company mutations to accept completion score and status'
+  );
+});
+
+test('company dashboard replaces included pro services with profile completion reminder', () => {
+  const source = read(dashboardPagePath);
+
+  assert.match(
+    source,
+    /Profile completion \/ Penyelesaian profil[\s\S]*\{profileCompletionScore\}[\s\S]*\{profileCompletionStatus\.legend\}/,
+    'Expected company dashboard to display the profile completion reminder block'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /Services included with PRO account[\s\S]*proFeatures\.map/,
+    'Expected the old included PRO services dashboard block to be removed'
   );
 });
 
