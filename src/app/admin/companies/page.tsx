@@ -68,10 +68,6 @@ export default function AdminCompanies() {
     await updateCompany({ id: id as Parameters<typeof updateCompany>[0]["id"], isReviewed: !(currentReviewed ?? true) });
   };
 
-  const handleOpenCompany = async (id: string) => {
-    await updateCompany({ id: id as Parameters<typeof updateCompany>[0]["id"], adminViewedAt: Date.now() });
-  };
-
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "admin";
 
   const handleDelete = async (id: string) => {
@@ -149,19 +145,19 @@ export default function AdminCompanies() {
               </tr>
             ) : (
               paginated.map((company) => {
-                const isNewCompany = Date.now() - company.createdAt <= NEW_COMPANY_WINDOW_MS && !company.adminViewedAt;
+                const isRecentCompany = Date.now() - company.createdAt <= NEW_COMPANY_WINDOW_MS;
+                const needsReviewHighlight = isRecentCompany && company.isReviewed === false;
                 const categoryLabels = getCompanyCategories(company);
                 return (
-                <tr key={company._id} className={`border-b border-[#f0f0f0] hover:bg-[#fafafa] ${isNewCompany ? "bg-[#f14110]/5" : ""}`}>
+                <tr key={company._id} className={`border-b border-[#f0f0f0] hover:bg-[#fafafa] ${needsReviewHighlight ? "bg-[#f14110]/5" : ""}`}>
                   <td className="px-4 py-3">
                     <Link
                       href={buildCompanyProfilePath(company)}
-                      onClick={() => { void handleOpenCompany(company._id); }}
-                      className={`text-[12px] font-medium hover:text-[#f14110] transition-colors ${isNewCompany ? "text-[#f14110] font-semibold" : "text-[#333]"}`}
+                      className={`text-[12px] font-medium hover:text-[#f14110] transition-colors ${needsReviewHighlight ? "text-[#f14110] font-semibold" : "text-[#333]"}`}
                     >
                       {company.name}
                     </Link>
-                    {isNewCompany && (
+                    {isRecentCompany && (
                       <span className="ml-2 rounded-full bg-[#f14110]/10 px-2 py-0.5 text-[9px] font-medium text-[#f14110]">
                         New profile
                       </span>

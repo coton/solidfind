@@ -10,7 +10,7 @@ const navItems = [
   { href: "/admin/companies", label: "Companies", icon: Building2 },
   { href: "/admin/reviews", label: "Testimonials", icon: MessageSquare },
   { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/waitlist", label: "Waitlist", icon: Mail },
+  { href: "/admin/waitlist", label: "Newsletter", icon: Mail },
   { href: "/admin/reports", label: "Reports", icon: Flag },
   { href: "/admin/audit-log", label: "Audit Log", icon: ScrollText },
   { href: "/admin/ui", label: "UI", icon: Palette },

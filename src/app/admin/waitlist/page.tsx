@@ -5,7 +5,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useState } from "react";
 
-export default function WaitlistPage() {
+export default function NewsletterPage() {
   const waitlistData = useQuery(api.waitlist.getWaitlist, {});
   const markAsNotified = useMutation(api.waitlist.markAsNotified);
   const deleteEmail = useMutation(api.waitlist.deleteWaitlistEmail);
@@ -16,7 +16,7 @@ export default function WaitlistPage() {
   if (!waitlistData) {
     return (
       <div className="p-6">
-        <div className="animate-pulse">Loading waitlist...</div>
+        <div className="animate-pulse">Loading newsletter signups...</div>
       </div>
     );
   }
@@ -56,7 +56,7 @@ export default function WaitlistPage() {
   };
 
   const handleDeleteEmail = async (id: Id<"waitlist">) => {
-    if (confirm("Delete this email from waitlist?")) {
+    if (confirm("Delete this email from newsletter signups?")) {
       await deleteEmail({ emailId: id });
     }
   };
@@ -78,7 +78,7 @@ export default function WaitlistPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `solidfind-waitlist-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `solidfind-newsletter-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
   };
 
@@ -86,9 +86,9 @@ export default function WaitlistPage() {
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Waitlist</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Newsletter</h1>
         <p className="text-gray-600">
-          Manage email signups from the Coming Soon page
+          Manage newsletter signups from account registration and launch pages
         </p>
       </div>
 

@@ -16,11 +16,11 @@ import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 
 const proFeatures = [
-  { icon: "star", title: "Top search ranking", subtitle: "Peringkat pencarian teratas" },
-  { icon: "ai", title: "AI search optimisation", subtitle: "Optimasi pencarian AI" },
-  { icon: "stats", title: "Statistics", subtitle: "Statistik" },
-  { icon: "pics", title: "12 project pictures or videos", subtitle: "12 gambar proyek atau Video" },
-  { icon: "ads", title: "Possibility to buy ad space", subtitle: "Boleh untuk membeli iklan" },
+  { icon: "star", title: "Priority placement in search results", subtitle: "Penempatan prioritas dalam hasil pencarian" },
+  { icon: "ai", title: "Structured for AI-assisted search", subtitle: "Terstruktur untuk pencarian yang dibantu AI" },
+  { icon: "stats", title: "Visibility analytics — who's viewing your profile and when", subtitle: "Analisis visibilitas — siapa yang melihat profil Anda dan kapan" },
+  { icon: "pics", title: "Up to 12 project photos or videos", subtitle: "Hingga 12 foto atau video proyek" },
+  { icon: "ads", title: "Ad placements across the platform", subtitle: "Penempatan iklan di seluruh platform" },
 ];
 
 function ReviewCard({ userName, rating, content, date }: {
@@ -389,9 +389,9 @@ export default function CompanyDashboardPage() {
 
             <h3 className="text-[28px] font-bold text-[#333] text-center mb-2">AD SPACE</h3>
             <p className="text-[12px] text-[#333]/50 text-center mb-8">
-              Make sure your brand stands out!
+              Ad placements on SolidFind
               <br />
-              Pastikan merek Anda menonjol!
+              Penempatan iklan di SolidFind
             </p>
 
             <div className="space-y-5 mb-8">
@@ -433,7 +433,7 @@ export default function CompanyDashboardPage() {
             </div>
 
             <p className="text-[11px] text-[#333]/70 text-center mb-6 leading-[18px]">
-              Your Ads will be visible throughout the website, in essential pages offering instant visibility across the entirety of Solidfind.id / Iklan Anda akan terlihat di seluruh situs web, di halaman-halaman penting yang menawarkan visibilitas instan di seluruh Solidfind.id.
+              Your placement appears on category pages and search results — in front of people actively looking for professionals. Penempatan Anda muncul di halaman kategori dan hasil pencarian — di hadapan orang-orang yang aktif mencari profesional.
             </p>
 
             <p className="text-[12px] text-[#f14110] text-center mb-4">
@@ -515,8 +515,8 @@ export default function CompanyDashboardPage() {
               <div className="flex items-center gap-3">
                 <Star className="w-5 h-5 text-[#f14110]" />
                 <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Top search ranking</p>
-                  <p className="text-[10px] text-[#333]/50">Peringkat pencarian teratas</p>
+                  <p className="text-[12px] font-semibold text-[#333]">Priority placement in search results</p>
+                  <p className="text-[10px] text-[#333]/50">Penempatan prioritas dalam hasil pencarian</p>
                 </div>
               </div>
 
@@ -525,8 +525,8 @@ export default function CompanyDashboardPage() {
                   <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
                 </svg>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#333]">AI search optimisation</p>
-                  <p className="text-[10px] text-[#333]/50">Optimasi pencarian AI</p>
+                  <p className="text-[12px] font-semibold text-[#333]">Structured for AI-assisted search</p>
+                  <p className="text-[10px] text-[#333]/50">Terstruktur untuk pencarian yang dibantu AI</p>
                 </div>
               </div>
 
@@ -537,8 +537,8 @@ export default function CompanyDashboardPage() {
                   <rect x="11" y="1" width="3" height="14"/>
                 </svg>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Statistics</p>
-                  <p className="text-[10px] text-[#333]/50">Statistik</p>
+                  <p className="text-[12px] font-semibold text-[#333]">Visibility analytics — who's viewing your profile and when</p>
+                  <p className="text-[10px] text-[#333]/50">Analisis visibilitas — siapa yang melihat profil Anda dan kapan</p>
                 </div>
               </div>
 
@@ -547,8 +547,8 @@ export default function CompanyDashboardPage() {
                   <path d="M17.5 0C18.163 0 18.7987 0.263581 19.2676 0.732422C19.7364 1.20126 20 1.83696 20 2.5V17.5C20 18.163 19.7364 18.7987 19.2676 19.2676C18.7987 19.7364 18.163 20 17.5 20H2.5C1.83696 20 1.20126 19.7364 0.732422 19.2676C0.263581 18.7987 0 18.163 0 17.5V2.5C0 1.83696 0.263581 1.20126 0.732422 0.732422C1.20126 0.263581 1.83696 0 2.5 0H17.5ZM7.99512 18H17.084L12.6963 11.709L7.99512 18ZM2.5 2C2.36739 2 2.24025 2.05272 2.14648 2.14648C2.05272 2.24025 2 2.36739 2 2.5V17.5C2 17.6326 2.05272 17.7597 2.14648 17.8535C2.24025 17.9473 2.36739 18 2.5 18H5.49902L11.0938 10.5117C11.2832 10.258 11.5302 10.0527 11.8145 9.91309C12.0986 9.77355 12.412 9.70387 12.7285 9.70898C13.0452 9.71416 13.3562 9.79456 13.6357 9.94336C13.9153 10.0922 14.1558 10.3047 14.3369 10.5645L18 15.8164V2.5C18 2.36739 17.9473 2.24025 17.8535 2.14648C17.7597 2.05272 17.6326 2 17.5 2H2.5ZM7 3.5C7.92826 3.5 8.81823 3.86901 9.47461 4.52539C10.131 5.18177 10.5 6.07174 10.5 7C10.5 7.92826 10.131 8.81823 9.47461 9.47461C8.81823 10.131 7.92826 10.5 7 10.5C6.07174 10.5 5.18177 10.131 4.52539 9.47461C3.86901 8.81823 3.5 7.92826 3.5 7C3.5 6.07174 3.86901 5.18177 4.52539 4.52539C5.18177 3.86901 6.07174 3.5 7 3.5ZM7 5.5C6.60218 5.5 6.22076 5.65815 5.93945 5.93945C5.65815 6.22076 5.5 6.60218 5.5 7C5.5 7.39782 5.65815 7.77924 5.93945 8.06055C6.22076 8.34185 6.60218 8.5 7 8.5C7.39782 8.5 7.77924 8.34185 8.06055 8.06055C8.34185 7.77924 8.5 7.39782 8.5 7C8.5 6.60218 8.34185 6.22076 8.06055 5.93945C7.77924 5.65815 7.39782 5.5 7 5.5Z" fill="#F14110"/>
                 </svg>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#333]">12 project pictures or videos</p>
-                  <p className="text-[10px] text-[#333]/50">12 gambar proyek atau Video</p>
+                  <p className="text-[12px] font-semibold text-[#333]">Up to 12 project photos or videos</p>
+                  <p className="text-[10px] text-[#333]/50">Hingga 12 foto atau video proyek</p>
                 </div>
               </div>
 
@@ -558,8 +558,8 @@ export default function CompanyDashboardPage() {
                   <path d="M1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125ZM1.72645 3.48125V1.75M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072Z" stroke="#F14110"/>
                 </svg>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Possibility to buy ad space</p>
-                  <p className="text-[10px] text-[#333]/50">Boleh untuk membeli iklan</p>
+                  <p className="text-[12px] font-semibold text-[#333]">Ad placements across the platform</p>
+                  <p className="text-[10px] text-[#333]/50">Penempatan iklan di seluruh platform</p>
                 </div>
               </div>
             </div>

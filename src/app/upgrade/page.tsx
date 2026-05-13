@@ -9,32 +9,32 @@ import { ArrowLeft, Star, Check, X } from "lucide-react";
 const proFeatures = [
   {
     icon: "star",
-    title: "Top search ranking",
-    subtitle: "Peringkat pencarian teratas",
+    title: "Priority placement in search results",
+    subtitle: "Penempatan prioritas dalam hasil pencarian",
     description: "Your company appears first in search results, maximizing your visibility to potential clients.",
   },
   {
     icon: "ai",
-    title: "AI search optimisation",
-    subtitle: "Optimasi pencarian AI",
+    title: "Structured for AI-assisted search",
+    subtitle: "Terstruktur untuk pencarian yang dibantu AI",
     description: "Your profile is optimized for AI-powered search, helping clients find you through natural language queries.",
   },
   {
     icon: "stats",
-    title: "Statistics & Analytics",
-    subtitle: "Statistik dan Analitik",
+    title: "Visibility analytics — who's viewing your profile and when",
+    subtitle: "Analisis visibilitas — siapa yang melihat profil Anda dan kapan",
     description: "Track your profile views, bookmark count, and most-searched locations to understand your audience.",
   },
   {
     icon: "photos",
-    title: "12 project pictures",
-    subtitle: "12 gambar proyek",
+    title: "Up to 12 project photos or videos",
+    subtitle: "Hingga 12 foto atau video proyek",
     description: "Showcase up to 12 project photos instead of 3 — let your work speak for itself.",
   },
   {
     icon: "ad",
-    title: "Possibility to buy ad space",
-    subtitle: "Boleh untuk membeli iklan",
+    title: "Ad placements across the platform",
+    subtitle: "Penempatan iklan di seluruh platform",
     description: "Access premium ad placements across the site for maximum brand exposure.",
   },
 ];

@@ -26,16 +26,27 @@ type CleanupResponse = {
 
 export default function AdminUsers() {
   const users = useQuery(api.users.listAll);
+  const newsletterData = useQuery(api.waitlist.getWaitlist, {});
 
   const [search, setSearch] = useState("");
+  const [newsletterOnly, setNewsletterOnly] = useState(false);
   const [sortMode, setSortMode] = useState<"joined" | "type">("joined");
   const [currentPage, setCurrentPage] = useState(0);
   const [cleanupLoading, setCleanupLoading] = useState<"dry-run" | "apply" | null>(null);
   const [cleanupError, setCleanupError] = useState("");
   const [cleanupResult, setCleanupResult] = useState<CleanupResponse | null>(null);
 
+  const newsletterEmails = useMemo(() => {
+    return new Set(
+      newsletterData?.emails.map((item) => item.email.trim().toLowerCase()) ?? []
+    );
+  }, [newsletterData]);
+
   const filtered = users
     ?.filter((u) => {
+      if (newsletterOnly && !newsletterEmails.has(u.email.trim().toLowerCase())) {
+        return false;
+      }
       if (!search) return true;
       const q = search.toLowerCase();
       return (
@@ -128,7 +139,7 @@ export default function AdminUsers() {
       </div>
 
       {/* Search */}
-      <div className="mb-4">
+      <div className="mb-4 flex items-center gap-2 flex-wrap">
         <input
           type="text"
           value={search}
@@ -136,6 +147,17 @@ export default function AdminUsers() {
           placeholder="Search by name or email..."
           className="w-full max-w-[300px] h-9 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
         />
+        <button
+          type="button"
+          onClick={() => { setNewsletterOnly((value) => !value); setCurrentPage(0); }}
+          className={`h-9 px-3 rounded-[6px] border text-[11px] font-medium transition-colors ${
+            newsletterOnly
+              ? "border-[#f14110] bg-[#f14110] text-white"
+              : "border-[#e4e4e4] bg-white text-[#333]/60 hover:text-[#f14110] hover:border-[#f14110]"
+          }`}
+        >
+          Newsletter
+        </button>
       </div>
 
       {(cleanupError || cleanupResult) && (
@@ -220,6 +242,7 @@ export default function AdminUsers() {
             <tr className="border-b border-[#e4e4e4] bg-[#fafafa]">
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">User</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Email</th>
+              <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Newsletter</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">
                 <button onClick={() => { setSortMode("type"); setCurrentPage(0); }} className="hover:text-[#f14110] transition-colors">
                   Type
@@ -235,24 +258,27 @@ export default function AdminUsers() {
           <tbody>
             {paginated === undefined ? (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
+                <td colSpan={5} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
                   Loading...
                 </td>
               </tr>
             ) : paginated.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
+                <td colSpan={5} className="px-4 py-8 text-center text-[12px] text-[#333]/50">
                   No users found.
                 </td>
               </tr>
             ) : (
-              paginated.map((user) => (
+              paginated.map((user) => {
+                const profileImageUrl = user.accountType === "company" ? user.imageUrl : undefined;
+                const isNewsletterSubscriber = newsletterEmails.has(user.email.trim().toLowerCase());
+                return (
                 <tr key={user._id} className="border-b border-[#f0f0f0] hover:bg-[#fafafa]">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
-                      {user.imageUrl ? (
+                      {profileImageUrl ? (
                         <Image
-                          src={user.imageUrl}
+                          src={profileImageUrl}
                           alt={user.name || ""}
                           width={28}
                           height={28}
@@ -270,6 +296,15 @@ export default function AdminUsers() {
                   </td>
                   <td className="px-4 py-3 text-[11px] text-[#333]/50">{user.email}</td>
                   <td className="px-4 py-3">
+                    {isNewsletterSubscriber ? (
+                      <span className="text-[9px] font-medium text-[#f14110] bg-[#f14110]/10 px-2 py-0.5 rounded-full">
+                        Newsletter
+                      </span>
+                    ) : (
+                      <span className="text-[#333]/30 text-[11px]">-</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
                     <span
                       className={`text-[9px] font-medium px-2 py-0.5 rounded-full ${
                         user.accountType === "company"
@@ -284,7 +319,8 @@ export default function AdminUsers() {
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
                 </tr>
-              ))
+              );
+              })
             )}
           </tbody>
         </table>

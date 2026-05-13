@@ -94,11 +94,11 @@ const locationOptions = [
 ];
 
 const proFeatures = [
-  { icon: "star", title: "Top search ranking", subtitle: "Peringkat pencarian teratas" },
-  { icon: "ai", title: "AI search optimisation", subtitle: "Optimasi pencarian AI" },
-  { icon: "stats", title: "Statistics", subtitle: "Statistik" },
-  { icon: "photos", title: "12 project pictures", subtitle: "12 gambar proyek" },
-  { icon: "ad", title: "Possibility to buy ad space", subtitle: "Boleh untuk membeli iklan" },
+  { icon: "star", title: "Priority placement in search results", subtitle: "Penempatan prioritas dalam hasil pencarian" },
+  { icon: "ai", title: "Structured for AI-assisted search", subtitle: "Terstruktur untuk pencarian yang dibantu AI" },
+  { icon: "stats", title: "Visibility analytics — who's viewing your profile and when", subtitle: "Analisis visibilitas — siapa yang melihat profil Anda dan kapan" },
+  { icon: "photos", title: "Up to 12 project photos or videos", subtitle: "Hingga 12 foto atau video proyek" },
+  { icon: "ad", title: "Ad placements across the platform", subtitle: "Penempatan iklan di seluruh platform" },
 ];
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {
@@ -321,6 +321,7 @@ export default function EditProfilePage() {
   const missingProjectSize = selectedProjectSizes.length === 0;
   const missingLocation = selectedLocations.length === 0;
   const missingDescription = !description.trim();
+  const missingEmail = !email.trim();
   const normalizedAddress = normalizeCompanyAddress(address);
   const missingAddress = !normalizedAddress;
   const invalidAddress = Boolean(normalizedAddress && !isLikelyCompanyAddress(normalizedAddress));
@@ -347,6 +348,9 @@ export default function EditProfilePage() {
   } else if (missingDescription) {
     bottomHintText = "*Company description is required\n*Deskripsi perusahaan wajib diisi";
     bottomHintIsWarning = true;
+  } else if (missingEmail) {
+    bottomHintText = "*Company email is required\n*Email perusahaan wajib diisi";
+    bottomHintIsWarning = true;
   } else if (missingAddress) {
     bottomHintText = "*Company address is required\n*Alamat perusahaan wajib diisi";
     bottomHintIsWarning = true;
@@ -358,7 +362,7 @@ export default function EditProfilePage() {
     bottomHintIsWarning = true;
   }
 
-  const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingAddress && !invalidAddress && !invalidFoundedYear;
+  const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingEmail && !missingAddress && !invalidAddress && !invalidFoundedYear;
   const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
   const hasSetupAccountQuery = searchParams.get("setupAccount") === "1";
   const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;
@@ -800,7 +804,7 @@ export default function EditProfilePage() {
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         {/* Header Row */}
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-6">
-          <div>
+          <div className="flex-1">
             {company ? (
               <Link href={buildCompanyProfilePath(company)} className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2 block hover:text-[#f14110] transition-colors">
                 Company profile
@@ -810,15 +814,33 @@ export default function EditProfilePage() {
                 Company profile
               </h1>
             )}
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] max-w-[600px]">
-              Only informations filled in here will be displayed on your profile page. Keep in mind if you activate different categories you will only have a limited amount of pictures available. SolidFind encourages specialists : )
-            </p>
-            <p className="text-[10px] text-[#333]/70 tracking-[0.2px] max-w-[600px] mt-2">
-              Hanya informasi yang diisi di sini yang akan ditampilan di halaman profil Anda. Perlu diingat jika Anda mengaktifkan kategori yang berbeda, jumlah gambar yang tersedia hanya terbatas. SolidFind mendorong para spesialis : )
-            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[680px]">
+              <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[15px]">
+                <p className="font-semibold text-[#333] mb-1">What appears on your public profile:</p>
+                <p>Company name, location, and a brief description of your work*</p>
+                <p>Phone or WhatsApp contact*</p>
+                <p>Project size and areas you operate in*</p>
+                <p>Website, Instagram, or other online presence</p>
+                <p>Year founded and team size</p>
+                <p>Project photos or videos</p>
+                <p className="mt-2 text-[#333]/50">* Required fields. Fields marked optional may not be available for all company types — SolidFind welcomes specialists.</p>
+                <p className="text-[#333]/50">Only filled fields are shown on your public profile. The more complete your profile, the more visible it is in search.</p>
+              </div>
+              <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[15px]">
+                <p className="font-semibold text-[#333] mb-1">Yang ditampilkan di profil publik Anda:</p>
+                <p>Nama perusahaan, lokasi, dan deskripsi singkat pekerjaan Anda*</p>
+                <p>Nomor telepon atau WhatsApp*</p>
+                <p>Ukuran proyek dan area operasional*</p>
+                <p>Website, Instagram, atau kehadiran online lainnya</p>
+                <p>Tahun berdiri dan ukuran tim</p>
+                <p>Foto atau video proyek</p>
+                <p className="mt-2 text-[#333]/50">* Kolom wajib diisi. Kolom opsional mungkin tidak tersedia untuk semua jenis perusahaan — SolidFind menyambut para spesialis.</p>
+                <p className="text-[#333]/50">Hanya kolom yang diisi yang akan ditampilkan di profil publik Anda. Semakin lengkap profil Anda, semakin terlihat di hasil pencarian.</p>
+              </div>
+            </div>
           </div>
 
-          <div className="text-left md:text-right">
+          <div className="self-end text-right md:self-start">
             {company?.isPro && proEnabled ? (
               <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">PRO ACCOUNT</p>
             ) : proEnabled ? (
@@ -947,12 +969,13 @@ export default function EditProfilePage() {
               </div>
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  E-mail
+                  E-mail <span className="text-[#f14110]">(*)</span>
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
                   className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
                 />
               </div>

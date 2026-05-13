@@ -36,14 +36,14 @@ test('admin companies tab highlights recently created profiles', () => {
 
   assert.match(
     source,
-    /const isNewCompany = Date\.now\(\) - company\.createdAt <= NEW_COMPANY_WINDOW_MS && !company\.adminViewedAt;[\s\S]*bg-\[#f14110\]\/5[\s\S]*New profile/,
-    'expected recently created unseen companies to have a visible orange marker'
+    /const isRecentCompany = Date\.now\(\) - company\.createdAt <= NEW_COMPANY_WINDOW_MS;[\s\S]*const needsReviewHighlight = isRecentCompany && company\.isReviewed === false;[\s\S]*bg-\[#f14110\]\/5[\s\S]*New profile/,
+    'expected recently created companies to keep a marker while unreviewed ones get orange emphasis'
   );
 
-  assert.match(
+  assert.doesNotMatch(
     source,
-    /const handleOpenCompany = async \(id: string\) => \{[\s\S]*adminViewedAt: Date\.now\(\)[\s\S]*onClick=\{\(\) => \{ void handleOpenCompany\(company\._id\); \}\}/,
-    'expected clicking the company name to mark the recent-profile differentiator as seen'
+    /onClick=\{\(\) => \{ void handleOpenCompany\(company\._id\); \}\}/,
+    'expected review state, not clicking, to remove the orange unreviewed emphasis'
   );
 });
 

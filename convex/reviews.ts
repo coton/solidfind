@@ -1,19 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-const SPAM_KEYWORDS = [
-  "http://",
-  "https://",
-  "www.",
-  "casino",
-  "spam",
-  "click here",
-  "buy now",
-  "free money",
-  "whatsapp.com",
-  "t.me",
-];
-
 async function recalculateApprovedCompanyRating(ctx: any, companyId: any) {
   const reviews = await ctx.db
     .query("reviews")
@@ -94,13 +81,8 @@ export const create = mutation({
       throw new Error("You have already left a testimonial for this company.");
     }
 
-    // Spam detection
-    const lowerContent = args.content.toLowerCase();
-    const isFlagged = SPAM_KEYWORDS.some((kw) => lowerContent.includes(kw));
-
     const reviewId = await ctx.db.insert("reviews", {
       ...args,
-      flagged: isFlagged || undefined,
       approved: false,
       createdAt: Date.now(),
     });
@@ -171,42 +153,6 @@ export const approveReview = mutation({
       await ctx.db.insert("auditLogs", {
         adminEmail: args.adminEmail,
         action: "approve_review",
-        targetType: "review",
-        targetId: args.reviewId,
-        createdAt: Date.now(),
-      });
-    }
-  },
-});
-
-// Admin: flag a review as spam
-export const flagReview = mutation({
-  args: { reviewId: v.id("reviews"), adminEmail: v.optional(v.string()) },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.reviewId, { flagged: true });
-
-    if (args.adminEmail) {
-      await ctx.db.insert("auditLogs", {
-        adminEmail: args.adminEmail,
-        action: "flag_review_spam",
-        targetType: "review",
-        targetId: args.reviewId,
-        createdAt: Date.now(),
-      });
-    }
-  },
-});
-
-// Admin: unflag a review
-export const unflagReview = mutation({
-  args: { reviewId: v.id("reviews"), adminEmail: v.optional(v.string()) },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.reviewId, { flagged: false });
-
-    if (args.adminEmail) {
-      await ctx.db.insert("auditLogs", {
-        adminEmail: args.adminEmail,
-        action: "unflag_review",
         targetType: "review",
         targetId: args.reviewId,
         createdAt: Date.now(),

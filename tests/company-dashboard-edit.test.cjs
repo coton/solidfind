@@ -101,7 +101,7 @@ test('company edit page validates address format before saving', () => {
 
   assert.match(
     source,
-    /const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingAddress && !invalidAddress && !invalidFoundedYear;/,
+    /const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingEmail && !missingAddress && !invalidAddress && !invalidFoundedYear;/,
     'Expected invalid addresses to block saving'
   );
 
@@ -135,7 +135,7 @@ test('company edit page only accepts four-digit founded years from 1980 to prese
 
   assert.match(
     source,
-    /const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingAddress && !invalidAddress && !invalidFoundedYear;/,
+    /const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingEmail && !missingAddress && !invalidAddress && !invalidFoundedYear;/,
     'Expected invalid founded years to block saving'
   );
 
@@ -149,6 +149,34 @@ test('company edit page only accepts four-digit founded years from 1980 to prese
     source,
     /setFoundedYear\(normalizeCompanySinceYearInput\(e\.target\.value\)\);/,
     'Expected founded year input to strip non-digits and cap at four characters'
+  );
+});
+
+test('company edit page requires email and shows the public profile explainer in two languages', () => {
+  const source = read(editPagePath);
+
+  assert.match(
+    source,
+    /const missingEmail = !email\.trim\(\);[\s\S]*Company email is required[\s\S]*!missingEmail/,
+    'Expected company email to be required before saving'
+  );
+
+  assert.match(
+    source,
+    /E-mail <span className="text-\[#f14110\]">\(\*\)<\/span>[\s\S]*required/,
+    'Expected the email field to show the orange required marker'
+  );
+
+  assert.match(
+    source,
+    /grid grid-cols-1 sm:grid-cols-2[\s\S]*What appears on your public profile:[\s\S]*Yang ditampilkan di profil publik Anda:/,
+    'Expected the edit page explainer to be split into English and Indonesian columns'
+  );
+
+  assert.match(
+    source,
+    /<div className="self-end text-right md:self-start">/,
+    'Expected the account status/delete controls to align right on mobile'
   );
 });
 

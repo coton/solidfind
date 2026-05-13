@@ -120,11 +120,6 @@ export default function AdminReviews() {
                       {"★".repeat(Math.round(review.rating))}
                       {"☆".repeat(5 - Math.round(review.rating))}
                     </span>
-                    {review.flagged && (
-                      <span className="text-[9px] font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
-                        SPAM
-                      </span>
-                    )}
                     {review.approved === false ? (
                       <span className="text-[9px] font-medium text-[#f14110] bg-[#f14110]/10 px-2 py-0.5 rounded-full">
                         NEW

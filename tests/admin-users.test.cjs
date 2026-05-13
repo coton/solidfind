@@ -46,3 +46,35 @@ test('admin users tab uses brand orange for company and grey for individual', ()
     'expected the old blue company badge styling to be removed'
   );
 });
+
+test('admin users tab can filter newsletter subscribers while preserving type sorting', () => {
+  const source = readProjectFile('src/app/admin/users/page.tsx');
+
+  assert.match(
+    source,
+    /const newsletterData = useQuery\(api\.waitlist\.getWaitlist, \{\}\);[\s\S]*const \[newsletterOnly, setNewsletterOnly\] = useState\(false\);/,
+    'expected admin users to load newsletter signups and keep a newsletter filter state'
+  );
+
+  assert.match(
+    source,
+    /newsletterOnly && !newsletterEmails\.has\(u\.email\.trim\(\)\.toLowerCase\(\)\)/,
+    'expected newsletter filtering to combine with the existing user filters'
+  );
+
+  assert.match(
+    source,
+    /setNewsletterOnly\(\(value\) => !value\)[\s\S]*Newsletter/,
+    'expected the newsletter filter button to be toggleable'
+  );
+});
+
+test('admin users tab only displays profile images for company accounts', () => {
+  const source = readProjectFile('src/app/admin/users/page.tsx');
+
+  assert.match(
+    source,
+    /const profileImageUrl = user\.accountType === "company" \? user\.imageUrl : undefined;[\s\S]*\{profileImageUrl \? \(/,
+    'expected users without company profile images to keep the initials avatar'
+  );
+});

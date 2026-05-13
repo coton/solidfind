@@ -22,13 +22,13 @@ test('signup newsletter opt-in is saved to the admin waitlist', () => {
 
   assert.match(
     adminLayoutSource,
-    /\{ href: "\/admin\/waitlist", label: "Waitlist", icon: Mail \}/,
-    'expected newsletter/waitlist entries to be accessible from Back Office > Waitlist'
+    /\{ href: "\/admin\/waitlist", label: "Newsletter", icon: Mail \}/,
+    'expected newsletter entries to be accessible from Back Office > Newsletter'
   );
 
   assert.match(
     waitlistSource,
-    /solidfind-waitlist-[\s\S]*Export CSV/,
-    'expected the waitlist admin page to support CSV export'
+    /solidfind-newsletter-[\s\S]*Export CSV/,
+    'expected the newsletter admin page to support CSV export'
   );
 });
