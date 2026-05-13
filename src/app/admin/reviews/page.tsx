@@ -6,13 +6,12 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import Pagination, { PAGE_SIZE } from "../components/Pagination";
 
-type Tab = "all" | "flagged" | "normal";
+type Tab = "all" | "pending" | "approved";
 
 export default function AdminReviews() {
   const reviews = useQuery(api.reviews.listAll);
   const deleteReview = useMutation(api.reviews.deleteReview);
-  const flagReview = useMutation(api.reviews.flagReview);
-  const unflagReview = useMutation(api.reviews.unflagReview);
+  const approveReview = useMutation(api.reviews.approveReview);
 
   const [tab, setTab] = useState<Tab>("all");
   const [search, setSearch] = useState("");
@@ -21,8 +20,8 @@ export default function AdminReviews() {
 
   const filtered = reviews
     ?.filter((r) => {
-      if (tab === "flagged") return r.flagged === true;
-      if (tab === "normal") return !r.flagged;
+      if (tab === "pending") return r.approved === false;
+      if (tab === "approved") return r.approved !== false;
       return true;
     })
     .filter((r) => {
@@ -50,8 +49,8 @@ export default function AdminReviews() {
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "all", label: "All" },
-    { key: "flagged", label: "Flagged" },
-    { key: "normal", label: "Normal" },
+    { key: "pending", label: "Pending" },
+    { key: "approved", label: "Approved" },
   ];
 
   return (
@@ -61,7 +60,7 @@ export default function AdminReviews() {
         <span className="text-[12px] text-[#333]/50">
           {totalItems} reviews
           {reviews && (
-            <> &middot; {reviews.filter((r) => r.flagged).length} flagged</>
+            <> &middot; {reviews.filter((r) => r.approved === false).length} pending</>
           )}
         </span>
       </div>
@@ -94,7 +93,7 @@ export default function AdminReviews() {
       </div>
 
       {/* Reviews list */}
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {paginated === undefined ? (
           <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-8 text-center">
             <p className="text-[12px] text-[#333]/50">Loading...</p>
@@ -107,8 +106,8 @@ export default function AdminReviews() {
           paginated.map((review) => (
             <div
               key={review._id}
-              className={`bg-white rounded-[8px] border border-[#e4e4e4] p-4 ${
-                review.flagged ? "border-l-4 border-l-red-400" : ""
+              className={`bg-white rounded-[8px] border border-[#e4e4e4] p-3 ${
+                review.approved === false ? "border-l-4 border-l-[#f14110]" : ""
               }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
@@ -126,6 +125,15 @@ export default function AdminReviews() {
                         SPAM
                       </span>
                     )}
+                    {review.approved === false ? (
+                      <span className="text-[9px] font-medium text-[#f14110] bg-[#f14110]/10 px-2 py-0.5 rounded-full">
+                        NEW
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                        APPROVED
+                      </span>
+                    )}
                   </div>
                   <p className="text-[11px] text-[#333]/70 leading-[18px] mb-2">
                     {review.content.length > 80
@@ -140,19 +148,12 @@ export default function AdminReviews() {
                 </div>
 
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  {review.flagged ? (
+                  {review.approved === false && (
                     <button
-                      onClick={() => unflagReview({ reviewId: review._id, adminEmail })}
+                      onClick={() => approveReview({ reviewId: review._id, adminEmail })}
                       className="text-[10px] font-medium px-3 py-1.5 rounded-full border border-green-200 text-green-600 hover:bg-green-50 transition-colors"
                     >
-                      Unflag
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => flagReview({ reviewId: review._id, adminEmail })}
-                      className="text-[10px] font-medium px-3 py-1.5 rounded-full border border-amber-200 text-amber-600 hover:bg-amber-50 transition-colors"
-                    >
-                      Flag Spam
+                      Approve
                     </button>
                   )}
 

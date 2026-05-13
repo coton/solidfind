@@ -56,6 +56,8 @@ export default defineSchema({
     projectImageIds: v.optional(v.array(v.id("_storage"))),
     projectImageUrls: v.optional(v.array(v.string())), // External image URLs as fallback
     isFeatured: v.optional(v.boolean()),
+    isReviewed: v.optional(v.boolean()),
+    adminViewedAt: v.optional(v.number()),
     since: v.optional(v.number()), // Founded year
     subscriptionId: v.optional(v.id("subscriptions")),
     createdAt: v.number(),
@@ -94,6 +96,7 @@ export default defineSchema({
     rating: v.float64(),
     content: v.string(),
     flagged: v.optional(v.boolean()),
+    approved: v.optional(v.boolean()),
     createdAt: v.number(),
   })
     .index("by_companyId", ["companyId"])

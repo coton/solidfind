@@ -151,6 +151,7 @@ export const create = mutation({
     logoId: v.optional(v.id("_storage")),
     projectImageIds: v.optional(v.array(v.id("_storage"))),
     projectImageUrls: v.optional(v.array(v.string())),
+    isReviewed: v.optional(v.boolean()),
     projectSizes: v.optional(v.array(v.string())),
     constructionTypes: v.optional(v.array(v.string())),
     constructionLocations: v.optional(v.array(v.string())),
@@ -228,6 +229,8 @@ export const update = mutation({
     projectImageIds: v.optional(v.array(v.id("_storage"))),
     projectImageUrls: v.optional(v.array(v.string())),
     isFeatured: v.optional(v.boolean()),
+    isReviewed: v.optional(v.boolean()),
+    adminViewedAt: v.optional(v.number()),
     since: v.optional(v.number()),
   },
   handler: async (ctx, args) => {

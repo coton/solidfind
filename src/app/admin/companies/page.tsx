@@ -9,6 +9,26 @@ import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
 const CATEGORIES = ["all", "construction", "renovation", "architecture", "interior", "real-estate"] as const;
 const STATUS_OPTIONS = ["all", "pro", "free"] as const;
+const NEW_COMPANY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+function getCompanyCategories(company: {
+  category: string;
+  constructionTypes?: string[];
+  renovationTypes?: string[];
+  architectureTypes?: string[];
+  interiorTypes?: string[];
+  realEstateTypes?: string[];
+}) {
+  const categories = [
+    (company.constructionTypes?.length ?? 0) > 0 ? "construction" : null,
+    (company.renovationTypes?.length ?? 0) > 0 ? "renovation" : null,
+    (company.architectureTypes?.length ?? 0) > 0 ? "architecture" : null,
+    (company.interiorTypes?.length ?? 0) > 0 ? "interior" : null,
+    (company.realEstateTypes?.length ?? 0) > 0 ? "real estate" : null,
+  ].filter(Boolean) as string[];
+
+  return categories.length > 0 ? categories : [company.category.replace("-", " ")];
+}
 
 export default function AdminCompanies() {
   const companies = useQuery(api.companies.listAll);
@@ -42,6 +62,14 @@ export default function AdminCompanies() {
 
   const handleToggleFeatured = async (id: string, currentFeatured: boolean) => {
     await updateCompany({ id: id as Parameters<typeof updateCompany>[0]["id"], isFeatured: !currentFeatured });
+  };
+
+  const handleToggleReviewed = async (id: string, currentReviewed: boolean | undefined) => {
+    await updateCompany({ id: id as Parameters<typeof updateCompany>[0]["id"], isReviewed: !(currentReviewed ?? true) });
+  };
+
+  const handleOpenCompany = async (id: string) => {
+    await updateCompany({ id: id as Parameters<typeof updateCompany>[0]["id"], adminViewedAt: Date.now() });
   };
 
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "admin";
@@ -120,17 +148,28 @@ export default function AdminCompanies() {
                 </td>
               </tr>
             ) : (
-              paginated.map((company) => (
-                <tr key={company._id} className="border-b border-[#f0f0f0] hover:bg-[#fafafa]">
+              paginated.map((company) => {
+                const isNewCompany = Date.now() - company.createdAt <= NEW_COMPANY_WINDOW_MS && !company.adminViewedAt;
+                const categoryLabels = getCompanyCategories(company);
+                return (
+                <tr key={company._id} className={`border-b border-[#f0f0f0] hover:bg-[#fafafa] ${isNewCompany ? "bg-[#f14110]/5" : ""}`}>
                   <td className="px-4 py-3">
                     <Link
                       href={buildCompanyProfilePath(company)}
-                      className="text-[12px] font-medium text-[#333] hover:text-[#f14110] transition-colors"
+                      onClick={() => { void handleOpenCompany(company._id); }}
+                      className={`text-[12px] font-medium hover:text-[#f14110] transition-colors ${isNewCompany ? "text-[#f14110] font-semibold" : "text-[#333]"}`}
                     >
                       {company.name}
                     </Link>
+                    {isNewCompany && (
+                      <span className="ml-2 rounded-full bg-[#f14110]/10 px-2 py-0.5 text-[9px] font-medium text-[#f14110]">
+                        New profile
+                      </span>
+                    )}
                   </td>
-                  <td className="px-4 py-3 text-[11px] text-[#333]/70 capitalize">{company.category}</td>
+                  <td className="px-4 py-3 text-[11px] text-[#333]/70 capitalize">
+                    {categoryLabels.join(", ")}
+                  </td>
                   <td className="px-4 py-3 text-[11px] text-[#333]/70">
                     {company.rating ? (
                       <span className="text-amber-500">★ {company.rating.toFixed(1)}</span>
@@ -176,6 +215,16 @@ export default function AdminCompanies() {
                       >
                         {company.isFeatured ? "Unfeature" : "Feature"}
                       </button>
+                      <button
+                        onClick={() => handleToggleReviewed(company._id, company.isReviewed)}
+                        className={`text-[10px] font-medium px-3 py-1 rounded-full border transition-colors ${
+                          company.isReviewed === false
+                            ? "border-[#f14110] text-[#f14110] hover:bg-[#f14110] hover:text-white"
+                            : "border-[#e4e4e4] hover:bg-[#333] hover:text-white hover:border-[#333]"
+                        }`}
+                      >
+                        {company.isReviewed === false ? "Not reviewed" : "Reviewed"}
+                      </button>
                       {confirmDelete === company._id ? (
                         <div className="flex items-center gap-1">
                           <button
@@ -202,7 +251,8 @@ export default function AdminCompanies() {
                     </div>
                   </td>
                 </tr>
-              ))
+              );
+              })
             )}
           </tbody>
         </table>

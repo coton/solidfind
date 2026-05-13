@@ -47,4 +47,10 @@ test('companies mutations accept import-owned fields for directory onboarding', 
     /googleMapsLink: v\.optional\(v\.string\(\)\)/,
     'expected companies mutations to accept the imported Google Maps URL used by the public profile address link'
   );
+
+  assert.match(
+    source,
+    /isReviewed: v\.optional\(v\.boolean\(\)\)/,
+    'expected companies mutations to accept reviewed status for imported/manual listings'
+  );
 });

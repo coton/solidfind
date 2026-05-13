@@ -33,6 +33,7 @@ interface ListingCardProps {
   imageUrl?: string;
   logoId?: string;
   projectImageIds?: string[];
+  returnToDashboard?: boolean;
   onBookmark?: () => void;
 }
 
@@ -59,6 +60,7 @@ export function ListingCard({
   isSaved = false,
   imageUrl,
   logoId,
+  returnToDashboard = false,
   onBookmark,
 }: ListingCardProps) {
   const logoUrl = useQuery(api.files.getUrl, logoId ? { storageId: logoId as Id<"_storage"> } : "skip");
@@ -108,7 +110,13 @@ export function ListingCard({
   };
 
   return (
-    <Link href={buildCompanyProfilePath({ _id: id, name }, categoryContext ? { from: categoryContext } : {})} className="block">
+    <Link
+      href={buildCompanyProfilePath(
+        { _id: id, name },
+        { ...(categoryContext ? { from: categoryContext } : {}), ...(returnToDashboard ? { returnTo: "dashboard" } : {}) }
+      )}
+      className="block"
+    >
       <div
         className={`relative w-[210px] h-[220px] rounded-[6px] overflow-hidden cursor-pointer transition-all ${
           isHovered ? 'bg-[#333]' : 'bg-[#f8f8f8]'

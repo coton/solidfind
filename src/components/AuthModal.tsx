@@ -278,6 +278,12 @@ export function AuthModal({
         },
       });
 
+      if (subscribeNewsletter) {
+        await convex.mutation(api.waitlist.addToWaitlist, {
+          email: email.toLowerCase().trim(),
+        });
+      }
+
       // Send email verification code
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);

@@ -222,6 +222,7 @@ function normalizeCompanyDirectoryRow(row, { sourceName } = {}) {
     realEstateTypes: categorySelections.realEstateTypes,
     realEstateLocations: locationSelections,
     isPro: false,
+    isReviewed: false,
   };
 }
 
@@ -246,6 +247,7 @@ function buildCompanyMutationPayload(normalized) {
     since: normalized.since,
     imageUrl: normalized.imageUrl,
     projectImageUrls: normalized.projectImageUrls,
+    isReviewed: normalized.isReviewed,
     projectSizes: normalized.projectSizes,
     constructionTypes: normalized.constructionTypes,
     constructionLocations: normalized.constructionLocations,

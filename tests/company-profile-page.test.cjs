@@ -85,6 +85,60 @@ test('company profile hides testimonial score and count when there are no review
   );
 });
 
+test('company profile returns to the individual dashboard only from dashboard-origin visits', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /const returnTo = searchParams\.get\("returnTo"\);/,
+    'Expected profile page to read the explicit return target from the URL'
+  );
+
+  assert.match(
+    source,
+    /const backHref = returnTo === "dashboard" && currentUser \? "\/dashboard" : "\/";/,
+    'Expected profile back link to return to dashboard only for logged-in dashboard-origin visits'
+  );
+
+  assert.match(
+    source,
+    /<Link\s*href=\{backHref\}[\s\S]*<span>BACK<\/span>/,
+    'Expected the top profile back link to use the guarded back href'
+  );
+});
+
+test('company profile displays public information and unconfirmed listing disclaimers', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /<p>\*SolidFind lists this company based on publicly available information and has not independently verified their work quality or operating status\.<\/p>/,
+    'Expected every company profile to show the public-information disclaimer below the description'
+  );
+
+  assert.match(
+    source,
+    /\{company\.isReviewed === false && \(\s*<p>\*\*This listing has not been confirmed by the company\.<\/p>\s*\)\}/,
+    'Expected unreviewed admin/imported listings to show the company confirmation disclaimer'
+  );
+
+  assert.match(
+    source,
+    /className="space-y-1 font-bam text-\[9px\] leading-\[13px\] text-\[#333\]\/35 tracking-\[0\.18px\]"/,
+    'Expected profile disclaimers to use the requested low-opacity formatting'
+  );
+});
+
+test('company profile dims latest testimonials heading when there are no reviews', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /<div className=\{\(company\.reviewCount \?\? 0\) > 0 \? "" : "opacity-50"\}>\s*<p className="text-\[11px\] font-medium text-\[#333\] tracking-\[0\.22px\]">Latest testimonials \/<\/p>\s*<p className="text-\[11px\] font-medium text-\[#333\] tracking-\[0\.22px\]">Ulasan terbaru<\/p>/,
+    'Expected Latest testimonials / Ulasan terbaru to render at 50% opacity when review count is zero'
+  );
+});
+
 test('company profile only lets individual accounts write one testimonial per company', () => {
   const source = readProfilePage();
 

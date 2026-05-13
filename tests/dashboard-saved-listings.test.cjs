@@ -126,6 +126,30 @@ test('individual dashboard saved-listing sorts are A to Z and Recent only', () =
   );
 });
 
+test('individual dashboard profile cards mark dashboard as the return target', () => {
+  const source = readProjectFile('src/app/dashboard/page.tsx');
+  const categorySource = readProjectFile('src/app/dashboard/[category]/page.tsx');
+  const cardSource = readProjectFile('src/components/cards/ListingCard.tsx');
+
+  assert.match(
+    source,
+    /<ListingCard \{\.\.\.listing\} proEnabled=\{proEnabled\} categoryContext=\{cat\.id\} returnToDashboard \/>/,
+    'expected dashboard overview saved profile cards to request dashboard back navigation'
+  );
+
+  assert.match(
+    categorySource,
+    /returnToDashboard[\s\S]*onBookmark=\{\(\) => handleBookmark\(listing\.id\)\}/,
+    'expected dashboard category saved profile cards to request dashboard back navigation'
+  );
+
+  assert.match(
+    cardSource,
+    /returnToDashboard\?: boolean;[\s\S]*returnToDashboard = false[\s\S]*returnTo: "dashboard"/,
+    'expected ListingCard to append returnTo=dashboard only when the dashboard passes the opt-in prop'
+  );
+});
+
 test('individual dashboard intro copy spans the mobile content width', () => {
   const source = readProjectFile('src/app/dashboard/page.tsx');
 

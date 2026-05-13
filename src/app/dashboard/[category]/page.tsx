@@ -216,6 +216,7 @@ export default function DashboardCategoryPage() {
                       proEnabled={proEnabled}
                       reviewsEnabled={reviewsEnabled}
                       categoryContext={category}
+                      returnToDashboard
                       onBookmark={() => handleBookmark(listing.id)}
                     />
                   </div>
@@ -231,6 +232,7 @@ export default function DashboardCategoryPage() {
                   proEnabled={proEnabled}
                   reviewsEnabled={reviewsEnabled}
                   categoryContext={category}
+                  returnToDashboard
                   onBookmark={() => handleBookmark(listing.id)}
                 />
               ))}

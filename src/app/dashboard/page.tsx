@@ -232,7 +232,7 @@ export default function DashboardPage() {
                     <div className="flex gap-5 pb-2">
                       {sortedListings.map((listing) => (
                         <div key={listing.id} className="flex-shrink-0">
-                          <ListingCard {...listing} proEnabled={proEnabled} categoryContext={cat.id} />
+                          <ListingCard {...listing} proEnabled={proEnabled} categoryContext={cat.id} returnToDashboard />
                         </div>
                       ))}
                     </div>
@@ -240,7 +240,7 @@ export default function DashboardPage() {
 
                   <div className="hidden sm:grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
                     {desktopListings.map((listing) => (
-                      <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} categoryContext={cat.id} />
+                      <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} categoryContext={cat.id} returnToDashboard />
                     ))}
                   </div>
                   {cat.listings.length > 4 && (

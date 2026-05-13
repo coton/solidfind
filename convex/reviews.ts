@@ -14,13 +14,35 @@ const SPAM_KEYWORDS = [
   "t.me",
 ];
 
+async function recalculateApprovedCompanyRating(ctx: any, companyId: any) {
+  const reviews = await ctx.db
+    .query("reviews")
+    .withIndex("by_companyId", (q: any) => q.eq("companyId", companyId))
+    .collect();
+  const visibleReviews = reviews.filter((review: any) => review.approved !== false);
+
+  if (visibleReviews.length === 0) {
+    await ctx.db.patch(companyId, { rating: 0, reviewCount: 0 });
+    return;
+  }
+
+  const avgRating =
+    visibleReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / visibleReviews.length;
+
+  await ctx.db.patch(companyId, {
+    rating: Math.round(avgRating * 10) / 10,
+    reviewCount: visibleReviews.length,
+  });
+}
+
 export const listByCompany = query({
   args: { companyId: v.id("companies") },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const reviews = await ctx.db
       .query("reviews")
       .withIndex("by_companyId", (q) => q.eq("companyId", args.companyId))
       .collect();
+    return reviews.filter((review) => review.approved !== false);
   },
 });
 
@@ -79,21 +101,8 @@ export const create = mutation({
     const reviewId = await ctx.db.insert("reviews", {
       ...args,
       flagged: isFlagged || undefined,
+      approved: false,
       createdAt: Date.now(),
-    });
-
-    // Update company rating
-    const reviews = await ctx.db
-      .query("reviews")
-      .withIndex("by_companyId", (q) => q.eq("companyId", args.companyId))
-      .collect();
-
-    const avgRating =
-      reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-
-    await ctx.db.patch(args.companyId, {
-      rating: Math.round(avgRating * 10) / 10,
-      reviewCount: reviews.length,
     });
 
     return reviewId;
@@ -133,22 +142,7 @@ export const deleteReview = mutation({
     const companyId = review.companyId;
     await ctx.db.delete(args.reviewId);
 
-    // Recalculate company rating
-    const remaining = await ctx.db
-      .query("reviews")
-      .withIndex("by_companyId", (q) => q.eq("companyId", companyId))
-      .collect();
-
-    if (remaining.length === 0) {
-      await ctx.db.patch(companyId, { rating: 0, reviewCount: 0 });
-    } else {
-      const avgRating =
-        remaining.reduce((sum, r) => sum + r.rating, 0) / remaining.length;
-      await ctx.db.patch(companyId, {
-        rating: Math.round(avgRating * 10) / 10,
-        reviewCount: remaining.length,
-      });
-    }
+    await recalculateApprovedCompanyRating(ctx, companyId);
 
     if (args.adminEmail) {
       await ctx.db.insert("auditLogs", {
@@ -157,6 +151,28 @@ export const deleteReview = mutation({
         targetType: "review",
         targetId: args.reviewId,
         details: `Rating: ${review.rating}, Content: ${review.content.slice(0, 50)}`,
+        createdAt: Date.now(),
+      });
+    }
+  },
+});
+
+// Admin: approve a review and recalculate company rating
+export const approveReview = mutation({
+  args: { reviewId: v.id("reviews"), adminEmail: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const review = await ctx.db.get(args.reviewId);
+    if (!review) return;
+
+    await ctx.db.patch(args.reviewId, { approved: true, flagged: false });
+    await recalculateApprovedCompanyRating(ctx, review.companyId);
+
+    if (args.adminEmail) {
+      await ctx.db.insert("auditLogs", {
+        adminEmail: args.adminEmail,
+        action: "approve_review",
+        targetType: "review",
+        targetId: args.reviewId,
         createdAt: Date.now(),
       });
     }

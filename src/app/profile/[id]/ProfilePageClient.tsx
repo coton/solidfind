@@ -221,6 +221,7 @@ export default function ProfilePageClient() {
   const searchParams = useSearchParams();
   const companyIdentifier = (params.companySlug ?? params.id) as string;
   const fromCategory = searchParams.get("from");
+  const returnTo = searchParams.get("returnTo");
   const { user: clerkUser } = useUser();
   const [isSaved, setIsSaved] = useState(false);
   const proEnabled = useProEnabled();
@@ -493,6 +494,7 @@ export default function ProfilePageClient() {
     text: r.content,
     date: new Date(r.createdAt).toLocaleDateString("en-CA").replace(/-/g, "/"),
   }));
+  const backHref = returnTo === "dashboard" && currentUser ? "/dashboard" : "/";
 
   return (
     <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
@@ -502,7 +504,7 @@ export default function ProfilePageClient() {
         {/* Back Button Row */}
         <div className="flex items-center justify-between mb-3 py-2 border-b border-[#333]/10">
           <Link
-            href="/"
+            href={backHref}
             className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
           >
             <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
@@ -718,6 +720,12 @@ export default function ProfilePageClient() {
             <p className="text-[10px] text-[#333] leading-[18px] tracking-[0.2px] whitespace-pre-line mb-4" style={{ wordBreak: "break-word", overflowWrap: "break-word" }}>
               {company.description ?? ""}
             </p>
+            <div className="space-y-1 font-bam text-[9px] leading-[13px] text-[#333]/35 tracking-[0.18px]">
+              <p>*SolidFind lists this company based on publicly available information and has not independently verified their work quality or operating status.</p>
+              {company.isReviewed === false && (
+                <p>**This listing has not been confirmed by the company.</p>
+              )}
+            </div>
 
           </div>
 
@@ -794,7 +802,7 @@ export default function ProfilePageClient() {
         {reviewsEnabled && <div className="mb-8 border-t border-[#333]/10 pt-4">
           <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div>
+              <div className={(company.reviewCount ?? 0) > 0 ? "" : "opacity-50"}>
                 <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Latest testimonials /</p>
                 <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Ulasan terbaru</p>
               </div>

@@ -52,6 +52,7 @@ test('normalizeCompanyDirectoryRow maps the provided test row into a complete So
     'https://example.com/p4.webp',
   ]);
   assert.equal(normalized.googleMapsLink, 'https://maps.google.com/?q=Balitecture+Seminyak+Bali');
+  assert.equal(normalized.isReviewed, false);
 });
 
 test('mapCategorySelections keeps filter keyword categories instead of collapsing them into one raw string', () => {
@@ -125,6 +126,7 @@ test('buildCompanyMutationPayload keeps every import-relevant profile field, inc
     since: undefined,
     imageUrl: 'https://logo.clearbit.com/balitecture.com',
     projectImageUrls: ['https://example.com/p1.webp'],
+    isReviewed: false,
     projectSizes: ['any'],
     constructionTypes: ['all'],
     constructionLocations: ['badung', 'tabanan'],
@@ -140,6 +142,7 @@ test('buildCompanyMutationPayload keeps every import-relevant profile field, inc
 
   assert.equal(payload.imageUrl, 'https://logo.clearbit.com/balitecture.com');
   assert.equal(payload.googleMapsLink, 'https://maps.google.com/?q=Balitecture+Seminyak+Bali');
+  assert.equal(payload.isReviewed, false);
   assert.deepEqual(payload.projectImageUrls, ['https://example.com/p1.webp']);
   assert.deepEqual(payload.projectSizes, ['any']);
   assert.deepEqual(payload.constructionTypes, ['all']);

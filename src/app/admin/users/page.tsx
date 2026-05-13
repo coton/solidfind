@@ -28,19 +28,27 @@ export default function AdminUsers() {
   const users = useQuery(api.users.listAll);
 
   const [search, setSearch] = useState("");
+  const [sortMode, setSortMode] = useState<"joined" | "type">("joined");
   const [currentPage, setCurrentPage] = useState(0);
   const [cleanupLoading, setCleanupLoading] = useState<"dry-run" | "apply" | null>(null);
   const [cleanupError, setCleanupError] = useState("");
   const [cleanupResult, setCleanupResult] = useState<CleanupResponse | null>(null);
 
-  const filtered = users?.filter((u) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      u.email.toLowerCase().includes(q) ||
-      u.name?.toLowerCase().includes(q)
-    );
-  });
+  const filtered = users
+    ?.filter((u) => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return (
+        u.email.toLowerCase().includes(q) ||
+        u.name?.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      if (sortMode === "type") {
+        return a.accountType.localeCompare(b.accountType) || b.createdAt - a.createdAt;
+      }
+      return b.createdAt - a.createdAt;
+    });
 
   const totalItems = filtered?.length ?? 0;
   const paginated = filtered?.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
@@ -212,8 +220,16 @@ export default function AdminUsers() {
             <tr className="border-b border-[#e4e4e4] bg-[#fafafa]">
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">User</th>
               <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Email</th>
-              <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Type</th>
-              <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">Joined</th>
+              <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">
+                <button onClick={() => { setSortMode("type"); setCurrentPage(0); }} className="hover:text-[#f14110] transition-colors">
+                  Type
+                </button>
+              </th>
+              <th className="text-left text-[10px] font-semibold text-[#333]/60 tracking-[0.2px] px-4 py-3">
+                <button onClick={() => { setSortMode("joined"); setCurrentPage(0); }} className="hover:text-[#f14110] transition-colors">
+                  Joined
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -257,7 +273,7 @@ export default function AdminUsers() {
                     <span
                       className={`text-[9px] font-medium px-2 py-0.5 rounded-full ${
                         user.accountType === "company"
-                          ? "text-blue-600 bg-blue-50"
+                          ? "text-[#f14110] bg-[#f14110]/10"
                           : "text-[#333]/50 bg-[#f0f0f0]"
                       }`}
                     >
