@@ -328,7 +328,11 @@ function HeaderInner() {
   };
 
   const isDashboardPage = pathname.startsWith("/dashboard") || pathname.startsWith("/company-dashboard");
-  const isProfilePage = pathname.startsWith("/profile");
+  const rootNonProfilePages = new Set(["/", "/about", "/admin", "/auth-complete", "/coming-soon", "/register-business", "/reviews", "/sso-callback", "/terms", "/upgrade"]);
+  const isProfilePage = pathname.startsWith("/profile") || (
+    pathname.split("/").filter(Boolean).length === 1 &&
+    !rootNonProfilePages.has(pathname)
+  );
   const isArticlePage = pathname.startsWith("/article");
   const fromCategory = searchParams.get("from");
   

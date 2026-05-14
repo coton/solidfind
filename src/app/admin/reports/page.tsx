@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import Pagination, { PAGE_SIZE } from "../components/Pagination";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
 type Tab = "all" | "pending" | "handled";
 
@@ -83,12 +85,21 @@ export default function AdminReports() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <p className="text-[12px] font-medium text-[#333] mb-1">
+                  <Link
+                    href={buildCompanyProfilePath({ _id: report.companyId, name: report.companyName, slug: report.companySlug })}
+                    className="inline-block text-[12px] font-medium text-[#333] mb-1 hover:text-[#f14110] transition-colors"
+                    target="_blank"
+                  >
                     {report.companyName}
-                  </p>
+                  </Link>
                   <p className="text-[11px] text-[#333]/70 leading-[18px] mb-2">
                     {report.text}
                   </p>
+                  {(report.reporterEmail || report.reporterName) && (
+                    <p className="text-[10px] text-[#333]/50 mb-2">
+                      Reported by {report.reporterName || "Logged-in user"} {report.reporterEmail ? `- ${report.reporterEmail}` : ""} {report.reporterAccountType ? `(${report.reporterAccountType})` : ""}
+                    </p>
+                  )}
                   <div className="flex items-center gap-2">
                     <p className="text-[9px] text-[#333]/40">
                       {new Date(report.createdAt).toLocaleString()}

@@ -15,6 +15,7 @@ import { MagicLinkLoadingPage } from "@/components/MagicLinkLoadingPage";
 import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 import { COMPANY_ADDRESS_VALIDATION_MESSAGE, isLikelyCompanyAddress, normalizeCompanyAddress } from "@/lib/company-address-validation.mjs";
 import { MIN_COMPANY_SINCE_YEAR, getMaxCompanySinceYear, isValidCompanySinceYear, normalizeCompanySinceYearInput } from "@/lib/company-since-year-validation.mjs";
+import { isValidEmail, isValidPhone, isValidSocialProfile, isValidWebsite, isValidWhatsApp } from "@/lib/company-contact-validation.mjs";
 import { Star, X, Upload, Lock, Check, ChevronDown } from "lucide-react";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import { useProEnabled } from "@/hooks/useProEnabled";
@@ -22,6 +23,7 @@ import { calculateProfileCompletionScore, getProfileCompletionStatus } from "@/l
 
 type SetupOAuthStrategy = Extract<OAuthStrategy, "oauth_google">;
 type ServiceOption = { id: string; label: string };
+const completeHouseChildren = ["living", "kitchen", "bathroom", "bedroom", "electricity", "plumbing"];
 
 const projectSizeOptions = [
   { id: "any", label: "ANY SIZE" },
@@ -402,6 +404,14 @@ export default function EditProfilePage() {
   const invalidAddress = Boolean(normalizedAddress && !isLikelyCompanyAddress(normalizedAddress));
   const maxCompanySinceYear = getMaxCompanySinceYear();
   const invalidFoundedYear = Boolean(foundedYear && !isValidCompanySinceYear(foundedYear, maxCompanySinceYear));
+  const invalidPhone = !isValidPhone(phone);
+  const invalidEmail = !isValidEmail(email);
+  const invalidWebsite = !isValidWebsite(website);
+  const invalidWhatsapp = !isValidWhatsApp(whatsapp);
+  const invalidFacebook = !isValidSocialProfile(facebook, "facebook");
+  const invalidLinkedin = !isValidSocialProfile(linkedin, "linkedin");
+  const invalidInstagram = !isValidSocialProfile(instagram, "instagram");
+  const hasInvalidContactField = invalidPhone || invalidEmail || invalidWebsite || invalidWhatsapp || invalidFacebook || invalidLinkedin || invalidInstagram;
 
   // Determine the bottom hint text and whether it's a warning (orange)
   let bottomHintText = "*Select at least 1 category before saving\n*Pilih setidaknya 1 kategori sebelum menyimpan";
@@ -435,9 +445,12 @@ export default function EditProfilePage() {
   } else if (invalidFoundedYear) {
     bottomHintText = `*Founded year must be 4 digits from ${MIN_COMPANY_SINCE_YEAR} to ${maxCompanySinceYear}\n*Tahun berdiri harus 4 angka dari ${MIN_COMPANY_SINCE_YEAR} sampai ${maxCompanySinceYear}`;
     bottomHintIsWarning = true;
+  } else if (hasInvalidContactField) {
+    bottomHintText = "*Please check contact and social fields format\n*Mohon periksa format kontak dan media sosial";
+    bottomHintIsWarning = true;
   }
 
-  const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingEmail && !missingAddress && !invalidAddress && !invalidFoundedYear;
+  const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingEmail && !missingAddress && !invalidAddress && !invalidFoundedYear && !hasInvalidContactField;
   const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
   const hasSetupAccountQuery = searchParams.get("setupAccount") === "1";
   const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;
@@ -1136,8 +1149,11 @@ export default function EditProfilePage() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
+                  placeholder="+86 156 1871 1651"
+                  aria-invalid={invalidPhone}
+                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidPhone ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
                 />
+                {invalidPhone && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular phone number, with or without country code.</p>}
               </div>
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
@@ -1148,8 +1164,10 @@ export default function EditProfilePage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
+                  aria-invalid={invalidEmail}
+                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidEmail ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
                 />
+                {invalidEmail && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular email address.</p>}
               </div>
             </div>
 
@@ -1163,8 +1181,11 @@ export default function EditProfilePage() {
                   type="url"
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
+                  placeholder="https://example.com"
+                  aria-invalid={invalidWebsite}
+                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidWebsite ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
                 />
+                {invalidWebsite && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular website URL.</p>}
               </div>
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
@@ -1174,8 +1195,11 @@ export default function EditProfilePage() {
                   type="tel"
                   value={whatsapp}
                   onChange={(e) => setWhatsapp(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
+                  placeholder="8615618711651"
+                  aria-invalid={invalidWhatsapp}
+                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidWhatsapp ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
                 />
+                {invalidWhatsapp && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use country code without +, followed by the phone number.</p>}
               </div>
             </div>
 
@@ -1189,8 +1213,10 @@ export default function EditProfilePage() {
                   type="url"
                   value={facebook}
                   onChange={(e) => setFacebook(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
+                  aria-invalid={invalidFacebook}
+                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidFacebook ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
                 />
+                {invalidFacebook && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular Facebook URL or handle.</p>}
               </div>
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
@@ -1200,8 +1226,10 @@ export default function EditProfilePage() {
                   type="url"
                   value={linkedin}
                   onChange={(e) => setLinkedin(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
+                  aria-invalid={invalidLinkedin}
+                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidLinkedin ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
                 />
+                {invalidLinkedin && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular LinkedIn URL or handle.</p>}
               </div>
             </div>
 
@@ -1215,8 +1243,10 @@ export default function EditProfilePage() {
                 value={instagram}
                 onChange={(e) => setInstagram(e.target.value)}
                 placeholder="@username or https://instagram.com/username"
-                className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] placeholder:text-[#333]/40 outline-none focus:border-[#f14110] transition-colors"
+                aria-invalid={invalidInstagram}
+                className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] placeholder:text-[#333]/40 outline-none focus:border-[#f14110] transition-colors ${invalidInstagram ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
               />
+              {invalidInstagram && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular Instagram URL or handle.</p>}
             </div>
 
 
@@ -1538,8 +1568,10 @@ export default function EditProfilePage() {
                   const allId = getAllOptionId(renovationServiceOptions);
                   const normalizedSelected = normalizeAllSelection(selectedRenovation, renovationServiceOptions);
                   const allActive = !!allId && normalizedSelected.includes(allId);
+                  const completeActive = normalizedSelected.includes("complete");
+                  const isCompleteChild = completeHouseChildren.includes(service.id);
                   const isAll = service.id === allId;
-                  const isDisabled = allActive && !isAll;
+                  const isDisabled = (allActive && !isAll) || (completeActive && isCompleteChild);
                   return (
                     <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
                       <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
@@ -1555,6 +1587,8 @@ export default function EditProfilePage() {
                             } else {
                               setSelectedRenovation([allId]);
                             }
+                          } else if (service.id === "complete") {
+                            setSelectedRenovation(normalizedSelected.includes("complete") ? [] : ["complete"]);
                           } else {
                             let next = normalizedSelected.includes(service.id)
                               ? normalizedSelected.filter(s => s !== service.id)

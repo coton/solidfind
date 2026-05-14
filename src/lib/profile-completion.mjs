@@ -3,7 +3,7 @@ export function getProfileCompletionStatus(score) {
     return {
       key: "incomplete",
       label: "Incomplete",
-      legend: 'Profile visible but shows "Incomplete" badge. Not eligible for search ranking or Pro features. Company prompted to complete required fields.',
+      legend: "Please look for missing informations and add them in. Silakan cari informasi yang hilang dan tambahkan.",
     };
   }
 
@@ -11,7 +11,7 @@ export function getProfileCompletionStatus(score) {
     return {
       key: "basic",
       label: "Basic",
-      legend: 'Profile is active and searchable. No badge shown. Eligible for standard placement. Dashboard shows "Add more to improve visibility."',
+      legend: "Add more to improve visibility. Tambahkan lebih banyak untuk meningkatkan visibilitas.",
     };
   }
 
@@ -19,14 +19,14 @@ export function getProfileCompletionStatus(score) {
     return {
       key: "good",
       label: "Good",
-      legend: "Solid profile. Eligible for standard search ranking. Dashboard shows remaining optional fields with their point values.",
+      legend: "Solid profile! Some more projects should show up soon : ) Profil yang solid! Beberapa proyek lagi akan segera muncul : )",
     };
   }
 
   return {
     key: "complete",
     label: "Complete",
-    legend: 'Fully optimised. Eligible for all ranking features. Shows "Complete" badge on the public profile. 100% requires Pro (photo fields).',
+    legend: "Fully optimised! Dioptimalkan sepenuhnya!",
   };
 }
 

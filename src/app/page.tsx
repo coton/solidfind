@@ -16,9 +16,10 @@ import { ListingCardSkeleton } from "@/components/ui/ListingCardSkeleton";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { getEffectiveSubcategoryFilters, parseSubcategoryParam } from "@/lib/category-filter.mjs";
+import { expandRenovationTypes } from "@/lib/category-display.mjs";
 
 function getCompanyCategoryTypes(company: any, category: string) {
-  if (category === "renovation") return company.renovationTypes ?? [];
+  if (category === "renovation") return expandRenovationTypes(company.renovationTypes ?? []);
   if (category === "architecture") return company.architectureTypes ?? [];
   if (category === "interior") return company.interiorTypes ?? [];
   if (category === "real-estate") return company.realEstateTypes ?? [];

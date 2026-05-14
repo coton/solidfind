@@ -29,9 +29,14 @@ export const list = query({
     const enriched = await Promise.all(
       reports.map(async (r) => {
         const company = await ctx.db.get(r.companyId);
+        const reporter = r.reporterUserId ? await ctx.db.get(r.reporterUserId) : null;
         return {
           ...r,
           companyName: company?.name ?? "Deleted Company",
+          companySlug: company?.slug,
+          reporterName: reporter?.name,
+          reporterEmail: reporter?.email,
+          reporterAccountType: reporter?.accountType,
         };
       })
     );

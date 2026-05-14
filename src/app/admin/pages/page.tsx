@@ -29,9 +29,11 @@ export default function AdminPagesPage() {
   const seed = useMutation(api.pageConfigs.seed);
 
   const [selectedId, setSelectedId] = useState<Id<"pageConfigs"> | null>(null);
+  const [selectedGlobal, setSelectedGlobal] = useState(false);
   const [editLabel, setEditLabel] = useState("");
   const [editSubtitle, setEditSubtitle] = useState("");
   const [editFilters, setEditFilters] = useState<Filter[]>([]);
+  const [globalEditFilters, setGlobalEditFilters] = useState<Filter[]>([]);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -48,9 +50,20 @@ export default function AdminPagesPage() {
   const categoryFilterIndexes = editFilters
     .map((filter, index) => ({ filter, index }))
     .filter(({ filter }) => !GLOBAL_FILTER_IDS.has(filter.id));
-  const globalFilters = editFilters.filter((filter) => GLOBAL_FILTER_IDS.has(filter.id));
+  const displayedFilterIndexes = selectedGlobal
+    ? globalEditFilters.map((filter, index) => ({ filter, index }))
+    : categoryFilterIndexes;
+  const defaultGlobalFilters = pages?.[0]?.filters.filter((filter) => GLOBAL_FILTER_IDS.has(filter.id)) ?? [];
+
+  const selectGlobalFilters = () => {
+    setSelectedGlobal(true);
+    setSelectedId(null);
+    setGlobalEditFilters(JSON.parse(JSON.stringify(defaultGlobalFilters)));
+    setDirty(false);
+  };
 
   const selectPage = (page: PageConfig) => {
+    setSelectedGlobal(false);
     setSelectedId(page._id);
     setEditLabel(page.label);
     setEditSubtitle(page.subtitle);
@@ -59,6 +72,24 @@ export default function AdminPagesPage() {
   };
 
   const handleSave = async () => {
+    if (selectedGlobal && pages) {
+      setSaving(true);
+      await Promise.all(pages.map((page) => {
+        const categoryFilters = page.filters.filter((filter) => !GLOBAL_FILTER_IDS.has(filter.id));
+        return upsert({
+          categoryId: page.categoryId,
+          label: page.label,
+          subtitle: page.subtitle,
+          visible: page.visible,
+          sortOrder: page.sortOrder,
+          filters: [...globalEditFilters, ...categoryFilters],
+        });
+      }));
+      setDirty(false);
+      setSaving(false);
+      return;
+    }
+
     if (!selectedPage) return;
     setSaving(true);
     await upsert({
@@ -98,83 +129,92 @@ export default function AdminPagesPage() {
     await updateVisibility({ id: page._id, visible: !page.visible });
   };
 
+  const currentFilters = selectedGlobal ? globalEditFilters : editFilters;
+  const setCurrentFilters = (filters: Filter[]) => {
+    if (selectedGlobal) {
+      setGlobalEditFilters(filters);
+    } else {
+      setEditFilters(filters);
+    }
+  };
+
   // Filter editing helpers
   const updateFilterTitle = (filterIndex: number, title: string) => {
-    const updated = [...editFilters];
+    const updated = [...currentFilters];
     updated[filterIndex] = { ...updated[filterIndex], title };
-    setEditFilters(updated);
+    setCurrentFilters(updated);
     setDirty(true);
   };
 
   const updateOptionLabel = (filterIndex: number, optionIndex: number, label: string) => {
-    const updated = [...editFilters];
+    const updated = [...currentFilters];
     updated[filterIndex] = {
       ...updated[filterIndex],
       options: updated[filterIndex].options.map((o, i) =>
         i === optionIndex ? { ...o, label } : o
       ),
     };
-    setEditFilters(updated);
+    setCurrentFilters(updated);
     setDirty(true);
   };
 
   const updateOptionId = (filterIndex: number, optionIndex: number, id: string) => {
-    const updated = [...editFilters];
+    const updated = [...currentFilters];
     updated[filterIndex] = {
       ...updated[filterIndex],
       options: updated[filterIndex].options.map((o, i) =>
         i === optionIndex ? { ...o, id } : o
       ),
     };
-    setEditFilters(updated);
+    setCurrentFilters(updated);
     setDirty(true);
   };
 
   const removeOption = (filterIndex: number, optionIndex: number) => {
-    const updated = [...editFilters];
+    const updated = [...currentFilters];
     updated[filterIndex] = {
       ...updated[filterIndex],
       options: updated[filterIndex].options.filter((_, i) => i !== optionIndex),
     };
-    setEditFilters(updated);
+    setCurrentFilters(updated);
     setDirty(true);
   };
 
   const addOption = (filterIndex: number) => {
-    const updated = [...editFilters];
+    const updated = [...currentFilters];
     updated[filterIndex] = {
       ...updated[filterIndex],
       options: [...updated[filterIndex].options, { id: "", label: "" }],
     };
-    setEditFilters(updated);
+    setCurrentFilters(updated);
     setDirty(true);
   };
 
   const moveOption = (filterIndex: number, optionIndex: number, direction: "up" | "down") => {
-    const updated = [...editFilters];
+    const updated = [...currentFilters];
     const opts = [...updated[filterIndex].options];
     const targetIndex = direction === "up" ? optionIndex - 1 : optionIndex + 1;
     if (targetIndex < 0 || targetIndex >= opts.length) return;
     [opts[optionIndex], opts[targetIndex]] = [opts[targetIndex], opts[optionIndex]];
     updated[filterIndex] = { ...updated[filterIndex], options: opts };
-    setEditFilters(updated);
+    setCurrentFilters(updated);
     setDirty(true);
   };
 
   const addFilter = () => {
-    setEditFilters([...editFilters, { id: "", title: "", options: [] }]);
+    setCurrentFilters([...currentFilters, { id: "", title: "", options: [] }]);
     setDirty(true);
   };
 
   const updateFilterId = (filterIndex: number, id: string) => {
-    const updated = [...editFilters];
+    const updated = [...currentFilters];
     updated[filterIndex] = { ...updated[filterIndex], id };
-    setEditFilters(updated);
+    setCurrentFilters(updated);
     setDirty(true);
   };
 
   const removeFilter = (filterIndex: number) => {
-    setEditFilters(editFilters.filter((_, i) => i !== filterIndex));
+    setCurrentFilters(currentFilters.filter((_, i) => i !== filterIndex));
     setDirty(true);
   };
 
@@ -218,64 +258,78 @@ export default function AdminPagesPage() {
                 No pages configured. Click &quot;Seed Defaults&quot; to initialize.
               </div>
             ) : (
-              pages.map((page) => (
+              <>
                 <div
-                  key={page._id}
-                  className={`flex items-center gap-3 px-4 py-3 border-b border-[#e4e4e4] last:border-b-0 cursor-pointer transition-colors ${
-                    selectedId === page._id ? "bg-[#f5f5f5]" : "hover:bg-[#fafafa]"
+                  className={`flex items-center gap-3 px-4 py-3 border-b border-[#e4e4e4] cursor-pointer transition-colors ${
+                    selectedGlobal ? "bg-[#f5f5f5]" : "hover:bg-[#fafafa]"
                   }`}
-                  onClick={() => selectPage(page as PageConfig)}
+                  onClick={selectGlobalFilters}
                 >
-                  {/* Visibility toggle */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleToggleVisibility(page as PageConfig);
-                    }}
-                    className={`w-8 h-4 rounded-full flex-shrink-0 transition-colors ${
-                      page.visible ? "bg-gradient-to-l from-[#f14110] to-[#e9a28e]" : "bg-[#333]/20"
-                    }`}
-                  >
-                    <div
-                      className={`w-3 h-3 bg-white rounded-full mt-0.5 transition-all ${
-                        page.visible ? "ml-4.5" : "ml-0.5"
-                      }`}
-                    />
-                  </button>
-
+                  <div className="h-4 w-8 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-medium text-[#333] truncate">{page.label}</p>
-                    <p className="text-[10px] text-[#333]/50 truncate">{page.categoryId}</p>
+                    <p className="text-[12px] font-medium text-[#333] truncate">Global filters</p>
+                    <p className="text-[10px] text-[#333]/50 truncate">Project size / Location</p>
                   </div>
-
-                  {/* Delete button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteConfirmId(page._id);
-                    }}
-                    className="text-[#333]/30 hover:text-red-500 transition-colors flex-shrink-0"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14" />
-                    </svg>
-                  </button>
                 </div>
-              ))
+                {pages.map((page) => (
+                  <div
+                    key={page._id}
+                    className={`flex items-center gap-3 px-4 py-3 border-b border-[#e4e4e4] last:border-b-0 cursor-pointer transition-colors ${
+                      selectedId === page._id ? "bg-[#f5f5f5]" : "hover:bg-[#fafafa]"
+                    }`}
+                    onClick={() => selectPage(page as PageConfig)}
+                  >
+                    {/* Visibility toggle */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleVisibility(page as PageConfig);
+                      }}
+                      className={`w-8 h-4 rounded-full flex-shrink-0 transition-colors ${
+                        page.visible ? "bg-gradient-to-l from-[#f14110] to-[#e9a28e]" : "bg-[#333]/20"
+                      }`}
+                    >
+                      <div
+                        className={`w-3 h-3 bg-white rounded-full mt-0.5 transition-all ${
+                          page.visible ? "ml-4.5" : "ml-0.5"
+                        }`}
+                      />
+                    </button>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-[#333] truncate">{page.label}</p>
+                      <p className="text-[10px] text-[#333]/50 truncate">{page.categoryId}</p>
+                    </div>
+
+                    {/* Delete button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfirmId(page._id);
+                      }}
+                      className="text-[#333]/30 hover:text-red-500 transition-colors flex-shrink-0"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         </div>
 
         {/* Right column: Editor */}
         <div className="flex-1">
-          {!selectedPage ? (
+          {!selectedPage && !selectedGlobal ? (
             <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-8 text-center text-[12px] text-[#333]/50">
               Select a page from the list to edit its configuration.
             </div>
           ) : (
             <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-6">
               {/* Label */}
-              <div className="mb-4">
+              {!selectedGlobal && <div className="mb-4">
                 <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Label</label>
                 <input
                   type="text"
@@ -283,10 +337,10 @@ export default function AdminPagesPage() {
                   onChange={(e) => { setEditLabel(e.target.value); setDirty(true); }}
                   className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333] transition-colors"
                 />
-              </div>
+              </div>}
 
               {/* Subtitle */}
-              <div className="mb-6">
+              {!selectedGlobal && <div className="mb-6">
                 <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Subtitle</label>
                 <textarea
                   value={editSubtitle}
@@ -294,43 +348,32 @@ export default function AdminPagesPage() {
                   rows={2}
                   className="w-full px-3 py-2 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333] transition-colors resize-none"
                 />
-              </div>
-
-              {/* Global filters */}
-              <div className="mb-6 rounded-[6px] border border-[#e4e4e4] bg-[#fafafa] p-4">
-                <h3 className="text-[13px] font-semibold text-[#333]">Global filters</h3>
-                <p className="mt-1 text-[11px] leading-[16px] text-[#333]/50">
-                  Project size and Location sit outside the main category setup and are reused across category pages.
-                </p>
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  {globalFilters.map((filter) => (
-                    <div key={filter.id} className="rounded-[6px] border border-[#e4e4e4] bg-white p-3">
-                      <p className="text-[11px] font-semibold text-[#333]">{filter.title}</p>
-                      <p className="mt-1 text-[10px] leading-[15px] text-[#333]/50">
-                        {filter.options.map((option) => option.label).join(", ")}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              </div>}
 
               {/* Filters */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-[13px] font-semibold text-[#333]">Sub-categories</h3>
+                  <div>
+                    <h3 className="text-[13px] font-semibold text-[#333]">{selectedGlobal ? "Global filters" : "Sub-categories"}</h3>
+                    {selectedGlobal && (
+                      <p className="mt-1 text-[11px] leading-[16px] text-[#333]/50">
+                        Project size and Location sit outside the main category setup and are reused across category pages.
+                      </p>
+                    )}
+                  </div>
                   <button
                     onClick={() => {
-                      setEditFilters([...editFilters, { id: "categories", title: "CATEGORIES", options: [] }]);
+                      setCurrentFilters([...currentFilters, { id: selectedGlobal ? "" : "categories", title: selectedGlobal ? "" : "CATEGORIES", options: [] }]);
                       setDirty(true);
                     }}
-                    disabled={categoryFilterIndexes.length > 0}
+                    disabled={!selectedGlobal && categoryFilterIndexes.length > 0}
                     className="text-[11px] text-[#333]/60 hover:text-[#333] transition-colors underline"
                   >
-                    + Add Sub-category Group
+                    {selectedGlobal ? "+ Add Global Filter" : "+ Add Sub-category Group"}
                   </button>
                 </div>
 
-                {categoryFilterIndexes.map(({ filter, index: fi }) => (
+                {displayedFilterIndexes.map(({ filter, index: fi }) => (
                   <div key={fi} className="mb-5 border border-[#e4e4e4] rounded-[6px] p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <input

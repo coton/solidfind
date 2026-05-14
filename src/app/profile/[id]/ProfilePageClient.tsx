@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, type TouchEvent } from "react";
+import { useState, useEffect, useMemo, useRef, type TouchEvent } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -20,6 +20,7 @@ import { Star } from "lucide-react";
 import { starFillColor, starColor } from "@/lib/starColors";
 import { buildCompanyAddressHref } from '@/lib/company-address-link.mjs';
 import { buildCompanyProfilePath, buildCompanyReviewsPath } from '@/lib/company-profile-url.mjs';
+import { buildCategoryOptionLabelMap, formatCategoryValues } from "@/lib/category-display.mjs";
 
 /** Capitalize first letter of each word in every array element, then join */
 function capitalizeJoin(arr: string[]): string {
@@ -189,7 +190,7 @@ function ReportModal({ isOpen, onClose, companyId, userId }: { isOpen: boolean; 
             <button
               onClick={handleSubmit}
               disabled={!text.trim() || submitting}
-              className="w-[140px] h-[40px] border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] rounded-[4px] hover:bg-[#f14110] hover:text-white hover:border-transparent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-[140px] h-[40px] border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] rounded-full hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {submitting ? "Submitting..." : "Submit Report"}
             </button>
@@ -286,6 +287,8 @@ export default function ProfilePageClient() {
     api.featuredArticles.listByCompany,
     validId ? { companyId: validId } : "skip"
   );
+  const pageConfigs = useQuery(api.pageConfigs.listVisible);
+  const categoryLabelMap = useMemo(() => buildCategoryOptionLabelMap(pageConfigs ?? []), [pageConfigs]);
 
   const toggleSave = useMutation(api.savedListings.toggle);
   const recordView = useMutation(api.profileViews.record);
@@ -472,19 +475,19 @@ export default function ProfilePageClient() {
   ].filter(Boolean) as Array<{ label: string; value: string }>;
   const workCategoryServices = [
     (company.constructionTypes?.length ?? 0) > 0
-      ? { label: "CONSTRUCTION", value: capitalizeJoin(company.constructionTypes!) }
+      ? { label: "CONSTRUCTION", value: formatCategoryValues(company.constructionTypes!, categoryLabelMap, "construction") }
       : null,
     (company.renovationTypes?.length ?? 0) > 0
-      ? { label: "RENOVATION", value: capitalizeJoin(company.renovationTypes!) }
+      ? { label: "RENOVATION", value: formatCategoryValues(company.renovationTypes!, categoryLabelMap, "renovation") }
       : null,
     (company.architectureTypes?.length ?? 0) > 0
-      ? { label: "ARCHITECTURE", value: capitalizeJoin(company.architectureTypes!) }
+      ? { label: "ARCHITECTURE", value: formatCategoryValues(company.architectureTypes!, categoryLabelMap, "architecture") }
       : null,
     (company.interiorTypes?.length ?? 0) > 0
-      ? { label: "INTERIOR", value: capitalizeJoin(company.interiorTypes!) }
+      ? { label: "INTERIOR", value: formatCategoryValues(company.interiorTypes!, categoryLabelMap, "interior") }
       : null,
     (company.realEstateTypes?.length ?? 0) > 0
-      ? { label: "REAL ESTATE", value: capitalizeJoin(company.realEstateTypes!) }
+      ? { label: "REAL ESTATE", value: formatCategoryValues(company.realEstateTypes!, categoryLabelMap, "real-estate") }
       : null,
   ].filter(Boolean) as Array<{ label: string; value: string }>;
 
@@ -651,14 +654,7 @@ export default function ProfilePageClient() {
               </div>
             </div>
 
-            {projectImages.length > 0 && (
-              <ProjectImagesGrid
-                items={projectImages}
-                onImageClick={handleImageClick}
-              />
-            )}
-
-            {/* Mobile only: Save/Share/Report directly below the project thumbnails */}
+            {/* Mobile only: Save/Share/Report directly above the project thumbnails */}
             <div className="mt-3 flex lg:hidden items-center gap-2">
               <button onClick={handleToggleSave} className="group flex items-center gap-1.5 text-[#333]/35 transition-colors">
                 <span className={`font-bam text-[9px] ${company.bookmarkCount ? 'text-[#F14110]' : '#666'}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
@@ -694,6 +690,13 @@ export default function ProfilePageClient() {
                 </svg>
               </button>
             </div>
+
+            {projectImages.length > 0 && (
+              <ProjectImagesGrid
+                items={projectImages}
+                onImageClick={handleImageClick}
+              />
+            )}
           </div>
 
           {/* Profile stats and description */}

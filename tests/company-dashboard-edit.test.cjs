@@ -101,7 +101,7 @@ test('company edit page validates address format before saving', () => {
 
   assert.match(
     source,
-    /const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingEmail && !missingAddress && !invalidAddress && !invalidFoundedYear;/,
+    /const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingEmail && !missingAddress && !invalidAddress && !invalidFoundedYear && !hasInvalidContactField;/,
     'Expected invalid addresses to block saving'
   );
 
@@ -135,7 +135,7 @@ test('company edit page only accepts four-digit founded years from 1980 to prese
 
   assert.match(
     source,
-    /const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingEmail && !missingAddress && !invalidAddress && !invalidFoundedYear;/,
+    /const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingEmail && !missingAddress && !invalidAddress && !invalidFoundedYear && !hasInvalidContactField;/,
     'Expected invalid founded years to block saving'
   );
 
