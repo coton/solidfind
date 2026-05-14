@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,6 +21,7 @@ import { useProEnabled } from "@/hooks/useProEnabled";
 import { calculateProfileCompletionScore, getProfileCompletionStatus } from "@/lib/profile-completion.mjs";
 
 type SetupOAuthStrategy = Extract<OAuthStrategy, "oauth_google">;
+type ServiceOption = { id: string; label: string };
 
 const projectSizeOptions = [
   { id: "any", label: "ANY SIZE" },
@@ -96,6 +97,20 @@ const locationOptions = [
   { id: "buleleng", label: "BULELENG" },
   { id: "jembrana", label: "JEMBRANA" },
 ];
+
+function getAllOptionId(options: ServiceOption[]) {
+  return options.find((option) => option.id === "all" || option.id === "every")?.id ?? null;
+}
+
+function normalizeAllSelection(selected: string[], options: ServiceOption[]) {
+  const allId = getAllOptionId(options);
+  if (!allId) return selected;
+  const allAliases = ["all", "every"];
+  if (selected.some((id) => allAliases.includes(id)) && !selected.includes(allId)) {
+    return [allId];
+  }
+  return selected.filter((id) => options.some((option) => option.id === id));
+}
 
 const proFeatures = [
   { icon: "star", title: "Priority placement in search results", subtitle: "Penempatan prioritas dalam hasil pencarian" },
@@ -282,6 +297,20 @@ export default function EditProfilePage() {
 
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
   const isCategoryVisible = (catId: string) => pageConfigs?.some(p => p.categoryId === catId) ?? false;
+  const getCategoryServiceOptions = useMemo(() => {
+    return (categoryId: string, fallback: ServiceOption[]) => {
+      const dynamicOptions = pageConfigs
+        ?.find((page) => page.categoryId === categoryId)
+        ?.filters.find((filter) => filter.id === "categories")
+        ?.options;
+      return dynamicOptions && dynamicOptions.length > 0 ? dynamicOptions : fallback;
+    };
+  }, [pageConfigs]);
+  const constructionServiceOptions = getCategoryServiceOptions("construction", constructionServices);
+  const renovationServiceOptions = getCategoryServiceOptions("renovation", renovationServices);
+  const architectureServiceOptions = getCategoryServiceOptions("architecture", architectureServices);
+  const interiorServiceOptions = getCategoryServiceOptions("interior", interiorServices);
+  const realEstateServiceOptions = getCategoryServiceOptions("real-estate", realEstateServices);
 
   const updateCompany = useMutation(api.companies.update);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
@@ -608,6 +637,11 @@ export default function EditProfilePage() {
 
     setSaving(true);
     try {
+      const savedConstruction = constructionEnabled ? normalizeAllSelection(selectedConstruction, constructionServiceOptions) : [];
+      const savedRenovation = renovationEnabled ? normalizeAllSelection(selectedRenovation, renovationServiceOptions) : [];
+      const savedArchitecture = architectureEnabled ? normalizeAllSelection(selectedArchitecture, architectureServiceOptions) : [];
+      const savedInterior = interiorEnabled ? normalizeAllSelection(selectedInterior, interiorServiceOptions) : [];
+      const savedRealEstate = realEstateEnabled ? normalizeAllSelection(selectedRealEstate, realEstateServiceOptions) : [];
       if (company) {
         await updateCompany({
           id: company._id,
@@ -625,15 +659,15 @@ export default function EditProfilePage() {
           linkedin: linkedin || undefined,
           instagram: instagram || undefined,
           projectSizes: selectedProjectSizes,
-          constructionTypes: constructionEnabled ? selectedConstruction : [],
+          constructionTypes: savedConstruction,
           constructionLocations: selectedLocations,
-          renovationTypes: renovationEnabled ? selectedRenovation : [],
+          renovationTypes: savedRenovation,
           renovationLocations: selectedLocations,
-          architectureTypes: architectureEnabled ? selectedArchitecture : [],
+          architectureTypes: savedArchitecture,
           architectureLocations: selectedLocations,
-          interiorTypes: interiorEnabled ? selectedInterior : [],
+          interiorTypes: savedInterior,
           interiorLocations: selectedLocations,
-          realEstateTypes: realEstateEnabled ? selectedRealEstate : [],
+          realEstateTypes: savedRealEstate,
           realEstateLocations: selectedLocations,
           logoId: logoId ?? undefined,
           projectImageIds,
@@ -662,6 +696,8 @@ export default function EditProfilePage() {
         });
       }
       setIsDirty(false);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save your company profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -1003,7 +1039,7 @@ export default function EditProfilePage() {
               </Link>
             )}
             <button
-              onClick={() => { setIsDirty(false); handleSave(); }}
+              onClick={handleSave}
               disabled={saving || !canSave}
               className={`ml-auto h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
               style={{ width: '140px', maxWidth: '140px' }}
@@ -1017,6 +1053,11 @@ export default function EditProfilePage() {
                 {bottomHintText}
               </p>
             </div>
+          )}
+          {saveError && canSave && (
+            <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px] text-right">
+              {saveError}
+            </p>
           )}
         </div>
 
@@ -1436,32 +1477,34 @@ export default function EditProfilePage() {
                     Layanan yang Disediakan
                   </p>
                 </div>
-                {constructionServices.map((service) => {
-                  const allActive = selectedConstruction.includes("all");
-                  const isAll = service.id === "all";
+                {constructionServiceOptions.map((service) => {
+                  const allId = getAllOptionId(constructionServiceOptions);
+                  const normalizedSelected = normalizeAllSelection(selectedConstruction, constructionServiceOptions);
+                  const allActive = !!allId && normalizedSelected.includes(allId);
+                  const isAll = service.id === allId;
                   const isDisabled = allActive && !isAll;
                   return (
                     <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <span className={`text-[10px] tracking-[0.2px] ${selectedConstruction.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                      <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
                         {service.label}
                       </span>
                       <Toggle
-                        checked={selectedConstruction.includes(service.id)}
+                        checked={normalizedSelected.includes(service.id)}
                         onChange={() => {
                           setIsDirty(true);
-                          if (isAll) {
-                            if (selectedConstruction.includes("all")) {
-                              setSelectedConstruction(selectedConstruction.filter(s => s !== "all"));
+                          if (isAll && allId) {
+                            if (normalizedSelected.includes(allId)) {
+                              setSelectedConstruction(normalizedSelected.filter(s => s !== allId));
                             } else {
-                              setSelectedConstruction(["all"]);
+                              setSelectedConstruction([allId]);
                             }
                           } else {
-                            let next = selectedConstruction.includes(service.id)
-                              ? selectedConstruction.filter(s => s !== service.id)
-                              : [...selectedConstruction.filter(s => s !== "all"), service.id];
-                            const allIndividual = constructionServices.filter(s => s.id !== "all").map(s => s.id);
+                            let next = normalizedSelected.includes(service.id)
+                              ? normalizedSelected.filter(s => s !== service.id)
+                              : [...normalizedSelected.filter(s => s !== allId), service.id];
+                            const allIndividual = constructionServiceOptions.filter(s => s.id !== allId).map(s => s.id);
                             if (allIndividual.every(id => next.includes(id))) {
-                              next = ["all"];
+                              next = allId ? [allId] : next;
                             }
                             setSelectedConstruction(next);
                           }
@@ -1495,32 +1538,34 @@ export default function EditProfilePage() {
                     Layanan yang Disediakan
                   </p>
                 </div>
-                {renovationServices.map((service) => {
-                  const everyActive = selectedRenovation.includes("every");
-                  const isEvery = service.id === "every";
-                  const isDisabled = everyActive && !isEvery;
+                {renovationServiceOptions.map((service) => {
+                  const allId = getAllOptionId(renovationServiceOptions);
+                  const normalizedSelected = normalizeAllSelection(selectedRenovation, renovationServiceOptions);
+                  const allActive = !!allId && normalizedSelected.includes(allId);
+                  const isAll = service.id === allId;
+                  const isDisabled = allActive && !isAll;
                   return (
                     <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <span className={`text-[10px] tracking-[0.2px] ${selectedRenovation.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                      <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
                         {service.label}
                       </span>
                       <Toggle
-                        checked={selectedRenovation.includes(service.id)}
+                        checked={normalizedSelected.includes(service.id)}
                         onChange={() => {
                           setIsDirty(true);
-                          if (isEvery) {
-                            if (selectedRenovation.includes("every")) {
-                              setSelectedRenovation(selectedRenovation.filter(s => s !== "every"));
+                          if (isAll && allId) {
+                            if (normalizedSelected.includes(allId)) {
+                              setSelectedRenovation(normalizedSelected.filter(s => s !== allId));
                             } else {
-                              setSelectedRenovation(["every"]);
+                              setSelectedRenovation([allId]);
                             }
                           } else {
-                            let next = selectedRenovation.includes(service.id)
-                              ? selectedRenovation.filter(s => s !== service.id)
-                              : [...selectedRenovation.filter(s => s !== "every"), service.id];
-                            const allIndividual = renovationServices.filter(s => s.id !== "every").map(s => s.id);
+                            let next = normalizedSelected.includes(service.id)
+                              ? normalizedSelected.filter(s => s !== service.id)
+                              : [...normalizedSelected.filter(s => s !== allId), service.id];
+                            const allIndividual = renovationServiceOptions.filter(s => s.id !== allId).map(s => s.id);
                             if (allIndividual.every(id => next.includes(id))) {
-                              next = ["every"];
+                              next = allId ? [allId] : next;
                             }
                             setSelectedRenovation(next);
                           }
@@ -1555,32 +1600,34 @@ export default function EditProfilePage() {
                     Layanan yang Disediakan
                   </p>
                 </div>
-                {architectureServices.map((service) => {
-                  const allActive = selectedArchitecture.includes("all");
-                  const isAll = service.id === "all";
+                {architectureServiceOptions.map((service) => {
+                  const allId = getAllOptionId(architectureServiceOptions);
+                  const normalizedSelected = normalizeAllSelection(selectedArchitecture, architectureServiceOptions);
+                  const allActive = !!allId && normalizedSelected.includes(allId);
+                  const isAll = service.id === allId;
                   const isDisabled = allActive && !isAll;
                   return (
                     <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <span className={`text-[10px] tracking-[0.2px] ${selectedArchitecture.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                      <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
                         {service.label}
                       </span>
                       <Toggle
-                        checked={selectedArchitecture.includes(service.id)}
+                        checked={normalizedSelected.includes(service.id)}
                         onChange={() => {
                           setIsDirty(true);
-                          if (isAll) {
-                            if (selectedArchitecture.includes("all")) {
-                              setSelectedArchitecture(selectedArchitecture.filter(s => s !== "all"));
+                          if (isAll && allId) {
+                            if (normalizedSelected.includes(allId)) {
+                              setSelectedArchitecture(normalizedSelected.filter(s => s !== allId));
                             } else {
-                              setSelectedArchitecture(["all"]);
+                              setSelectedArchitecture([allId]);
                             }
                           } else {
-                            let next = selectedArchitecture.includes(service.id)
-                              ? selectedArchitecture.filter(s => s !== service.id)
-                              : [...selectedArchitecture.filter(s => s !== "all"), service.id];
-                            const allIndividual = architectureServices.filter(s => s.id !== "all").map(s => s.id);
+                            let next = normalizedSelected.includes(service.id)
+                              ? normalizedSelected.filter(s => s !== service.id)
+                              : [...normalizedSelected.filter(s => s !== allId), service.id];
+                            const allIndividual = architectureServiceOptions.filter(s => s.id !== allId).map(s => s.id);
                             if (allIndividual.every(id => next.includes(id))) {
-                              next = ["all"];
+                              next = allId ? [allId] : next;
                             }
                             setSelectedArchitecture(next);
                           }
@@ -1616,32 +1663,34 @@ export default function EditProfilePage() {
                     Layanan yang Disediakan
                   </p>
                 </div>
-                {interiorServices.map((service) => {
-                  const allActive = selectedInterior.includes("all");
-                  const isAll = service.id === "all";
+                {interiorServiceOptions.map((service) => {
+                  const allId = getAllOptionId(interiorServiceOptions);
+                  const normalizedSelected = normalizeAllSelection(selectedInterior, interiorServiceOptions);
+                  const allActive = !!allId && normalizedSelected.includes(allId);
+                  const isAll = service.id === allId;
                   const isDisabled = allActive && !isAll;
                   return (
                     <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <span className={`text-[10px] tracking-[0.2px] ${selectedInterior.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                      <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
                         {service.label}
                       </span>
                       <Toggle
-                        checked={selectedInterior.includes(service.id)}
+                        checked={normalizedSelected.includes(service.id)}
                         onChange={() => {
                           setIsDirty(true);
-                          if (isAll) {
-                            if (selectedInterior.includes("all")) {
-                              setSelectedInterior(selectedInterior.filter(s => s !== "all"));
+                          if (isAll && allId) {
+                            if (normalizedSelected.includes(allId)) {
+                              setSelectedInterior(normalizedSelected.filter(s => s !== allId));
                             } else {
-                              setSelectedInterior(["all"]);
+                              setSelectedInterior([allId]);
                             }
                           } else {
-                            let next = selectedInterior.includes(service.id)
-                              ? selectedInterior.filter(s => s !== service.id)
-                              : [...selectedInterior.filter(s => s !== "all"), service.id];
-                            const allIndividual = interiorServices.filter(s => s.id !== "all").map(s => s.id);
+                            let next = normalizedSelected.includes(service.id)
+                              ? normalizedSelected.filter(s => s !== service.id)
+                              : [...normalizedSelected.filter(s => s !== allId), service.id];
+                            const allIndividual = interiorServiceOptions.filter(s => s.id !== allId).map(s => s.id);
                             if (allIndividual.every(id => next.includes(id))) {
-                              next = ["all"];
+                              next = allId ? [allId] : next;
                             }
                             setSelectedInterior(next);
                           }
@@ -1679,32 +1728,34 @@ export default function EditProfilePage() {
                   Layanan yang Disediakan
                 </p>
               </div>
-              {realEstateServices.map((service) => {
-                const allActive = selectedRealEstate.includes("all");
-                const isAll = service.id === "all";
+              {realEstateServiceOptions.map((service) => {
+                const allId = getAllOptionId(realEstateServiceOptions);
+                const normalizedSelected = normalizeAllSelection(selectedRealEstate, realEstateServiceOptions);
+                const allActive = !!allId && normalizedSelected.includes(allId);
+                const isAll = service.id === allId;
                 const isDisabled = allActive && !isAll;
                 return (
                   <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <span className={`text-[10px] tracking-[0.2px] ${selectedRealEstate.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
+                    <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
                       {service.label}
                     </span>
                     <Toggle
-                      checked={selectedRealEstate.includes(service.id)}
+                      checked={normalizedSelected.includes(service.id)}
                       onChange={() => {
                         setIsDirty(true);
-                        if (isAll) {
-                          if (selectedRealEstate.includes("all")) {
-                            setSelectedRealEstate(selectedRealEstate.filter(s => s !== "all"));
+                        if (isAll && allId) {
+                          if (normalizedSelected.includes(allId)) {
+                            setSelectedRealEstate(normalizedSelected.filter(s => s !== allId));
                           } else {
-                            setSelectedRealEstate(["all"]);
+                            setSelectedRealEstate([allId]);
                           }
                         } else {
-                          let next = selectedRealEstate.includes(service.id)
-                            ? selectedRealEstate.filter(s => s !== service.id)
-                            : [...selectedRealEstate.filter(s => s !== "all"), service.id];
-                          const allIndividual = realEstateServices.filter(s => s.id !== "all").map(s => s.id);
+                          let next = normalizedSelected.includes(service.id)
+                            ? normalizedSelected.filter(s => s !== service.id)
+                            : [...normalizedSelected.filter(s => s !== allId), service.id];
+                          const allIndividual = realEstateServiceOptions.filter(s => s.id !== allId).map(s => s.id);
                           if (allIndividual.every(id => next.includes(id))) {
-                            next = ["all"];
+                            next = allId ? [allId] : next;
                           }
                           setSelectedRealEstate(next);
                         }
@@ -1731,7 +1782,7 @@ export default function EditProfilePage() {
               <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px] text-right">{saveError}</p>
             )}
             <button
-              onClick={() => { setIsDirty(false); handleSave(); }}
+              onClick={handleSave}
               disabled={saving || !canSave}
               className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
               style={{ width: '140px', maxWidth: '140px' }}

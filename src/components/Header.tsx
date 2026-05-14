@@ -303,7 +303,9 @@ function HeaderInner() {
   }, [pageConfigs, pageConfigsLoaded]);
 
   const [keywords, setKeywords] = useState(searchParams.get("search") ?? "");
-  const [projectSize, setProjectSize] = useState(searchParams.get("projectSize") ?? "");
+  const [projectSizes, setProjectSizes] = useState<string[]>(
+    searchParams.get("projectSize") ? searchParams.get("projectSize")!.split(",").filter(Boolean) : []
+  );
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>(
     searchParams.get("location") ? searchParams.get("location")!.split(",") : []
@@ -390,7 +392,7 @@ function HeaderInner() {
 
   const clearFilters = () => {
     setKeywords("");
-    setProjectSize("");
+    setProjectSizes([]);
     setSelectedCategories([]);
     setLocations([]);
     // Keep the current category tab, only reset filters
@@ -412,6 +414,9 @@ function HeaderInner() {
 
   const currentLocationOptions = getDynamicFilter("location") ?? locationOptions;
   const currentProjectSizeOptions = getDynamicFilter("project-size") ?? projectSizeOptions;
+  const concreteProjectSizeIds = currentProjectSizeOptions
+    .filter((option) => option.id !== "any")
+    .map((option) => option.id);
   const categoryOptions = useMemo(() => {
     const dynamicCats = getDynamicFilter("categories");
     if (dynamicCats) return dynamicCats;
@@ -426,6 +431,37 @@ function HeaderInner() {
   useEffect(() => {
     setSelectedCategories(parseSubcategoryParam(searchParams.get("subcategory"), categoryOptions));
   }, [searchParams, categoryOptions]);
+
+  useEffect(() => {
+    setProjectSizes(searchParams.get("projectSize") ? searchParams.get("projectSize")!.split(",").filter(Boolean) : []);
+  }, [searchParams]);
+
+  const handleProjectSizeChange = (sizeId: string) => {
+    let nextSizes: string[];
+
+    if (sizeId === "any") {
+      nextSizes = projectSizes.includes("any") ? [] : ["any"];
+    } else {
+      nextSizes = projectSizes.includes(sizeId)
+        ? projectSizes.filter((id) => id !== sizeId && id !== "any")
+        : [...projectSizes.filter((id) => id !== "any"), sizeId];
+      const hasAllConcreteSizes = concreteProjectSizeIds.length > 0 && concreteProjectSizeIds.every((id) => nextSizes.includes(id));
+      if (hasAllConcreteSizes) nextSizes = ["any"];
+    }
+
+    setProjectSizes(nextSizes);
+    updateParams({ projectSize: nextSizes.length > 0 ? nextSizes.join(",") : null });
+  };
+
+  const getProjectSizeDisplayText = () => {
+    if (projectSizes.length === 0) return "PROJECT SIZE";
+    if (projectSizes.includes("any")) return "ANY SIZE";
+    if (projectSizes.length === 1) {
+      const label = currentProjectSizeOptions.find((option) => option.id === projectSizes[0])?.label;
+      return label ? label.replace(/\s*\([^)]*\)/, '') : "PROJECT SIZE";
+    }
+    return "PROJECT SIZE";
+  };
 
   // Handle location multi-select
   const handleLocationChange = (locationId: string) => {
@@ -644,10 +680,18 @@ function HeaderInner() {
               <Dropdown
                 label="PROJECT SIZE"
                 options={currentProjectSizeOptions}
-                value={projectSize}
-                onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
+                value=""
+                onChange={handleProjectSizeChange}
                 width="w-[140px]"
                 isProjectSize={true}
+                multiSelect={true}
+                selectedValues={projectSizes}
+                displayText={getProjectSizeDisplayText()}
+                isActive={projectSizes.length > 0}
+                isOptionSelected={(optionId) => {
+                  if (optionId === "any") return projectSizes.includes("any");
+                  return !projectSizes.includes("any") && projectSizes.includes(optionId);
+                }}
                 closeSignal={dropdownCloseSignal}
               />
 
@@ -728,10 +772,18 @@ function HeaderInner() {
                   <Dropdown
                     label="PROJECT SIZE"
                     options={currentProjectSizeOptions}
-                    value={projectSize}
-                    onChange={(val) => { setProjectSize(val); updateParams({ projectSize: val || null }); }}
+                    value=""
+                    onChange={handleProjectSizeChange}
                     width="w-full"
                     isProjectSize={true}
+                    multiSelect={true}
+                    selectedValues={projectSizes}
+                    displayText={getProjectSizeDisplayText()}
+                    isActive={projectSizes.length > 0}
+                    isOptionSelected={(optionId) => {
+                      if (optionId === "any") return projectSizes.includes("any");
+                      return !projectSizes.includes("any") && projectSizes.includes(optionId);
+                    }}
                     closeSignal={dropdownCloseSignal}
                   />
                 </div>

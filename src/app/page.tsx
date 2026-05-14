@@ -17,6 +17,14 @@ import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { getEffectiveSubcategoryFilters, parseSubcategoryParam } from "@/lib/category-filter.mjs";
 
+function getCompanyCategoryTypes(company: any, category: string) {
+  if (category === "renovation") return company.renovationTypes ?? [];
+  if (category === "architecture") return company.architectureTypes ?? [];
+  if (category === "interior") return company.interiorTypes ?? [];
+  if (category === "real-estate") return company.realEstateTypes ?? [];
+  return company.constructionTypes ?? (company.subcategory ? [company.subcategory] : []);
+}
+
 export default function Home() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#ececec]" />}>
@@ -60,7 +68,12 @@ function HomeContent() {
     ?.filter((c) => !visibleCategoryIds || visibleCategoryIds.includes(c.category))
     ?.filter((c) => {
       if (effectiveSubcategories.length === 0) return true;
-      return !!c.subcategory && effectiveSubcategories.includes(c.subcategory.toLowerCase());
+      const companyTypes = getCompanyCategoryTypes(c, categoryParam).map((type: string) => type.toLowerCase());
+      return (
+        companyTypes.includes("all") ||
+        companyTypes.includes("every") ||
+        effectiveSubcategories.some((subcategory) => companyTypes.includes(subcategory))
+      );
     });
 
   const allLatestCompanies = useQuery(api.companies.latest);
@@ -192,7 +205,7 @@ function HomeContent() {
         </div>
 
         {showEmptyState ? (
-          /* Empty State — flex column filling remaining height, no ad */
+          /* Empty State — flex column filling remaining height */
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
             {/* Orange message — vertically centered in available space */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -302,12 +315,12 @@ function HomeContent() {
               </div>
             </div>
 
-            {/* Ad Banner — only shown when there are results */}
-            <div className="mb-[32px] sm:mb-[52px]">
-              <AdBanner alt="Advertisement" />
-            </div>
           </>
         )}
+
+        <div className="mb-[32px] sm:mb-[52px]">
+          <AdBanner alt="Advertisement" />
+        </div>
       </main>
 
       <Footer />

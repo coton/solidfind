@@ -250,8 +250,18 @@ test('company dashboard aligns most frequent location with numeric stats', () =>
 
   assert.match(
     source,
-    /h-\[42px\][\s\S]*Most frequent location searched\/[\s\S]*text-\[32px\] font-bold text-\[#f14110\] tracking-\[0\.64px\] leading-\[38px\]/,
-    'Expected most frequent location value to use the same visual height as the views stat'
+    /h-\[42px\][\s\S]*Most frequent location searched\/[\s\S]*text-\[24px\] font-bold text-\[#f14110\] tracking-\[0\.48px\] leading-\[38px\]/,
+    'Expected most frequent location value to keep its old font size while aligning with the views stat row'
+  );
+});
+
+test('company dashboard completion score uses category locations like the editor', () => {
+  const source = read(dashboardPagePath);
+
+  assert.match(
+    source,
+    /const companyProfileLocations = company[\s\S]*constructionLocations[\s\S]*renovationLocations[\s\S]*architectureLocations[\s\S]*interiorLocations[\s\S]*realEstateLocations[\s\S]*locations: Array\.from\(new Set\(companyProfileLocations\)\),/,
+    'Expected dashboard completion score to use the same category locations as the edit page'
   );
 });
 

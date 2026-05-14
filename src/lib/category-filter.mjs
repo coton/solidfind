@@ -59,7 +59,7 @@ export function toggleSubcategorySelection(selectedValues = [], toggledValue, op
   if (!toggledId) return normalizeSubcategorySelection(selectedValues, options);
 
   if (toggledId === 'all') {
-    return ['all'];
+    return normalizeSubcategorySelection(selectedValues, options).includes('all') ? [] : ['all'];
   }
 
   const current = normalizeSubcategorySelection(selectedValues, options).filter((id) => id !== 'all');

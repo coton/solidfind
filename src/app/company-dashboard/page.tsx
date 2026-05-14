@@ -100,12 +100,22 @@ export default function CompanyDashboardPage() {
       (company.realEstateTypes?.length ?? 0) > 0 ? "real-estate" : null,
     ].filter(Boolean)
     : [];
+  const companyProfileLocations = company
+    ? [
+      ...(company.constructionLocations ?? []),
+      ...(company.renovationLocations ?? []),
+      ...(company.architectureLocations ?? []),
+      ...(company.interiorLocations ?? []),
+      ...(company.realEstateLocations ?? []),
+      ...(company.location?.split(",") ?? []),
+    ].filter(Boolean)
+    : [];
   const companyProjectImageCount = (company?.projectImageIds?.length ?? 0) + (company?.projectImageUrls?.length ?? 0);
   const profileCompletionScore = calculateProfileCompletionScore(
     {
       companyName: company?.name,
       categories: activeCategories,
-      locations: company?.location?.split(",").filter(Boolean) ?? [],
+      locations: Array.from(new Set(companyProfileLocations)),
       description: company?.description,
       phone: company?.phone,
       whatsapp: company?.whatsapp,
@@ -275,7 +285,7 @@ export default function CompanyDashboardPage() {
                     Lokasi yang paling sering lokasi
                   </p>
                 </div>
-                <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px] leading-[38px]">
+                <p className="text-[24px] font-bold text-[#f14110] tracking-[0.48px] leading-[38px]">
                   {data.stats.mostSearchedLocation}
                 </p>
               </div>

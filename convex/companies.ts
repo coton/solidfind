@@ -35,9 +35,18 @@ export const list = query({
       // Handle comma-separated multiple locations
       const selectedLocations = args.location.toLowerCase().split(",");
       companies = companies.filter((c) => {
-        if (!c.location) return false;
-        const companyLocation = c.location.toLowerCase();
-        return selectedLocations.some(loc => companyLocation.includes(loc.trim()));
+        const companyLocations = [
+          ...(c.location?.split(",") ?? []),
+          ...(c.constructionLocations ?? []),
+          ...(c.renovationLocations ?? []),
+          ...(c.architectureLocations ?? []),
+          ...(c.interiorLocations ?? []),
+          ...(c.realEstateLocations ?? []),
+        ]
+          .map((location) => location.toLowerCase().trim())
+          .filter(Boolean);
+
+        return selectedLocations.some((loc) => companyLocations.some((companyLocation) => companyLocation.includes(loc.trim())));
       });
     }
 
@@ -51,9 +60,25 @@ export const list = query({
     }
 
     if (args.projectSize && args.projectSize !== "any") {
-      companies = companies.filter(
-        (c) => c.projectSize === args.projectSize
-      );
+      const selectedProjectSizes = args.projectSize
+        .split(",")
+        .map((size) => size.trim())
+        .filter((size) => size && size !== "any");
+
+      if (selectedProjectSizes.length > 0) {
+        companies = companies.filter((c) => {
+          const companyProjectSizes = c.projectSizes?.length
+            ? c.projectSizes
+            : c.projectSize
+              ? [c.projectSize]
+              : [];
+
+          return (
+            companyProjectSizes.includes("any") ||
+            selectedProjectSizes.some((size) => companyProjectSizes.includes(size))
+          );
+        });
+      }
     }
 
     // Pro companies listed first

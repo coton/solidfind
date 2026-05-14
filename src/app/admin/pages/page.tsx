@@ -18,6 +18,8 @@ type PageConfig = {
   updatedAt: number;
 };
 
+const GLOBAL_FILTER_IDS = new Set(["project-size", "location"]);
+
 export default function AdminPagesPage() {
   const pages = useQuery(api.pageConfigs.list);
   const upsert = useMutation(api.pageConfigs.upsert);
@@ -43,6 +45,10 @@ export default function AdminPagesPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<Id<"pageConfigs"> | null>(null);
 
   const selectedPage = pages?.find((p) => p._id === selectedId);
+  const categoryFilterIndexes = editFilters
+    .map((filter, index) => ({ filter, index }))
+    .filter(({ filter }) => !GLOBAL_FILTER_IDS.has(filter.id));
+  const globalFilters = editFilters.filter((filter) => GLOBAL_FILTER_IDS.has(filter.id));
 
   const selectPage = (page: PageConfig) => {
     setSelectedId(page._id);
@@ -290,19 +296,41 @@ export default function AdminPagesPage() {
                 />
               </div>
 
+              {/* Global filters */}
+              <div className="mb-6 rounded-[6px] border border-[#e4e4e4] bg-[#fafafa] p-4">
+                <h3 className="text-[13px] font-semibold text-[#333]">Global filters</h3>
+                <p className="mt-1 text-[11px] leading-[16px] text-[#333]/50">
+                  Project size and Location sit outside the main category setup and are reused across category pages.
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  {globalFilters.map((filter) => (
+                    <div key={filter.id} className="rounded-[6px] border border-[#e4e4e4] bg-white p-3">
+                      <p className="text-[11px] font-semibold text-[#333]">{filter.title}</p>
+                      <p className="mt-1 text-[10px] leading-[15px] text-[#333]/50">
+                        {filter.options.map((option) => option.label).join(", ")}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Filters */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-[13px] font-semibold text-[#333]">Filters</h3>
+                  <h3 className="text-[13px] font-semibold text-[#333]">Sub-categories</h3>
                   <button
-                    onClick={addFilter}
+                    onClick={() => {
+                      setEditFilters([...editFilters, { id: "categories", title: "CATEGORIES", options: [] }]);
+                      setDirty(true);
+                    }}
+                    disabled={categoryFilterIndexes.length > 0}
                     className="text-[11px] text-[#333]/60 hover:text-[#333] transition-colors underline"
                   >
-                    + Add Filter
+                    + Add Sub-category Group
                   </button>
                 </div>
 
-                {editFilters.map((filter, fi) => (
+                {categoryFilterIndexes.map(({ filter, index: fi }) => (
                   <div key={fi} className="mb-5 border border-[#e4e4e4] rounded-[6px] p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <input
