@@ -672,8 +672,6 @@ export default function EditProfilePage() {
           logoId: logoId ?? undefined,
           projectImageIds,
           projectImageUrls,
-          profileCompletionScore,
-          profileCompletionStatus: profileCompletionStatus.key,
           since: foundedYear ? parseInt(foundedYear) : undefined,
         });
       } else {
@@ -691,8 +689,6 @@ export default function EditProfilePage() {
           email: email || undefined,
           website: website || undefined,
           whatsapp: whatsapp || undefined,
-          profileCompletionScore,
-          profileCompletionStatus: profileCompletionStatus.key,
         });
       }
       setIsDirty(false);

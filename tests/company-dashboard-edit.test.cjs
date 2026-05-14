@@ -192,11 +192,14 @@ test('company edit page requires email and shows the public profile explainer in
   );
 });
 
-test('company edit page calculates and stores profile completion score', () => {
+test('company edit page calculates profile completion score without blocking saves on stored fields', () => {
   const source = read(editPagePath);
   const schemaSource = read('convex/schema.ts');
   const mutationSource = read('convex/companies.ts');
   const scoreSource = read('src/lib/profile-completion.mjs');
+  const handleSaveStart = source.indexOf('const handleSave = async () => {');
+  const maxImagesStart = source.indexOf('const maxImages = company?.isPro ? 12 : 4;');
+  const handleSaveSource = source.slice(handleSaveStart, maxImagesStart);
 
   assert.match(
     scoreSource,
@@ -206,8 +209,14 @@ test('company edit page calculates and stores profile completion score', () => {
 
   assert.match(
     source,
-    /calculateProfileCompletionScore\([\s\S]*profileCompletionScore[\s\S]*profileCompletionStatus: profileCompletionStatus\.key/,
-    'Expected company edit saves to calculate and persist completion score and status'
+    /calculateProfileCompletionScore\([\s\S]*const profileCompletionStatus = getProfileCompletionStatus\(profileCompletionScore\);/,
+    'Expected company edit page to calculate the live completion score and status'
+  );
+
+  assert.doesNotMatch(
+    handleSaveSource,
+    /profileCompletionScore|profileCompletionStatus/,
+    'Expected company save payloads to avoid completion fields that may not exist on older deployed Convex validators'
   );
 
   assert.match(
