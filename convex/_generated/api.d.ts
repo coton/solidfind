@@ -14,6 +14,7 @@ import type * as companies from "../companies.js";
 import type * as featuredArticles from "../featuredArticles.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
+import type * as magicLinks from "../magicLinks.js";
 import type * as migrations from "../migrations.js";
 import type * as migrations_migrateFeaturedCategories from "../migrations/migrateFeaturedCategories.js";
 import type * as pageConfigs from "../pageConfigs.js";
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   featuredArticles: typeof featuredArticles;
   files: typeof files;
   http: typeof http;
+  magicLinks: typeof magicLinks;
   migrations: typeof migrations;
   "migrations/migrateFeaturedCategories": typeof migrations_migrateFeaturedCategories;
   pageConfigs: typeof pageConfigs;
