@@ -33,7 +33,7 @@ export function getAuthStatusMessage(
   status,
   {
     fallbackMessage = "Login requires additional verification.",
-    needsSecondFactorMessage = "This account requires two-factor authentication. The current popup cannot complete the second step yet.",
+    needsSecondFactorMessage = "This account needs an extra secure verification step. Continue with secure sign in to finish.",
   } = {}
 ) {
   if (status === "needs_second_factor") {

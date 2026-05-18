@@ -146,6 +146,7 @@ export function AuthModal({
   const [pendingVerification, setPendingVerification] = useState(false);
   const [pendingReset, setPendingReset] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [needsSecureSignIn, setNeedsSecureSignIn] = useState(false);
   const portalElement = typeof document !== "undefined" ? document.body : null;
 
   // Sync when props change (e.g. re-opening with different defaults)
@@ -160,6 +161,7 @@ export function AuthModal({
       setPendingReset(false);
       setVerificationCode("");
       setNewPassword("");
+      setNeedsSecureSignIn(false);
       setIsLoading(false);
       setStep("method");
     }
@@ -171,6 +173,7 @@ export function AuthModal({
     setPendingReset(false);
     setVerificationCode("");
     setNewPassword("");
+    setNeedsSecureSignIn(false);
     setStep("method");
   }, [mode]);
 
@@ -233,11 +236,15 @@ export function AuthModal({
         return;
       }
 
+      if (result.status === "needs_second_factor") {
+        setNeedsSecureSignIn(true);
+      }
+
       setError(
         getAuthStatusMessage(result.status, {
           fallbackMessage: "Login requires additional verification before it can continue.",
           needsSecondFactorMessage:
-            "This account requires two-factor authentication. The current popup cannot complete the second step yet.",
+            "This account needs an extra secure verification step. Continue with secure sign in to finish.",
         })
       );
     } catch (err: unknown) {
@@ -246,6 +253,17 @@ export function AuthModal({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSecureSignIn = () => {
+    const params = new URLSearchParams();
+    const trimmedEmail = email.trim();
+    if (trimmedEmail) {
+      params.set("identifier", trimmedEmail);
+    }
+    params.set("next", accountType === "company" ? "/company-dashboard" : "/dashboard");
+    onClose();
+    router.push(`/secure-sign-in?${params.toString()}`);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -906,7 +924,7 @@ export function AuthModal({
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); setNeedsSecureSignIn(false); }}
             required
             style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
           />
@@ -967,7 +985,7 @@ export function AuthModal({
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); setNeedsSecureSignIn(false); }}
             required
             style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
           />
@@ -1017,6 +1035,29 @@ export function AuthModal({
         {error && (
           <div style={{ textAlign: 'center', marginBottom: '8px' }}>
             <p style={{ color: '#F14110', fontSize: '11px', fontWeight: 500, margin: '4px 0' }}>*{error}</p>
+          </div>
+        )}
+
+        {needsSecureSignIn && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+            <button
+              type="button"
+              onClick={handleSecureSignIn}
+              style={{
+                minWidth: '180px',
+                height: '40px',
+                borderRadius: '20px',
+                border: '1px solid #333',
+                background: 'transparent',
+                color: '#333',
+                fontSize: '12px',
+                fontWeight: 600,
+                letterSpacing: '0.24px',
+                cursor: 'pointer',
+              }}
+            >
+              Continue secure sign in
+            </button>
           </div>
         )}
 
