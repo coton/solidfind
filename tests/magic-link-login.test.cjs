@@ -5,6 +5,10 @@ async function loadModule() {
   return import('../src/lib/magic-link-login.mjs');
 }
 
+async function loadShortCodeModule() {
+  return import('../src/lib/magic-link-short-code.mjs');
+}
+
 test('sanitizeNextPath keeps safe internal company edit paths', async () => {
   const { sanitizeNextPath } = await loadModule();
 
@@ -159,5 +163,27 @@ test('parseMagicLinkTokenWithFallback accepts legacy tokens after dedicated secr
       expiresAt: 1777888800000,
       targetPath: '/company-dashboard/edit',
     }
+  );
+});
+
+test('buildMagicLinkShortCode creates branded company-readable codes', async () => {
+  const { buildMagicLinkShortCode } = await loadShortCodeModule();
+
+  const code = buildMagicLinkShortCode({
+    companyName: 'Bali Home Fix',
+    companyId: 'j57company',
+    clerkUserId: 'user_123',
+    expiresAt: 1777888800000,
+  });
+
+  assert.match(code, /^solidfind-bali-home-fix-[a-z0-9]{7}$/);
+  assert.equal(
+    code,
+    buildMagicLinkShortCode({
+      companyName: 'Bali Home Fix',
+      companyId: 'j57company',
+      clerkUserId: 'user_123',
+      expiresAt: 1777888800000,
+    })
   );
 });

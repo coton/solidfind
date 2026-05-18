@@ -43,6 +43,40 @@ function StorageImage({ storageId, alt, className, width, height, fill, sizes }:
   return fill ? <Image src={url} alt={alt} fill sizes={sizes ?? "210px"} className={className} unoptimized /> : <Image src={url} alt={alt} width={width ?? 210} height={height ?? 210} className={className} unoptimized />;
 }
 
+function ExternalImage({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div
+        className={className}
+        aria-label={`${alt} unavailable`}
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3C/svg%3E")`,
+          backgroundSize: '10px 10px',
+        }}
+      />
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 function formatWhatsApp(num: string): string {
   return num.replace(/^[+0]+/, "");
 }
@@ -111,13 +145,10 @@ function ProjectImagesGrid({
             className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative cursor-pointer hover:opacity-90 transition-opacity"
             onClick={() => onImageClick(index)}
           >
-            <Image
+            <ExternalImage
               src={image.src}
               alt={image.alt}
-              fill
-              unoptimized
-              sizes="(max-width: 640px) 23vw, 105px"
-              className="object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
         ) : (
@@ -538,12 +569,10 @@ export default function ProfilePageClient() {
                   {company.logoId ? (
                     <StorageImage storageId={company.logoId} alt={company.name} fill className="object-cover w-full h-full" />
                   ) : company.imageUrl ? (
-                    <Image
+                    <ExternalImage
                       src={company.imageUrl}
                       alt={company.name}
-                      width={210}
-                      height={210}
-                      className="object-cover w-full h-full"
+                      className="h-full w-full object-cover"
                     />
                   ) : (
                     <div

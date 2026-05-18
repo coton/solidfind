@@ -224,7 +224,13 @@ test('Save All UI Settings only re-saves media sections that still have unsaved 
   assert.match(
     adminUiSource,
     /if \(dashboardMediaHasDraft\) \{\s*pendingSaves\.push\(saveDashboardMedia\(\)\);\s*\}/,
-    'expected Save All to avoid overwriting the dashboard media after an individual save clears its draft state'
+    'expected Save All to avoid overwriting the company dashboard media after an individual save clears its draft state'
+  );
+
+  assert.match(
+    adminUiSource,
+    /if \(individualDashboardMediaHasDraft\) \{\s*pendingSaves\.push\(saveIndividualDashboardMedia\(\)\);\s*\}/,
+    'expected Save All to avoid overwriting the individual dashboard media after an individual save clears its draft state'
   );
 
   assert.match(
@@ -246,7 +252,7 @@ test('Save All UI Settings only re-saves media sections that still have unsaved 
   );
 });
 
-test('admin UI replaces New User Image with dashboard media upload for images and videos', () => {
+test('admin UI replaces New User Image with split dashboard media uploads for images and videos', () => {
   const adminUiSource = readProjectFile('src/app/admin/ui/page.tsx');
   const dashboardSource = readProjectFile('src/app/dashboard/page.tsx');
   const companyDashboardSource = readProjectFile('src/app/company-dashboard/page.tsx');
@@ -261,8 +267,20 @@ test('admin UI replaces New User Image with dashboard media upload for images an
 
   assert.match(
     adminUiSource,
-    /SectionCard title="Users Dashboard Media"[\s\S]*accept="image\/\*,video\/\*"/,
-    'expected the UI tab to expose a dashboard media uploader that accepts images and videos'
+    /SectionCard title="Company Dashboard Media"[\s\S]*accept="image\/\*,video\/\*"/,
+    'expected the UI tab to expose a company dashboard media uploader that accepts images and videos'
+  );
+
+  assert.match(
+    adminUiSource,
+    /SectionCard title="Individual Dashboard Media"[\s\S]*accept="image\/\*,video\/\*"/,
+    'expected the UI tab to expose an individual dashboard media uploader that accepts images and videos'
+  );
+
+  assert.doesNotMatch(
+    adminUiSource,
+    /SectionCard title="Header Background"|SectionCard title="Footer Background"/,
+    'expected the old header/footer background sections to be removed from the UI tab'
   );
 
   assert.match(
@@ -274,13 +292,25 @@ test('admin UI replaces New User Image with dashboard media upload for images an
   assert.match(
     platformSettingsSource,
     /DASHBOARD_MEDIA_PLATFORM_SETTING_KEY = "dashboardMedia"/,
-    'expected dashboard media to use a dedicated platform setting key'
+    'expected dashboard media to keep the legacy fallback platform setting key'
+  );
+
+  assert.match(
+    platformSettingsSource,
+    /COMPANY_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY = "companyDashboardMedia"/,
+    'expected company dashboard media to use a dedicated platform setting key'
+  );
+
+  assert.match(
+    platformSettingsSource,
+    /INDIVIDUAL_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY = "individualDashboardMedia"/,
+    'expected individual dashboard media to use a dedicated platform setting key'
   );
 
   assert.match(
     dashboardMediaSource,
-    /api\.platformSettings\.get, \{ key: DASHBOARD_MEDIA_PLATFORM_SETTING_KEY \}/,
-    'expected dashboard media to load from platform settings'
+    /variant = "individual"[\s\S]*COMPANY_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY[\s\S]*INDIVIDUAL_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY[\s\S]*DASHBOARD_MEDIA_PLATFORM_SETTING_KEY/,
+    'expected dashboard media to load the split platform setting with legacy fallback'
   );
 
   assert.match(
@@ -297,7 +327,7 @@ test('admin UI replaces New User Image with dashboard media upload for images an
 
   assert.match(
     companyDashboardSource,
-    /<DashboardHeroMedia className="mb-8" alt="" mobileAspectRatio="2 \/ 1" \/>/,
-    'expected the company dashboard to use the configurable dashboard media'
+    /<DashboardHeroMedia className="mb-8" alt="" mobileAspectRatio="2 \/ 1" variant="company" \/>/,
+    'expected the company dashboard to use the configurable company dashboard media'
   );
 });

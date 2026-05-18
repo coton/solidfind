@@ -204,10 +204,11 @@ export default function CompanyDashboardPage() {
           </div>
         </div>
 
-        <div className="mb-6">
-          <p className="w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px] sm:max-w-[600px]">
+        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-8">
+          <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
             Your profile is live on SolidFind. As the platform grows, so does your visibility. Make sure you are showing your best profile : )
-            <br />
+          </p>
+          <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
             Profil Anda sudah aktif di SolidFind. Seiring platform berkembang, begitu pula jangkauan Anda. Pastikan kamu menampilkan profil terbaikmu : )
           </p>
         </div>
@@ -347,7 +348,7 @@ export default function CompanyDashboardPage() {
 
         {/* Banner Image — hidden when reviews are enabled */}
         {!isPro && !reviewsEnabled && (
-          <DashboardHeroMedia className="mb-8" alt="" mobileAspectRatio="2 / 1" />
+          <DashboardHeroMedia className="mb-8" alt="" mobileAspectRatio="2 / 1" variant="company" />
         )}
 
         {/* Reviews Section */}

@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { fetchQuery } = require('convex/nextjs');
+const { fetchMutation } = require('convex/nextjs');
 const { anyApi } = require('convex/server');
 const { resolveRuntimeConfig } = require('../src/lib/admin-cleanup-test-users.cjs');
 const { loadRowsFromFile } = require('../src/lib/company-directory-import.cjs');
@@ -18,6 +19,7 @@ function parseArgs(argv) {
     days: 14,
     targetPath: '/company-dashboard/edit',
     apply: false,
+    long: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -89,6 +91,10 @@ function parseArgs(argv) {
       args.apply = true;
       continue;
     }
+    if (arg === '--long') {
+      args.long = true;
+      continue;
+    }
     if (arg === '--help' || arg === '-h') {
       args.help = true;
       continue;
@@ -114,6 +120,7 @@ Options:
   --days <n>                    Default: 14
   --target-path <path>          Default: /company-dashboard/edit
   --output-base <path>          Without extension; default under excel-files/
+  --long                        Export old self-contained long /m/<token> links
   --apply                       Required acknowledgement for writing export files
 `);
 }
@@ -183,6 +190,7 @@ async function main() {
 
   const runtime = resolveRuntimeConfig(args);
   const { createMagicLinkToken, getPrimaryMagicLinkSigningSecret } = await import('../src/lib/magic-link-login.mjs');
+  const { buildMagicLinkShortCode } = await import('../src/lib/magic-link-short-code.mjs');
   const signingSecret = getPrimaryMagicLinkSigningSecret({
     magicLinkSigningSecret: runtime.magicLinkSigningSecret,
     clerkSecretKey: runtime.clerkSecretKey,
@@ -223,10 +231,28 @@ async function main() {
         targetPath: args.targetPath,
       },
     });
+    const shortCode = buildMagicLinkShortCode({
+      companyName: company.name,
+      companyId: company._id,
+      clerkUserId: owner.clerkId,
+      expiresAt,
+    });
+
+    if (!args.long) {
+      await fetchMutation(anyApi.magicLinks.upsert, {
+        code: shortCode,
+        token,
+        companyId: company._id,
+        companyName: company.name,
+        clerkUserId: owner.clerkId,
+        targetPath: args.targetPath,
+        expiresAt,
+      }, { url: runtime.convexUrl });
+    }
 
     exportedRows.push({
       companyName: company.name,
-      magicLink: `${appUrl}/m/${token}`,
+      magicLink: `${appUrl}/m/${args.long ? token : shortCode}`,
     });
   }
 

@@ -89,3 +89,56 @@ test('resolveStoredCompanyMedia uploads remote logo and project images into Conv
   assert.equal(second.logoId, 'existing-logo-id');
   assert.deepEqual(second.projectImageIds, ['existing-p1-id', 'existing-p2-id']);
 });
+
+test('resolveStoredCompanyMedia keeps protected remote images as external fallbacks instead of failing import', async () => {
+  const uploadUrlQueue = ['https://upload/logo', 'https://upload/p1'];
+
+  const fetchImpl = async (url, options = {}) => {
+    if (!options.method) {
+      if (String(url).includes('blocked')) {
+        return {
+          ok: false,
+          status: 403,
+          headers: { get: () => 'text/plain' },
+          async arrayBuffer() {
+            return Buffer.from('');
+          },
+        };
+      }
+
+      return {
+        ok: true,
+        headers: {
+          get(name) {
+            return name.toLowerCase() === 'content-type' ? 'image/jpeg' : null;
+          },
+        },
+        async arrayBuffer() {
+          return Buffer.from(`downloaded:${url}`);
+        },
+      };
+    }
+
+    return {
+      ok: true,
+      async json() {
+        return { storageId: `stored:${url.split('/').pop()}` };
+      },
+    };
+  };
+
+  const media = await importer.resolveStoredCompanyMedia({
+    normalized: {
+      imageUrl: 'https://cdn.example.com/logo.jpg',
+      projectImageUrls: ['https://cdn.example.com/p1.jpg', 'https://blocked.example.com/p2.jpg'],
+    },
+    existingCompany: null,
+    generateUploadUrl: async () => uploadUrlQueue.shift(),
+    fetchImpl,
+  });
+
+  assert.equal(media.logoId, 'stored:logo');
+  assert.deepEqual(media.projectImageIds, ['stored:p1']);
+  assert.deepEqual(media.projectImageUrls, ['https://blocked.example.com/p2.jpg']);
+  assert.equal(media.projectImageUploadErrors.length, 1);
+});

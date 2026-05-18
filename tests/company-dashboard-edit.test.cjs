@@ -49,6 +49,12 @@ test('company edit page keeps imported external media visible and editable', () 
     /const logoPreviewUrl = logoUrl \?\? company\?\.imageUrl;/,
     'Expected the edit page logo preview to fall back to imported external company logos'
   );
+
+  assert.match(
+    source,
+    /function ExternalImagePreview\(\{ src, alt \}[\s\S]*<img[\s\S]*src=\{src\}[\s\S]*onError=\{\(\) => setFailed\(true\)\}/,
+    'Expected imported external media previews to use a native image fallback so protected URLs do not render broken alt text'
+  );
 });
 
 test('company edit page stays on the editor after saving profile changes', () => {
@@ -81,6 +87,56 @@ test('company edit page keeps legacy location field in sync with selected locati
     source,
     /location: selectedLocations\.join\(","\) \|\| undefined,[\s\S]*constructionLocations: selectedLocations,[\s\S]*renovationLocations: selectedLocations,[\s\S]*architectureLocations: selectedLocations,[\s\S]*interiorLocations: selectedLocations,[\s\S]*realEstateLocations: selectedLocations,/,
     'Expected saving company edits to update both the legacy location field and category location arrays'
+  );
+});
+
+test('company edit page saves the active category derived from selected service groups', () => {
+  const source = read(editPagePath);
+
+  assert.match(
+    source,
+    /const categoryPriority = \["construction", "renovation", "architecture", "interior", "real-estate"\] as const;/,
+    'Expected the edit page to define the public category priority order'
+  );
+
+  assert.match(
+    source,
+    /function getPrimaryActiveCategory\(categories: Record<\(typeof categoryPriority\)\[number\], string\[\]>\) \{\s*return categoryPriority\.find\(\(category\) => categories\[category\]\.length > 0\) \?\? "construction";\s*\}/,
+    'Expected the primary category to come from the active saved service arrays'
+  );
+
+  assert.match(
+    source,
+    /const primaryCategory = getPrimaryActiveCategory\(\{[\s\S]*construction: savedConstruction,[\s\S]*renovation: savedRenovation,[\s\S]*architecture: savedArchitecture,[\s\S]*interior: savedInterior,[\s\S]*"real-estate": savedRealEstate,[\s\S]*\}\);[\s\S]*updateCompany\(\{[\s\S]*category: primaryCategory,/,
+    'Expected every company update save to refresh the legacy category from the activated service groups'
+  );
+});
+
+test('company edit page warns before internal navigation with unsaved changes', () => {
+  const source = read(editPagePath);
+
+  assert.match(
+    source,
+    /const \[pendingNavigationHref, setPendingNavigationHref\] = useState<string \| null>\(null\);/,
+    'Expected edit page to track pending internal navigation while dirty'
+  );
+
+  assert.match(
+    source,
+    /window\.addEventListener\("beforeunload", handleBeforeUnload\);/,
+    'Expected browser/tab exits to trigger the native unsaved changes warning'
+  );
+
+  assert.match(
+    source,
+    /const requestNavigation = \(href: string\) => \{[\s\S]*if \(isDirty\) \{[\s\S]*setPendingNavigationHref\(href\);[\s\S]*return;[\s\S]*\}[\s\S]*router\.push\(href\);[\s\S]*\};/,
+    'Expected guarded internal navigation to open the warning instead of immediately leaving'
+  );
+
+  assert.match(
+    source,
+    /pendingNavigationHref && \([\s\S]*Unsaved changes[\s\S]*rounded-full[\s\S]*Stay[\s\S]*rounded-full[\s\S]*Leave/,
+    'Expected an on-brand pill-button modal for unsaved changes'
   );
 });
 

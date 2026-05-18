@@ -215,6 +215,8 @@ async function upsertCompanyDirectory(options) {
           id: existingCompany._id,
           ownerId: convexUserId,
           ...companyPayload,
+          imageUrl: storedMedia.imageUrl,
+          projectImageUrls: storedMedia.projectImageUrls,
           logoId: storedMedia.logoId,
           projectImageIds: storedMedia.projectImageIds,
         }, { url: runtime.convexUrl });
@@ -223,6 +225,8 @@ async function upsertCompanyDirectory(options) {
         companyId = await fetchMutation(anyApi.companies.create, {
           ownerId: convexUserId,
           ...companyPayload,
+          imageUrl: storedMedia.imageUrl,
+          projectImageUrls: storedMedia.projectImageUrls,
           logoId: storedMedia.logoId,
           projectImageIds: storedMedia.projectImageIds,
         }, { url: runtime.convexUrl });
@@ -248,6 +252,10 @@ async function upsertCompanyDirectory(options) {
         existingId: existingCompany?._id || null,
         finalId: companyId,
         previousOwnerEmail: existingCompany?.ownerEmail || null,
+        mediaUploadErrors: [
+          storedMedia.logoUploadError ? { sourceUrl: normalized.imageUrl, error: storedMedia.logoUploadError } : null,
+          ...(storedMedia.projectImageUploadErrors || []),
+        ].filter(Boolean),
       },
       normalized,
     });

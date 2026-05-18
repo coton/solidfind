@@ -4,6 +4,8 @@ export const HEADER_MEDIA_PLATFORM_SETTING_KEY = "headerMedia";
 export const FOOTER_MEDIA_PLATFORM_SETTING_KEY = "footerMedia";
 export const AD_VERTICAL_PLATFORM_SETTING_KEY = "adVertical";
 export const DASHBOARD_MEDIA_PLATFORM_SETTING_KEY = "dashboardMedia";
+export const COMPANY_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY = "companyDashboardMedia";
+export const INDIVIDUAL_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY = "individualDashboardMedia";
 
 /**
  * @param {string | null | undefined} value

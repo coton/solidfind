@@ -172,7 +172,13 @@ test('company profile displays project images even when reviews are enabled', ()
 
   assert.match(
     source,
-    /<div className="grid grid-cols-1 gap-6 lg:grid-cols-\[440px_1fr_70px\] lg:gap-5 mb-8">[\s\S]*\{projectImages\.length > 0 && \([\s\S]*<ProjectImagesGrid[\s\S]*\/\* Mobile only: Save\/Share\/Report directly below the project thumbnails \*\//,
+    /function ExternalImage\(\{[\s\S]*<img[\s\S]*src=\{src\}[\s\S]*onError=\{\(\) => setFailed\(true\)\}/,
+    'Expected external imported images to use native image rendering with a no-alt-text broken-image fallback'
+  );
+
+  assert.match(
+    source,
+    /<div className="grid grid-cols-1 gap-6 lg:grid-cols-\[440px_1fr_70px\] lg:gap-5 mb-8">[\s\S]*\/\* Mobile only: Save\/Share\/Report directly above the project thumbnails \*\/[\s\S]*\{projectImages\.length > 0 && \([\s\S]*<ProjectImagesGrid/,
     'Expected project images to render in the left profile block whenever images exist'
   );
 
@@ -400,13 +406,13 @@ test('company profile image viewer supports previous/next controls and mobile sw
   );
 });
 
-test('company profile mobile actions sit directly below the project thumbnails', () => {
+test('company profile mobile actions sit directly above the project thumbnails', () => {
   const source = readProfilePage();
 
   assert.match(
     source,
-    /\/\* Mobile only: Save\/Share\/Report directly below the project thumbnails \*\/[\s\S]*className="mt-3 flex lg:hidden items-center gap-2"/,
-    'Expected mobile bookmark/share/report actions to render directly below the project thumbnails'
+    /\/\* Mobile only: Save\/Share\/Report directly above the project thumbnails \*\/[\s\S]*className="mt-3 flex lg:hidden items-center gap-2"[\s\S]*\{projectImages\.length > 0 && \(/,
+    'Expected mobile bookmark/share/report actions to render directly above the project thumbnails'
   );
 
   assert.doesNotMatch(

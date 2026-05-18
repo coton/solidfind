@@ -7,9 +7,11 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import {
+  COMPANY_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
   DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
   FOOTER_MEDIA_PLATFORM_SETTING_KEY,
   HEADER_MEDIA_PLATFORM_SETTING_KEY,
+  INDIVIDUAL_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
   parseMediaSetting,
 } from "@/lib/platform-settings.mjs";
 import { TERMS_TEXT_PLATFORM_SETTING_KEY } from "@/lib/terms-content.mjs";
@@ -175,9 +177,13 @@ export default function AdminUI() {
   const [headerMediaSaved, setHeaderMediaSaved] = useState(false);
   const [footerMediaSaved, setFooterMediaSaved] = useState(false);
 
-  // Users dashboard media (Convex-backed)
-  const dashboardMediaValue = useQuery(api.platformSettings.get, { key: DASHBOARD_MEDIA_PLATFORM_SETTING_KEY });
-  const parsedDashboardMedia = parseMediaSetting(dashboardMediaValue, { url: "", type: "image" });
+  // Dashboard media (Convex-backed)
+  const legacyDashboardMediaValue = useQuery(api.platformSettings.get, { key: DASHBOARD_MEDIA_PLATFORM_SETTING_KEY });
+  const companyDashboardMediaValue = useQuery(api.platformSettings.get, { key: COMPANY_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY });
+  const individualDashboardMediaValue = useQuery(api.platformSettings.get, { key: INDIVIDUAL_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY });
+  const parsedLegacyDashboardMedia = parseMediaSetting(legacyDashboardMediaValue, { url: "", type: "image" });
+  const parsedDashboardMedia = parseMediaSetting(companyDashboardMediaValue, parsedLegacyDashboardMedia);
+  const parsedIndividualDashboardMedia = parseMediaSetting(individualDashboardMediaValue, parsedLegacyDashboardMedia);
   const [dashboardMediaDraft, setDashboardMediaDraft] = useState<{ url: string; type: "image" | "video" }>({ url: "", type: "image" });
   const [dashboardMediaHasDraft, setDashboardMediaHasDraft] = useState(false);
   const [dashboardMediaSaved, setDashboardMediaSaved] = useState(false);
@@ -185,6 +191,13 @@ export default function AdminUI() {
   const [dashboardMediaUploadError, setDashboardMediaUploadError] = useState("");
   const effectiveDashboardMediaUrl = dashboardMediaHasDraft ? dashboardMediaDraft.url : parsedDashboardMedia.url;
   const effectiveDashboardMediaType = dashboardMediaHasDraft ? dashboardMediaDraft.type : parsedDashboardMedia.type;
+  const [individualDashboardMediaDraft, setIndividualDashboardMediaDraft] = useState<{ url: string; type: "image" | "video" }>({ url: "", type: "image" });
+  const [individualDashboardMediaHasDraft, setIndividualDashboardMediaHasDraft] = useState(false);
+  const [individualDashboardMediaSaved, setIndividualDashboardMediaSaved] = useState(false);
+  const [individualDashboardMediaUploading, setIndividualDashboardMediaUploading] = useState(false);
+  const [individualDashboardMediaUploadError, setIndividualDashboardMediaUploadError] = useState("");
+  const effectiveIndividualDashboardMediaUrl = individualDashboardMediaHasDraft ? individualDashboardMediaDraft.url : parsedIndividualDashboardMedia.url;
+  const effectiveIndividualDashboardMediaType = individualDashboardMediaHasDraft ? individualDashboardMediaDraft.type : parsedIndividualDashboardMedia.type;
 
   // About profile picture (Convex-backed)
   const aboutProfilePictureUrlValue = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
@@ -363,13 +376,24 @@ export default function AdminUI() {
 
   const saveDashboardMedia = async () => {
     await setPlatformSetting({
-      key: DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
+      key: COMPANY_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
       value: JSON.stringify({ url: effectiveDashboardMediaUrl, type: effectiveDashboardMediaType }),
       updatedBy: "admin",
     });
     setDashboardMediaDraft({ url: "", type: "image" });
     setDashboardMediaHasDraft(false);
     flashSaved(setDashboardMediaSaved);
+  };
+
+  const saveIndividualDashboardMedia = async () => {
+    await setPlatformSetting({
+      key: INDIVIDUAL_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
+      value: JSON.stringify({ url: effectiveIndividualDashboardMediaUrl, type: effectiveIndividualDashboardMediaType }),
+      updatedBy: "admin",
+    });
+    setIndividualDashboardMediaDraft({ url: "", type: "image" });
+    setIndividualDashboardMediaHasDraft(false);
+    flashSaved(setIndividualDashboardMediaSaved);
   };
 
   const saveAdSpaces = async () => {
@@ -441,7 +465,7 @@ export default function AdminUI() {
   };
 
   const saveAllUiSettings = async () => {
-    if (dashboardMediaUploading || adVerticalUploading || adHorizontalUploading) return;
+    if (dashboardMediaUploading || individualDashboardMediaUploading || adVerticalUploading || adHorizontalUploading) return;
 
     const pendingSaves = [
       saveAboutText(),
@@ -453,6 +477,10 @@ export default function AdminUI() {
 
     if (dashboardMediaHasDraft) {
       pendingSaves.push(saveDashboardMedia());
+    }
+
+    if (individualDashboardMediaHasDraft) {
+      pendingSaves.push(saveIndividualDashboardMedia());
     }
 
     if (s.headerMediaUrl || s.headerMediaType) {
@@ -482,10 +510,10 @@ export default function AdminUI() {
         <button
           type="button"
           onClick={saveAllUiSettings}
-          disabled={dashboardMediaUploading || adVerticalUploading || adHorizontalUploading}
+          disabled={dashboardMediaUploading || individualDashboardMediaUploading || adVerticalUploading || adHorizontalUploading}
           className="h-9 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors disabled:bg-[#333]/25"
         >
-          {dashboardMediaUploading || adVerticalUploading || adHorizontalUploading ? "Uploading media…" : saveAllUiSaved ? "✓ All UI Settings Saved!" : "Save All UI Settings"}
+          {dashboardMediaUploading || individualDashboardMediaUploading || adVerticalUploading || adHorizontalUploading ? "Uploading media…" : saveAllUiSaved ? "✓ All UI Settings Saved!" : "Save All UI Settings"}
         </button>
       </div>
 
@@ -607,14 +635,14 @@ export default function AdminUI() {
         </button>
       </div>
 
-      {/* Users Dashboard Media */}
-      <SectionCard title="Users Dashboard Media">
+      {/* Company Dashboard Media */}
+      <SectionCard title="Company Dashboard Media">
         <Field
-          label="Dashboard media"
-          hint="Shown on both individual and company dashboards. Upload an image or MP4. Recommended size: 1800×400px or larger (same 4.5:1 ratio as 900×200px). Keep important content near the center/right for mobile cropping."
+          label="Company dashboard media"
+          hint="Shown on company dashboards. Upload an image or MP4. Recommended size: 1800×400px or larger (same 4.5:1 ratio as 900×200px). Keep important content near the center/right for mobile cropping."
         >
           <MediaUpload
-            label="Dashboard media"
+            label="Company dashboard media"
             url={effectiveDashboardMediaUrl}
             mediaType={effectiveDashboardMediaType}
             onUrl={(v) => {
@@ -643,13 +671,13 @@ export default function AdminUI() {
           />
         </Field>
         {dashboardMediaUploading && (
-          <p className="text-[10px] text-[#f14110] mb-2">Uploading dashboard media to Convex storage…</p>
+          <p className="text-[10px] text-[#f14110] mb-2">Uploading company dashboard media to Convex storage…</p>
         )}
         {dashboardMediaUploadError && (
           <p className="text-[10px] text-red-600 mb-2">{dashboardMediaUploadError}</p>
         )}
         {dashboardMediaHasDraft && (
-          <p className="text-[10px] text-green-600 mb-2">✓ Dashboard media draft loaded — click Save Dashboard Media or Save All UI Settings to publish it.</p>
+          <p className="text-[10px] text-green-600 mb-2">✓ Company dashboard media draft loaded — click Save Company Dashboard Media or Save All UI Settings to publish it.</p>
         )}
         <div className="mt-2">
           <button
@@ -658,7 +686,63 @@ export default function AdminUI() {
             disabled={dashboardMediaUploading}
             className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
           >
-            {dashboardMediaUploading ? "Uploading..." : dashboardMediaSaved ? "✓ Saved!" : "Save Dashboard Media"}
+            {dashboardMediaUploading ? "Uploading..." : dashboardMediaSaved ? "✓ Saved!" : "Save Company Dashboard Media"}
+          </button>
+        </div>
+      </SectionCard>
+
+      {/* Individual Dashboard Media */}
+      <SectionCard title="Individual Dashboard Media">
+        <Field
+          label="Individual dashboard media"
+          hint="Shown on individual dashboards. Upload an image or MP4. Recommended size: 1800×400px or larger (same 4.5:1 ratio as 900×200px). Keep important content near the center/right for mobile cropping."
+        >
+          <MediaUpload
+            label="Individual dashboard media"
+            url={effectiveIndividualDashboardMediaUrl}
+            mediaType={effectiveIndividualDashboardMediaType}
+            onUrl={(v) => {
+              setIndividualDashboardMediaUploadError("");
+              setIndividualDashboardMediaHasDraft(true);
+              setIndividualDashboardMediaDraft({
+                url: v,
+                type: inferMediaTypeFromUrl(v, effectiveIndividualDashboardMediaType),
+              });
+            }}
+            onFile={async ({ file, type }) => {
+              setIndividualDashboardMediaUploadError("");
+              setIndividualDashboardMediaUploading(true);
+
+              try {
+                const uploadedUrl = await uploadAdminMediaAsset(file);
+                setIndividualDashboardMediaHasDraft(true);
+                setIndividualDashboardMediaDraft({ url: uploadedUrl, type });
+              } catch (error) {
+                setIndividualDashboardMediaUploadError(error instanceof Error ? error.message : "Failed to upload individual dashboard media.");
+              } finally {
+                setIndividualDashboardMediaUploading(false);
+              }
+            }}
+            accept="image/*,video/*"
+          />
+        </Field>
+        {individualDashboardMediaUploading && (
+          <p className="text-[10px] text-[#f14110] mb-2">Uploading individual dashboard media to Convex storage…</p>
+        )}
+        {individualDashboardMediaUploadError && (
+          <p className="text-[10px] text-red-600 mb-2">{individualDashboardMediaUploadError}</p>
+        )}
+        {individualDashboardMediaHasDraft && (
+          <p className="text-[10px] text-green-600 mb-2">✓ Individual dashboard media draft loaded — click Save Individual Dashboard Media or Save All UI Settings to publish it.</p>
+        )}
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={saveIndividualDashboardMedia}
+            disabled={individualDashboardMediaUploading}
+            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
+          >
+            {individualDashboardMediaUploading ? "Uploading..." : individualDashboardMediaSaved ? "✓ Saved!" : "Save Individual Dashboard Media"}
           </button>
         </div>
       </SectionCard>
@@ -708,48 +792,6 @@ export default function AdminUI() {
             className={`h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center disabled:border-[#333]/25 disabled:text-[#333]/25 disabled:hover:border-[#333]/25 disabled:hover:text-[#333]/25 ${adSpacesSaved ? 'border-[#f14110] text-[#f14110]' : ''}`}
           >
             {adVerticalUploading || adHorizontalUploading ? "Uploading…" : adSpacesSaved ? "Saved" : "Save Ad Spaces"}
-          </button>
-        </div>
-      </SectionCard>
-
-      {/* Header */}
-      <SectionCard title="Header Background">
-        <MediaUpload
-          label="Header media"
-          hint="Photo or video — replaces the header background across the whole website. Recommended JPG size: 3840×1080px (supports up to 4K)"
-          url={effectiveHeaderMediaUrl}
-          mediaType={effectiveHeaderMediaType}
-          onUrl={(v) => u({ headerMediaUrl: v })}
-          onFile={({ previewUrl, type }) => u({ headerMediaUrl: previewUrl, headerMediaType: type })}
-        />
-        <div className="mt-2">
-          <button
-            type="button"
-            onClick={saveHeaderMedia}
-            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
-          >
-            {headerMediaSaved ? "✓ Saved!" : "Save Header Media"}
-          </button>
-        </div>
-      </SectionCard>
-
-      {/* Footer */}
-      <SectionCard title="Footer Background">
-        <MediaUpload
-          label="Footer media"
-          hint="Photo or video — replaces the footer background across the whole website. Recommended JPG size: 3840×600px (supports up to 4K)"
-          url={effectiveFooterMediaUrl}
-          mediaType={effectiveFooterMediaType}
-          onUrl={(v) => u({ footerMediaUrl: v })}
-          onFile={({ previewUrl, type }) => u({ footerMediaUrl: previewUrl, footerMediaType: type })}
-        />
-        <div className="mt-2">
-          <button
-            type="button"
-            onClick={saveFooterMedia}
-            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
-          >
-            {footerMediaSaved ? "✓ Saved!" : "Save Footer Media"}
           </button>
         </div>
       </SectionCard>

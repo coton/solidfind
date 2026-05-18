@@ -196,6 +196,20 @@ export default defineSchema({
     updatedBy: v.optional(v.string()),
   }).index("by_key", ["key"]),
 
+  magicLinks: defineTable({
+    code: v.string(),
+    token: v.string(),
+    companyId: v.id("companies"),
+    companyName: v.string(),
+    clerkUserId: v.string(),
+    targetPath: v.string(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_code", ["code"])
+    .index("by_companyId", ["companyId"]),
+
   profileViews: defineTable({
     companyId: v.id("companies"),
     viewedAt: v.number(),

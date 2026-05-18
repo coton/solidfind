@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClerkClient } from "@clerk/backend";
+import { fetchQuery } from "convex/nextjs";
+import { anyApi } from "convex/server";
 import { buildTicketSignInUrl, parseMagicLinkToken, resolveMagicLinkSigningSecrets } from "@/lib/magic-link-login.mjs";
 
 function safeSecretFingerprint(secret: string) {
@@ -49,17 +51,47 @@ function resolvePayloadWithMatchedSecret(secrets: string[], token: string) {
   return { payload: null, matchedSecretIndex: -1 };
 }
 
+async function resolveMagicLinkToken(code: string) {
+  if (code.includes(".")) {
+    return {
+      token: code,
+      shortCode: null,
+      shortLinkFound: false,
+    };
+  }
+
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!convexUrl) {
+    return {
+      token: code,
+      shortCode: code,
+      shortLinkFound: false,
+    };
+  }
+
+  const shortLink = await fetchQuery(anyApi.magicLinks.getByCode, { code }, { url: convexUrl });
+  return {
+    token: shortLink?.token ?? code,
+    shortCode: code,
+    shortLinkFound: Boolean(shortLink?.token),
+  };
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ code: string }> }
 ) {
   const { code } = await params;
   const clerkSecretKey = process.env.CLERK_SECRET_KEY;
-  const decodedPayloadSummary = getDecodedPayloadSummary(code);
+  const resolved = await resolveMagicLinkToken(code);
+  const token = resolved.token;
+  const decodedPayloadSummary = getDecodedPayloadSummary(token);
 
   if (!clerkSecretKey) {
     logMagicLinkDebug("missing-clerk-secret", {
       ...decodedPayloadSummary,
+      shortCode: resolved.shortCode,
+      shortLinkFound: resolved.shortLinkFound,
       hasDedicatedMagicLinkSecret: Boolean(process.env.MAGIC_LINK_SIGNING_SECRET),
       origin: request.nextUrl.origin,
     });
@@ -70,7 +102,7 @@ export async function GET(
     magicLinkSigningSecret: process.env.MAGIC_LINK_SIGNING_SECRET,
     clerkSecretKey,
   }).filter((secret): secret is string => typeof secret === "string" && secret.length > 0);
-  const { payload, matchedSecretIndex } = resolvePayloadWithMatchedSecret(signingSecrets, code);
+  const { payload, matchedSecretIndex } = resolvePayloadWithMatchedSecret(signingSecrets, token);
   const secretFingerprints = signingSecrets.map((secret, index) => ({
     index,
     fingerprint: safeSecretFingerprint(secret),
@@ -78,6 +110,8 @@ export async function GET(
 
   logMagicLinkDebug("request-received", {
     ...decodedPayloadSummary,
+    shortCode: resolved.shortCode,
+    shortLinkFound: resolved.shortLinkFound,
     origin: request.nextUrl.origin,
     hasClerkSecretKey: true,
     hasDedicatedMagicLinkSecret: Boolean(process.env.MAGIC_LINK_SIGNING_SECRET),
@@ -89,6 +123,8 @@ export async function GET(
   if (!payload) {
     logMagicLinkDebug("token-parse-failed", {
       ...decodedPayloadSummary,
+      shortCode: resolved.shortCode,
+      shortLinkFound: resolved.shortLinkFound,
       signingSecretFingerprints: secretFingerprints,
     });
     return NextResponse.json({ error: "Magic link not found." }, { status: 404 });

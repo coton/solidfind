@@ -19,6 +19,8 @@ export default function SecureSignInPage() {
           </h1>
           <p className="mt-2 text-[12px] leading-[18px] text-[#777]">
             Complete the extra verification step to access your SolidFind account.
+            <br />
+            Selesaikan langkah verifikasi tambahan untuk mengakses akun SolidFind Anda.
           </p>
         </div>
 
@@ -33,14 +35,25 @@ export default function SecureSignInPage() {
               variables: {
                 colorPrimary: "#F14110",
                 colorText: "#333333",
-                borderRadius: "6px",
+                borderRadius: "20px",
                 fontFamily: "var(--font-sora), sans-serif",
               },
               elements: {
-                cardBox: "shadow-none",
-                card: "border border-[#e4e4e4]",
+                rootBox: "w-full",
+                cardBox: "shadow-none w-full",
+                card: "border-0 shadow-none rounded-[6px]",
+                headerTitle: "text-[#333]",
+                headerSubtitle: "whitespace-pre-line text-[#777]",
+                formFieldInput: "rounded-[6px] shadow-none focus:shadow-none focus:ring-0",
                 formButtonPrimary:
-                  "rounded-full bg-[#f14110] text-white hover:bg-[#d8390e]",
+                  "rounded-full bg-[#f14110] text-white shadow-none hover:bg-[#d8390e] focus:shadow-none",
+                socialButtonsBlockButton:
+                  "rounded-full shadow-none border border-[#e4e4e4] focus:shadow-none",
+                footerActionLink: "whitespace-pre-line text-[#f14110]",
+                footerActionText: "text-[#777]",
+                footer: "shadow-none",
+                alertText: "whitespace-pre-line",
+                footerPages: "hidden",
               },
             }}
           />

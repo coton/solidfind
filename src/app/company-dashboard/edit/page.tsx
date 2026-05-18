@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser, useClerk, useReverification } from "@clerk/nextjs";
@@ -24,6 +23,7 @@ import { calculateProfileCompletionScore, getProfileCompletionStatus } from "@/l
 type SetupOAuthStrategy = Extract<OAuthStrategy, "oauth_google">;
 type ServiceOption = { id: string; label: string };
 const completeHouseChildren = ["living", "kitchen", "bathroom", "bedroom", "electricity", "plumbing"];
+const categoryPriority = ["construction", "renovation", "architecture", "interior", "real-estate"] as const;
 
 const projectSizeOptions = [
   { id: "any", label: "ANY SIZE" },
@@ -114,6 +114,10 @@ function normalizeAllSelection(selected: string[], options: ServiceOption[]) {
   return selected.filter((id) => options.some((option) => option.id === id));
 }
 
+function getPrimaryActiveCategory(categories: Record<(typeof categoryPriority)[number], string[]>) {
+  return categoryPriority.find((category) => categories[category].length > 0) ?? "construction";
+}
+
 const proFeatures = [
   { icon: "star", title: "Priority placement in search results", subtitle: "Penempatan prioritas dalam hasil pencarian" },
   { icon: "ai", title: "Structured for AI-assisted search", subtitle: "Terstruktur untuk pencarian yang dibantu AI" },
@@ -144,8 +148,30 @@ function ProjectImage({ storageId }: { storageId: Id<"_storage"> }) {
   return <Image src={url} alt="Project" fill className="object-cover" />;
 }
 
-function ExternalProjectImage({ src }: { src: string }) {
-  return <Image src={src} alt="Project" fill className="object-cover" />;
+function ExternalImagePreview({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div
+        className="absolute inset-0 bg-[#e4e4e4]"
+        aria-label={`${alt} unavailable`}
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23e4e4e4'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23e4e4e4'/%3E%3C/svg%3E")`,
+          backgroundSize: '10px 10px',
+        }}
+      />
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className="absolute inset-0 h-full w-full object-cover"
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
 function RequiredStar() {
@@ -269,6 +295,7 @@ export default function EditProfilePage() {
   const proEnabled = useProEnabled();
   const [showProModal, setShowProModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingNavigationHref, setPendingNavigationHref] = useState<string | null>(null);
   const [openProfileExplainer, setOpenProfileExplainer] = useState<"english" | "indonesian" | null>(null);
   const [redirected, setRedirected] = useState(false);
   const [isDirty, setIsDirty] = useState(true);
@@ -547,8 +574,41 @@ export default function EditProfilePage() {
       setProjectImageIds(company.projectImageIds ?? []);
       setProjectImageUrls(company.projectImageUrls ?? []);
       setFoundedYear(company.since?.toString() ?? "");
+      setIsDirty(false);
     }
   }, [company]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
+  const requestNavigation = (href: string) => {
+    if (isDirty) {
+      setPendingNavigationHref(href);
+      return;
+    }
+
+    router.push(href);
+  };
+
+  const confirmPendingNavigation = () => {
+    if (!pendingNavigationHref) return;
+    setIsDirty(false);
+    const href = pendingNavigationHref;
+    setPendingNavigationHref(null);
+    router.push(href);
+  };
+
+  const cancelPendingNavigation = () => {
+    setPendingNavigationHref(null);
+  };
 
   useEffect(() => {
     if (!hasSetupAccountQuery) {
@@ -655,10 +715,18 @@ export default function EditProfilePage() {
       const savedArchitecture = architectureEnabled ? normalizeAllSelection(selectedArchitecture, architectureServiceOptions) : [];
       const savedInterior = interiorEnabled ? normalizeAllSelection(selectedInterior, interiorServiceOptions) : [];
       const savedRealEstate = realEstateEnabled ? normalizeAllSelection(selectedRealEstate, realEstateServiceOptions) : [];
+      const primaryCategory = getPrimaryActiveCategory({
+        construction: savedConstruction,
+        renovation: savedRenovation,
+        architecture: savedArchitecture,
+        interior: savedInterior,
+        "real-estate": savedRealEstate,
+      });
       if (company) {
         await updateCompany({
           id: company._id,
           name: companyName || undefined,
+          category: primaryCategory,
           description: description || undefined,
           location: selectedLocations.join(",") || undefined,
           address: normalizedAddress || undefined,
@@ -692,7 +760,7 @@ export default function EditProfilePage() {
           ownerId: currentUser._id,
           name: companyName || currentUser.companyName || "My Company",
           description: description || undefined,
-          category: selectedConstruction.length > 0 ? "construction" : "renovation",
+          category: primaryCategory,
           location: selectedLocations[0] || "bali",
           address: normalizedAddress || undefined,
           isPro: false,
@@ -702,6 +770,21 @@ export default function EditProfilePage() {
           email: email || undefined,
           website: website || undefined,
           whatsapp: whatsapp || undefined,
+          projectSizes: selectedProjectSizes,
+          constructionTypes: savedConstruction,
+          constructionLocations: selectedLocations,
+          renovationTypes: savedRenovation,
+          renovationLocations: selectedLocations,
+          architectureTypes: savedArchitecture,
+          architectureLocations: selectedLocations,
+          interiorTypes: savedInterior,
+          interiorLocations: selectedLocations,
+          realEstateTypes: savedRealEstate,
+          realEstateLocations: selectedLocations,
+          logoId: logoId ?? undefined,
+          projectImageIds,
+          projectImageUrls,
+          since: foundedYear ? parseInt(foundedYear) : undefined,
         });
       }
       setIsDirty(false);
@@ -943,10 +1026,14 @@ export default function EditProfilePage() {
         <div className="mb-6">
           <div className="mb-5 flex items-start justify-between gap-4">
             {company ? (
-              <Link href={buildCompanyProfilePath(company)} className="block text-[40px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px] leading-[42px] sm:leading-[36px] hover:text-[#f14110] transition-colors">
+              <button
+                type="button"
+                onClick={() => requestNavigation(buildCompanyProfilePath(company))}
+                className="block text-left text-[40px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px] leading-[42px] sm:leading-[36px] hover:text-[#f14110] transition-colors"
+              >
                 <span className="block sm:inline">Company</span>
                 <span className="block sm:inline sm:ml-2">profile</span>
-              </Link>
+              </button>
             ) : (
               <h1 className="text-[40px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px] leading-[42px] sm:leading-[36px]">
                 <span className="block sm:inline">Company</span>
@@ -1039,13 +1126,14 @@ export default function EditProfilePage() {
         <div className="mb-8 space-y-3">
           <div className="flex items-center gap-4">
             {company && !isFirstCompanyConnection && (
-              <Link
-                href="/company-dashboard"
+              <button
+                type="button"
+                onClick={() => requestNavigation("/company-dashboard")}
                 className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
                 style={{ minWidth: '140px' }}
               >
                 ← Back
-              </Link>
+              </button>
             )}
             <button
               onClick={handleSave}
@@ -1086,7 +1174,11 @@ export default function EditProfilePage() {
                 className={`w-[100px] h-[100px] rounded-[6px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden relative ${!logoPreviewUrl ? 'border-2 border-dashed border-[#ccc] flex items-center justify-center bg-white' : ''}`}
               >
                 {logoPreviewUrl ? (
-                  <Image src={logoPreviewUrl} alt="Company logo" fill className="object-cover" />
+                  logoId ? (
+                    <Image src={logoPreviewUrl} alt="Company logo" fill className="object-cover" />
+                  ) : (
+                    <ExternalImagePreview src={logoPreviewUrl} alt="Company logo" />
+                  )
                 ) : (
                   <Upload className="w-5 h-5 text-[#ccc]" />
                 )}
@@ -1350,7 +1442,7 @@ export default function EditProfilePage() {
                         backgroundSize: '10px 10px'
                       } : undefined}
                     >
-                      {imgUrl && <ExternalProjectImage src={imgUrl} />}
+                      {imgUrl && <ExternalImagePreview src={imgUrl} alt="Project" />}
                       {imgId && <ProjectImage storageId={imgId} />}
                       {hasImage && (
                         <button
@@ -2150,6 +2242,34 @@ export default function EditProfilePage() {
                 className="h-10 px-6 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pendingNavigationHref && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40" onClick={cancelPendingNavigation} />
+          <div className="relative w-full max-w-[360px] rounded-[6px] bg-white p-6 text-center shadow-lg">
+            <h3 className="mb-3 text-[18px] font-bold tracking-[0.36px] text-[#333]">Unsaved changes</h3>
+            <p className="mb-6 text-[12px] leading-[19px] tracking-[0.24px] text-[#333]/60">
+              You have unsaved changes on this profile. Leave without saving?
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <button
+                type="button"
+                onClick={cancelPendingNavigation}
+                className="flex h-10 min-w-[130px] items-center justify-center rounded-full border border-[#333] px-6 text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110]"
+              >
+                Stay
+              </button>
+              <button
+                type="button"
+                onClick={confirmPendingNavigation}
+                className="flex h-10 min-w-[130px] items-center justify-center rounded-full bg-[#f14110] px-6 text-[11px] font-medium tracking-[0.22px] text-white transition-colors hover:bg-[#d93a0e]"
+              >
+                Leave
               </button>
             </div>
           </div>

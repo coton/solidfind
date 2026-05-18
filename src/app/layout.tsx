@@ -13,6 +13,21 @@ const sora = Sora({
   weight: ["400", "500", "600", "700"],
 });
 
+const clerkLocalization = {
+  signIn: {
+    start: {
+      subtitle: "Welcome back! Please sign in to continue.\nSelamat Datang kembali! Silakan masuk untuk melanjutkan.",
+    },
+    password: {
+      subtitle: "Enter the password associated with your account:\nMasukkan kata sandi yang terkait dengan akun Anda:",
+      actionLink: "Use another method\nGunakan metode lain",
+    },
+    newDeviceVerificationNotice:
+      "You're signing in from a new device. We're asking for verification to keep your account secure.\nAnda masuk dari perangkat baru. Kami meminta verifikasi untuk menjaga keamanan akun Anda.",
+  },
+  footerActionLink__useAnotherMethod: "Use another method\nGunakan metode lain",
+};
+
 export const metadata: Metadata = {
   title: {
     default: "SOLIDFIND.ID - Bali's Trusted Directory for Construction & Renovation",
@@ -73,6 +88,7 @@ export default function RootLayout({
         signUpFallbackRedirectUrl="/auth-complete"
         signInForceRedirectUrl="/auth-complete"
         signUpForceRedirectUrl="/auth-complete"
+        localization={clerkLocalization}
       >
         <html lang="en">
           <body

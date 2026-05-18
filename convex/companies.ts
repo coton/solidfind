@@ -12,6 +12,15 @@ function ensureValidSinceYear(since: number | undefined) {
   }
 }
 
+function companyHasCategory(company: any, category: string) {
+  if (category === "construction") return (company.constructionTypes?.length ?? 0) > 0 || company.category === "construction";
+  if (category === "renovation") return (company.renovationTypes?.length ?? 0) > 0 || company.category === "renovation";
+  if (category === "architecture") return (company.architectureTypes?.length ?? 0) > 0 || company.category === "architecture";
+  if (category === "interior") return (company.interiorTypes?.length ?? 0) > 0 || company.category === "interior";
+  if (category === "real-estate") return (company.realEstateTypes?.length ?? 0) > 0 || company.category === "real-estate";
+  return company.category === category;
+}
+
 export const list = query({
   args: {
     category: v.optional(v.string()),
@@ -22,13 +31,10 @@ export const list = query({
   handler: async (ctx, args) => {
     let companies;
 
+    companies = await ctx.db.query("companies").collect();
+
     if (args.category) {
-      companies = await ctx.db
-        .query("companies")
-        .withIndex("by_category", (q) => q.eq("category", args.category!))
-        .collect();
-    } else {
-      companies = await ctx.db.query("companies").collect();
+      companies = companies.filter((company) => companyHasCategory(company, args.category!));
     }
 
     if (args.location) {

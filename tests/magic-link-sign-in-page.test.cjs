@@ -82,3 +82,39 @@ test('magic-link sign-in bypasses ticket redemption when a Clerk user session al
     'expected the magic-link ticket processing state to reuse the shared loading page instead of flashing plain text'
   );
 });
+
+test('magic-link route resolves short branded codes while keeping long token fallback', () => {
+  const source = readProjectFile('src/app/m/[code]/route.ts');
+  const generatorSource = readProjectFile('scripts/generate-company-magic-links.cjs');
+  const schemaSource = readProjectFile('convex/schema.ts');
+
+  assert.match(
+    schemaSource,
+    /magicLinks: defineTable\(\{[\s\S]*code: v\.string\(\),[\s\S]*token: v\.string\(\),[\s\S]*\.index\("by_code", \["code"\]\)/,
+    'expected short magic links to be stored in Convex by readable code'
+  );
+
+  assert.match(
+    source,
+    /if \(code\.includes\("\."\)\) \{[\s\S]*token: code/,
+    'expected existing long signed token links to keep working'
+  );
+
+  assert.match(
+    source,
+    /fetchQuery\(anyApi\.magicLinks\.getByCode, \{ code \}, \{ url: convexUrl \}\)/,
+    'expected short codes to resolve their stored signed token before Clerk ticket creation'
+  );
+
+  assert.match(
+    generatorSource,
+    /buildMagicLinkShortCode\(\{[\s\S]*companyName: company\.name,[\s\S]*companyId: company\._id,[\s\S]*clerkUserId: owner\.clerkId,[\s\S]*expiresAt,/,
+    'expected generated exports to use company-readable SolidFind short codes'
+  );
+
+  assert.match(
+    generatorSource,
+    /fetchMutation\(anyApi\.magicLinks\.upsert,[\s\S]*code: shortCode,[\s\S]*token,/,
+    'expected generated short links to persist the long signed token server-side'
+  );
+});

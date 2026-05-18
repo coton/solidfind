@@ -4,7 +4,9 @@ import Image from "next/image";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
+  COMPANY_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
   DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
+  INDIVIDUAL_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
   resolveMediaSetting,
 } from "@/lib/platform-settings.mjs";
 
@@ -58,6 +60,7 @@ export function DashboardHeroMedia({
   desktopObjectClassName = "object-cover object-center",
   mobileObjectClassName = "object-cover object-right-bottom",
   priority = false,
+  variant = "individual",
 }: {
   alt?: string;
   className?: string;
@@ -66,10 +69,20 @@ export function DashboardHeroMedia({
   desktopObjectClassName?: string;
   mobileObjectClassName?: string;
   priority?: boolean;
+  variant?: "individual" | "company";
 }) {
-  const dashboardMediaValue = useQuery(api.platformSettings.get, { key: DASHBOARD_MEDIA_PLATFORM_SETTING_KEY });
-  const dashboardMediaState = resolveMediaSetting(dashboardMediaValue, DASHBOARD_MEDIA_FALLBACK);
-  const media = dashboardMediaState.media.url ? dashboardMediaState.media : DASHBOARD_MEDIA_FALLBACK;
+  const settingKey = variant === "company"
+    ? COMPANY_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY
+    : INDIVIDUAL_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY;
+  const dashboardMediaValue = useQuery(api.platformSettings.get, { key: settingKey });
+  const legacyDashboardMediaValue = useQuery(api.platformSettings.get, { key: DASHBOARD_MEDIA_PLATFORM_SETTING_KEY });
+  const dashboardMediaState = resolveMediaSetting(dashboardMediaValue, { url: "", type: "image" });
+  const legacyDashboardMediaState = resolveMediaSetting(legacyDashboardMediaValue, DASHBOARD_MEDIA_FALLBACK);
+  const media = dashboardMediaState.media.url
+    ? dashboardMediaState.media
+    : legacyDashboardMediaState.media.url
+      ? legacyDashboardMediaState.media
+      : DASHBOARD_MEDIA_FALLBACK;
 
   return (
     <div className={`rounded-[6px] overflow-hidden ${className}`}>

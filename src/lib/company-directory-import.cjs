@@ -272,9 +272,14 @@ function arraysEqual(left, right) {
 }
 
 async function uploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchImpl = fetch }) {
-  const response = await fetchImpl(sourceUrl);
+  const response = await fetchImpl(sourceUrl, {
+    headers: {
+      'user-agent': 'Mozilla/5.0 (compatible; SolidFindBot/1.0; +https://solidfind.id)',
+      accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+    },
+  });
   if (!response.ok) {
-    throw new Error(`Failed to download remote media: ${sourceUrl}`);
+    throw new Error(`Failed to download remote media (${response.status}): ${sourceUrl}`);
   }
 
   const uploadUrl = await generateUploadUrl();
@@ -295,6 +300,20 @@ async function uploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchI
   }
 
   return payload.storageId;
+}
+
+async function tryUploadRemoteAssetToStorage(options) {
+  try {
+    return {
+      ok: true,
+      storageId: await uploadRemoteAssetToStorage(options),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
 }
 
 async function resolveStoredCompanyMedia({
@@ -318,17 +337,40 @@ async function resolveStoredCompanyMedia({
   };
 
   if (imageUrl) {
-    media.logoId = imageUrl === existingImageUrl && existingCompany?.logoId
-      ? existingCompany.logoId
-      : await uploadRemoteAssetToStorage({ sourceUrl: imageUrl, generateUploadUrl, fetchImpl });
+    if (imageUrl === existingImageUrl && existingCompany?.logoId) {
+      media.logoId = existingCompany.logoId;
+    } else {
+      const uploadedLogo = await tryUploadRemoteAssetToStorage({ sourceUrl: imageUrl, generateUploadUrl, fetchImpl });
+      if (uploadedLogo.ok) {
+        media.logoId = uploadedLogo.storageId;
+      } else {
+        media.logoUploadError = uploadedLogo.error;
+      }
+    }
   }
 
-  media.projectImageIds = arraysEqual(projectImageUrls, existingProjectImageUrls)
-    && existingProjectImageIds.length === projectImageUrls.length
-    ? existingProjectImageIds
-    : await Promise.all(
-        projectImageUrls.map((sourceUrl) => uploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchImpl }))
-      );
+  if (arraysEqual(projectImageUrls, existingProjectImageUrls) && existingProjectImageIds.length === projectImageUrls.length) {
+    media.projectImageIds = existingProjectImageIds;
+    media.projectImageUrls = [];
+  } else {
+    const storedIds = [];
+    const fallbackUrls = [];
+    const uploadErrors = [];
+
+    for (const sourceUrl of projectImageUrls) {
+      const uploaded = await tryUploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchImpl });
+      if (uploaded.ok) {
+        storedIds.push(uploaded.storageId);
+      } else {
+        fallbackUrls.push(sourceUrl);
+        uploadErrors.push({ sourceUrl, error: uploaded.error });
+      }
+    }
+
+    media.projectImageIds = storedIds;
+    media.projectImageUrls = fallbackUrls;
+    media.projectImageUploadErrors = uploadErrors;
+  }
 
   return media;
 }
@@ -410,5 +452,6 @@ module.exports = {
   parseCsvText,
   parseDelimitedCell,
   resolveStoredCompanyMedia,
+  tryUploadRemoteAssetToStorage,
   uploadRemoteAssetToStorage,
 };
