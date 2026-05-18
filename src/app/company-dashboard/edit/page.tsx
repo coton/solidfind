@@ -119,11 +119,11 @@ function getPrimaryActiveCategory(categories: Record<(typeof categoryPriority)[n
 }
 
 const proFeatures = [
-  { icon: "star", title: "Priority placement in search results", subtitle: "Penempatan prioritas dalam hasil pencarian" },
+  { icon: "star", title: "Priority in search results", subtitle: "Prioritas dalam hasil pencarian" },
   { icon: "ai", title: "Structured for AI-assisted search", subtitle: "Terstruktur untuk pencarian yang dibantu AI" },
-  { icon: "stats", title: "Visibility analytics — who's viewing your profile and when", subtitle: "Analisis visibilitas — siapa yang melihat profil Anda dan kapan" },
+  { icon: "stats", title: "Visibility analytics — who's interested and when", subtitle: "Analisis visibilitas — siapa yang tertarik dan kapan" },
   { icon: "photos", title: "Up to 12 project photos or videos", subtitle: "Hingga 12 foto atau video proyek" },
-  { icon: "ad", title: "Ad placements across the platform", subtitle: "Penempatan iklan di seluruh platform" },
+  { icon: "ad", title: "Ad placements across the website", subtitle: "Penempatan iklan di seluruh situs web" },
 ];
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {

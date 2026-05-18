@@ -310,6 +310,50 @@ test('company dashboard replaces included pro services with profile completion r
   );
 });
 
+test('company dashboard keeps bookmark and completion paired while pro analytics wrap below', () => {
+  const source = read(dashboardPagePath);
+
+  assert.match(
+    source,
+    /<div className="grid grid-cols-2 gap-4 sm:gap-6 mb-6">[\s\S]*Company bookmarked \/[\s\S]*Profile completion \/ Penyelesaian profil/,
+    'Expected bookmark and profile completion cards to share the first dashboard stats row'
+  );
+
+  assert.match(
+    source,
+    /showProAnalytics[\s\S]*grid grid-cols-1 gap-4 sm:grid-cols-2[\s\S]*Most frequent location searched\/[\s\S]*View within the last month \//,
+    'Expected pro-only analytics to wrap onto their own responsive rows instead of the bookmark/completion row'
+  );
+});
+
+test('company dashboard pro modal reads platform pricing and starts Xendit checkout', () => {
+  const source = read(dashboardPagePath);
+
+  assert.match(
+    source,
+    /useAction\(api\.xendit\.createInvoice\)/,
+    'Expected the Buy now button to call the Xendit invoice action'
+  );
+
+  assert.match(
+    source,
+    /platformSettings = useQuery\(api\.platformSettings\.getAll\)[\s\S]*pricingPhase[\s\S]*monthly_price_\$\{pricingPhase\}[\s\S]*yearly_price_\$\{pricingPhase\}/,
+    'Expected displayed pricing to follow the active admin pricing phase'
+  );
+
+  assert.match(
+    source,
+    /handleBuyPro[\s\S]*plan: billingPlan/,
+    'Expected checkout to use the currently selected billing plan'
+  );
+
+  assert.match(
+    source,
+    /billingPlan === "monthly"[\s\S]*setBillingPlan\("yearly"\)/,
+    'Expected monthly/yearly pricing switches to be mutually exclusive and passed to checkout'
+  );
+});
+
 test('company dashboard aligns most frequent location with numeric stats', () => {
   const source = read(dashboardPagePath);
 

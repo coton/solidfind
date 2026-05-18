@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -15,6 +15,49 @@ import { Star } from "lucide-react";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { calculateProfileCompletionScore, getProfileCompletionStatus } from "@/lib/profile-completion.mjs";
+
+const PRICE_DEFAULTS = {
+  launch: { monthly: "450000", yearly: "5000000" },
+  standard: { monthly: "650000", yearly: "7000000" },
+};
+
+function formatIdrPrice(value: string | null | undefined) {
+  const amount = Number.parseInt(value ?? "0", 10);
+  if (!Number.isFinite(amount) || amount <= 0) return "0";
+  return new Intl.NumberFormat("id-ID").format(amount);
+}
+
+function ProFeatureIcon({ name }: { name: "star" | "ai" | "stats" | "photos" | "ad" }) {
+  return (
+    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center text-[#f14110]" aria-hidden="true">
+      {name === "star" && (
+        <svg className="h-5 w-5" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7.93511 0.71955C8.31202 -0.239851 9.68798 -0.23985 10.0649 0.719551L11.6204 4.67914C11.7825 5.09161 12.1742 5.37238 12.6219 5.39695L16.9196 5.63291C17.9609 5.69008 18.3861 6.98113 17.5777 7.63124L14.2414 10.3144C13.8938 10.5939 13.7442 11.0481 13.8589 11.4758L14.9595 15.5812C15.2262 16.576 14.113 17.3739 13.2364 16.8163L9.61892 14.5149C9.24208 14.2752 8.75792 14.2752 8.38108 14.5149L4.76355 16.8163C3.88703 17.3739 2.77385 16.576 3.04053 15.5812L4.14114 11.4758C4.25579 11.0481 4.10618 10.5939 3.75863 10.3144L0.422255 7.63124C-0.386142 6.98113 0.0390565 5.69008 1.08039 5.63291L5.37814 5.39695C5.82584 5.37238 6.21753 5.09161 6.37957 4.67914L7.93511 0.71955Z" fill="currentColor" />
+        </svg>
+      )}
+      {name === "ai" && (
+        <svg className="h-[22px] w-[22px]" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11 1V4.25926M11 17.7407V21M21 11H17.7407M4.25926 11H1M18.0711 3.92893L15.7668 6.23317M6.23317 15.7668L3.92893 18.0711M18.0711 18.0711L15.7668 15.7668M6.23317 6.23317L3.92893 3.92893M15.5455 11C15.5455 13.5104 13.5104 15.5455 11 15.5455C8.48962 15.5455 6.45455 13.5104 6.45455 11C6.45455 8.48962 8.48962 6.45455 11 6.45455C13.5104 6.45455 15.5455 8.48962 15.5455 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+      {name === "stats" && (
+        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18.5 18.5H1.5V1.5M5 14.5V8.5M10 14.5V4.5M15 14.5V11.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+      {name === "photos" && (
+        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.5 0C18.163 0 18.7987 0.263581 19.2676 0.732422C19.7364 1.20126 20 1.83696 20 2.5V17.5C20 18.163 19.7364 18.7987 19.2676 19.2676C18.7987 19.7364 18.163 20 17.5 20H2.5C1.83696 20 1.20126 19.7364 0.732422 19.2676C0.263581 18.7987 0 18.163 0 17.5V2.5C0 1.83696 0.263581 1.20126 0.732422 0.732422C1.20126 0.263581 1.83696 0 2.5 0H17.5ZM7.99512 18H17.084L12.6963 11.709L7.99512 18ZM2.5 2C2.36739 2 2.24025 2.05272 2.14648 2.14648C2.05272 2.24025 2 2.36739 2 2.5V17.5C2 17.6326 2.05272 17.7597 2.14648 17.8535C2.24025 17.9473 2.36739 18 2.5 18H5.49902L11.0938 10.5117C11.2832 10.258 11.5302 10.0527 11.8145 9.91309C12.0986 9.77355 12.412 9.70387 12.7285 9.70898C13.0452 9.71416 13.3562 9.79456 13.6357 9.94336C13.9153 10.0922 14.1558 10.3047 14.3369 10.5645L18 15.8164V2.5C18 2.36739 17.9473 2.24025 17.8535 2.14648C17.7597 2.05272 17.6326 2 17.5 2H2.5ZM7 3.5C7.92826 3.5 8.81823 3.86901 9.47461 4.52539C10.131 5.18177 10.5 6.07174 10.5 7C10.5 7.92826 10.131 8.81823 9.47461 9.47461C8.81823 10.131 7.92826 10.5 7 10.5C6.07174 10.5 5.18177 10.131 4.52539 9.47461C3.86901 8.81823 3.5 7.92826 3.5 7C3.5 6.07174 3.86901 5.18177 4.52539 4.52539C5.18177 3.86901 6.07174 3.5 7 3.5ZM7 5.5C6.60218 5.5 6.22076 5.65815 5.93945 5.93945C5.65815 6.22076 5.5 6.60218 5.5 7C5.5 7.39782 5.65815 7.77924 5.93945 8.06055C6.22076 8.34185 6.60218 8.5 7 8.5C7.39782 8.5 7.77924 8.34185 8.06055 8.06055C8.34185 7.77924 8.5 7.39782 8.5 7C8.5 6.60218 8.34185 6.22076 8.06055 5.93945C7.77924 5.65815 7.39782 5.5 7 5.5Z" fill="currentColor" />
+        </svg>
+      )}
+      {name === "ad" && (
+        <svg className="h-5 w-5" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072ZM1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125Z" fill="currentColor" />
+        </svg>
+      )}
+    </span>
+  );
+}
 
 function ReviewCard({ userName, rating, content, date }: {
   userName: string;
@@ -47,11 +90,15 @@ export default function CompanyDashboardPage() {
   const [showAdModal, setShowAdModal] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [billingPlan, setBillingPlan] = useState<"monthly" | "yearly">("monthly");
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+  const [proCheckoutError, setProCheckoutError] = useState("");
   const [redirected, setRedirected] = useState(false);
   const router = useRouter();
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const deleteAccount = useMutation(api.users.deleteAccount);
+  const createProInvoice = useAction(api.xendit.createInvoice);
 
   const handleSignOut = async () => {
     await signOut({ redirectUrl: "/" });
@@ -79,6 +126,12 @@ export default function CompanyDashboardPage() {
     api.reviews.listByCompany,
     company?._id ? { companyId: company._id } : "skip"
   );
+
+  const platformSettings = useQuery(api.platformSettings.getAll);
+  const platformMap = new Map((platformSettings ?? []).map((setting) => [setting.key, setting.value]));
+  const pricingPhase = platformMap.get("pricing_phase") === "standard" ? "standard" : "launch";
+  const monthlyPrice = platformMap.get(`monthly_price_${pricingPhase}`) ?? PRICE_DEFAULTS[pricingPhase].monthly;
+  const yearlyPrice = platformMap.get(`yearly_price_${pricingPhase}`) ?? PRICE_DEFAULTS[pricingPhase].yearly;
 
   const monthlyViews = useQuery(
     api.profileViews.getMonthlyStats,
@@ -168,6 +221,48 @@ export default function CompanyDashboardPage() {
   };
 
   const maxViews = Math.max(1, ...data.monthlyViews.map(m => m.views));
+  const showProAnalytics = isPro;
+
+  const handleBuyPro = async () => {
+    if (!currentUser?._id || !company?._id) {
+      setProCheckoutError("Company profile is still loading. Please try again in a moment.");
+      return;
+    }
+
+    const email =
+      company.email ||
+      currentUser.email ||
+      clerkUser?.emailAddresses?.[0]?.emailAddress ||
+      "";
+
+    if (!email) {
+      setProCheckoutError("Please add an email address before buying PRO.");
+      return;
+    }
+
+    setIsCreatingInvoice(true);
+    setProCheckoutError("");
+
+    try {
+      const result = await createProInvoice({
+        userId: currentUser._id,
+        companyId: company._id,
+        plan: billingPlan,
+        email,
+        companyName: company.name,
+      });
+
+      if (result?.invoiceUrl) {
+        window.location.href = result.invoiceUrl;
+      } else {
+        setProCheckoutError("Payment link could not be created. Please try again.");
+      }
+    } catch (error) {
+      setProCheckoutError(error instanceof Error ? error.message : "Payment link could not be created. Please try again.");
+    } finally {
+      setIsCreatingInvoice(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -241,8 +336,7 @@ export default function CompanyDashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className={`grid ${isPro && proEnabled ? 'grid-cols-4' : proEnabled ? 'grid-cols-2' : 'grid-cols-1'} gap-6 mb-8`}>
-          {/* Bookmarked — always visible */}
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-6">
           <div>
             <div className="h-[42px]">
               <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
@@ -257,41 +351,6 @@ export default function CompanyDashboardPage() {
               <span className="text-[14px] font-normal ml-1">Times</span>
             </p>
           </div>
-
-          {isPro && proEnabled && (
-            <>
-              {/* Views Last Month */}
-              <div>
-                <div className="h-[42px]">
-                  <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                    View within the last month /
-                  </p>
-                  <p className="text-[10px] text-[#333]/70 tracking-[0.2px]">
-                    Lihat dalam sebulan terakhir
-                  </p>
-                </div>
-                <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px] leading-[38px]">
-                  {data.stats.viewsLastMonth}
-                  <span className="text-[14px] font-normal ml-1">Views</span>
-                </p>
-              </div>
-
-              {/* Most Searched Location */}
-              <div className="flex flex-col">
-                <div className="h-[42px]">
-                  <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                    Most frequent location searched/
-                  </p>
-                  <p className="text-[10px] text-[#333]/70 tracking-[0.2px]">
-                    Lokasi yang paling sering lokasi
-                  </p>
-                </div>
-                <p className="text-[24px] font-bold text-[#f14110] tracking-[0.48px] leading-[38px]">
-                  {data.stats.mostSearchedLocation}
-                </p>
-              </div>
-            </>
-          )}
 
           <div className="bg-white rounded-[6px] p-4">
             <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
@@ -316,6 +375,39 @@ export default function CompanyDashboardPage() {
             </p>
           </div>
         </div>
+
+        {showProAnalytics && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 mb-8">
+            <div className="order-1 sm:order-2">
+              <div className="h-[42px]">
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                  Most frequent location searched/
+                </p>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px]">
+                  Lokasi yang paling sering lokasi
+                </p>
+              </div>
+              <p className="text-[24px] font-bold text-[#f14110] tracking-[0.48px] leading-[38px]">
+                {data.stats.mostSearchedLocation}
+              </p>
+            </div>
+
+            <div className="order-2 sm:order-1">
+              <div className="h-[42px]">
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
+                  View within the last month /
+                </p>
+                <p className="text-[10px] text-[#333]/70 tracking-[0.2px]">
+                  Lihat dalam sebulan terakhir
+                </p>
+              </div>
+              <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px] leading-[38px]">
+                {data.stats.viewsLastMonth}
+                <span className="text-[14px] font-normal ml-1">Views</span>
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Monthly Views Chart */}
         {isPro && <div className="mb-8">
@@ -346,8 +438,8 @@ export default function CompanyDashboardPage() {
           </div>
         </div>}
 
-        {/* Banner Image — hidden when reviews are enabled */}
-        {!isPro && !reviewsEnabled && (
+        {/* Banner Image */}
+        {!isPro && proEnabled && (
           <DashboardHeroMedia className="mb-8" alt="" mobileAspectRatio="2 / 1" variant="company" />
         )}
 
@@ -501,9 +593,9 @@ export default function CompanyDashboardPage() {
 
       {/* PRO Features Modal - POPUP-03-BuyPro */}
       {showProModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-[10px] py-4 sm:px-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowProModal(false)} />
-          <div className="relative bg-white w-full max-w-[520px] rounded-[6px] p-10 overflow-hidden">
+          <div className="relative bg-white w-full max-w-[520px] max-h-[calc(100vh-20px)] rounded-[6px] p-6 sm:p-10 overflow-y-auto overflow-x-hidden">
             {/* Launch Discount Ribbon */}
             <div className="absolute top-0 left-0 w-[150px] h-[150px] overflow-hidden">
               <div
@@ -530,19 +622,17 @@ export default function CompanyDashboardPage() {
             </p>
 
             {/* Features Grid */}
-            <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-8">
               <div className="flex items-center gap-3">
-                <Star className="w-5 h-5 text-[#f14110]" />
+                <ProFeatureIcon name="star" />
                 <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Priority placement in search results</p>
-                  <p className="text-[10px] text-[#333]/50">Penempatan prioritas dalam hasil pencarian</p>
+                  <p className="text-[12px] font-semibold text-[#333]">Priority in search results</p>
+                  <p className="text-[10px] text-[#333]/50">Prioritas dalam hasil pencarian</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <svg width="20" height="20" viewBox="0 0 16 16" fill="#f14110">
-                  <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
-                </svg>
+                <ProFeatureIcon name="ai" />
                 <div>
                   <p className="text-[12px] font-semibold text-[#333]">Structured for AI-assisted search</p>
                   <p className="text-[10px] text-[#333]/50">Terstruktur untuk pencarian yang dibantu AI</p>
@@ -550,71 +640,73 @@ export default function CompanyDashboardPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <svg width="20" height="20" viewBox="0 0 16 16" fill="#f14110">
-                  <rect x="1" y="8" width="3" height="7"/>
-                  <rect x="6" y="4" width="3" height="11"/>
-                  <rect x="11" y="1" width="3" height="14"/>
-                </svg>
+                <ProFeatureIcon name="stats" />
                 <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Visibility analytics — who's viewing your profile and when</p>
-                  <p className="text-[10px] text-[#333]/50">Analisis visibilitas — siapa yang melihat profil Anda dan kapan</p>
+                  <p className="text-[12px] font-semibold text-[#333]">Visibility analytics — who's interested and when</p>
+                  <p className="text-[10px] text-[#333]/50">Analisis visibilitas — siapa yang tertarik dan kapan</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="#f14110">
-                  <path d="M17.5 0C18.163 0 18.7987 0.263581 19.2676 0.732422C19.7364 1.20126 20 1.83696 20 2.5V17.5C20 18.163 19.7364 18.7987 19.2676 19.2676C18.7987 19.7364 18.163 20 17.5 20H2.5C1.83696 20 1.20126 19.7364 0.732422 19.2676C0.263581 18.7987 0 18.163 0 17.5V2.5C0 1.83696 0.263581 1.20126 0.732422 0.732422C1.20126 0.263581 1.83696 0 2.5 0H17.5ZM7.99512 18H17.084L12.6963 11.709L7.99512 18ZM2.5 2C2.36739 2 2.24025 2.05272 2.14648 2.14648C2.05272 2.24025 2 2.36739 2 2.5V17.5C2 17.6326 2.05272 17.7597 2.14648 17.8535C2.24025 17.9473 2.36739 18 2.5 18H5.49902L11.0938 10.5117C11.2832 10.258 11.5302 10.0527 11.8145 9.91309C12.0986 9.77355 12.412 9.70387 12.7285 9.70898C13.0452 9.71416 13.3562 9.79456 13.6357 9.94336C13.9153 10.0922 14.1558 10.3047 14.3369 10.5645L18 15.8164V2.5C18 2.36739 17.9473 2.24025 17.8535 2.14648C17.7597 2.05272 17.6326 2 17.5 2H2.5ZM7 3.5C7.92826 3.5 8.81823 3.86901 9.47461 4.52539C10.131 5.18177 10.5 6.07174 10.5 7C10.5 7.92826 10.131 8.81823 9.47461 9.47461C8.81823 10.131 7.92826 10.5 7 10.5C6.07174 10.5 5.18177 10.131 4.52539 9.47461C3.86901 8.81823 3.5 7.92826 3.5 7C3.5 6.07174 3.86901 5.18177 4.52539 4.52539C5.18177 3.86901 6.07174 3.5 7 3.5ZM7 5.5C6.60218 5.5 6.22076 5.65815 5.93945 5.93945C5.65815 6.22076 5.5 6.60218 5.5 7C5.5 7.39782 5.65815 7.77924 5.93945 8.06055C6.22076 8.34185 6.60218 8.5 7 8.5C7.39782 8.5 7.77924 8.34185 8.06055 8.06055C8.34185 7.77924 8.5 7.39782 8.5 7C8.5 6.60218 8.34185 6.22076 8.06055 5.93945C7.77924 5.65815 7.39782 5.5 7 5.5Z" fill="#F14110"/>
-                </svg>
+                <ProFeatureIcon name="photos" />
                 <div>
                   <p className="text-[12px] font-semibold text-[#333]">Up to 12 project photos or videos</p>
                   <p className="text-[10px] text-[#333]/50">Hingga 12 foto atau video proyek</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 col-span-2">
-                <svg width="20" height="20" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072ZM1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125Z" fill="#F14110"/>
-                  <path d="M1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125ZM1.72645 3.48125V1.75M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072Z" stroke="#F14110"/>
-                </svg>
+              <div className="flex items-center gap-3">
+                <ProFeatureIcon name="ad" />
                 <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Ad placements across the platform</p>
-                  <p className="text-[10px] text-[#333]/50">Penempatan iklan di seluruh platform</p>
+                  <p className="text-[12px] font-semibold text-[#333]">Ad placements across the website</p>
+                  <p className="text-[10px] text-[#333]/50">Penempatan iklan di seluruh situs web</p>
                 </div>
               </div>
             </div>
 
             {/* Pricing Toggle */}
-            <div className="flex items-center justify-center gap-8 mb-6">
-              <div className="flex items-center gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-6">
+              <button
+                type="button"
+                onClick={() => setBillingPlan("monthly")}
+                className="flex items-center justify-between gap-3 text-left"
+              >
                 <div>
-                  <p className="text-[28px] font-bold text-[#333]">650.000<span className="text-[14px]">rp</span></p>
+                  <p className="text-[28px] font-bold text-[#333]">{formatIdrPrice(monthlyPrice)}<span className="text-[14px]">rp</span></p>
                   <p className="text-[11px] text-[#333]/50">Month / Bulan</p>
                 </div>
-                <div className="w-10 h-5 rounded-full bg-gradient-to-l from-[#f14110] to-[#e9a28e]">
-                  <div className="w-4 h-4 bg-white rounded-full mt-0.5 ml-5" />
+                <div className={`relative h-4 w-8 rounded-full transition-colors ${billingPlan === "monthly" ? "bg-gradient-to-r from-[#e9a28e] to-[#f14110]" : "bg-[#333]/20"}`}>
+                  <div className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${billingPlan === "monthly" ? "left-[18px]" : "left-0.5"}`} />
                 </div>
-              </div>
+              </button>
 
-              <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setBillingPlan("yearly")}
+                className="flex items-center justify-between gap-3 text-left"
+              >
                 <div>
-                  <p className="text-[28px] font-bold text-[#333]/30">7<span className="text-[14px]">jt</span></p>
-                  <p className="text-[11px] text-[#333]/30">Year / Tahun</p>
+                  <p className="text-[28px] font-bold text-[#333]">{formatIdrPrice(yearlyPrice)}<span className="text-[14px]">rp</span></p>
+                  <p className="text-[11px] text-[#333]/50">Year / Tahun</p>
                 </div>
-                <div className="w-10 h-5 rounded-full bg-[#333]/20">
-                  <div className="w-4 h-4 bg-white rounded-full mt-0.5 ml-0.5" />
+                <div className={`relative h-4 w-8 rounded-full transition-colors ${billingPlan === "yearly" ? "bg-gradient-to-r from-[#e9a28e] to-[#f14110]" : "bg-[#333]/20"}`}>
+                  <div className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${billingPlan === "yearly" ? "left-[18px]" : "left-0.5"}`} />
                 </div>
-              </div>
+              </button>
             </div>
 
+            {proCheckoutError && (
+              <p className="mb-4 text-center text-[10px] leading-[16px] text-[#f14110]">
+                {proCheckoutError}
+              </p>
+            )}
+
             <button
-              onClick={() => setShowProModal(false)}
-              className="mx-auto flex items-center gap-2 h-10 px-10 rounded-full border-2 border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors"
+              onClick={handleBuyPro}
+              disabled={isCreatingInvoice}
+              className="mx-auto flex items-center justify-center h-10 px-10 rounded-full border border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             >
-              BUY NOW
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"/>
-                <path d="M9 4H7v5h5V7H9V4z"/>
-              </svg>
+              {isCreatingInvoice ? "Creating link..." : "Buy now"}
             </button>
           </div>
         </div>

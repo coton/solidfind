@@ -5,12 +5,25 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ArrowLeft, Star, Check, X } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+
+const PRICE_DEFAULTS = {
+  launch: { monthly: "450000", yearly: "5000000" },
+  standard: { monthly: "650000", yearly: "7000000" },
+};
+
+function formatIdrPrice(value: string | null | undefined) {
+  const amount = Number.parseInt(value ?? "0", 10);
+  if (!Number.isFinite(amount) || amount <= 0) return "0";
+  return new Intl.NumberFormat("id-ID").format(amount);
+}
 
 const proFeatures = [
   {
     icon: "star",
-    title: "Priority placement in search results",
-    subtitle: "Penempatan prioritas dalam hasil pencarian",
+    title: "Priority in search results",
+    subtitle: "Prioritas dalam hasil pencarian",
     description: "Your company appears first in search results, maximizing your visibility to potential clients.",
   },
   {
@@ -21,8 +34,8 @@ const proFeatures = [
   },
   {
     icon: "stats",
-    title: "Visibility analytics — who's viewing your profile and when",
-    subtitle: "Analisis visibilitas — siapa yang melihat profil Anda dan kapan",
+    title: "Visibility analytics — who's interested and when",
+    subtitle: "Analisis visibilitas — siapa yang tertarik dan kapan",
     description: "Track your profile views, bookmark count, and most-searched locations to understand your audience.",
   },
   {
@@ -33,8 +46,8 @@ const proFeatures = [
   },
   {
     icon: "ad",
-    title: "Ad placements across the platform",
-    subtitle: "Penempatan iklan di seluruh platform",
+    title: "Ad placements across the website",
+    subtitle: "Penempatan iklan di seluruh situs web",
     description: "Access premium ad placements across the site for maximum brand exposure.",
   },
 ];
@@ -42,6 +55,11 @@ const proFeatures = [
 export default function UpgradePage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [showComingSoon, setShowComingSoon] = useState(false);
+  const platformSettings = useQuery(api.platformSettings.getAll);
+  const platformMap = new Map((platformSettings ?? []).map((setting) => [setting.key, setting.value]));
+  const pricingPhase = platformMap.get("pricing_phase") === "standard" ? "standard" : "launch";
+  const monthlyPrice = platformMap.get(`monthly_price_${pricingPhase}`) ?? PRICE_DEFAULTS[pricingPhase].monthly;
+  const yearlyPrice = platformMap.get(`yearly_price_${pricingPhase}`) ?? PRICE_DEFAULTS[pricingPhase].yearly;
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -89,7 +107,7 @@ export default function UpgradePage() {
               $29
             </p>
             <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">per month</p>
-            <p className="text-[9px] text-[#333]/40 mt-1">650.000 rp / Bulan</p>
+            <p className="text-[9px] text-[#333]/40 mt-1">{formatIdrPrice(monthlyPrice)} rp / Bulan</p>
           </button>
 
           {/* Yearly */}
@@ -113,7 +131,7 @@ export default function UpgradePage() {
               $199
             </p>
             <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">per year</p>
-            <p className="text-[9px] text-[#333]/40 mt-1">~7 jt / Tahun</p>
+            <p className="text-[9px] text-[#333]/40 mt-1">{formatIdrPrice(yearlyPrice)} rp / Tahun</p>
           </button>
         </div>
 
@@ -174,10 +192,10 @@ export default function UpgradePage() {
             onClick={() => setShowComingSoon(true)}
             className="h-12 px-12 rounded-full bg-[#f14110] text-white text-[13px] font-medium tracking-[0.26px] hover:bg-[#d93a0e] transition-colors shadow-lg"
           >
-            Upgrade to PRO — {billingCycle === "monthly" ? "$29/mo" : "$199/yr"}
+            Upgrade to PRO — {billingCycle === "monthly" ? `${formatIdrPrice(monthlyPrice)}rp/mo` : `${formatIdrPrice(yearlyPrice)}rp/yr`}
           </button>
           <p className="text-[9px] text-[#333]/40 mt-3">
-            Secure payment via Stripe. Cancel anytime.
+            Secure payment via Xendit. Cancel anytime.
           </p>
         </div>
       </main>

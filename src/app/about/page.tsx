@@ -16,7 +16,7 @@ const DEFAULT_ABOUT_TAGLINE = "A clearer way to build and live in Indonesia.";
 const DEFAULT_ABOUT_DESCRIPTION = `Building, renovating, or choosing a home is one of the most important decisions people make — yet reliable information and trustworthy contacts are often hard to find. SOLIDFIND.ID exists to bring clarity, structure, and confidence to that process.`;
 const DEFAULT_INDIVIDUAL_TEXT = "For property owners & renters — browse listings, bookmark companies, write testimonials, and find the right professionals for your project. Choose your household type: Solo / Couple, Family / Co-Hosting, or Shared / Community.";
 const DEFAULT_FREE_COMPANY_TEXT = "For construction & renovation professionals — create your company profile, showcase up to 3 project photos, receive testimonials, and get discovered by potential clients across Bali.";
-const DEFAULT_PRO_COMPANY_TEXT = "Everything in Free, plus: priority placement in search results, structured AI-assisted search, visibility analytics, up to 12 project photos or videos, and ad placements across the platform. Built for companies ready to grow.";
+const DEFAULT_PRO_COMPANY_TEXT = "Everything in Free, plus: priority in search results, structured AI-assisted search, visibility analytics, up to 12 project photos or videos, and ad placements across the website. Built for companies ready to grow.";
 const DEFAULT_CONTACT_TEXT = "Questions, feedback, or partnership inquiries?";
 const DEFAULT_CONTACT_EMAIL = "hello@solidfind.id";
 
