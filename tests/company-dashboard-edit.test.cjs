@@ -364,6 +364,18 @@ test('company dashboard pro modal reads platform pricing and starts Xendit check
     /setProTermsView\("english"\)[\s\S]*Terms of Services[\s\S]*setProTermsView\("indonesian"\)[\s\S]*Ketentuan penggunaan/,
     'Expected the Pro modal to abbreviate yearly pricing and link to both Pro Terms versions'
   );
+
+  assert.match(
+    source,
+    /!proTermsView && <div className="absolute top-0 left-0 w-\[150px\] h-\[150px\] overflow-hidden">/,
+    'Expected the launch discount ribbon to hide while Pro Terms are open'
+  );
+
+  assert.match(
+    source,
+    /max-w-\[440px\][\s\S]*max-w-\[260px\] space-y-3[\s\S]*text-\[22px\] font-bold leading-\[26px\][\s\S]*formatProPrice\(yearlyPrice, "yearly"\)/,
+    'Expected the Pro modal to be narrower and stack smaller pricing rows vertically'
+  );
 });
 
 test('company dashboard aligns most frequent location with numeric stats', () => {

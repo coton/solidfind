@@ -68,9 +68,9 @@ function ProFeatureIcon({ name }: { name: "star" | "ai" | "stats" | "photos" | "
         </svg>
       )}
       {name === "ad" && (
-        <svg className="h-5 w-5" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2 4.5C2 3.11929 3.11929 2 4.5 2H15.5C16.8807 2 18 3.11929 18 4.5V12.5C18 13.8807 16.8807 15 15.5 15H4.5C3.11929 15 2 13.8807 2 12.5V4.5Z" stroke="currentColor" strokeWidth="2" />
-          <path d="M6 7.5H12M6 11H10M18 10H20M19 9V11M14 18H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <svg className="h-5 w-6" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072ZM1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125Z" fill="currentColor" />
+          <path d="M1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125ZM1.72645 3.48125V1.75M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072Z" stroke="currentColor" />
         </svg>
       )}
     </span>
@@ -619,15 +619,15 @@ export default function CompanyDashboardPage() {
       {showProModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-[10px] py-4 sm:px-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowProModal(false)} />
-          <div className="relative bg-white w-full max-w-[520px] max-h-[calc(100vh-20px)] rounded-[6px] p-6 sm:p-10 overflow-y-auto overflow-x-hidden">
+          <div className="relative bg-white w-full max-w-[440px] max-h-[calc(100vh-20px)] rounded-[6px] p-6 sm:p-8 overflow-y-auto overflow-x-hidden">
             {/* Launch Discount Ribbon */}
-            <div className="absolute top-0 left-0 w-[150px] h-[150px] overflow-hidden">
+            {!proTermsView && <div className="absolute top-0 left-0 w-[150px] h-[150px] overflow-hidden">
               <div
                 className="absolute top-[35px] left-[-35px] w-[180px] bg-[#f14110] text-white text-[10px] font-bold tracking-[0.2px] py-1 text-center transform -rotate-45"
               >
                 LAUNCH DISCOUNT
               </div>
-            </div>
+            </div>}
 
             <button
               onClick={() => {
@@ -691,7 +691,7 @@ export default function CompanyDashboardPage() {
                   Layanan dengan akun PRO:
                 </p>
 
-                <div className="mx-auto max-w-[380px] space-y-4 mb-8">
+                <div className="mx-auto max-w-[340px] space-y-4 mb-8">
                   <div className="flex items-center gap-4">
                     <ProFeatureIcon name="star" />
                     <div>
@@ -733,14 +733,14 @@ export default function CompanyDashboardPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-6">
+                <div className="mx-auto max-w-[260px] space-y-3 mb-6">
                   <button
                     type="button"
                     onClick={() => setBillingPlan("monthly")}
                     className="flex items-center justify-between gap-3 text-left"
                   >
                     <div>
-                      <p className="text-[28px] font-bold text-[#333]">{formatProPrice(monthlyPrice, "monthly")}</p>
+                      <p className="text-[22px] font-bold leading-[26px] text-[#333]">{formatProPrice(monthlyPrice, "monthly")}</p>
                       <p className="text-[11px] text-[#333]/50">Month / Bulan</p>
                     </div>
                     <div className={`relative h-4 w-8 rounded-full transition-colors ${billingPlan === "monthly" ? "bg-gradient-to-r from-[#e9a28e] to-[#f14110]" : "bg-[#333]/20"}`}>
@@ -754,7 +754,7 @@ export default function CompanyDashboardPage() {
                     className="flex items-center justify-between gap-3 text-left"
                   >
                     <div>
-                      <p className="text-[28px] font-bold text-[#333]">{formatProPrice(yearlyPrice, "yearly")}</p>
+                      <p className="text-[22px] font-bold leading-[26px] text-[#333]">{formatProPrice(yearlyPrice, "yearly")}</p>
                       <p className="text-[11px] text-[#333]/50">Year / Tahun</p>
                     </div>
                     <div className={`relative h-4 w-8 rounded-full transition-colors ${billingPlan === "yearly" ? "bg-gradient-to-r from-[#e9a28e] to-[#f14110]" : "bg-[#333]/20"}`}>
