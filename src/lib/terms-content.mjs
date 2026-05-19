@@ -6,6 +6,8 @@
  */
 
 export const TERMS_TEXT_PLATFORM_SETTING_KEY = "termsText";
+export const PRO_TERMS_EN_PLATFORM_SETTING_KEY = "proTermsEnglish";
+export const PRO_TERMS_ID_PLATFORM_SETTING_KEY = "proTermsIndonesian";
 
 export const DEFAULT_TERMS_TEXT = `[TITLE] Terms of Use
 [COPY] Welcome to SOLIDFIND.ID. By accessing and using this platform, you agree to be bound by these Terms & Conditions. If you do not agree with any part of these terms, please do not use our services.
@@ -29,6 +31,16 @@ export const DEFAULT_TERMS_TEXT = `[TITLE] Terms of Use
 - Not attempt to manipulate ratings or testimonials
 - Comply with all applicable local laws and regulations
 [COPY] SOLIDFIND.ID reserves the right to suspend or terminate accounts that violate these responsibilities without prior notice.`;
+
+export const DEFAULT_PRO_TERMS_EN_TEXT = `[TITLE] Pro Terms of Services
+[COPY] These Pro Terms of Services apply to companies subscribing to SolidFind Pro features. By subscribing, you agree to the billing, visibility, and platform-use conditions attached to Pro access.
+[COPY] Pro features may include priority positioning in search results, profile visibility analytics, additional project media, and access to ad placement options. Feature availability may change as the platform evolves.
+[COPY] Subscription fees are billed through SolidFind's payment provider. Access may be paused or cancelled if payment fails, if account information is inaccurate, or if the company violates SolidFind policies.`;
+
+export const DEFAULT_PRO_TERMS_ID_TEXT = `[TITLE] Ketentuan Penggunaan Pro
+[COPY] Ketentuan Penggunaan Pro ini berlaku untuk perusahaan yang berlangganan fitur SolidFind Pro. Dengan berlangganan, Anda menyetujui ketentuan pembayaran, visibilitas, dan penggunaan platform yang terkait dengan akses Pro.
+[COPY] Fitur Pro dapat mencakup penempatan prioritas dalam hasil pencarian, analitik visibilitas profil, media proyek tambahan, dan akses ke opsi penempatan iklan. Ketersediaan fitur dapat berubah seiring perkembangan platform.
+[COPY] Biaya langganan diproses melalui penyedia pembayaran SolidFind. Akses dapat dijeda atau dibatalkan jika pembayaran gagal, informasi akun tidak akurat, atau perusahaan melanggar kebijakan SolidFind.`;
 
 /**
  * @param {string | null | undefined} value

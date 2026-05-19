@@ -321,8 +321,8 @@ test('company dashboard keeps bookmark and completion paired while pro analytics
 
   assert.match(
     source,
-    /showProAnalytics[\s\S]*grid grid-cols-1 gap-4 sm:grid-cols-2[\s\S]*Most frequent location searched\/[\s\S]*View within the last month \//,
-    'Expected pro-only analytics to wrap onto their own responsive rows instead of the bookmark/completion row'
+    /showProAnalytics[\s\S]*grid grid-cols-1 gap-4 sm:grid-cols-2[\s\S]*className="order-2 sm:order-2"[\s\S]*Most frequent location searched\/[\s\S]*className="order-1 sm:order-1"[\s\S]*View within the last month \//,
+    'Expected pro-only analytics to put views above location on mobile while keeping desktop order'
   );
 });
 
@@ -351,6 +351,18 @@ test('company dashboard pro modal reads platform pricing and starts Xendit check
     source,
     /billingPlan === "monthly"[\s\S]*setBillingPlan\("yearly"\)/,
     'Expected monthly/yearly pricing switches to be mutually exclusive and passed to checkout'
+  );
+
+  assert.match(
+    source,
+    /formatProPrice\(yearlyPrice, "yearly"\)/,
+    'Expected the Pro modal to abbreviate yearly pricing'
+  );
+
+  assert.match(
+    source,
+    /setProTermsView\("english"\)[\s\S]*Terms of Services[\s\S]*setProTermsView\("indonesian"\)[\s\S]*Ketentuan penggunaan/,
+    'Expected the Pro modal to abbreviate yearly pricing and link to both Pro Terms versions'
   );
 });
 

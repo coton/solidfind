@@ -11,10 +11,17 @@ import { Footer } from "@/components/Footer";
 import { DashboardHeroMedia } from "@/components/DashboardHeroMedia";
 import { buildCompanyProfilePath, buildCompanyReviewsPath } from "@/lib/company-profile-url.mjs";
 import { starColor } from "@/lib/starColors";
-import { Star } from "lucide-react";
+import { ArrowLeft, Star } from "lucide-react";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { calculateProfileCompletionScore, getProfileCompletionStatus } from "@/lib/profile-completion.mjs";
+import {
+  DEFAULT_PRO_TERMS_EN_TEXT,
+  DEFAULT_PRO_TERMS_ID_TEXT,
+  parseTermsContent,
+  PRO_TERMS_EN_PLATFORM_SETTING_KEY,
+  PRO_TERMS_ID_PLATFORM_SETTING_KEY,
+} from "@/lib/terms-content.mjs";
 
 const PRICE_DEFAULTS = {
   launch: { monthly: "450000", yearly: "5000000" },
@@ -27,9 +34,19 @@ function formatIdrPrice(value: string | null | undefined) {
   return new Intl.NumberFormat("id-ID").format(amount);
 }
 
+function formatProPrice(value: string | null | undefined, plan: "monthly" | "yearly") {
+  const amount = Number.parseInt(value ?? "0", 10);
+  if (!Number.isFinite(amount) || amount <= 0) return "0";
+  if (plan === "yearly" && amount >= 1000000) {
+    const millionValue = amount / 1000000;
+    return `${Number.isInteger(millionValue) ? millionValue.toFixed(0) : millionValue.toFixed(1)}jt`;
+  }
+  return `${formatIdrPrice(value)}rp`;
+}
+
 function ProFeatureIcon({ name }: { name: "star" | "ai" | "stats" | "photos" | "ad" }) {
   return (
-    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center text-[#f14110]" aria-hidden="true">
+    <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center text-[#f14110]" aria-hidden="true">
       {name === "star" && (
         <svg className="h-5 w-5" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7.93511 0.71955C8.31202 -0.239851 9.68798 -0.23985 10.0649 0.719551L11.6204 4.67914C11.7825 5.09161 12.1742 5.37238 12.6219 5.39695L16.9196 5.63291C17.9609 5.69008 18.3861 6.98113 17.5777 7.63124L14.2414 10.3144C13.8938 10.5939 13.7442 11.0481 13.8589 11.4758L14.9595 15.5812C15.2262 16.576 14.113 17.3739 13.2364 16.8163L9.61892 14.5149C9.24208 14.2752 8.75792 14.2752 8.38108 14.5149L4.76355 16.8163C3.88703 17.3739 2.77385 16.576 3.04053 15.5812L4.14114 11.4758C4.25579 11.0481 4.10618 10.5939 3.75863 10.3144L0.422255 7.63124C-0.386142 6.98113 0.0390565 5.69008 1.08039 5.63291L5.37814 5.39695C5.82584 5.37238 6.21753 5.09161 6.37957 4.67914L7.93511 0.71955Z" fill="currentColor" />
@@ -42,7 +59,7 @@ function ProFeatureIcon({ name }: { name: "star" | "ai" | "stats" | "photos" | "
       )}
       {name === "stats" && (
         <svg className="h-5 w-5" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18.5 18.5H1.5V1.5M5 14.5V8.5M10 14.5V4.5M15 14.5V11.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M17 0C18.6569 0 20 1.34315 20 3V17C20 18.6051 18.7394 19.9158 17.1543 19.9961L17 20H3L2.8457 19.9961C1.31166 19.9184 0.0816253 18.6883 0.00390625 17.1543L0 17V3C0 1.34315 1.34315 6.44255e-08 3 0H17ZM3 2C2.44771 2 2 2.44772 2 3V17C2 17.5523 2.44772 18 3 18H17C17.5523 18 18 17.5523 18 17V3C18 2.44771 17.5523 2 17 2H3ZM6.66699 15.5557H4.44434V4.44434H6.66699V15.5557ZM11.1113 15.5557H8.88867V7.77734H11.1113V15.5557ZM15.5557 15.5557H13.333V10H15.5557V15.5557Z" fill="currentColor" />
         </svg>
       )}
       {name === "photos" && (
@@ -51,8 +68,9 @@ function ProFeatureIcon({ name }: { name: "star" | "ai" | "stats" | "photos" | "
         </svg>
       )}
       {name === "ad" && (
-        <svg className="h-5 w-5" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20.5942 19.7313V15.9813H16.9148V14.7313H20.5942V10.9813H21.8206V14.7313H25.5V15.9813H21.8206V19.7313H20.5942ZM2.48072 20.5C1.91655 20.5 1.44519 20.3075 1.06662 19.9225C0.688059 19.5375 0.499185 19.0571 0.500003 18.4813V2.51875C0.500003 1.94375 0.688876 1.46375 1.06662 1.07875C1.44437 0.69375 1.91574 0.500833 2.48072 0.5H18.1425C18.7067 0.5 19.1776 0.692916 19.5554 1.07875C19.9331 1.46458 20.1224 1.945 20.1232 2.52V8H18.8968V4.73125H1.72645V18.4813C1.72645 18.7054 1.79718 18.8896 1.93863 19.0337C2.08008 19.1779 2.26078 19.25 2.48072 19.25H17.6703V20.5H2.48072ZM1.72645 3.48125H18.8968V2.51875C18.8968 2.29458 18.8257 2.11042 18.6834 1.96625C18.5427 1.82208 18.3621 1.75 18.1413 1.75H2.48072C2.25996 1.75 2.07926 1.82208 1.93863 1.96625C1.79718 2.11042 1.72645 2.295 1.72645 2.52V3.48125Z" fill="currentColor" />
+        <svg className="h-5 w-5" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 4.5C2 3.11929 3.11929 2 4.5 2H15.5C16.8807 2 18 3.11929 18 4.5V12.5C18 13.8807 16.8807 15 15.5 15H4.5C3.11929 15 2 13.8807 2 12.5V4.5Z" stroke="currentColor" strokeWidth="2" />
+          <path d="M6 7.5H12M6 11H10M18 10H20M19 9V11M14 18H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )}
     </span>
@@ -91,6 +109,7 @@ export default function CompanyDashboardPage() {
   const [showProModal, setShowProModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [billingPlan, setBillingPlan] = useState<"monthly" | "yearly">("monthly");
+  const [proTermsView, setProTermsView] = useState<"english" | "indonesian" | null>(null);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
   const [proCheckoutError, setProCheckoutError] = useState("");
   const [redirected, setRedirected] = useState(false);
@@ -132,6 +151,11 @@ export default function CompanyDashboardPage() {
   const pricingPhase = platformMap.get("pricing_phase") === "standard" ? "standard" : "launch";
   const monthlyPrice = platformMap.get(`monthly_price_${pricingPhase}`) ?? PRICE_DEFAULTS[pricingPhase].monthly;
   const yearlyPrice = platformMap.get(`yearly_price_${pricingPhase}`) ?? PRICE_DEFAULTS[pricingPhase].yearly;
+  const proTermsEnglishText = platformMap.get(PRO_TERMS_EN_PLATFORM_SETTING_KEY) ?? DEFAULT_PRO_TERMS_EN_TEXT;
+  const proTermsIndonesianText = platformMap.get(PRO_TERMS_ID_PLATFORM_SETTING_KEY) ?? DEFAULT_PRO_TERMS_ID_TEXT;
+  const selectedProTermsSections = parseTermsContent(
+    proTermsView === "indonesian" ? proTermsIndonesianText : proTermsEnglishText
+  );
 
   const monthlyViews = useQuery(
     api.profileViews.getMonthlyStats,
@@ -378,7 +402,7 @@ export default function CompanyDashboardPage() {
 
         {showProAnalytics && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 mb-8">
-            <div className="order-1 sm:order-2">
+            <div className="order-2 sm:order-2">
               <div className="h-[42px]">
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                   Most frequent location searched/
@@ -392,7 +416,7 @@ export default function CompanyDashboardPage() {
               </p>
             </div>
 
-            <div className="order-2 sm:order-1">
+            <div className="order-1 sm:order-1">
               <div className="h-[42px]">
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                   View within the last month /
@@ -606,108 +630,166 @@ export default function CompanyDashboardPage() {
             </div>
 
             <button
-              onClick={() => setShowProModal(false)}
-              className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"
+              onClick={() => {
+                setShowProModal(false);
+                setProTermsView(null);
+              }}
+              className="absolute top-4 right-4 text-[#333]/50 hover:text-[#f14110] transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </button>
 
-            <h3 className="text-[28px] font-bold text-[#333] text-center mb-2 mt-4">PRO ACCOUNT</h3>
-            <p className="text-[12px] text-[#333]/50 text-center mb-8">
-              Services included with PRO account:
-              <br />
-              Layanan dengan akun PRO:
-            </p>
+            {proTermsView ? (
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setProTermsView(null)}
+                  className="mb-6 inline-flex items-center gap-2 text-[11px] text-[#333]/50 hover:text-[#333] transition-colors tracking-[0.22px]"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  BACK
+                </button>
+                <h3 className="text-[24px] font-bold text-[#333] mb-6">
+                  {proTermsView === "english" ? "Pro Terms of Services" : "Ketentuan Penggunaan Pro"}
+                </h3>
+                <div className="space-y-6 text-[11px] text-[#333]/70 leading-[18px] tracking-[0.22px]">
+                  {selectedProTermsSections.map((section) => (
+                    <section key={section.title}>
+                      <h4 className="text-[16px] font-semibold text-[#333] mb-2">{section.title}</h4>
+                      {section.blocks.map((block, index) => {
+                        if (block.type === "list") {
+                          return (
+                            <ul key={`${section.title}-${index}`} className="space-y-1 ml-4 mb-2">
+                              {block.items.map((item) => (
+                                <li key={item} className="flex items-start gap-2">
+                                  <span className="text-[#333]">•</span>
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          );
+                        }
 
-            {/* Features Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-8">
-              <div className="flex items-center gap-3">
-                <ProFeatureIcon name="star" />
-                <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Priority in search results</p>
-                  <p className="text-[10px] text-[#333]/50">Prioritas dalam hasil pencarian</p>
+                        return (
+                          <p key={`${section.title}-${index}`} className="mb-2">
+                            {block.content}
+                          </p>
+                        );
+                      })}
+                    </section>
+                  ))}
                 </div>
               </div>
+            ) : (
+              <>
+                <h3 className="text-[28px] font-bold text-[#333] text-center mb-2 mt-4">PRO ACCOUNT</h3>
+                <p className="text-[12px] text-[#333]/50 text-center mb-8">
+                  Services included with PRO account:
+                  <br />
+                  Layanan dengan akun PRO:
+                </p>
 
-              <div className="flex items-center gap-3">
-                <ProFeatureIcon name="ai" />
-                <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Structured for AI-assisted search</p>
-                  <p className="text-[10px] text-[#333]/50">Terstruktur untuk pencarian yang dibantu AI</p>
-                </div>
-              </div>
+                <div className="mx-auto max-w-[380px] space-y-4 mb-8">
+                  <div className="flex items-center gap-4">
+                    <ProFeatureIcon name="star" />
+                    <div>
+                      <p className="text-[12px] font-semibold text-[#333]">Priority positioning in search results</p>
+                      <p className="text-[10px] text-[#333]/50">Penempatan prioritas dalam hasil pencarian</p>
+                    </div>
+                  </div>
 
-              <div className="flex items-center gap-3">
-                <ProFeatureIcon name="stats" />
-                <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Visibility analytics — who's interested and when</p>
-                  <p className="text-[10px] text-[#333]/50">Analisis visibilitas — siapa yang tertarik dan kapan</p>
-                </div>
-              </div>
+                  <div className="flex items-center gap-4">
+                    <ProFeatureIcon name="ai" />
+                    <div>
+                      <p className="text-[12px] font-semibold text-[#333]">Structured for AI-assisted search</p>
+                      <p className="text-[10px] text-[#333]/50">Terstruktur untuk pencarian yang dibantu AI</p>
+                    </div>
+                  </div>
 
-              <div className="flex items-center gap-3">
-                <ProFeatureIcon name="photos" />
-                <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Up to 12 project photos or videos</p>
-                  <p className="text-[10px] text-[#333]/50">Hingga 12 foto atau video proyek</p>
-                </div>
-              </div>
+                  <div className="flex items-center gap-4">
+                    <ProFeatureIcon name="stats" />
+                    <div>
+                      <p className="text-[12px] font-semibold text-[#333]">Visibility analytics — who's interested and when</p>
+                      <p className="text-[10px] text-[#333]/50">Analisis visibilitas — siapa yang tertarik dan kapan</p>
+                    </div>
+                  </div>
 
-              <div className="flex items-center gap-3">
-                <ProFeatureIcon name="ad" />
-                <div>
-                  <p className="text-[12px] font-semibold text-[#333]">Ad placements across the website</p>
-                  <p className="text-[10px] text-[#333]/50">Penempatan iklan di seluruh situs web</p>
-                </div>
-              </div>
-            </div>
+                  <div className="flex items-center gap-4">
+                    <ProFeatureIcon name="photos" />
+                    <div>
+                      <p className="text-[12px] font-semibold text-[#333]">Up to 12 project photos or videos</p>
+                      <p className="text-[10px] text-[#333]/50">Hingga 12 foto atau video proyek</p>
+                    </div>
+                  </div>
 
-            {/* Pricing Toggle */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-6">
-              <button
-                type="button"
-                onClick={() => setBillingPlan("monthly")}
-                className="flex items-center justify-between gap-3 text-left"
-              >
-                <div>
-                  <p className="text-[28px] font-bold text-[#333]">{formatIdrPrice(monthlyPrice)}<span className="text-[14px]">rp</span></p>
-                  <p className="text-[11px] text-[#333]/50">Month / Bulan</p>
+                  <div className="flex items-center gap-4">
+                    <ProFeatureIcon name="ad" />
+                    <div>
+                      <p className="text-[12px] font-semibold text-[#333]">Ad placements across the website</p>
+                      <p className="text-[10px] text-[#333]/50">Penempatan iklan di seluruh situs web</p>
+                    </div>
+                  </div>
                 </div>
-                <div className={`relative h-4 w-8 rounded-full transition-colors ${billingPlan === "monthly" ? "bg-gradient-to-r from-[#e9a28e] to-[#f14110]" : "bg-[#333]/20"}`}>
-                  <div className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${billingPlan === "monthly" ? "left-[18px]" : "left-0.5"}`} />
-                </div>
-              </button>
 
-              <button
-                type="button"
-                onClick={() => setBillingPlan("yearly")}
-                className="flex items-center justify-between gap-3 text-left"
-              >
-                <div>
-                  <p className="text-[28px] font-bold text-[#333]">{formatIdrPrice(yearlyPrice)}<span className="text-[14px]">rp</span></p>
-                  <p className="text-[11px] text-[#333]/50">Year / Tahun</p>
-                </div>
-                <div className={`relative h-4 w-8 rounded-full transition-colors ${billingPlan === "yearly" ? "bg-gradient-to-r from-[#e9a28e] to-[#f14110]" : "bg-[#333]/20"}`}>
-                  <div className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${billingPlan === "yearly" ? "left-[18px]" : "left-0.5"}`} />
-                </div>
-              </button>
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-6">
+                  <button
+                    type="button"
+                    onClick={() => setBillingPlan("monthly")}
+                    className="flex items-center justify-between gap-3 text-left"
+                  >
+                    <div>
+                      <p className="text-[28px] font-bold text-[#333]">{formatProPrice(monthlyPrice, "monthly")}</p>
+                      <p className="text-[11px] text-[#333]/50">Month / Bulan</p>
+                    </div>
+                    <div className={`relative h-4 w-8 rounded-full transition-colors ${billingPlan === "monthly" ? "bg-gradient-to-r from-[#e9a28e] to-[#f14110]" : "bg-[#333]/20"}`}>
+                      <div className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${billingPlan === "monthly" ? "left-[18px]" : "left-0.5"}`} />
+                    </div>
+                  </button>
 
-            {proCheckoutError && (
-              <p className="mb-4 text-center text-[10px] leading-[16px] text-[#f14110]">
-                {proCheckoutError}
-              </p>
+                  <button
+                    type="button"
+                    onClick={() => setBillingPlan("yearly")}
+                    className="flex items-center justify-between gap-3 text-left"
+                  >
+                    <div>
+                      <p className="text-[28px] font-bold text-[#333]">{formatProPrice(yearlyPrice, "yearly")}</p>
+                      <p className="text-[11px] text-[#333]/50">Year / Tahun</p>
+                    </div>
+                    <div className={`relative h-4 w-8 rounded-full transition-colors ${billingPlan === "yearly" ? "bg-gradient-to-r from-[#e9a28e] to-[#f14110]" : "bg-[#333]/20"}`}>
+                      <div className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${billingPlan === "yearly" ? "left-[18px]" : "left-0.5"}`} />
+                    </div>
+                  </button>
+                </div>
+
+                {proCheckoutError && (
+                  <p className="mb-4 text-center text-[10px] leading-[16px] text-[#f14110]">
+                    {proCheckoutError}
+                  </p>
+                )}
+
+                <button
+                  onClick={handleBuyPro}
+                  disabled={isCreatingInvoice}
+                  className="mx-auto flex items-center justify-center h-10 px-10 rounded-full border border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isCreatingInvoice ? "Creating link..." : "Buy now"}
+                </button>
+
+                <p className="mt-4 text-center text-[10px] leading-[16px] text-[#333]/50">
+                  By subscribing, you agree to our{" "}
+                  <button type="button" onClick={() => setProTermsView("english")} className="underline hover:text-[#f14110] transition-colors">
+                    Terms of Services
+                  </button>
+                  {" / "}Dengan berlangganan, Anda menyetujui{" "}
+                  <button type="button" onClick={() => setProTermsView("indonesian")} className="underline hover:text-[#f14110] transition-colors">
+                    Ketentuan penggunaan
+                  </button>
+                  {" "}kami
+                </p>
+              </>
             )}
-
-            <button
-              onClick={handleBuyPro}
-              disabled={isCreatingInvoice}
-              className="mx-auto flex items-center justify-center h-10 px-10 rounded-full border border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isCreatingInvoice ? "Creating link..." : "Buy now"}
-            </button>
           </div>
         </div>
       )}

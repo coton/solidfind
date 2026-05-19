@@ -14,14 +14,12 @@ import {
   INDIVIDUAL_DASHBOARD_MEDIA_PLATFORM_SETTING_KEY,
   parseMediaSetting,
 } from "@/lib/platform-settings.mjs";
-import { TERMS_TEXT_PLATFORM_SETTING_KEY } from "@/lib/terms-content.mjs";
 
 interface UISettings {
   headerMediaUrl: string;
   headerMediaType: "image" | "video" | "";
   footerMediaUrl: string;
   footerMediaType: "image" | "video" | "";
-  termsText: string;
 }
 
 const DEFAULT: UISettings = {
@@ -29,7 +27,6 @@ const DEFAULT: UISettings = {
   headerMediaType: "",
   footerMediaUrl: "",
   footerMediaType: "",
-  termsText: "",
 };
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -142,18 +139,6 @@ function MediaUpload({
   );
 }
 
-function parseTermsPreview(text: string) {
-  return text.split("\n").map((line, i) => {
-    if (line.startsWith("[TITLE]")) {
-      return <p key={i} className="text-[12px] font-bold text-[#333] mt-3 mb-1">{line.replace("[TITLE]", "").trim()}</p>;
-    }
-    if (line.startsWith("[COPY]")) {
-      return <p key={i} className="text-[11px] text-[#333]/70 leading-relaxed mb-1">{line.replace("[COPY]", "").trim()}</p>;
-    }
-    return <p key={i} className="text-[10px] text-[#333]/40">{line}</p>;
-  });
-}
-
 function inferMediaTypeFromUrl(url: string, fallback: "image" | "video" = "image") {
   return /\.(mp4|webm|mov)(\?|#|$)/i.test(url) ? "video" : fallback;
 }
@@ -161,11 +146,7 @@ function inferMediaTypeFromUrl(url: string, fallback: "image" | "video" = "image
 export default function AdminUI() {
   const [s, setS] = useState<UISettings>(DEFAULT);
   const convex = useConvex();
-  const [termsFile, setTermsFile] = useState("");
-  const termsRef = useRef<HTMLInputElement>(null);
   const [saveAllUiSaved, setSaveAllUiSaved] = useState(false);
-  const termsTextValue = useQuery(api.platformSettings.get, { key: TERMS_TEXT_PLATFORM_SETTING_KEY });
-  const [termsSaved, setTermsSaved] = useState(false);
   const headerMediaValue = useQuery(api.platformSettings.get, { key: HEADER_MEDIA_PLATFORM_SETTING_KEY });
   const footerMediaValue = useQuery(api.platformSettings.get, { key: FOOTER_MEDIA_PLATFORM_SETTING_KEY });
   const parsedHeaderMedia = parseMediaSetting(headerMediaValue, { url: "", type: "image" });
@@ -230,8 +211,6 @@ export default function AdminUI() {
   const [adHorizontalUploading, setAdHorizontalUploading] = useState(false);
   const [adSpacesUploadError, setAdSpacesUploadError] = useState("");
   const adSpacesLoaded = useRef(false);
-
-  const effectiveTermsText = s.termsText || termsTextValue || "";
 
   useEffect(() => {
     if (adSpacesLoaded.current) return;
@@ -311,18 +290,6 @@ export default function AdminUI() {
   }, [aboutCardValue]);
 
   const u = (patch: Partial<UISettings>) => setS((prev) => ({ ...prev, ...patch }));
-
-  const handleTermsFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      setTermsFile(text);
-      u({ termsText: text });
-    };
-    reader.readAsText(file);
-  };
 
   const flashSaved = (setter: (value: boolean) => void) => {
     setter(true);
@@ -459,11 +426,6 @@ export default function AdminUI() {
     flashSaved(setAboutProfilePictureSaved);
   };
 
-  const saveTermsContent = async () => {
-    await setPlatformSetting({ key: TERMS_TEXT_PLATFORM_SETTING_KEY, value: effectiveTermsText, updatedBy: "admin" });
-    flashSaved(setTermsSaved);
-  };
-
   const saveAllUiSettings = async () => {
     if (dashboardMediaUploading || individualDashboardMediaUploading || adVerticalUploading || adHorizontalUploading) return;
 
@@ -472,7 +434,6 @@ export default function AdminUI() {
       saveAboutPage(),
       saveLinks(),
       saveAdSpaces(),
-      saveTermsContent(),
     ];
 
     if (dashboardMediaHasDraft) {
@@ -855,63 +816,6 @@ export default function AdminUI() {
         </div>
       </SectionCard>
 
-      {/* Terms & Conditions */}
-      <SectionCard title="Terms & Conditions">
-        <p className="text-[10px] text-[#333]/50 mb-3">
-          Upload a <code className="bg-[#f5f5f5] px-1 rounded">.txt</code> file. Use{" "}
-          <code className="bg-[#f5f5f5] px-1 rounded">[TITLE]</code> for section headings and{" "}
-          <code className="bg-[#f5f5f5] px-1 rounded">[COPY]</code> for body text. These are auto-formatted on the website.
-        </p>
-        <p className="text-[10px] text-[#f14110] mb-3">
-          Upload loads a draft only. Click Save Terms & Conditions or Save All UI Settings to publish it to the website.
-        </p>
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <button
-            type="button"
-            onClick={() => termsRef.current?.click()}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-[6px] border border-[#e4e4e4] text-[11px] text-[#333]/70 hover:border-[#333] hover:text-[#333] transition-colors"
-          >
-            <Upload className="w-3.5 h-3.5" />
-            Upload .txt file
-          </button>
-          <button
-            type="button"
-            onClick={saveTermsContent}
-            className="h-9 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
-          >
-            {termsSaved ? "✓ Saved!" : "Save Terms & Conditions"}
-          </button>
-          <input ref={termsRef} type="file" accept=".txt" className="hidden" onChange={handleTermsFile} />
-          {termsFile && <span className="text-[10px] text-green-600">✓ File loaded</span>}
-        </div>
-
-        <textarea
-          value={effectiveTermsText}
-          onChange={(e) => u({ termsText: e.target.value })}
-          placeholder={"[TITLE] Section 1\n[COPY] Content of the section goes here.\n\n[TITLE] Section 2\n[COPY] More content here."}
-          rows={8}
-          className="w-full max-w-[600px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#333] transition-colors font-mono resize-y"
-        />
-
-        {effectiveTermsText && (
-          <div className="mt-4">
-            <p className="text-[10px] font-semibold text-[#333]/50 mb-2 uppercase tracking-wider">Preview</p>
-            <div className="max-w-[600px] bg-[#f8f8f8] rounded-[6px] p-4 border border-[#e4e4e4]">
-              {parseTermsPreview(effectiveTermsText)}
-            </div>
-          </div>
-        )}
-
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={saveTermsContent}
-            className="h-8 px-4 rounded-[6px] bg-[#333] text-white text-[11px] font-medium hover:bg-[#111] transition-colors"
-          >
-            {termsSaved ? "✓ Saved!" : "Save Terms & Conditions"}
-          </button>
-        </div>
-      </SectionCard>
     </div>
   );
 }

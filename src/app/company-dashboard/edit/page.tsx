@@ -119,7 +119,7 @@ function getPrimaryActiveCategory(categories: Record<(typeof categoryPriority)[n
 }
 
 const proFeatures = [
-  { icon: "star", title: "Priority in search results", subtitle: "Prioritas dalam hasil pencarian" },
+  { icon: "star", title: "Priority positioning in search results", subtitle: "Penempatan prioritas dalam hasil pencarian" },
   { icon: "ai", title: "Structured for AI-assisted search", subtitle: "Terstruktur untuk pencarian yang dibantu AI" },
   { icon: "stats", title: "Visibility analytics — who's interested and when", subtitle: "Analisis visibilitas — siapa yang tertarik dan kapan" },
   { icon: "photos", title: "Up to 12 project photos or videos", subtitle: "Hingga 12 foto atau video proyek" },

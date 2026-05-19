@@ -1,7 +1,11 @@
 import { mutation, query, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import {
+  DEFAULT_PRO_TERMS_EN_TEXT,
+  DEFAULT_PRO_TERMS_ID_TEXT,
   DEFAULT_TERMS_TEXT,
+  PRO_TERMS_EN_PLATFORM_SETTING_KEY,
+  PRO_TERMS_ID_PLATFORM_SETTING_KEY,
   TERMS_TEXT_PLATFORM_SETTING_KEY,
 } from "../src/lib/terms-content.mjs";
 
@@ -84,6 +88,8 @@ export const seedDefaults = internalMutation({
       yearly_price_standard: "7000000",
       pricing_phase: "launch",
       [TERMS_TEXT_PLATFORM_SETTING_KEY]: DEFAULT_TERMS_TEXT,
+      [PRO_TERMS_EN_PLATFORM_SETTING_KEY]: DEFAULT_PRO_TERMS_EN_TEXT,
+      [PRO_TERMS_ID_PLATFORM_SETTING_KEY]: DEFAULT_PRO_TERMS_ID_TEXT,
     };
 
     for (const [key, value] of Object.entries(defaults)) {

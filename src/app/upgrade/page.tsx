@@ -22,8 +22,8 @@ function formatIdrPrice(value: string | null | undefined) {
 const proFeatures = [
   {
     icon: "star",
-    title: "Priority in search results",
-    subtitle: "Prioritas dalam hasil pencarian",
+    title: "Priority positioning in search results",
+    subtitle: "Penempatan prioritas dalam hasil pencarian",
     description: "Your company appears first in search results, maximizing your visibility to potential clients.",
   },
   {
