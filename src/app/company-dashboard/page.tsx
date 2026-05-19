@@ -654,16 +654,16 @@ export default function CompanyDashboardPage() {
                 <h3 className="text-[24px] font-bold text-[#333] mb-6">
                   {proTermsView === "english" ? "Pro Terms of Services" : "Ketentuan Penggunaan Pro"}
                 </h3>
-                <div className="space-y-6 text-[11px] text-[#333]/70 leading-[18px] tracking-[0.22px]">
+                <div className="space-y-5 text-[11px] text-[#333]/70 leading-[15px] tracking-[0.22px]">
                   {selectedProTermsSections.map((section) => (
                     <section key={section.title}>
-                      <h4 className="text-[16px] font-semibold text-[#333] mb-2">{section.title}</h4>
+                      <h4 className="text-[16px] font-semibold text-[#333] leading-[18px] mb-2">{section.title}</h4>
                       {section.blocks.map((block, index) => {
                         if (block.type === "list") {
                           return (
-                            <ul key={`${section.title}-${index}`} className="space-y-1 ml-4 mb-2">
+                            <ul key={`${section.title}-${index}`} className="space-y-0.5 ml-5 pl-2 mb-1">
                               {block.items.map((item) => (
-                                <li key={item} className="flex items-start gap-2">
+                                <li key={item} className="flex items-start gap-2 leading-[15px]">
                                   <span className="text-[#333]">•</span>
                                   <span>{item}</span>
                                 </li>
@@ -673,7 +673,7 @@ export default function CompanyDashboardPage() {
                         }
 
                         return (
-                          <p key={`${section.title}-${index}`} className="mb-2">
+                          <p key={`${section.title}-${index}`} className="mb-1">
                             {block.content}
                           </p>
                         );

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
+import { usePathname } from "next/navigation";
 import { api } from "../../convex/_generated/api";
 import { AuthModal } from "./AuthModal";
 import {
@@ -16,6 +17,7 @@ import {
 
 export function Footer() {
   const footerMediaValue = useQuery(api.platformSettings.get, { key: FOOTER_MEDIA_PLATFORM_SETTING_KEY });
+  const pathname = usePathname();
   const footerMediaState = resolveMediaSetting(footerMediaValue, { url: "", type: "image" });
   const footerMedia = footerMediaState.media;
   const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
@@ -30,8 +32,14 @@ export function Footer() {
   const showIg = igVisibleState.value !== "false";
   const { user } = useUser();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [aboutHref, setAboutHref] = useState("/about");
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
   const accountDashboardHref = userType === "company" ? "/company-dashboard" : "/dashboard";
+
+  useEffect(() => {
+    const currentPath = `${window.location.pathname}${window.location.search}`;
+    setAboutHref(window.location.pathname === "/about" ? currentPath : `/about?from=${encodeURIComponent(currentPath)}`);
+  }, [pathname]);
 
   // Footer Account button behavior (same as Header):
   // - If logged in as individual: link to /dashboard
@@ -110,7 +118,7 @@ export function Footer() {
               <Image src="/images/footer-mail.svg" alt="Email" width={25} height={20} />
             </a>
             <Link
-              href="/about"
+              href={aboutHref}
               className="text-white font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
             >
               ABOUT
@@ -165,7 +173,7 @@ export function Footer() {
               <Image src="/images/footer-mail.svg" alt="Email" width={25} height={20} />
             </a>
             <Link
-              href="/about"
+              href={aboutHref}
               className="text-white font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
             >
               ABOUT

@@ -79,6 +79,32 @@ test('terms page links to Pro Terms only when Pro features are enabled', () => {
   );
 });
 
+test('legal text views keep manual line breaks tight and indent bullet lists', () => {
+  const termsPageSource = readProjectFile('src/app/terms/page.tsx');
+  const companyDashboardSource = readProjectFile('src/app/company-dashboard/page.tsx');
+  const adminLegalSource = readProjectFile('src/app/admin/legal/page.tsx');
+
+  for (const source of [termsPageSource, companyDashboardSource]) {
+    assert.match(
+      source,
+      /className="space-y-0\.5 ml-5 pl-2 mb-1"/,
+      'expected public legal bullet lists to be indented without adding large vertical gaps'
+    );
+
+    assert.match(
+      source,
+      /className="mb-1"/,
+      'expected public legal paragraphs to keep manual line breaks close to regular line spacing'
+    );
+  }
+
+  assert.match(
+    adminLegalSource,
+    /line\.trim\(\)\.startsWith\("- "\)/,
+    'expected Legal preview to recognize admin-authored bullet lines'
+  );
+});
+
 test('shared terms utility parses admin-authored sections, paragraphs, and lists', async () => {
   const termsUtils = await import(path.join(projectRoot, 'src/lib/terms-content.mjs'));
   const sections = termsUtils.parseTermsContent(`

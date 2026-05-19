@@ -49,19 +49,48 @@ test('about page ties the PRO account card to the platform pro_enabled switch an
   );
 });
 
-test('about page uses the shared email icon asset and right-aligns the contact icons under the profile image', () => {
+test('about page uses the profile email icon treatment and right-aligns the contact icons under the profile image', () => {
   const aboutSource = readProjectFile('src/app/about/page.tsx');
 
   assert.match(
     aboutSource,
-    /Image src="\/images\/footer-mail\.svg" alt="Email" width=\{25\} height=\{20\}/,
-    'expected the About page email icon to reuse the same footer-mail asset as the rest of the website'
+    /className="text-\[#333\] hover:text-\[#f14110\] transition-colors flex items-center h-\[20px\]"/,
+    'expected the About page email icon to use the same black-to-orange hover treatment as company profiles'
+  );
+
+  assert.match(
+    aboutSource,
+    /<rect x="1" y="1" width="22" height="16" rx="2" stroke="currentColor" strokeWidth="2"/,
+    'expected the About page email icon to use a currentColor inline SVG'
   );
 
   assert.match(
     aboutSource,
     /className="flex w-\[180px\] justify-end gap-4 sm:w-\[200px\]"/,
     'expected the About page contact icon row to align to the right edge of the profile picture'
+  );
+});
+
+test('footer About links preserve the current page and query filters for the About back link', () => {
+  const footerSource = readProjectFile('src/components/Footer.tsx');
+  const aboutSource = readProjectFile('src/app/about/page.tsx');
+
+  assert.match(
+    footerSource,
+    /usePathname/,
+    'expected Footer to read the current path before building the About link'
+  );
+
+  assert.match(
+    footerSource,
+    /setAboutHref\(window\.location\.pathname === "\/about" \? currentPath : `\/about\?from=\$\{encodeURIComponent\(currentPath\)\}`\)/,
+    'expected Footer About link to carry the current route and filters in a from parameter'
+  );
+
+  assert.match(
+    aboutSource,
+    /new URLSearchParams\(window\.location\.search\)\.get\("from"\)/,
+    'expected About back button to return to the preserved source page when provided'
   );
 });
 

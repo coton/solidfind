@@ -75,19 +75,19 @@ export default function TermsPage() {
           {title}
         </h1>
 
-        <div className="space-y-8 text-[11px] text-[#333]/70 leading-[18px] tracking-[0.22px] mb-12">
+        <div className="space-y-6 text-[11px] text-[#333]/70 leading-[15px] tracking-[0.22px] mb-12">
           {sections.map((section) => (
             <section key={section.title}>
-              <h2 className="text-[18px] font-semibold text-[#333] tracking-[0.36px] leading-[22px] mb-3">
+              <h2 className="text-[18px] font-semibold text-[#333] tracking-[0.36px] leading-[20px] mb-2">
                 {section.title}
               </h2>
 
               {section.blocks.map((block, index) => {
                 if (block.type === "list") {
                   return (
-                    <ul key={`${section.title}-${index}`} className="space-y-1 ml-4 mb-2">
+                    <ul key={`${section.title}-${index}`} className="space-y-0.5 ml-5 pl-2 mb-1">
                       {block.items.map((item) => (
-                        <li key={item} className="flex items-start gap-2">
+                        <li key={item} className="flex items-start gap-2 leading-[15px]">
                           <span className="text-[#333]">•</span>
                           <span>{item}</span>
                         </li>
@@ -97,7 +97,7 @@ export default function TermsPage() {
                 }
 
                 return (
-                  <p key={`${section.title}-${index}`} className="mb-2">
+                  <p key={`${section.title}-${index}`} className="mb-1">
                     {block.content}
                   </p>
                 );

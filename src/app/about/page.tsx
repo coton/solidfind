@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useQuery } from "convex/react";
@@ -32,8 +33,18 @@ function renderBoldTextLine(line: string) {
 
 function renderFormattedParagraphs(text: string, className: string) {
   return text.split("\n").map((line, index) => {
-    if (!line.trim()) {
-      return <div key={`spacer-${index}`} className="h-2" aria-hidden="true" />;
+    const trimmedLine = line.trim();
+
+    if (!trimmedLine) {
+      return <div key={`spacer-${index}`} className="h-1" aria-hidden="true" />;
+    }
+
+    if (trimmedLine.startsWith("- ")) {
+      return (
+        <p key={`line-${index}`} className={`${className} ml-5 pl-2`}>
+          - {renderBoldTextLine(trimmedLine.slice(2))}
+        </p>
+      );
     }
 
     return <p key={`line-${index}`} className={className}>{renderBoldTextLine(line)}</p>;
@@ -41,6 +52,15 @@ function renderFormattedParagraphs(text: string, className: string) {
 }
 
 export default function AboutPage() {
+  const [backHref, setBackHref] = useState("/");
+
+  useEffect(() => {
+    const from = new URLSearchParams(window.location.search).get("from");
+    if (from) {
+      setBackHref(from);
+    }
+  }, []);
+
   // Dynamic content from admin UI tab
   const tagline = useQuery(api.platformSettings.get, { key: "aboutPageTagline" });
   const taglineState = resolveTextSetting(tagline, DEFAULT_ABOUT_TAGLINE);
@@ -80,7 +100,7 @@ export default function AboutPage() {
         {/* Back row */}
         <div className="flex items-center mb-3 py-2 border-b border-[#333]/10">
           <Link
-            href="/"
+            href={backHref}
             className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
           >
             <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
@@ -137,9 +157,11 @@ export default function AboutPage() {
 
             {/* Social Links */}
             <div className="flex w-[180px] justify-end gap-4 sm:w-[200px]">
-              {/* Mail icon - matches the footer asset */}
-              <a href={mailHref} className="text-[#333] hover:opacity-70 transition-opacity">
-                <Image src="/images/footer-mail.svg" alt="Email" width={25} height={20} />
+              <a href={mailHref} aria-label="Email" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
+                <svg height="20" viewBox="0 0 24 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="1" y="1" width="22" height="16" rx="2" stroke="currentColor" strokeWidth="2" />
+                  <path d="M1 3L12 10L23 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </a>
               {/* IG icon - same as header (20×20, stroke 1.5) */}
               <a href={igUrlState.value || "#"} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:opacity-70 transition-opacity">
@@ -156,7 +178,7 @@ export default function AboutPage() {
             </p>
 
             {/* About Description */}
-            <div className="space-y-2 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]">
+            <div className="space-y-1 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]">
               {renderFormattedParagraphs(descriptionState.value, "text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]")}
             </div>
 
@@ -179,7 +201,7 @@ export default function AboutPage() {
                 <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
                   COMPANY ACCOUNT
                 </h4>
-                <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px] space-y-1">
+                <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px] space-y-0.5">
                   {renderFormattedParagraphs(freeCompanyState.value, "text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]")}
                 </div>
               </div>
@@ -189,7 +211,7 @@ export default function AboutPage() {
                   <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
                     PRO COMPANY ACCOUNT
                   </h4>
-                  <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px] space-y-1">
+                  <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px] space-y-0.5">
                     {renderFormattedParagraphs(proCompanyState.value, "text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]")}
                   </div>
                 </div>
