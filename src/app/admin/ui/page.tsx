@@ -22,11 +22,37 @@ interface UISettings {
   footerMediaType: "image" | "video" | "";
 }
 
+type AboutLanguage = "en" | "id";
+
+interface AboutPageLanguageFields {
+  tagline: string;
+  description: string;
+  individual: string;
+  freeCompany: string;
+  proCompany: string;
+  contact: string;
+}
+
+interface AboutPageFieldsByLanguage {
+  en: AboutPageLanguageFields;
+  id: AboutPageLanguageFields;
+  email: string;
+}
+
 const DEFAULT: UISettings = {
   headerMediaUrl: "",
   headerMediaType: "",
   footerMediaUrl: "",
   footerMediaType: "",
+};
+
+const EMPTY_ABOUT_LANGUAGE_FIELDS: AboutPageLanguageFields = {
+  tagline: "",
+  description: "",
+  individual: "",
+  freeCompany: "",
+  proCompany: "",
+  contact: "",
 };
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -253,15 +279,18 @@ export default function AdminUI() {
   const aboutFreeCompany = useQuery(api.platformSettings.get, { key: "aboutPageFreeCompany" });
   const aboutProCompany = useQuery(api.platformSettings.get, { key: "aboutPageProCompany" });
   const aboutContact = useQuery(api.platformSettings.get, { key: "aboutPageContact" });
+  const aboutTaglineId = useQuery(api.platformSettings.get, { key: "aboutPageTaglineId" });
+  const aboutDescriptionId = useQuery(api.platformSettings.get, { key: "aboutPageDescriptionId" });
+  const aboutIndividualId = useQuery(api.platformSettings.get, { key: "aboutPageIndividualId" });
+  const aboutFreeCompanyId = useQuery(api.platformSettings.get, { key: "aboutPageFreeCompanyId" });
+  const aboutProCompanyId = useQuery(api.platformSettings.get, { key: "aboutPageProCompanyId" });
+  const aboutContactId = useQuery(api.platformSettings.get, { key: "aboutPageContactId" });
   const aboutEmail = useQuery(api.platformSettings.get, { key: "aboutPageEmail" });
 
-  const [aboutPageFields, setAboutPageFields] = useState({
-    tagline: "",
-    description: "",
-    individual: "",
-    freeCompany: "",
-    proCompany: "",
-    contact: "",
+  const [aboutPageLanguage, setAboutPageLanguage] = useState<AboutLanguage>("en");
+  const [aboutPageFields, setAboutPageFields] = useState<AboutPageFieldsByLanguage>({
+    en: EMPTY_ABOUT_LANGUAGE_FIELDS,
+    id: EMPTY_ABOUT_LANGUAGE_FIELDS,
     email: "",
   });
   const [aboutPageSaved, setAboutPageSaved] = useState(false);
@@ -269,19 +298,58 @@ export default function AdminUI() {
 
   useEffect(() => {
     if (aboutPageLoaded.current) return;
-    if (aboutTagline !== undefined) {
-      aboutPageLoaded.current = true;
-      setAboutPageFields({
+    const values = [
+      aboutTagline,
+      aboutDescription,
+      aboutIndividual,
+      aboutFreeCompany,
+      aboutProCompany,
+      aboutContact,
+      aboutTaglineId,
+      aboutDescriptionId,
+      aboutIndividualId,
+      aboutFreeCompanyId,
+      aboutProCompanyId,
+      aboutContactId,
+      aboutEmail,
+    ];
+    if (values.some((value) => value === undefined)) return;
+
+    aboutPageLoaded.current = true;
+    setAboutPageFields({
+      en: {
         tagline: aboutTagline ?? "",
         description: aboutDescription ?? "",
         individual: aboutIndividual ?? "",
         freeCompany: aboutFreeCompany ?? "",
         proCompany: aboutProCompany ?? "",
         contact: aboutContact ?? "",
-        email: aboutEmail ?? "",
-      });
-    }
-  }, [aboutTagline, aboutDescription, aboutIndividual, aboutFreeCompany, aboutProCompany, aboutContact, aboutEmail]);
+      },
+      id: {
+        tagline: aboutTaglineId ?? "",
+        description: aboutDescriptionId ?? "",
+        individual: aboutIndividualId ?? "",
+        freeCompany: aboutFreeCompanyId ?? "",
+        proCompany: aboutProCompanyId ?? "",
+        contact: aboutContactId ?? "",
+      },
+      email: aboutEmail ?? "",
+    });
+  }, [
+    aboutTagline,
+    aboutDescription,
+    aboutIndividual,
+    aboutFreeCompany,
+    aboutProCompany,
+    aboutContact,
+    aboutTaglineId,
+    aboutDescriptionId,
+    aboutIndividualId,
+    aboutFreeCompanyId,
+    aboutProCompanyId,
+    aboutContactId,
+    aboutEmail,
+  ]);
 
   useEffect(() => {
     if (aboutCardValue !== undefined && aboutCardValue !== null) {
@@ -315,12 +383,18 @@ export default function AdminUI() {
 
   const saveAboutPage = async () => {
     const entries: [string, string][] = [
-      ["aboutPageTagline", aboutPageFields.tagline],
-      ["aboutPageDescription", aboutPageFields.description],
-      ["aboutPageIndividual", aboutPageFields.individual],
-      ["aboutPageFreeCompany", aboutPageFields.freeCompany],
-      ["aboutPageProCompany", aboutPageFields.proCompany],
-      ["aboutPageContact", aboutPageFields.contact],
+      ["aboutPageTagline", aboutPageFields.en.tagline],
+      ["aboutPageDescription", aboutPageFields.en.description],
+      ["aboutPageIndividual", aboutPageFields.en.individual],
+      ["aboutPageFreeCompany", aboutPageFields.en.freeCompany],
+      ["aboutPageProCompany", aboutPageFields.en.proCompany],
+      ["aboutPageContact", aboutPageFields.en.contact],
+      ["aboutPageTaglineId", aboutPageFields.id.tagline],
+      ["aboutPageDescriptionId", aboutPageFields.id.description],
+      ["aboutPageIndividualId", aboutPageFields.id.individual],
+      ["aboutPageFreeCompanyId", aboutPageFields.id.freeCompany],
+      ["aboutPageProCompanyId", aboutPageFields.id.proCompany],
+      ["aboutPageContactId", aboutPageFields.id.contact],
       ["aboutPageEmail", aboutPageFields.email],
     ];
 
@@ -461,6 +535,17 @@ export default function AdminUI() {
     flashSaved(setSaveAllUiSaved);
   };
 
+  const activeAboutFields = aboutPageFields[aboutPageLanguage];
+  const updateAboutLanguageField = (field: keyof AboutPageLanguageFields, value: string) => {
+    setAboutPageFields((previous) => ({
+      ...previous,
+      [aboutPageLanguage]: {
+        ...previous[aboutPageLanguage],
+        [field]: value,
+      },
+    }));
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
@@ -500,53 +585,65 @@ export default function AdminUI() {
 
       {/* About Page Content */}
       <SectionCard title="About Page Content">
-        <Field label="Tagline" hint="Bold text at the top of the about page">
+        <div className="mb-4 flex h-8 w-max overflow-hidden rounded-full border border-[#333]/15 text-[11px] font-semibold tracking-[0.22px] text-[#333]/50">
+          {(["en", "id"] as AboutLanguage[]).map((language) => (
+            <button
+              key={language}
+              type="button"
+              onClick={() => setAboutPageLanguage(language)}
+              className={`px-4 transition-colors ${aboutPageLanguage === language ? "bg-[#333] text-white" : "hover:text-[#333]"}`}
+            >
+              {language.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <Field label={`Tagline (${aboutPageLanguage.toUpperCase()})`} hint="Bold text at the top of the about page">
           <TextInput
-            value={aboutPageFields.tagline}
-            onChange={(v) => setAboutPageFields((p) => ({ ...p, tagline: v }))}
+            value={activeAboutFields.tagline}
+            onChange={(v) => updateAboutLanguageField("tagline", v)}
             placeholder="A clearer way to build and live in Indonesia."
           />
         </Field>
-        <Field label="Description" hint="Main paragraph below the tagline. Use line breaks for multiple paragraphs. Wrap text in **bold** to emphasize it on the public About page.">
+        <Field label={`Description (${aboutPageLanguage.toUpperCase()})`} hint="Main paragraph below the tagline. Use line breaks for multiple paragraphs. Wrap text in **bold** to emphasize it on the public About page.">
           <textarea
-            value={aboutPageFields.description}
-            onChange={(e) => setAboutPageFields((p) => ({ ...p, description: e.target.value }))}
+            value={activeAboutFields.description}
+            onChange={(e) => updateAboutLanguageField("description", e.target.value)}
             placeholder="Building, renovating, or choosing a home is one of the most important decisions people make..."
             rows={5}
             className="w-full max-w-[500px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
           />
         </Field>
-        <Field label="Individual Account description">
+        <Field label={`Individual Account description (${aboutPageLanguage.toUpperCase()})`}>
           <textarea
-            value={aboutPageFields.individual}
-            onChange={(e) => setAboutPageFields((p) => ({ ...p, individual: e.target.value }))}
+            value={activeAboutFields.individual}
+            onChange={(e) => updateAboutLanguageField("individual", e.target.value)}
             placeholder="For property owners & renters — browse listings, bookmark companies..."
             rows={3}
             className="w-full max-w-[500px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
           />
         </Field>
-        <Field label="Company Account description">
+        <Field label={`Company Account description (${aboutPageLanguage.toUpperCase()})`}>
           <textarea
-            value={aboutPageFields.freeCompany}
-            onChange={(e) => setAboutPageFields((p) => ({ ...p, freeCompany: e.target.value }))}
+            value={activeAboutFields.freeCompany}
+            onChange={(e) => updateAboutLanguageField("freeCompany", e.target.value)}
             placeholder="For construction & renovation professionals — create your company profile..."
             rows={3}
             className="w-full max-w-[500px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
           />
         </Field>
-        <Field label="Pro Company Account description">
+        <Field label={`Pro Company Account description (${aboutPageLanguage.toUpperCase()})`}>
           <textarea
-            value={aboutPageFields.proCompany}
-            onChange={(e) => setAboutPageFields((p) => ({ ...p, proCompany: e.target.value }))}
+            value={activeAboutFields.proCompany}
+            onChange={(e) => updateAboutLanguageField("proCompany", e.target.value)}
             placeholder="Everything in Free, plus: top search ranking, AI search optimization..."
             rows={3}
             className="w-full max-w-[500px] px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
           />
         </Field>
-        <Field label="Contact text" hint="Text above the email link in the contact section">
+        <Field label={`Contact text (${aboutPageLanguage.toUpperCase()})`} hint="Text above the email link in the contact section">
           <TextInput
-            value={aboutPageFields.contact}
-            onChange={(v) => setAboutPageFields((p) => ({ ...p, contact: v }))}
+            value={activeAboutFields.contact}
+            onChange={(v) => updateAboutLanguageField("contact", v)}
             placeholder="Questions, feedback, or partnership inquiries?"
           />
         </Field>

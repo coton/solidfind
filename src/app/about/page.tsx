@@ -20,6 +20,9 @@ const DEFAULT_FREE_COMPANY_TEXT = "For construction & renovation professionals â
 const DEFAULT_PRO_COMPANY_TEXT = "Everything in Free, plus: priority positioning in search results, structured AI-assisted search, visibility analytics, up to 12 project photos or videos, and ad placements across the website. Built for companies ready to grow.";
 const DEFAULT_CONTACT_TEXT = "Questions, feedback, or partnership inquiries?";
 const DEFAULT_CONTACT_EMAIL = "hello@solidfind.id";
+const ABOUT_ID_SETTING_SUFFIX = "Id";
+
+type AboutLanguage = "en" | "id";
 
 function renderBoldTextLine(line: string) {
   return line.split(/(\*\*[^*]+\*\*)/g).map((segment, index) => {
@@ -59,6 +62,7 @@ function renderFormattedParagraphs(text: string, className: string) {
 
 export default function AboutPage() {
   const [backHref, setBackHref] = useState("/");
+  const [language, setLanguage] = useState<AboutLanguage>("en");
 
   useEffect(() => {
     const from = new URLSearchParams(window.location.search).get("from");
@@ -70,16 +74,28 @@ export default function AboutPage() {
   // Dynamic content from admin UI tab
   const tagline = useQuery(api.platformSettings.get, { key: "aboutPageTagline" });
   const taglineState = resolveTextSetting(tagline, DEFAULT_ABOUT_TAGLINE);
+  const taglineId = useQuery(api.platformSettings.get, { key: `aboutPageTagline${ABOUT_ID_SETTING_SUFFIX}` });
+  const taglineIdState = resolveTextSetting(taglineId, taglineState.value || DEFAULT_ABOUT_TAGLINE);
   const description = useQuery(api.platformSettings.get, { key: "aboutPageDescription" });
   const descriptionState = resolveTextSetting(description, DEFAULT_ABOUT_DESCRIPTION);
+  const descriptionId = useQuery(api.platformSettings.get, { key: `aboutPageDescription${ABOUT_ID_SETTING_SUFFIX}` });
+  const descriptionIdState = resolveTextSetting(descriptionId, descriptionState.value || DEFAULT_ABOUT_DESCRIPTION);
   const individual = useQuery(api.platformSettings.get, { key: "aboutPageIndividual" });
   const individualState = resolveTextSetting(individual, DEFAULT_INDIVIDUAL_TEXT);
+  const individualId = useQuery(api.platformSettings.get, { key: `aboutPageIndividual${ABOUT_ID_SETTING_SUFFIX}` });
+  const individualIdState = resolveTextSetting(individualId, individualState.value || DEFAULT_INDIVIDUAL_TEXT);
   const freeCompany = useQuery(api.platformSettings.get, { key: "aboutPageFreeCompany" });
   const freeCompanyState = resolveTextSetting(freeCompany, DEFAULT_FREE_COMPANY_TEXT);
+  const freeCompanyId = useQuery(api.platformSettings.get, { key: `aboutPageFreeCompany${ABOUT_ID_SETTING_SUFFIX}` });
+  const freeCompanyIdState = resolveTextSetting(freeCompanyId, freeCompanyState.value || DEFAULT_FREE_COMPANY_TEXT);
   const proCompany = useQuery(api.platformSettings.get, { key: "aboutPageProCompany" });
   const proCompanyState = resolveTextSetting(proCompany, DEFAULT_PRO_COMPANY_TEXT);
+  const proCompanyId = useQuery(api.platformSettings.get, { key: `aboutPageProCompany${ABOUT_ID_SETTING_SUFFIX}` });
+  const proCompanyIdState = resolveTextSetting(proCompanyId, proCompanyState.value || DEFAULT_PRO_COMPANY_TEXT);
   const contact = useQuery(api.platformSettings.get, { key: "aboutPageContact" });
   const contactState = resolveTextSetting(contact, DEFAULT_CONTACT_TEXT);
+  const contactId = useQuery(api.platformSettings.get, { key: `aboutPageContact${ABOUT_ID_SETTING_SUFFIX}` });
+  const contactIdState = resolveTextSetting(contactId, contactState.value || DEFAULT_CONTACT_TEXT);
   const email = useQuery(api.platformSettings.get, { key: "aboutPageEmail" });
   const emailState = resolveTextSetting(email, DEFAULT_CONTACT_EMAIL);
   const aboutProfilePicture = useQuery(api.platformSettings.get, { key: "aboutProfilePictureUrl" });
@@ -90,6 +106,20 @@ export default function AboutPage() {
   const proFeatureValue = useQuery(api.platformSettings.get, { key: "pro_enabled" });
   const showProCompany = proFeatureValue === "true";
   const mailHref = normalizeContactHref(emailState.value, `mailto:${DEFAULT_CONTACT_EMAIL}`);
+  const localized = {
+    tagline: language === "id" ? taglineIdState.value : taglineState.value,
+    description: language === "id" ? descriptionIdState.value : descriptionState.value,
+    individual: language === "id" ? individualIdState.value : individualState.value,
+    freeCompany: language === "id" ? freeCompanyIdState.value : freeCompanyState.value,
+    proCompany: language === "id" ? proCompanyIdState.value : proCompanyState.value,
+    contact: language === "id" ? contactIdState.value : contactState.value,
+    howItWorks: language === "id" ? "Cara kerjanya" : "How it works",
+    individualHeading: language === "id" ? "AKUN INDIVIDU" : "INDIVIDUAL ACCOUNT",
+    companyHeading: language === "id" ? "AKUN PERUSAHAAN" : "COMPANY ACCOUNT",
+    proCompanyHeading: language === "id" ? "AKUN PRO PERUSAHAAN" : "PRO COMPANY ACCOUNT",
+    contactHeading: language === "id" ? "Hubungi kami" : "Get in touch",
+    reachUsAt: language === "id" ? "Hubungi kami di" : "Reach us at",
+  };
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({ title: "SOLIDFIND.ID", url: window.location.href });
@@ -119,15 +149,29 @@ export default function AboutPage() {
         {/* Title + Share (same row) */}
         <div className="flex items-start justify-between mb-6 sm:mb-8">
           <h1 className="text-[24px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px]">SOLIDFIND.ID</h1>
-          <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative flex-shrink-0 mt-1">
-            <span className="font-bam text-[9px]">Share</span>
-            <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
-              className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-              style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-            >
-              <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
-            </svg>
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative flex-shrink-0 mt-1">
+              <span className="font-bam text-[9px]">Share</span>
+              <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
+                style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
+              >
+                <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
+              </svg>
+            </button>
+            <div className="flex h-7 overflow-hidden rounded-full border border-[#333]/15 text-[10px] font-semibold tracking-[0.2px] text-[#333]/50">
+              {(["en", "id"] as AboutLanguage[]).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setLanguage(option)}
+                  className={`px-3 transition-colors ${language === option ? "bg-[#333] text-white" : "hover:text-[#333]"}`}
+                >
+                  {option.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* About Content - Mobile: stack, Desktop: side by side */}
@@ -162,7 +206,7 @@ export default function AboutPage() {
             </div>
 
             {/* Social Links */}
-            <div className="flex w-[180px] justify-end gap-4 sm:w-[200px]">
+            <div className="flex w-[180px] justify-start gap-4 sm:w-[200px]">
               <a href={mailHref} aria-label="Email" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
                 <svg height="20" viewBox="0 0 24 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <rect x="1" y="1" width="22" height="16" rx="2" stroke="currentColor" strokeWidth="2" />
@@ -180,45 +224,45 @@ export default function AboutPage() {
           <div>
             {/* Tagline */}
             <p className="text-[14px] font-semibold text-[#333] mb-4">
-              {taglineState.value}
+              {localized.tagline}
             </p>
 
             {/* About Description */}
             <div className="space-y-1 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]">
-              {renderFormattedParagraphs(descriptionState.value, "text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]")}
+              {renderFormattedParagraphs(localized.description, "text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]")}
             </div>
 
             {/* Account Types */}
             <div className="mt-8 space-y-4">
               <h3 className="text-[12px] font-semibold text-[#333] tracking-[0.24px] mb-2">
-                How it works
+                {localized.howItWorks}
               </h3>
 
               <div className="p-3 bg-white rounded-[6px]">
                 <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
-                  INDIVIDUAL ACCOUNT
+                  {localized.individualHeading}
                 </h4>
                 <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  {individualState.value}
+                  {localized.individual}
                 </p>
               </div>
 
               <div className="p-3 bg-white rounded-[6px]">
                 <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
-                  COMPANY ACCOUNT
+                  {localized.companyHeading}
                 </h4>
                 <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px] space-y-0.5">
-                  {renderFormattedParagraphs(freeCompanyState.value, "text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]")}
+                  {renderFormattedParagraphs(localized.freeCompany, "text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]")}
                 </div>
               </div>
 
               {showProCompany && (
                 <div className="p-3 bg-white rounded-[6px]">
                   <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
-                    PRO COMPANY ACCOUNT
+                    {localized.proCompanyHeading}
                   </h4>
                   <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px] space-y-0.5">
-                    {renderFormattedParagraphs(proCompanyState.value, "text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]")}
+                    {renderFormattedParagraphs(localized.proCompany, "text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]")}
                   </div>
                 </div>
               )}
@@ -227,12 +271,12 @@ export default function AboutPage() {
             {/* Contact */}
             <div className="mt-8 pt-4 border-t border-[#e4e4e4]">
               <h3 className="text-[12px] font-semibold text-[#333] tracking-[0.24px] mb-2">
-                Get in touch
+                {localized.contactHeading}
               </h3>
               <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
-                {contactState.value}
+                {localized.contact}
                 <br />
-                Reach us at{" "}
+                {localized.reachUsAt}{" "}
                 <a href={mailHref} className="text-[#f14110] hover:underline">
                   {emailState.value}
                 </a>

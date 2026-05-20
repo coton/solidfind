@@ -379,6 +379,12 @@ test('company dashboard pro modal reads platform pricing and starts Xendit check
 
   assert.match(
     source,
+    /\["english", "EN"\][\s\S]*\["indonesian", "ID"\][\s\S]*setProTermsView\(value\)/,
+    'Expected the Pro Terms modal view to expose an EN/ID language switch'
+  );
+
+  assert.match(
+    source,
     /max-w-\[440px\][\s\S]*max-w-\[260px\] space-y-3[\s\S]*text-\[22px\] font-bold leading-\[26px\][\s\S]*formatProPrice\(yearlyPrice, "yearly"\)/,
     'Expected the Pro modal to be narrower and stack smaller pricing rows vertically'
   );

@@ -643,14 +643,31 @@ export default function CompanyDashboardPage() {
 
             {proTermsView ? (
               <div className="mt-4">
-                <button
-                  type="button"
-                  onClick={() => setProTermsView(null)}
-                  className="mb-6 inline-flex items-center gap-2 text-[11px] text-[#333]/50 hover:text-[#333] transition-colors tracking-[0.22px]"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  BACK
-                </button>
+                <div className="mb-6 flex items-center justify-between gap-4 pr-8">
+                  <button
+                    type="button"
+                    onClick={() => setProTermsView(null)}
+                    className="inline-flex items-center gap-2 text-[11px] text-[#333]/50 hover:text-[#333] transition-colors tracking-[0.22px]"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    BACK
+                  </button>
+                  <div className="flex h-7 overflow-hidden rounded-full border border-[#333]/15 text-[10px] font-semibold tracking-[0.2px] text-[#333]/50">
+                    {([
+                      ["english", "EN"],
+                      ["indonesian", "ID"],
+                    ] as const).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setProTermsView(value)}
+                        className={`px-3 transition-colors ${proTermsView === value ? "bg-[#333] text-white" : "hover:text-[#333]"}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <h3 className="text-[24px] font-bold text-[#333] mb-6">
                   {proTermsView === "english" ? "Pro Terms of Services" : "Ketentuan Penggunaan Pro"}
                 </h3>

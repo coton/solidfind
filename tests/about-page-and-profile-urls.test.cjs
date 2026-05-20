@@ -66,8 +66,30 @@ test('about page uses the profile email icon treatment and right-aligns the cont
 
   assert.match(
     aboutSource,
-    /className="flex w-\[180px\] justify-end gap-4 sm:w-\[200px\]"/,
-    'expected the About page contact icon row to align to the right edge of the profile picture'
+    /className="flex w-\[180px\] justify-start gap-4 sm:w-\[200px\]"/,
+    'expected the About page contact icon row to align to the left edge of the profile picture'
+  );
+});
+
+test('about page exposes an EN ID language switch and localized platform settings', () => {
+  const aboutSource = readProjectFile('src/app/about/page.tsx');
+
+  assert.match(
+    aboutSource,
+    /type AboutLanguage = "en" \| "id"/,
+    'expected the public About page to keep language state for EN and ID'
+  );
+
+  assert.match(
+    aboutSource,
+    /ABOUT_ID_SETTING_SUFFIX[\s\S]*aboutPageTagline\$\{ABOUT_ID_SETTING_SUFFIX\}[\s\S]*aboutPageDescription\$\{ABOUT_ID_SETTING_SUFFIX\}[\s\S]*aboutPageIndividual\$\{ABOUT_ID_SETTING_SUFFIX\}[\s\S]*aboutPageFreeCompany\$\{ABOUT_ID_SETTING_SUFFIX\}[\s\S]*aboutPageProCompany\$\{ABOUT_ID_SETTING_SUFFIX\}[\s\S]*aboutPageContact\$\{ABOUT_ID_SETTING_SUFFIX\}/,
+    'expected the public About page to read Indonesian About content settings'
+  );
+
+  assert.match(
+    aboutSource,
+    /option\.toUpperCase\(\)/,
+    'expected the public About page language switch to render EN and ID labels'
   );
 });
 
@@ -120,8 +142,14 @@ test('admin UI explains bold formatting for the About page description and renam
 
   assert.match(
     adminUiSource,
-    /Company Account description/,
-    'expected the Back Office UI tab to rename Free Company Account description to Company Account description'
+    /Company Account description \(\$\{aboutPageLanguage\.toUpperCase\(\)\}\)/,
+    'expected the Back Office UI tab to edit Company Account description per language'
+  );
+
+  assert.match(
+    adminUiSource,
+    /aboutPageTaglineId[\s\S]*aboutPageDescriptionId[\s\S]*aboutPageIndividualId[\s\S]*aboutPageFreeCompanyId[\s\S]*aboutPageProCompanyId[\s\S]*aboutPageContactId/,
+    'expected the Back Office UI tab to save Indonesian About page content'
   );
 });
 
