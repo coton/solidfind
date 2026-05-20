@@ -87,7 +87,7 @@ test('legal text views keep manual line breaks tight and indent bullet lists', (
   for (const source of [termsPageSource, companyDashboardSource]) {
     assert.match(
       source,
-      /className="space-y-0\.5 ml-5 pl-2 mb-1"/,
+      /className="space-y-0\.5 pl-8 mb-1"/,
       'expected public legal bullet lists to be indented without adding large vertical gaps'
     );
 
@@ -98,10 +98,9 @@ test('legal text views keep manual line breaks tight and indent bullet lists', (
     );
   }
 
-  assert.match(
-    adminLegalSource,
-    /line\.trim\(\)\.startsWith\("- "\)/,
-    'expected Legal preview to recognize admin-authored bullet lines'
+  assert.ok(
+    adminLegalSource.includes('[-•▪*]\\s+(.+)'),
+    'expected Legal preview to recognize admin-authored bullet lines, including typed bullet characters'
   );
 });
 
@@ -122,6 +121,29 @@ test('shared terms utility parses admin-authored sections, paragraphs, and lists
         { type: 'paragraph', content: 'First paragraph.' },
         { type: 'list', items: ['First bullet', 'Second bullet'] },
         { type: 'paragraph', content: 'Closing paragraph.' },
+      ],
+    },
+  ]);
+});
+
+test('shared terms utility parses real bullet characters as list items', async () => {
+  const termsUtils = await import(path.join(projectRoot, 'src/lib/terms-content.mjs'));
+  const sections = termsUtils.parseTermsContent(`
+[TITLE] Beliefs
+[COPY] We believe that:
+• Visibility should be earned through clarity.
+▪ Trust should be built through transparency.
+* Access should be available to anyone.
+  `);
+
+  assert.deepEqual(sections[0].blocks, [
+    { type: 'paragraph', content: 'We believe that:' },
+    {
+      type: 'list',
+      items: [
+        'Visibility should be earned through clarity.',
+        'Trust should be built through transparency.',
+        'Access should be available to anyone.',
       ],
     },
   ]);

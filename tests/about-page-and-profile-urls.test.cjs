@@ -71,6 +71,21 @@ test('about page uses the profile email icon treatment and right-aligns the cont
   );
 });
 
+test('about page indents admin-authored bullet lines including real bullet characters', () => {
+  const aboutSource = readProjectFile('src/app/about/page.tsx');
+
+  assert.ok(
+    aboutSource.includes('[-•▪*]\\s+(.+)'),
+    'expected the About page text formatter to recognize typed bullet characters as list lines'
+  );
+
+  assert.match(
+    aboutSource,
+    /className=\{`\$\{className\} pl-8`\}/,
+    'expected About page bullet lines to render with a visible four-space-style indent'
+  );
+});
+
 test('footer About links preserve the current page and query filters for the About back link', () => {
   const footerSource = readProjectFile('src/components/Footer.tsx');
   const aboutSource = readProjectFile('src/app/about/page.tsx');

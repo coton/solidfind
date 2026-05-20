@@ -31,18 +31,24 @@ function renderBoldTextLine(line: string) {
   });
 }
 
+function parseBulletLine(line: string) {
+  const match = line.trim().match(/^[-•▪*]\s+(.+)$/);
+  return match ? match[1].trim() : null;
+}
+
 function renderFormattedParagraphs(text: string, className: string) {
   return text.split("\n").map((line, index) => {
     const trimmedLine = line.trim();
+    const bulletContent = parseBulletLine(trimmedLine);
 
     if (!trimmedLine) {
       return <div key={`spacer-${index}`} className="h-1" aria-hidden="true" />;
     }
 
-    if (trimmedLine.startsWith("- ")) {
+    if (bulletContent) {
       return (
-        <p key={`line-${index}`} className={`${className} ml-5 pl-2`}>
-          - {renderBoldTextLine(trimmedLine.slice(2))}
+        <p key={`line-${index}`} className={`${className} pl-8`}>
+          • {renderBoldTextLine(bulletContent)}
         </p>
       );
     }

@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 const projectRoot = path.join(__dirname, '..');
@@ -141,4 +143,67 @@ test('resolveStoredCompanyMedia keeps protected remote images as external fallba
   assert.deepEqual(media.projectImageIds, ['stored:p1']);
   assert.deepEqual(media.projectImageUrls, ['https://blocked.example.com/p2.jpg']);
   assert.equal(media.projectImageUploadErrors.length, 1);
+});
+
+test('discoverCompanyMedia finds logo and project images in Category/Company folders', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'solidfind-media-test-'));
+  const companyDir = path.join(root, 'Construction', 'Folder Media Builder');
+  fs.mkdirSync(companyDir, { recursive: true });
+  fs.writeFileSync(path.join(companyDir, 'Logo.jpg'), 'logo');
+  fs.writeFileSync(path.join(companyDir, 'project2.png'), 'project2');
+  fs.writeFileSync(path.join(companyDir, 'project1.png'), 'project1');
+
+  const media = importer.discoverCompanyMedia({
+    mediaRoot: root,
+    companyName: 'Folder Media Builder',
+    primaryCategory: 'construction',
+  });
+
+  assert.equal(media.imageFilePath, path.join(companyDir, 'Logo.jpg'));
+  assert.deepEqual(media.projectImageFilePaths, [
+    path.join(companyDir, 'project1.png'),
+    path.join(companyDir, 'project2.png'),
+  ]);
+});
+
+test('resolveStoredCompanyMedia uploads local folder media into storage', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'solidfind-local-upload-test-'));
+  const logoPath = path.join(root, 'logo.jpg');
+  const projectPath = path.join(root, 'project1.png');
+  fs.writeFileSync(logoPath, 'logo-bytes');
+  fs.writeFileSync(projectPath, 'project-bytes');
+
+  const uploaded = [];
+  const fetchImpl = async (url, options = {}) => {
+    assert.equal(options.method, 'POST');
+    uploaded.push({
+      url,
+      contentType: options.headers?.['Content-Type'],
+      body: Buffer.from(options.body).toString('utf8'),
+    });
+
+    return {
+      ok: true,
+      async json() {
+        return { storageId: `stored:${uploaded.length}` };
+      },
+    };
+  };
+  const uploadUrls = ['https://upload/logo', 'https://upload/project'];
+
+  const media = await importer.resolveStoredCompanyMedia({
+    normalized: {
+      imageFilePath: logoPath,
+      projectImageFilePaths: [projectPath],
+      projectImageUrls: [],
+    },
+    existingCompany: null,
+    generateUploadUrl: async () => uploadUrls.shift(),
+    fetchImpl,
+  });
+
+  assert.equal(media.logoId, 'stored:1');
+  assert.deepEqual(media.projectImageIds, ['stored:2']);
+  assert.deepEqual(uploaded.map((entry) => entry.contentType), ['image/jpeg', 'image/png']);
+  assert.deepEqual(uploaded.map((entry) => entry.body), ['logo-bytes', 'project-bytes']);
 });

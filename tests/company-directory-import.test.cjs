@@ -71,9 +71,28 @@ test('mapCategorySelections keeps filter keyword categories instead of collapsin
   assert.deepEqual(normalized.constructionTypes, ['residential', 'commercial']);
 });
 
+test('normalizeCompanyDirectoryRow allows password-free rows and treats folder notes as media placeholders', () => {
+  const normalized = importer.normalizeCompanyDirectoryRow(
+    {
+      'Company Name': 'Folder Media Builder',
+      Email: 'media@example.com',
+      'Company Logo ': 'in folder ',
+      'Picture 1 URL': 'in folder',
+      'Picture 2 URL': 'https://example.com/project.jpg',
+      Provinces: 'Badung',
+      Categories: 'Residential',
+    },
+    { sourceName: 'Living_id_Construction_Directory_TEST.xlsx' }
+  );
+
+  assert.equal(normalized.password, undefined);
+  assert.equal(normalized.imageUrl, undefined);
+  assert.deepEqual(normalized.projectImageUrls, ['https://example.com/project.jpg']);
+});
+
 test('loadRowsFromFile preserves empty spreadsheet columns when parsing xlsx uploads', () => {
   const rows = importer.loadRowsFromFile(
-    path.join(projectRoot, '..', '..', '3_assets', 'Living_id_Construction_Directory_TEST.xlsx')
+    path.join(projectRoot, 'excel-files', 'Living_id_Construction_Directory_TEST.xlsx')
   );
 
   assert.equal(rows.length, 1);
@@ -86,6 +105,14 @@ test('loadRowsFromFile preserves empty spreadsheet columns when parsing xlsx upl
   assert.equal(rows[0]['Company Logo '], 'https://logo.clearbit.com/balitecture.com');
   assert.equal(rows[0].Provinces, 'BADUNG, Tabanan');
   assert.equal(rows[0].Categories, 'ANY TYPE');
+});
+
+test('loadRowsFromFile ignores template note rows without a company name', () => {
+  const rows = importer.loadRowsFromFile(
+    path.join(projectRoot, '..', 'Directory_Companies', 'Living_id_Test-format.xlsx')
+  );
+
+  assert.deepEqual(rows, []);
 });
 
 test('parseDelimitedCell normalizes casing, trims whitespace, and drops blanks', () => {

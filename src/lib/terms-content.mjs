@@ -51,6 +51,15 @@ export function normalizeTermsText(value) {
 }
 
 /**
+ * @param {string} line
+ * @returns {string | null}
+ */
+function parseBulletLine(line) {
+  const match = line.trim().match(/^[-•▪*]\s+(.+)$/);
+  return match ? match[1].trim() : null;
+}
+
+/**
  * @param {string | null | undefined} value
  * @returns {TermsSection[]}
  */
@@ -94,15 +103,14 @@ export function parseTermsContent(value) {
       continue;
     }
 
-    if (line.startsWith("- ")) {
+    const bulletItem = parseBulletLine(line);
+    if (bulletItem) {
       const lastBlock = section.blocks[section.blocks.length - 1];
-      const item = line.slice(2).trim();
-      if (!item) continue;
 
       if (lastBlock?.type === "list") {
-        lastBlock.items.push(item);
+        lastBlock.items.push(bulletItem);
       } else {
-        section.blocks.push({ type: "list", items: [item] });
+        section.blocks.push({ type: "list", items: [bulletItem] });
       }
       continue;
     }

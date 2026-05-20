@@ -3,9 +3,13 @@
 const { fetchQuery, fetchMutation } = require('convex/nextjs');
 const { anyApi } = require('convex/server');
 const { createClerkClient } = require('@clerk/backend');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const {
   buildCompanyMutationPayload,
+  discoverCompanyMedia,
   loadRowsFromFile,
   normalizeCompanyDirectoryRow,
   resolveStoredCompanyMedia,
@@ -22,6 +26,8 @@ function parseArgs(argv) {
     file: null,
     envFile: null,
     companyNames: [],
+    mediaRoot: null,
+    mediaZip: null,
     verbose: false,
   };
 
@@ -56,6 +62,24 @@ function parseArgs(argv) {
     }
     if (arg.startsWith('--env-file=')) {
       args.envFile = arg.split('=')[1] || null;
+      continue;
+    }
+    if (arg === '--media-root') {
+      args.mediaRoot = argv[i + 1] || null;
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith('--media-root=')) {
+      args.mediaRoot = arg.split('=')[1] || null;
+      continue;
+    }
+    if (arg === '--media-zip') {
+      args.mediaZip = argv[i + 1] || null;
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith('--media-zip=')) {
+      args.mediaZip = arg.split('=')[1] || null;
       continue;
     }
     if (arg === '--company') {
@@ -94,6 +118,8 @@ Options:
   --target <name>       preview (default) or production
   --env-file <path>     explicit env file instead of --target
   --company <name>      import only matching company name (repeatable)
+  --media-root <path>   optional folder containing Category/CompanyName media folders
+  --media-zip <path>    optional ZIP with the same media folder structure
   --apply               perform writes (default is dry-run)
   --verbose             include more detail in output
 `);
@@ -101,6 +127,25 @@ Options:
 
 function normalizeCompanyFilter(values) {
   return values.map((value) => value.trim().toLowerCase()).filter(Boolean);
+}
+
+function extractMediaZip(mediaZip) {
+  if (!mediaZip) return null;
+
+  const zipPath = path.resolve(mediaZip);
+  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), 'solidfind-company-media-'));
+  const script = `import sys, zipfile\nfrom pathlib import Path\nzip_path, output_dir = sys.argv[1:]\nroot = Path(output_dir).resolve()\nwith zipfile.ZipFile(zip_path) as z:\n    for member in z.infolist():\n        target = (root / member.filename).resolve()\n        if root not in target.parents and target != root:\n            raise ValueError(f'Unsafe ZIP path: {member.filename}')\n    z.extractall(root)\n`;
+  const result = spawnSync('python3', ['-c', script, zipPath, outputDir], { encoding: 'utf8' });
+  if (result.status !== 0) {
+    throw new Error(result.stderr || result.stdout || `Failed to extract media ZIP: ${zipPath}`);
+  }
+
+  return outputDir;
+}
+
+function resolveMediaRoot(options) {
+  if (options.mediaRoot) return path.resolve(options.mediaRoot);
+  return extractMediaZip(options.mediaZip);
 }
 
 async function ensureClerkUser({ clerk, normalized, existingClerkUser, apply }) {
@@ -123,28 +168,35 @@ async function ensureClerkUser({ clerk, normalized, existingClerkUser, apply }) 
     };
   }
 
+  const password = typeof normalized.password === 'string' && normalized.password.length > 0
+    ? normalized.password
+    : null;
+  const passwordFields = password
+    ? { password, skipPasswordChecks: true }
+    : {};
+
   let clerkUser;
   if (existingClerkUser) {
     clerkUser = await clerk.users.updateUser(existingClerkUser.id, {
       firstName: normalized.name,
-      password: normalized.password,
-      skipPasswordChecks: true,
       signOutOfOtherSessions: false,
+      ...passwordFields,
       ...metadata,
     });
   } else {
     clerkUser = await clerk.users.createUser({
       emailAddress: [normalized.email],
       firstName: normalized.name,
-      password: normalized.password,
-      skipPasswordChecks: true,
       skipLegalChecks: true,
+      ...passwordFields,
       ...metadata,
     });
   }
 
   await clerk.users.updateUserMetadata(clerkUser.id, metadata);
-  const verified = await clerk.users.verifyPassword({ userId: clerkUser.id, password: normalized.password });
+  const verified = password
+    ? await clerk.users.verifyPassword({ userId: clerkUser.id, password })
+    : null;
 
   return {
     clerkUser,
@@ -159,13 +211,28 @@ async function upsertCompanyDirectory(options) {
   const rows = loadRowsFromFile(filePath);
   const filters = normalizeCompanyFilter(options.companyNames || []);
   const sourceName = path.basename(filePath);
+  const mediaRoot = resolveMediaRoot(options);
   const clerk = createClerkClient({ secretKey: runtime.clerkSecretKey });
   const existingCompanies = await fetchQuery(anyApi.companies.listAll, {}, { url: runtime.convexUrl });
   const existingUsers = await fetchQuery(anyApi.users.listAll, {}, { url: runtime.convexUrl });
 
   const normalizedRows = rows
     .map((row) => normalizeCompanyDirectoryRow(row, { sourceName }))
-    .filter((row) => !filters.length || filters.includes((row.name || '').toLowerCase()));
+    .filter((row) => !filters.length || filters.includes((row.name || '').toLowerCase()))
+    .map((row) => {
+      const discoveredMedia = discoverCompanyMedia({
+        mediaRoot,
+        companyName: row.name,
+        primaryCategory: row.primaryCategory,
+      });
+      return {
+        ...row,
+        imageFilePath: row.imageFilePath || discoveredMedia.imageFilePath,
+        projectImageFilePaths: row.projectImageFilePaths?.length
+          ? row.projectImageFilePaths
+          : discoveredMedia.projectImageFilePaths,
+      };
+    });
 
   const results = [];
 
@@ -253,7 +320,7 @@ async function upsertCompanyDirectory(options) {
         finalId: companyId,
         previousOwnerEmail: existingCompany?.ownerEmail || null,
         mediaUploadErrors: [
-          storedMedia.logoUploadError ? { sourceUrl: normalized.imageUrl, error: storedMedia.logoUploadError } : null,
+          storedMedia.logoUploadError ? { sourceUrl: normalized.imageUrl || normalized.imageFilePath, error: storedMedia.logoUploadError } : null,
           ...(storedMedia.projectImageUploadErrors || []),
         ].filter(Boolean),
       },
@@ -267,6 +334,7 @@ async function upsertCompanyDirectory(options) {
     envFile: runtime.envFile,
     convexUrl: runtime.convexUrl,
     filePath,
+    mediaRoot,
     importedCount: results.length,
     results,
   };

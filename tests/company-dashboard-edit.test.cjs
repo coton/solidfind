@@ -373,6 +373,12 @@ test('company dashboard pro modal reads platform pricing and starts Xendit check
 
   assert.match(
     source,
+    /proTermsView \? "max-w-\[540px\]" : "max-w-\[440px\]"/,
+    'Expected only the Pro Terms modal view to use the wider 540px layout'
+  );
+
+  assert.match(
+    source,
     /max-w-\[440px\][\s\S]*max-w-\[260px\] space-y-3[\s\S]*text-\[22px\] font-bold leading-\[26px\][\s\S]*formatProPrice\(yearlyPrice, "yearly"\)/,
     'Expected the Pro modal to be narrower and stack smaller pricing rows vertically'
   );

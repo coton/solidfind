@@ -85,7 +85,7 @@ export default function TermsPage() {
               {section.blocks.map((block, index) => {
                 if (block.type === "list") {
                   return (
-                    <ul key={`${section.title}-${index}`} className="space-y-0.5 ml-5 pl-2 mb-1">
+                    <ul key={`${section.title}-${index}`} className="space-y-0.5 pl-8 mb-1">
                       {block.items.map((item) => (
                         <li key={item} className="flex items-start gap-2 leading-[15px]">
                           <span className="text-[#333]">•</span>

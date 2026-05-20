@@ -619,7 +619,7 @@ export default function CompanyDashboardPage() {
       {showProModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-[10px] py-4 sm:px-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowProModal(false)} />
-          <div className="relative bg-white w-full max-w-[440px] max-h-[calc(100vh-20px)] rounded-[6px] p-6 sm:p-8 overflow-y-auto overflow-x-hidden">
+          <div className={`relative bg-white w-full ${proTermsView ? "max-w-[540px]" : "max-w-[440px]"} max-h-[calc(100vh-20px)] rounded-[6px] p-6 sm:p-8 overflow-y-auto overflow-x-hidden`}>
             {/* Launch Discount Ribbon */}
             {!proTermsView && <div className="absolute top-0 left-0 w-[150px] h-[150px] overflow-hidden">
               <div
@@ -661,7 +661,7 @@ export default function CompanyDashboardPage() {
                       {section.blocks.map((block, index) => {
                         if (block.type === "list") {
                           return (
-                            <ul key={`${section.title}-${index}`} className="space-y-0.5 ml-5 pl-2 mb-1">
+                            <ul key={`${section.title}-${index}`} className="space-y-0.5 pl-8 mb-1">
                               {block.items.map((item) => (
                                 <li key={item} className="flex items-start gap-2 leading-[15px]">
                                   <span className="text-[#333]">•</span>

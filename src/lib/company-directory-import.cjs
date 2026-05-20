@@ -2,6 +2,17 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
+const IMAGE_EXTENSIONS = new Set(['.avif', '.gif', '.jpeg', '.jpg', '.png', '.svg', '.webp']);
+const IMAGE_CONTENT_TYPES = {
+  '.avif': 'image/avif',
+  '.gif': 'image/gif',
+  '.jpeg': 'image/jpeg',
+  '.jpg': 'image/jpeg',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+  '.webp': 'image/webp',
+};
+
 function cleanString(value) {
   if (value === undefined || value === null) return undefined;
   const normalized = String(value).replace(/\r\n/g, '\n').trim();
@@ -27,6 +38,25 @@ function parseOptionalNumber(value) {
   if (!normalized) return undefined;
   const numeric = Number.parseInt(normalized.replace(/[^0-9]/g, ''), 10);
   return Number.isFinite(numeric) ? numeric : undefined;
+}
+
+function normalizeLookupName(value) {
+  return cleanString(value)
+    ?.toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function isFolderPlaceholder(value) {
+  const normalized = normalizeLookupName(value);
+  return normalized === 'in folder' || normalized === 'folder' || normalized === 'zip' || normalized === 'in zip';
+}
+
+function cleanMediaReference(value) {
+  const normalized = cleanString(value);
+  return normalized && !isFolderPlaceholder(normalized) ? normalized : undefined;
 }
 
 function inferPrimaryCategory({ sourceName, rowCategoryValue }) {
@@ -174,7 +204,7 @@ function collectPictureUrls(row) {
       const bNum = Number.parseInt(b.match(/(\d+)/)?.[1] || '0', 10);
       return aNum - bNum;
     })
-    .map((key) => cleanString(row[key]))
+    .map((key) => cleanMediaReference(row[key]))
     .filter(Boolean);
 }
 
@@ -208,8 +238,10 @@ function normalizeCompanyDirectoryRow(row, { sourceName } = {}) {
     teamSize: parseOptionalNumber(row['Team Size']),
     since: parseOptionalNumber(row['Since Year']),
     googleMapsLink: cleanString(row['Google Maps Link']),
-    imageUrl: cleanString(row['Company Logo ']) || cleanString(row['Company Logo']),
+    imageUrl: cleanMediaReference(row['Company Logo ']) || cleanMediaReference(row['Company Logo']),
     projectImageUrls: collectPictureUrls(row),
+    imageFilePath: undefined,
+    projectImageFilePaths: [],
     projectSizes: ['any'],
     constructionTypes: categorySelections.constructionTypes,
     constructionLocations: locationSelections,
@@ -266,6 +298,10 @@ function normalizeUrlList(values) {
   return (Array.isArray(values) ? values : []).map((value) => cleanString(value)).filter(Boolean);
 }
 
+function normalizePathList(values) {
+  return (Array.isArray(values) ? values : []).map((value) => cleanString(value)).filter(Boolean);
+}
+
 function arraysEqual(left, right) {
   if (left.length !== right.length) return false;
   return left.every((value, index) => value === right[index]);
@@ -316,6 +352,99 @@ async function tryUploadRemoteAssetToStorage(options) {
   }
 }
 
+async function uploadLocalAssetToStorage({ filePath, generateUploadUrl, fetchImpl = fetch }) {
+  const uploadUrl = await generateUploadUrl();
+  const extension = path.extname(filePath).toLowerCase();
+  const contentType = IMAGE_CONTENT_TYPES[extension] || 'application/octet-stream';
+  const uploadResponse = await fetchImpl(uploadUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': contentType },
+    body: fs.readFileSync(filePath),
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Failed to upload local media into Convex storage: ${filePath}`);
+  }
+
+  const payload = await uploadResponse.json();
+  if (!payload?.storageId) {
+    throw new Error(`Convex storage upload did not return a storageId for: ${filePath}`);
+  }
+
+  return payload.storageId;
+}
+
+async function tryUploadLocalAssetToStorage(options) {
+  try {
+    return {
+      ok: true,
+      storageId: await uploadLocalAssetToStorage(options),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+function isImageFile(filePath) {
+  return IMAGE_EXTENSIONS.has(path.extname(filePath).toLowerCase());
+}
+
+function listDirectories(rootDir, maxDepth = 3) {
+  const directories = [];
+  const walk = (dir, depth) => {
+    if (depth > maxDepth) return;
+    let entries = [];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+      const fullPath = path.join(dir, entry.name);
+      directories.push(fullPath);
+      walk(fullPath, depth + 1);
+    }
+  };
+  walk(rootDir, 1);
+  return directories;
+}
+
+function discoverCompanyMedia({ mediaRoot, companyName, primaryCategory }) {
+  if (!mediaRoot || !companyName || !fs.existsSync(mediaRoot)) {
+    return { imageFilePath: undefined, projectImageFilePaths: [] };
+  }
+
+  const targetName = normalizeLookupName(companyName);
+  const categoryName = normalizeLookupName(primaryCategory);
+  const matchingDirs = listDirectories(mediaRoot)
+    .filter((dir) => normalizeLookupName(path.basename(dir)) === targetName)
+    .sort((left, right) => {
+      const leftHasCategory = categoryName && normalizeLookupName(left).includes(categoryName) ? 0 : 1;
+      const rightHasCategory = categoryName && normalizeLookupName(right).includes(categoryName) ? 0 : 1;
+      return leftHasCategory - rightHasCategory || left.length - right.length;
+    });
+
+  const companyDir = matchingDirs[0];
+  if (!companyDir) {
+    return { imageFilePath: undefined, projectImageFilePaths: [] };
+  }
+
+  const files = fs.readdirSync(companyDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => path.join(companyDir, entry.name))
+    .filter(isImageFile)
+    .sort((left, right) => left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' }));
+
+  const imageFilePath = files.find((filePath) => /^logo(?:\b|[-_\s.])/i.test(path.basename(filePath)));
+  const projectImageFilePaths = files.filter((filePath) => filePath !== imageFilePath);
+
+  return { imageFilePath, projectImageFilePaths };
+}
+
 async function resolveStoredCompanyMedia({
   normalized,
   existingCompany,
@@ -324,6 +453,8 @@ async function resolveStoredCompanyMedia({
 }) {
   const imageUrl = cleanString(normalized?.imageUrl);
   const projectImageUrls = normalizeUrlList(normalized?.projectImageUrls);
+  const imageFilePath = cleanString(normalized?.imageFilePath);
+  const projectImageFilePaths = normalizePathList(normalized?.projectImageFilePaths);
 
   const existingImageUrl = cleanString(existingCompany?.imageUrl);
   const existingProjectImageUrls = normalizeUrlList(existingCompany?.projectImageUrls);
@@ -347,9 +478,16 @@ async function resolveStoredCompanyMedia({
         media.logoUploadError = uploadedLogo.error;
       }
     }
+  } else if (imageFilePath) {
+    const uploadedLogo = await tryUploadLocalAssetToStorage({ filePath: imageFilePath, generateUploadUrl, fetchImpl });
+    if (uploadedLogo.ok) {
+      media.logoId = uploadedLogo.storageId;
+    } else {
+      media.logoUploadError = uploadedLogo.error;
+    }
   }
 
-  if (arraysEqual(projectImageUrls, existingProjectImageUrls) && existingProjectImageIds.length === projectImageUrls.length) {
+  if (!projectImageFilePaths.length && arraysEqual(projectImageUrls, existingProjectImageUrls) && existingProjectImageIds.length === projectImageUrls.length) {
     media.projectImageIds = existingProjectImageIds;
     media.projectImageUrls = [];
   } else {
@@ -364,6 +502,14 @@ async function resolveStoredCompanyMedia({
       } else {
         fallbackUrls.push(sourceUrl);
         uploadErrors.push({ sourceUrl, error: uploaded.error });
+      }
+    }
+    for (const filePath of projectImageFilePaths) {
+      const uploaded = await tryUploadLocalAssetToStorage({ filePath, generateUploadUrl, fetchImpl });
+      if (uploaded.ok) {
+        storedIds.push(uploaded.storageId);
+      } else {
+        uploadErrors.push({ sourceUrl: filePath, error: uploaded.error });
       }
     }
 
@@ -415,7 +561,7 @@ function parseCsvText(content) {
     });
     rows.push(row);
   }
-  return rows;
+  return rows.filter((row) => cleanString(row['Company Name'] || row.companyName || row.name));
 }
 
 function loadRowsFromFile(filePath) {
@@ -432,26 +578,29 @@ function loadRowsFromFile(filePath) {
     const parsedRows = JSON.parse(result.stdout);
     const [headers = [], ...dataRows] = parsedRows;
     return dataRows
-      .filter((row) => row.some((value) => cleanString(value)))
       .map((values) => {
         const row = {};
         headers.forEach((header, index) => {
           row[header] = values[index] ?? '';
         });
         return row;
-      });
+      })
+      .filter((row) => cleanString(row['Company Name'] || row.companyName || row.name));
   }
   throw new Error(`Unsupported file type: ${filePath}`);
 }
 
 module.exports = {
   buildCompanyMutationPayload,
+  discoverCompanyMedia,
   inferPrimaryCategory,
   loadRowsFromFile,
   normalizeCompanyDirectoryRow,
   parseCsvText,
   parseDelimitedCell,
   resolveStoredCompanyMedia,
+  tryUploadLocalAssetToStorage,
   tryUploadRemoteAssetToStorage,
+  uploadLocalAssetToStorage,
   uploadRemoteAssetToStorage,
 };

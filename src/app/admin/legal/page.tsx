@@ -24,14 +24,15 @@ function SectionCard({ title, children }: { title: string; children: React.React
 
 function parseTermsPreview(text: string) {
   return text.split("\n").map((line, i) => {
+    const bullet = line.trim().match(/^[-•▪*]\s+(.+)$/);
     if (line.startsWith("[TITLE]")) {
       return <p key={i} className="text-[12px] font-bold text-[#333] mt-3 mb-1">{line.replace("[TITLE]", "").trim()}</p>;
     }
     if (line.startsWith("[COPY]")) {
       return <p key={i} className="text-[11px] text-[#333]/70 leading-[15px] mb-1">{line.replace("[COPY]", "").trim()}</p>;
     }
-    if (line.trim().startsWith("- ")) {
-      return <p key={i} className="ml-5 pl-2 text-[11px] text-[#333]/70 leading-[15px] mb-0.5">- {line.trim().slice(2)}</p>;
+    if (bullet) {
+      return <p key={i} className="pl-8 text-[11px] text-[#333]/70 leading-[15px] mb-0.5">• {bullet[1].trim()}</p>;
     }
     return <p key={i} className="text-[10px] text-[#333]/40">{line}</p>;
   });
