@@ -9,24 +9,36 @@ import { api } from "../../../convex/_generated/api";
 import {
   DEFAULT_PRO_TERMS_EN_TEXT,
   DEFAULT_PRO_TERMS_ID_TEXT,
+  DEFAULT_TERMS_ID_TEXT,
   DEFAULT_TERMS_TEXT,
   parseTermsContent,
   PRO_TERMS_EN_PLATFORM_SETTING_KEY,
   PRO_TERMS_ID_PLATFORM_SETTING_KEY,
+  TERMS_ID_TEXT_PLATFORM_SETTING_KEY,
   TERMS_TEXT_PLATFORM_SETTING_KEY,
 } from "@/lib/terms-content.mjs";
 import { resolveTextSetting } from "@/lib/platform-settings.mjs";
-import { useState } from "react";
+import { sanitizeNextPath } from "@/lib/magic-link-login.mjs";
+import { useSearchParams } from "next/navigation";
 
 type TermsView = "main" | "pro-en" | "pro-id";
+type TermsLanguage = "en" | "id";
 
 export default function TermsPage() {
-  const [view, setView] = useState<TermsView>("main");
+  const searchParams = useSearchParams();
+  const requestedView = searchParams.get("view");
+  const view: TermsView =
+    requestedView === "pro-en" || requestedView === "pro-id" ? requestedView : "main";
+  const language: TermsLanguage =
+    view === "pro-id" || (view === "main" && searchParams.get("lang") === "id") ? "id" : "en";
+  const fromPath = sanitizeNextPath(searchParams.get("from"));
   const termsText = useQuery(api.platformSettings.get, { key: TERMS_TEXT_PLATFORM_SETTING_KEY });
+  const termsTextIndonesian = useQuery(api.platformSettings.get, { key: TERMS_ID_TEXT_PLATFORM_SETTING_KEY });
   const proTermsEnglish = useQuery(api.platformSettings.get, { key: PRO_TERMS_EN_PLATFORM_SETTING_KEY });
   const proTermsIndonesian = useQuery(api.platformSettings.get, { key: PRO_TERMS_ID_PLATFORM_SETTING_KEY });
   const proEnabledValue = useQuery(api.platformSettings.get, { key: "pro_enabled" });
   const termsTextState = resolveTextSetting(termsText, DEFAULT_TERMS_TEXT);
+  const termsTextIndonesianState = resolveTextSetting(termsTextIndonesian, DEFAULT_TERMS_ID_TEXT);
   const proTermsEnglishState = resolveTextSetting(proTermsEnglish, DEFAULT_PRO_TERMS_EN_TEXT);
   const proTermsIndonesianState = resolveTextSetting(proTermsIndonesian, DEFAULT_PRO_TERMS_ID_TEXT);
   const selectedText =
@@ -34,13 +46,17 @@ export default function TermsPage() {
       ? proTermsEnglishState.value || DEFAULT_PRO_TERMS_EN_TEXT
       : view === "pro-id"
         ? proTermsIndonesianState.value || DEFAULT_PRO_TERMS_ID_TEXT
-        : termsTextState.value || DEFAULT_TERMS_TEXT;
+        : language === "id"
+          ? termsTextIndonesianState.value || DEFAULT_TERMS_ID_TEXT
+          : termsTextState.value || DEFAULT_TERMS_TEXT;
   const isLoading =
     view === "pro-en"
       ? proTermsEnglishState.isLoading
       : view === "pro-id"
         ? proTermsIndonesianState.isLoading
-        : termsTextState.isLoading;
+        : language === "id"
+          ? termsTextIndonesianState.isLoading
+          : termsTextState.isLoading;
   const sections = isLoading ? [] : parseTermsContent(selectedText);
   const proTermsVisible = proEnabledValue === "true";
   const title =
@@ -48,7 +64,21 @@ export default function TermsPage() {
       ? "Pro Terms of Services"
       : view === "pro-id"
         ? "Ketentuan Penggunaan Pro"
-        : "SOLIDFIND.ID Terms & Conditions";
+        : language === "id"
+          ? "Syarat & Ketentuan SOLIDFIND.ID"
+          : "SOLIDFIND.ID Terms & Conditions";
+  const backHref = view === "main" ? "/" : fromPath || "/terms";
+  const fromSuffix = fromPath ? `&from=${encodeURIComponent(fromPath)}` : "";
+  const languageLinks: Record<TermsLanguage, string> =
+    view === "main"
+      ? {
+          en: "/terms?lang=en",
+          id: "/terms?lang=id",
+        }
+      : {
+          en: `/terms?view=pro-en${fromSuffix}`,
+          id: `/terms?view=pro-id${fromSuffix}`,
+        };
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -57,13 +87,7 @@ export default function TermsPage() {
       <main className="max-w-[780px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         <div className="mb-6">
           <Link
-            href={view === "main" ? "/" : "#"}
-            onClick={(event) => {
-              if (view !== "main") {
-                event.preventDefault();
-                setView("main");
-              }
-            }}
+            href={backHref}
             className="inline-flex items-center gap-2 text-[11px] text-[#333]/50 hover:text-[#333] transition-colors tracking-[0.22px]"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -71,9 +95,22 @@ export default function TermsPage() {
           </Link>
         </div>
 
-        <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] leading-[36px] mb-8">
-          {title}
-        </h1>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] leading-[36px]">
+            {title}
+          </h1>
+          <div className="flex h-7 shrink-0 overflow-hidden rounded-full border border-[#333]/15 text-[10px] font-semibold tracking-[0.2px] text-[#333]/50">
+            {(["en", "id"] as TermsLanguage[]).map((option) => (
+              <Link
+                key={option}
+                href={languageLinks[option]}
+                className={`flex items-center px-3 transition-colors ${language === option ? "bg-[#333] text-white" : "hover:text-[#333]"}`}
+              >
+                {option.toUpperCase()}
+              </Link>
+            ))}
+          </div>
+        </div>
 
         <div className="space-y-6 text-[11px] text-[#333]/70 leading-[15px] tracking-[0.22px] mb-12">
           {sections.map((section) => (
@@ -114,20 +151,18 @@ export default function TermsPage() {
               Ketentuan Penggunaan Pro
             </p>
             <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => setView("pro-en")}
+              <Link
+                href="/terms?view=pro-en"
                 className="h-9 px-5 rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors"
               >
                 English
-              </button>
-              <button
-                type="button"
-                onClick={() => setView("pro-id")}
+              </Link>
+              <Link
+                href="/terms?view=pro-id"
                 className="h-9 px-5 rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors"
               >
                 Indonesian
-              </button>
+              </Link>
             </div>
           </div>
         )}

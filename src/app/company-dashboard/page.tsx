@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -114,6 +114,8 @@ export default function CompanyDashboardPage() {
   const [proCheckoutError, setProCheckoutError] = useState("");
   const [redirected, setRedirected] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const shouldOpenProModal = searchParams.get("pro") === "1";
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const deleteAccount = useMutation(api.users.deleteAccount);
@@ -128,6 +130,14 @@ export default function CompanyDashboardPage() {
     if (!clerkUser?.id) return;
     await deleteAccount({ clerkId: clerkUser.id });
     await handleSignOut();
+  };
+
+  const closeProModal = () => {
+    setShowProModal(false);
+    setProTermsView(null);
+    if (shouldOpenProModal) {
+      router.replace("/company-dashboard");
+    }
   };
 
   // Check if user has a company and redirect if needed
@@ -323,11 +333,11 @@ export default function CompanyDashboardPage() {
           </div>
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-8">
-          <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
+        <div className="mb-6">
+          <p className="w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px] sm:max-w-[600px]">
             Your profile is live on SolidFind. As the platform grows, so does your visibility. Make sure you are showing your best profile : )
           </p>
-          <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
+          <p className="mt-3 w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px] sm:max-w-[600px]">
             Profil Anda sudah aktif di SolidFind. Seiring platform berkembang, begitu pula jangkauan Anda. Pastikan kamu menampilkan profil terbaikmu : )
           </p>
         </div>
@@ -616,9 +626,9 @@ export default function CompanyDashboardPage() {
       )}
 
       {/* PRO Features Modal - POPUP-03-BuyPro */}
-      {showProModal && (
+      {(showProModal || shouldOpenProModal) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-[10px] py-4 sm:px-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowProModal(false)} />
+          <div className="absolute inset-0 bg-black/50" onClick={closeProModal} />
           <div className={`relative bg-white w-full ${proTermsView ? "max-w-[540px]" : "max-w-[440px]"} max-h-[calc(100vh-20px)] rounded-[6px] p-6 sm:p-8 overflow-y-auto overflow-x-hidden`}>
             {/* Launch Discount Ribbon */}
             {!proTermsView && <div className="absolute top-0 left-0 w-[150px] h-[150px] overflow-hidden">
@@ -630,10 +640,7 @@ export default function CompanyDashboardPage() {
             </div>}
 
             <button
-              onClick={() => {
-                setShowProModal(false);
-                setProTermsView(null);
-              }}
+              onClick={closeProModal}
               className="absolute top-4 right-4 text-[#333]/50 hover:text-[#f14110] transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -728,7 +735,7 @@ export default function CompanyDashboardPage() {
                   <div className="flex items-center gap-4">
                     <ProFeatureIcon name="stats" />
                     <div>
-                      <p className="text-[12px] font-semibold text-[#333]">Visibility analytics — who's interested and when</p>
+                      <p className="text-[12px] font-semibold text-[#333]">Visibility analytics — who&apos;s interested and when</p>
                       <p className="text-[10px] text-[#333]/50">Analisis visibilitas — siapa yang tertarik dan kapan</p>
                     </div>
                   </div>
@@ -796,13 +803,13 @@ export default function CompanyDashboardPage() {
 
                 <p className="mt-4 text-center text-[10px] leading-[16px] text-[#333]/50">
                   By subscribing, you agree to our{" "}
-                  <button type="button" onClick={() => setProTermsView("english")} className="underline hover:text-[#f14110] transition-colors">
+                  <Link href="/terms?view=pro-en&from=%2Fcompany-dashboard%3Fpro%3D1" className="underline hover:text-[#f14110] transition-colors">
                     Terms of Services
-                  </button>
+                  </Link>
                   {" / "}Dengan berlangganan, Anda menyetujui{" "}
-                  <button type="button" onClick={() => setProTermsView("indonesian")} className="underline hover:text-[#f14110] transition-colors">
+                  <Link href="/terms?view=pro-id&from=%2Fcompany-dashboard%3Fpro%3D1" className="underline hover:text-[#f14110] transition-colors">
                     Ketentuan penggunaan
-                  </button>
+                  </Link>
                   {" "}kami
                 </p>
               </>

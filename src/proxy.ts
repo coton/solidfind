@@ -33,7 +33,16 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (isProtectedRoute(req)) {
-    await auth.protect();
+    const { userId } = await auth();
+
+    if (!userId) {
+      const url = req.nextUrl.clone();
+      const nextPath = `${req.nextUrl.pathname}${req.nextUrl.search}`;
+      url.pathname = "/sign-in";
+      url.search = "";
+      url.searchParams.set("next", nextPath);
+      return NextResponse.redirect(url);
+    }
   }
 });
 

@@ -17,6 +17,18 @@ test('terms page reads Terms & Conditions content from Convex platform settings'
     /useQuery\(api\.platformSettings\.get,\s*\{\s*key:\s*TERMS_TEXT_PLATFORM_SETTING_KEY\s*\}\)/,
     'expected the public /terms page to query the admin-managed terms content from Convex'
   );
+
+  assert.match(
+    termsPageSource,
+    /useQuery\(api\.platformSettings\.get,\s*\{\s*key:\s*TERMS_ID_TEXT_PLATFORM_SETTING_KEY\s*\}\)/,
+    'expected the public /terms page to query the admin-managed Indonesian terms content from Convex'
+  );
+
+  assert.match(
+    termsPageSource,
+    /view === "main"[\s\S]*\/terms\?lang=en[\s\S]*\/terms\?lang=id/,
+    'expected the main Terms page to expose top-right EN/ID language links'
+  );
 });
 
 test('admin Legal tab persists Terms and Pro Terms text to Convex platform settings', () => {
@@ -31,8 +43,8 @@ test('admin Legal tab persists Terms and Pro Terms text to Convex platform setti
 
   assert.match(
     adminLegalSource,
-    /title="Terms & Conditions"[\s\S]*settingKey=\{TERMS_TEXT_PLATFORM_SETTING_KEY\}/,
-    'expected the Legal tab to save Terms & Conditions text into Convex platform settings'
+    /title="Terms & Conditions English"[\s\S]*settingKey=\{TERMS_TEXT_PLATFORM_SETTING_KEY\}[\s\S]*title="Terms & Conditions Indonesian"[\s\S]*settingKey=\{TERMS_ID_TEXT_PLATFORM_SETTING_KEY\}/,
+    'expected the Legal tab to save English and Indonesian Terms & Conditions text into Convex platform settings'
   );
 
   assert.match(
@@ -46,6 +58,7 @@ test('shared terms utility exposes the Convex key used by admin and website', as
   const termsUtils = await import(path.join(projectRoot, 'src/lib/terms-content.mjs'));
 
   assert.equal(termsUtils.TERMS_TEXT_PLATFORM_SETTING_KEY, 'termsText');
+  assert.equal(termsUtils.TERMS_ID_TEXT_PLATFORM_SETTING_KEY, 'termsTextId');
   assert.equal(termsUtils.PRO_TERMS_EN_PLATFORM_SETTING_KEY, 'proTermsEnglish');
   assert.equal(termsUtils.PRO_TERMS_ID_PLATFORM_SETTING_KEY, 'proTermsIndonesian');
 });
@@ -56,7 +69,7 @@ test('Convex platform settings seed includes the shared Terms & Conditions key',
 
   assert.match(
     platformSettingsSource,
-    /const defaults: Record<string, string> = \{[\s\S]*?\[TERMS_TEXT_PLATFORM_SETTING_KEY\]: DEFAULT_TERMS_TEXT[\s\S]*?\[PRO_TERMS_EN_PLATFORM_SETTING_KEY\]: DEFAULT_PRO_TERMS_EN_TEXT[\s\S]*?\[PRO_TERMS_ID_PLATFORM_SETTING_KEY\]: DEFAULT_PRO_TERMS_ID_TEXT[\s\S]*?\};/,
+    /const defaults: Record<string, string> = \{[\s\S]*?\[TERMS_TEXT_PLATFORM_SETTING_KEY\]: DEFAULT_TERMS_TEXT[\s\S]*?\[TERMS_ID_TEXT_PLATFORM_SETTING_KEY\]: DEFAULT_TERMS_ID_TEXT[\s\S]*?\[PRO_TERMS_EN_PLATFORM_SETTING_KEY\]: DEFAULT_PRO_TERMS_EN_TEXT[\s\S]*?\[PRO_TERMS_ID_PLATFORM_SETTING_KEY\]: DEFAULT_PRO_TERMS_ID_TEXT[\s\S]*?\};/,
     'expected Convex platform settings defaults to seed the shared terms keys with default legal content'
   );
 
@@ -74,8 +87,37 @@ test('terms page links to Pro Terms only when Pro features are enabled', () => {
 
   assert.match(
     termsPageSource,
-    /view === "main" && proTermsVisible[\s\S]*Pro Terms of Services[\s\S]*Ketentuan Penggunaan Pro/,
+    /view === "main" && proTermsVisible[\s\S]*Pro Terms of Services[\s\S]*Ketentuan Penggunaan Pro[\s\S]*href="\/terms\?view=pro-en"[\s\S]*href="\/terms\?view=pro-id"/,
     'expected the Terms page to show Pro Terms links only from the main Terms view when Pro is enabled'
+  );
+});
+
+test('pro terms pages preserve language switching and return targets', () => {
+  const termsPageSource = readProjectFile('src/app/terms/page.tsx');
+  const companyDashboardSource = readProjectFile('src/app/company-dashboard/page.tsx');
+
+  assert.match(
+    termsPageSource,
+    /const fromPath = sanitizeNextPath\(searchParams\.get\("from"\)\);[\s\S]*const backHref = view === "main" \? "\/" : fromPath \|\| "\/terms";/,
+    'expected Pro Terms back links to return to a sanitized source path when provided'
+  );
+
+  assert.match(
+    termsPageSource,
+    /en: `\/terms\?view=pro-en\$\{fromSuffix\}`,[\s\S]*id: `\/terms\?view=pro-id\$\{fromSuffix\}`/,
+    'expected Pro Terms top-right EN/ID switch links to keep the return target'
+  );
+
+  assert.match(
+    companyDashboardSource,
+    /href="\/terms\?view=pro-en&from=%2Fcompany-dashboard%3Fpro%3D1"[\s\S]*href="\/terms\?view=pro-id&from=%2Fcompany-dashboard%3Fpro%3D1"/,
+    'expected the paying popup Pro Terms links to redirect to exact English and Indonesian terms pages'
+  );
+
+  assert.match(
+    companyDashboardSource,
+    /shouldOpenProModal = searchParams\.get\("pro"\) === "1"[\s\S]*showProModal \|\| shouldOpenProModal/,
+    'expected returning from Pro Terms to /company-dashboard?pro=1 to reopen the paying popup'
   );
 });
 

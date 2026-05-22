@@ -7,9 +7,11 @@ import { api } from "../../../../convex/_generated/api";
 import {
   DEFAULT_PRO_TERMS_EN_TEXT,
   DEFAULT_PRO_TERMS_ID_TEXT,
+  DEFAULT_TERMS_ID_TEXT,
   DEFAULT_TERMS_TEXT,
   PRO_TERMS_EN_PLATFORM_SETTING_KEY,
   PRO_TERMS_ID_PLATFORM_SETTING_KEY,
+  TERMS_ID_TEXT_PLATFORM_SETTING_KEY,
   TERMS_TEXT_PLATFORM_SETTING_KEY,
 } from "@/lib/terms-content.mjs";
 
@@ -58,6 +60,7 @@ function LegalUploader({
   useEffect(() => {
     if (hydrated.current || savedValue === undefined) return;
     hydrated.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDraft(savedValue ?? defaultText);
   }, [defaultText, savedValue]);
 
@@ -138,9 +141,14 @@ export default function AdminLegalPage() {
       </div>
 
       <LegalUploader
-        title="Terms & Conditions"
+        title="Terms & Conditions English"
         settingKey={TERMS_TEXT_PLATFORM_SETTING_KEY}
         defaultText={DEFAULT_TERMS_TEXT}
+      />
+      <LegalUploader
+        title="Terms & Conditions Indonesian"
+        settingKey={TERMS_ID_TEXT_PLATFORM_SETTING_KEY}
+        defaultText={DEFAULT_TERMS_ID_TEXT}
       />
       <LegalUploader
         title="Pro Terms of Services English"

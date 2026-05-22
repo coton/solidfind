@@ -19,6 +19,7 @@ export default function SignInPage() {
 
   const ticket = searchParams.get("__clerk_ticket");
   const safeNextPath = useMemo(() => sanitizeNextPath(searchParams.get("next")), [searchParams]);
+  const initialAccountType = safeNextPath?.startsWith("/company-dashboard") ? "company" : "individual";
   const companySetupPath = useMemo(() => {
     if (!safeNextPath || !safeNextPath.startsWith("/company-dashboard/edit")) {
       return null;
@@ -149,7 +150,7 @@ export default function SignInPage() {
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
           initialMode="login"
-          initialAccountType="individual"
+          initialAccountType={initialAccountType}
         />
       </div>
     </div>

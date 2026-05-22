@@ -361,8 +361,8 @@ test('company dashboard pro modal reads platform pricing and starts Xendit check
 
   assert.match(
     source,
-    /setProTermsView\("english"\)[\s\S]*Terms of Services[\s\S]*setProTermsView\("indonesian"\)[\s\S]*Ketentuan penggunaan/,
-    'Expected the Pro modal to abbreviate yearly pricing and link to both Pro Terms versions'
+    /href="\/terms\?view=pro-en&from=%2Fcompany-dashboard%3Fpro%3D1"[\s\S]*Terms of Services[\s\S]*href="\/terms\?view=pro-id&from=%2Fcompany-dashboard%3Fpro%3D1"[\s\S]*Ketentuan penggunaan/,
+    'Expected the Pro modal to abbreviate yearly pricing and redirect to both Pro Terms versions'
   );
 
   assert.match(

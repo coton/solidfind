@@ -138,6 +138,7 @@ export function AuthModal({
   const [password, setPassword] = useState("");
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
   const [submitHovered, setSubmitHovered] = useState(false);
+  const [secureSignInHovered, setSecureSignInHovered] = useState(false);
 
   // Clerk flow states
   const [isLoading, setIsLoading] = useState(false);
@@ -577,7 +578,7 @@ export function AuthModal({
             VERIFY EMAIL
           </h2>
 
-          <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '20px', marginTop: 0 }}>
+          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', lineHeight: 1.5, marginBottom: '20px', marginTop: 0 }}>
             We sent a verification code to<br /><strong style={{ color: '#333', fontSize: '13px' }}>{email}</strong>
           </p>
 
@@ -645,7 +646,7 @@ export function AuthModal({
 
           {error && (
             <div style={{ textAlign: 'center' }}>
-              <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*{error}</p>
+              <p style={{ color: '#F14110', fontSize: '10px', margin: '2px 0' }}>*{error}</p>
             </div>
           )}
         </div>
@@ -673,7 +674,7 @@ export function AuthModal({
             RESET PASSWORD
           </h2>
 
-          <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
+          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
             Enter the code sent to<br /><strong style={{ color: '#333' }}>{email}</strong><br />and your new password.
           </p>
 
@@ -756,7 +757,7 @@ export function AuthModal({
 
           {error && (
             <div style={{ textAlign: 'center' }}>
-              <p style={{ color: '#F14110', fontSize: '9px', margin: '2px 0' }}>*{error}</p>
+              <p style={{ color: '#F14110', fontSize: '10px', margin: '2px 0' }}>*{error}</p>
             </div>
           )}
         </div>
@@ -772,7 +773,7 @@ export function AuthModal({
           {mode === "login" ? "LOGIN" : "CREATE AN ACCOUNT"}
         </h2>
 
-        <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '16px', marginTop: 0 }}>
+        <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', lineHeight: 1.5, marginBottom: '16px', marginTop: 0 }}>
           {mode === "register" ? (
             <>Welcome to the best Bali Directory.<br />Selamat datang di direktori Bali terbaik.</>
           ) : (
@@ -791,7 +792,7 @@ export function AuthModal({
                   onChange={() => setAccountType("company")}
                 />
               </div>
-              <p style={{ fontSize: '9px', color: '#999', margin: 0, lineHeight: 1.4 }}>
+              <p style={{ fontSize: '10px', color: '#999', margin: 0, lineHeight: 1.4 }}>
                 Create a profile page/<br />Buat halaman
               </p>
             </div>
@@ -804,7 +805,7 @@ export function AuthModal({
                   onChange={() => setAccountType("individual")}
                 />
               </div>
-              <p style={{ fontSize: '9px', color: '#999', margin: 0, lineHeight: 1.4 }}>
+              <p style={{ fontSize: '10px', color: '#999', margin: 0, lineHeight: 1.4 }}>
                 Save listings/<br />Simpan daftar
               </p>
             </div>
@@ -903,7 +904,7 @@ export function AuthModal({
           {mode === "login" ? "LOGIN" : "CREATE AN ACCOUNT"}
         </h2>
 
-        <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
+        <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
           {mode === "register" ? (
             <>Continue with your email address.<br />Lanjutkan dengan alamat email Anda.</>
           ) : (
@@ -941,7 +942,7 @@ export function AuthModal({
                   onChange={() => setAccountType("company")}
                 />
               </div>
-              <p style={{ fontSize: '9px', color: '#999', margin: 0, lineHeight: 1.4 }}>
+              <p style={{ fontSize: '10px', color: '#999', margin: 0, lineHeight: 1.4 }}>
                 Create a profile page/<br />Buat halaman
               </p>
             </div>
@@ -954,7 +955,7 @@ export function AuthModal({
                   onChange={() => setAccountType("individual")}
                 />
               </div>
-              <p style={{ fontSize: '9px', color: '#999', margin: 0, lineHeight: 1.4 }}>
+              <p style={{ fontSize: '10px', color: '#999', margin: 0, lineHeight: 1.4 }}>
                 Save listings/<br />Simpan daftar
               </p>
             </div>
@@ -1002,34 +1003,35 @@ export function AuthModal({
           </div>
         )}
 
-        {/* Register / Login button — 145×40, centered, gradient on hover only */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: mode === 'login' ? '28px' : '14px', marginBottom: '12px' }}>
-        <button
-          type="submit"
-          disabled={isLoading}
-          onMouseEnter={() => setSubmitHovered(true)}
-          onMouseLeave={() => setSubmitHovered(false)}
-          style={{
-            width: '145px',
-            height: '40px',
-            borderRadius: '20px',
-            border: submitHovered ? 'none' : '1px solid #F14110',
-            background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
-            color: submitHovered ? 'white' : '#F14110',
-            fontSize: '13px',
-            fontWeight: 600,
-            letterSpacing: '0.5px',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s ease',
-            opacity: isLoading ? 0.6 : 1,
-          }}
-        >
-          {isLoading
-            ? "Loading..."
-            : mode === "login" ? "Login" : "Register"
-          }
-        </button>
-        </div>
+        {!needsSecureSignIn && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: mode === 'login' ? '28px' : '14px', marginBottom: '12px' }}>
+            <button
+              type="submit"
+              disabled={isLoading}
+              onMouseEnter={() => setSubmitHovered(true)}
+              onMouseLeave={() => setSubmitHovered(false)}
+              style={{
+                width: '145px',
+                height: '40px',
+                borderRadius: '20px',
+                border: submitHovered ? 'none' : '1px solid #F14110',
+                background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
+                color: submitHovered ? 'white' : '#F14110',
+                fontSize: '13px',
+                fontWeight: 600,
+                letterSpacing: '0.5px',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                opacity: isLoading ? 0.6 : 1,
+              }}
+            >
+              {isLoading
+                ? "Loading..."
+                : mode === "login" ? "Login" : "Register"
+              }
+            </button>
+          </div>
+        )}
 
         {/* Error message — right below button for visibility */}
         {error && (
@@ -1043,17 +1045,20 @@ export function AuthModal({
             <button
               type="button"
               onClick={handleSecureSignIn}
+              onMouseEnter={() => setSecureSignInHovered(true)}
+              onMouseLeave={() => setSecureSignInHovered(false)}
               style={{
                 minWidth: '180px',
                 height: '40px',
                 borderRadius: '20px',
-                border: '1px solid #333',
+                border: `1px solid ${secureSignInHovered ? '#F14110' : '#333'}`,
                 background: 'transparent',
-                color: '#333',
+                color: secureSignInHovered ? '#F14110' : '#333',
                 fontSize: '12px',
                 fontWeight: 600,
                 letterSpacing: '0.24px',
                 cursor: 'pointer',
+                transition: 'border-color 0.2s ease, color 0.2s ease',
               }}
             >
               Continue secure sign in

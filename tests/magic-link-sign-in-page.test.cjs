@@ -83,6 +83,22 @@ test('magic-link sign-in bypasses ticket redemption when a Clerk user session al
   );
 });
 
+test('sign-in popup targets company dashboard redirects as company logins', () => {
+  const source = readProjectFile('src/app/sign-in/[[...sign-in]]/page.tsx');
+
+  assert.match(
+    source,
+    /const initialAccountType = safeNextPath\?\.startsWith\("\/company-dashboard"\) \? "company" : "individual";/,
+    'expected protected company-dashboard redirects to open the website login popup in company mode'
+  );
+
+  assert.match(
+    source,
+    /<AuthModal[\s\S]*initialMode="login"[\s\S]*initialAccountType=\{initialAccountType\}/,
+    'expected the normal login popup to receive the inferred account type'
+  );
+});
+
 test('magic-link route resolves short branded codes while keeping long token fallback', () => {
   const source = readProjectFile('src/app/m/[code]/route.ts');
   const generatorSource = readProjectFile('scripts/generate-company-magic-links.cjs');

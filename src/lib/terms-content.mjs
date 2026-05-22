@@ -6,6 +6,7 @@
  */
 
 export const TERMS_TEXT_PLATFORM_SETTING_KEY = "termsText";
+export const TERMS_ID_TEXT_PLATFORM_SETTING_KEY = "termsTextId";
 export const PRO_TERMS_EN_PLATFORM_SETTING_KEY = "proTermsEnglish";
 export const PRO_TERMS_ID_PLATFORM_SETTING_KEY = "proTermsIndonesian";
 
@@ -31,6 +32,29 @@ export const DEFAULT_TERMS_TEXT = `[TITLE] Terms of Use
 - Not attempt to manipulate ratings or testimonials
 - Comply with all applicable local laws and regulations
 [COPY] SOLIDFIND.ID reserves the right to suspend or terminate accounts that violate these responsibilities without prior notice.`;
+
+export const DEFAULT_TERMS_ID_TEXT = `[TITLE] Ketentuan Penggunaan
+[COPY] Selamat datang di SOLIDFIND.ID. Dengan mengakses dan menggunakan platform ini, Anda setuju untuk terikat oleh Syarat & Ketentuan ini. Jika Anda tidak setuju dengan bagian mana pun dari ketentuan ini, mohon untuk tidak menggunakan layanan kami.
+[COPY] SOLIDFIND.ID adalah platform independen yang dibangun untuk menghadirkan kejelasan, kepercayaan, dan perspektif bagi industri konstruksi dan renovasi di Indonesia. Kami berhak mengubah ketentuan ini kapan saja. Penggunaan platform secara berkelanjutan setelah perubahan berarti Anda menerima ketentuan yang diperbarui.
+[COPY] Pengguna harus berusia minimal 18 tahun untuk membuat akun. Semua informasi yang diberikan saat pendaftaran harus akurat dan terbaru.
+
+[TITLE] Kebijakan Privasi
+[COPY] Kami menghargai privasi Anda. SOLIDFIND.ID mengumpulkan informasi pribadi yang diperlukan untuk menyediakan layanan kami, termasuk nama, alamat email, dan preferensi akun Anda.
+[COPY] Data Anda disimpan dengan aman dan tidak pernah dijual kepada pihak ketiga. Kami dapat menggunakan data anonim dan agregat untuk meningkatkan platform dan layanan kami.
+[COPY] Anda berhak meminta akses, koreksi, atau penghapusan data pribadi Anda kapan saja dengan menghubungi tim dukungan kami.
+
+[TITLE] Kebijakan Cookie
+[COPY] SOLIDFIND.ID menggunakan cookie dan teknologi serupa untuk meningkatkan pengalaman browsing Anda. Cookie membantu kami memahami cara Anda berinteraksi dengan platform dan memungkinkan kami mengingat preferensi Anda.
+[COPY] Anda dapat mengatur preferensi cookie melalui pengaturan browser Anda. Menonaktifkan cookie dapat memengaruhi fitur tertentu di platform.
+
+[TITLE] Tanggung Jawab Pengguna
+[COPY] Sebagai pengguna SOLIDFIND.ID, Anda setuju untuk:
+- Memberikan informasi yang akurat dan benar di profil dan testimonial Anda
+- Menghormati pengguna dan perusahaan lain di platform
+- Tidak memposting konten yang mencemarkan nama baik, menyesatkan, atau curang
+- Tidak mencoba memanipulasi rating atau testimonial
+- Mematuhi semua hukum dan peraturan lokal yang berlaku
+[COPY] SOLIDFIND.ID berhak menangguhkan atau menghentikan akun yang melanggar tanggung jawab ini tanpa pemberitahuan sebelumnya.`;
 
 export const DEFAULT_PRO_TERMS_EN_TEXT = `[TITLE] Pro Terms of Services
 [COPY] These Pro Terms of Services apply to companies subscribing to SolidFind Pro features. By subscribing, you agree to the billing, visibility, and platform-use conditions attached to Pro access.

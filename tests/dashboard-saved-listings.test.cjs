@@ -169,3 +169,20 @@ test('company dashboard intro copy spans the mobile content width', () => {
     'expected company dashboard intro copy to use full mobile width with desktop max width only on larger screens'
   );
 });
+
+test('company dashboard account badge only appears when Pro features are enabled', () => {
+  const source = readProjectFile('src/app/company-dashboard/page.tsx');
+  const editSource = readProjectFile('src/app/company-dashboard/edit/page.tsx');
+
+  assert.match(
+    source,
+    /isPro && proEnabled[\s\S]*PRO ACCOUNT[\s\S]*: proEnabled \? \([\s\S]*FREE ACCOUNT[\s\S]*\) : null/,
+    'expected the company dashboard header to hide FREE/PRO labels while Pro features are off'
+  );
+
+  assert.match(
+    editSource,
+    /company\?\.isPro && proEnabled[\s\S]*PRO ACCOUNT[\s\S]*: proEnabled \? \([\s\S]*FREE ACCOUNT[\s\S]*\) : null/,
+    'expected the company profile editor header to hide FREE/PRO labels while Pro features are off'
+  );
+});
