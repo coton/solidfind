@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useQuery } from "convex/react";
@@ -61,15 +61,14 @@ function renderFormattedParagraphs(text: string, className: string) {
 }
 
 export default function AboutPage() {
-  const [backHref, setBackHref] = useState("/");
-  const [language, setLanguage] = useState<AboutLanguage>("en");
-
-  useEffect(() => {
-    const from = new URLSearchParams(window.location.search).get("from");
-    if (from) {
-      setBackHref(from);
+  const [backHref] = useState(() => {
+    if (typeof window === "undefined") {
+      return "/";
     }
-  }, []);
+
+    return new URLSearchParams(window.location.search).get("from") || "/";
+  });
+  const [language, setLanguage] = useState<AboutLanguage>("en");
 
   // Dynamic content from admin UI tab
   const tagline = useQuery(api.platformSettings.get, { key: "aboutPageTagline" });
@@ -151,7 +150,7 @@ export default function AboutPage() {
           <h1 className="text-[24px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px]">SOLIDFIND.ID</h1>
           <div className="flex flex-col items-end gap-2">
             <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative flex-shrink-0 mt-1">
-              <span className="font-bam text-[9px]">Share</span>
+              <span className="font-bam text-[9px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">Share</span>
               <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
                 className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
                 style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
@@ -207,12 +206,6 @@ export default function AboutPage() {
 
             {/* Social Links */}
             <div className="flex w-[180px] justify-start gap-4 sm:w-[200px]">
-              <a href={mailHref} aria-label="Email" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                <svg height="20" viewBox="0 0 24 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <rect x="1" y="1" width="22" height="16" rx="2" stroke="currentColor" strokeWidth="2" />
-                  <path d="M1 3L12 10L23 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </a>
               {/* IG icon - same as header (20×20, stroke 1.5) */}
               <a href={igUrlState.value || "#"} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:opacity-70 transition-opacity">
                 <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />

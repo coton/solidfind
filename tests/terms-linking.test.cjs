@@ -29,6 +29,18 @@ test('terms page reads Terms & Conditions content from Convex platform settings'
     /view === "main"[\s\S]*\/terms\?lang=en[\s\S]*\/terms\?lang=id/,
     'expected the main Terms page to expose top-right EN/ID language links'
   );
+
+  assert.match(
+    termsPageSource,
+    /<h1 className="text-\[24px\] sm:text-\[32px\][^"]*">\s*SOLIDFIND\.ID\s*<\/h1>/,
+    'expected the general Terms page title to only show SOLIDFIND.ID'
+  );
+
+  assert.match(
+    termsPageSource,
+    /language === "id"[\s\S]*\? "Syarat & Ketentuan"[\s\S]*: "Terms & Conditions"/,
+    'expected the general Terms page to render the localized legal heading above the terms body'
+  );
 });
 
 test('admin Legal tab persists Terms and Pro Terms text to Convex platform settings', () => {
@@ -76,7 +88,7 @@ test('Convex platform settings seed includes the shared Terms & Conditions key',
   assert.equal(termsUtils.TERMS_TEXT_PLATFORM_SETTING_KEY, 'termsText');
 });
 
-test('terms page links to Pro Terms only when Pro features are enabled', () => {
+test('terms page opens Pro Terms popups only when Pro features are enabled', () => {
   const termsPageSource = readProjectFile('src/app/terms/page.tsx');
 
   assert.match(
@@ -87,8 +99,36 @@ test('terms page links to Pro Terms only when Pro features are enabled', () => {
 
   assert.match(
     termsPageSource,
-    /view === "main" && proTermsVisible[\s\S]*Pro Terms of Services[\s\S]*Ketentuan Penggunaan Pro[\s\S]*href="\/terms\?view=pro-en"[\s\S]*href="\/terms\?view=pro-id"/,
-    'expected the Terms page to show Pro Terms links only from the main Terms view when Pro is enabled'
+    /view === "main" && proTermsVisible[\s\S]*setProTermsModalView\("pro-en"\)[\s\S]*Pro Terms of Services[\s\S]*setProTermsModalView\("pro-id"\)[\s\S]*Ketentuan Penggunaan Pro/,
+    'expected the Terms page to show Pro Terms popup links only from the main Terms view when Pro is enabled'
+  );
+
+  assert.match(
+    termsPageSource,
+    /proTermsModalView && \([\s\S]*setProTermsModalView\(null\)[\s\S]*selectedProModalSections\.map/,
+    'expected the Pro Terms popup to contain only legal text plus a close button'
+  );
+});
+
+test('terms page reuses the About thumbnail layout without contact icons', () => {
+  const termsPageSource = readProjectFile('src/app/terms/page.tsx');
+
+  assert.match(
+    termsPageSource,
+    /useQuery\(api\.platformSettings\.get,\s*\{\s*key:\s*"aboutProfilePictureUrl"\s*\}\)/,
+    'expected the Terms page to reuse the About profile thumbnail setting'
+  );
+
+  assert.match(
+    termsPageSource,
+    /grid grid-cols-1 gap-8 lg:grid-cols-\[200px_1fr\] lg:gap-12/,
+    'expected the Terms page to use the About page thumbnail-and-right-text layout'
+  );
+
+  assert.doesNotMatch(
+    termsPageSource,
+    /aria-label="Email"|icon-ig\.svg/,
+    'expected the Terms page thumbnail area to render without mail or social icons'
   );
 });
 
@@ -98,8 +138,14 @@ test('pro terms pages preserve language switching and return targets', () => {
 
   assert.match(
     termsPageSource,
-    /const fromPath = sanitizeNextPath\(searchParams\.get\("from"\)\);[\s\S]*const backHref = view === "main" \? "\/" : fromPath \|\| "\/terms";/,
+    /function sanitizeReturnPath\(value: string \| null\)[\s\S]*const fromPath = sanitizeReturnPath\(searchParams\.get\("from"\)\);[\s\S]*const backHref = view === "main" \? "\/" : fromPath \|\| "\/terms";/,
     'expected Pro Terms back links to return to a sanitized source path when provided'
+  );
+
+  assert.doesNotMatch(
+    termsPageSource,
+    /@\/lib\/magic-link-login\.mjs/,
+    'expected the client Terms page to avoid importing the server crypto-backed magic-link helper'
   );
 
   assert.match(

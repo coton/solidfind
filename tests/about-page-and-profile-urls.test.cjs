@@ -49,25 +49,35 @@ test('about page ties the PRO account card to the platform pro_enabled switch an
   );
 });
 
-test('about page uses the profile email icon treatment and right-aligns the contact icons under the profile image', () => {
+test('about page removes the thumbnail mail icon while keeping Instagram aligned under the profile image', () => {
   const aboutSource = readProjectFile('src/app/about/page.tsx');
 
-  assert.match(
+  assert.doesNotMatch(
     aboutSource,
-    /className="text-\[#333\] hover:text-\[#f14110\] transition-colors flex items-center h-\[20px\]"/,
-    'expected the About page email icon to use the same black-to-orange hover treatment as company profiles'
+    /aria-label="Email"[\s\S]*<rect x="1" y="1" width="22" height="16" rx="2" stroke="currentColor" strokeWidth="2"/,
+    'expected the About page to stop rendering the black mail icon under the thumbnail'
   );
 
   assert.match(
     aboutSource,
-    /<rect x="1" y="1" width="22" height="16" rx="2" stroke="currentColor" strokeWidth="2"/,
-    'expected the About page email icon to use a currentColor inline SVG'
+    /<Image src="\/images\/icon-ig\.svg" alt="Instagram" width=\{20\} height=\{20\}/,
+    'expected the About page Instagram icon to remain under the thumbnail'
   );
 
   assert.match(
     aboutSource,
     /className="flex w-\[180px\] justify-start gap-4 sm:w-\[200px\]"/,
     'expected the About page contact icon row to align to the left edge of the profile picture'
+  );
+});
+
+test('about page only shows the Share label on hover', () => {
+  const aboutSource = readProjectFile('src/app/about/page.tsx');
+
+  assert.match(
+    aboutSource,
+    /<span className="font-bam text-\[9px\] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">Share<\/span>/,
+    'expected the About page share text to be hidden until the share control is hovered or focused'
   );
 });
 

@@ -178,7 +178,7 @@ test('company profile displays project images even when reviews are enabled', ()
 
   assert.match(
     source,
-    /<div className="grid grid-cols-1 gap-6 lg:grid-cols-\[440px_1fr_70px\] lg:gap-5 mb-8">[\s\S]*\/\* Mobile only: Save\/Share\/Report directly above the project thumbnails \*\/[\s\S]*\{projectImages\.length > 0 && \([\s\S]*<ProjectImagesGrid/,
+    /<div className="grid grid-cols-1 gap-6 lg:grid-cols-\[440px_1fr\] lg:gap-10 mb-8">[\s\S]*\/\* Mobile only: Save\/Share\/Report directly above the project thumbnails \*\/[\s\S]*\{projectImages\.length > 0 && \([\s\S]*<ProjectImagesGrid/,
     'Expected project images to render in the left profile block whenever images exist'
   );
 
@@ -411,7 +411,7 @@ test('company profile mobile actions sit directly above the project thumbnails',
 
   assert.match(
     source,
-    /\/\* Mobile only: Save\/Share\/Report directly above the project thumbnails \*\/[\s\S]*className="mt-3 flex lg:hidden items-center gap-2"[\s\S]*\{projectImages\.length > 0 && \(/,
+    /\/\* Mobile only: Save\/Share\/Report directly above the project thumbnails \*\/[\s\S]*className="mt-3 flex lg:hidden items-center gap-4"[\s\S]*\{projectImages\.length > 0 && \(/,
     'Expected mobile bookmark/share/report actions to render directly above the project thumbnails'
   );
 
@@ -419,6 +419,28 @@ test('company profile mobile actions sit directly above the project thumbnails',
     source,
     /\/\* Mobile only: Save\/Share\/Report below description/,
     'Expected mobile bookmark/share/report actions to no longer render below the description'
+  );
+});
+
+test('company profile desktop actions align with the title and use icon-only share/report controls', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /\/\* Company Name \+ Desktop Actions \*\/[\s\S]*<h1 className="text-\[20px\] sm:text-\[26px\][\s\S]*hidden lg:flex items-center justify-end gap-6 pt-1/,
+    'Expected desktop bookmark/share/report controls to sit in the company title row'
+  );
+
+  assert.match(
+    source,
+    /aria-label="Share company"[\s\S]*aria-label="Report company"/,
+    'Expected icon-only profile actions to keep accessible labels'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /<span className="font-bam text-\[9px\]">Share<\/span>|<span className="font-bam text-\[9px\]">Report<\/span>/,
+    'Expected profile share and report controls to remove visible text labels'
   );
 });
 
