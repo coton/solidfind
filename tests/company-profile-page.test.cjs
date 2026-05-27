@@ -178,7 +178,7 @@ test('company profile displays project images even when reviews are enabled', ()
 
   assert.match(
     source,
-    /<div className="grid grid-cols-1 gap-6 lg:grid-cols-\[440px_1fr\] lg:gap-10 mb-8">[\s\S]*\/\* Mobile only: Save\/Share\/Report directly above the project thumbnails \*\/[\s\S]*\{projectImages\.length > 0 && \([\s\S]*<ProjectImagesGrid/,
+    /<div className="grid grid-cols-1 gap-6 lg:grid-cols-\[440px_1fr\] lg:gap-5 mb-8">[\s\S]*\/\* Mobile only: Save\/Share\/Report directly above the project thumbnails \*\/[\s\S]*\{projectImages\.length > 0 && \([\s\S]*<ProjectImagesGrid/,
     'Expected project images to render in the left profile block whenever images exist'
   );
 
@@ -441,6 +441,22 @@ test('company profile desktop actions align with the title and use icon-only sha
     source,
     /<span className="font-bam text-\[9px\]">Share<\/span>|<span className="font-bam text-\[9px\]">Report<\/span>/,
     'Expected profile share and report controls to remove visible text labels'
+  );
+});
+
+test('company profile top detail half aligns with the four-column review grid', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /className="grid grid-cols-1 gap-6 lg:grid-cols-\[440px_1fr\] lg:gap-5 mb-8"/,
+    'Expected the upper profile split to use two 440px halves separated by the same 20px gap as the four-column review grid'
+  );
+
+  assert.match(
+    source,
+    /className="hidden lg:grid lg:grid-cols-4 gap-5"/,
+    'Expected desktop reviews to keep the same 20px four-column rhythm the upper split aligns to'
   );
 });
 

@@ -607,7 +607,7 @@ export default function ProfilePageClient() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[440px_1fr] lg:gap-10 mb-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[440px_1fr] lg:gap-5 mb-8">
           <div className="space-y-3 lg:self-start">
             <div className="grid grid-cols-[160px_1fr] gap-4 lg:grid-cols-2 lg:gap-5">
               {/* Logo */}
