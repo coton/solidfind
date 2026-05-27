@@ -15,6 +15,7 @@ import type * as featuredArticles from "../featuredArticles.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as magicLinks from "../magicLinks.js";
+import type * as midtrans from "../midtrans.js";
 import type * as migrations from "../migrations.js";
 import type * as migrations_migrateFeaturedCategories from "../migrations/migrateFeaturedCategories.js";
 import type * as pageConfigs from "../pageConfigs.js";
@@ -27,7 +28,6 @@ import type * as seed from "../seed.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as users from "../users.js";
 import type * as waitlist from "../waitlist.js";
-import type * as xendit from "../xendit.js";
 
 import type {
   ApiFromModules,
@@ -43,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   files: typeof files;
   http: typeof http;
   magicLinks: typeof magicLinks;
+  midtrans: typeof midtrans;
   migrations: typeof migrations;
   "migrations/migrateFeaturedCategories": typeof migrations_migrateFeaturedCategories;
   pageConfigs: typeof pageConfigs;
@@ -55,7 +56,6 @@ declare const fullApi: ApiFromModules<{
   subscriptions: typeof subscriptions;
   users: typeof users;
   waitlist: typeof waitlist;
-  xendit: typeof xendit;
 }>;
 
 /**

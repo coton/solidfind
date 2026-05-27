@@ -6,6 +6,8 @@ const path = require('path');
 const projectRoot = path.join(__dirname, '..');
 const editPagePath = path.join(projectRoot, 'src/app/company-dashboard/edit/page.tsx');
 const dashboardPagePath = path.join(projectRoot, 'src/app/company-dashboard/page.tsx');
+const midtransPath = path.join(projectRoot, 'convex/midtrans.ts');
+const httpPath = path.join(projectRoot, 'convex/http.ts');
 
 function read(relativePath) {
   return fs.readFileSync(relativePath, 'utf8');
@@ -326,13 +328,13 @@ test('company dashboard keeps bookmark and completion paired while pro analytics
   );
 });
 
-test('company dashboard pro modal reads platform pricing and starts Xendit checkout', () => {
+test('company dashboard pro modal reads platform pricing and starts Midtrans checkout', () => {
   const source = read(dashboardPagePath);
 
   assert.match(
     source,
-    /useAction\(api\.xendit\.createInvoice\)/,
-    'Expected the Buy now button to call the Xendit invoice action'
+    /useAction\(api\.midtrans\.createCheckout\)/,
+    'Expected the Buy now button to call the Midtrans checkout action'
   );
 
   assert.match(
@@ -387,6 +389,23 @@ test('company dashboard pro modal reads platform pricing and starts Xendit check
     source,
     /max-w-\[440px\][\s\S]*max-w-\[260px\] space-y-3[\s\S]*text-\[22px\] font-bold leading-\[26px\][\s\S]*formatProPrice\(yearlyPrice, "yearly"\)/,
     'Expected the Pro modal to be narrower and stack smaller pricing rows vertically'
+  );
+});
+
+test('Midtrans checkout uses Snap redirect and validates signed payment notifications', () => {
+  const paymentSource = read(midtransPath);
+  const httpSource = read(httpPath);
+
+  assert.match(
+    paymentSource,
+    /app\.midtrans\.com\/snap\/v1\/transactions[\s\S]*app\.sandbox\.midtrans\.com\/snap\/v1\/transactions[\s\S]*return \{ redirectUrl: transaction\.redirect_url \}/,
+    'Expected the backend checkout to create a Midtrans Snap redirect transaction'
+  );
+
+  assert.match(
+    httpSource,
+    /path: "\/webhooks\/midtrans"[\s\S]*orderId\}\$\{statusCode\}\$\{grossAmount\}\$\{serverKey\}[\s\S]*SHA-512[\s\S]*internal\.midtrans\.handlePaymentNotification/,
+    'Expected Midtrans notifications to be signature verified before updating subscriptions'
   );
 });
 

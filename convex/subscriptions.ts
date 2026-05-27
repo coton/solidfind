@@ -29,7 +29,7 @@ export const create = mutation({
     companyId: v.id("companies"),
     plan: v.union(v.literal("monthly"), v.literal("yearly")),
     amount: v.number(),
-    xenditInvoiceId: v.optional(v.string()),
+    midtransOrderId: v.optional(v.string()),
     startDate: v.number(),
     endDate: v.number(),
   },
@@ -39,7 +39,7 @@ export const create = mutation({
       companyId: args.companyId,
       plan: args.plan,
       status: "pending",
-      xenditInvoiceId: args.xenditInvoiceId,
+      midtransOrderId: args.midtransOrderId,
       amount: args.amount,
       currency: "IDR",
       startDate: args.startDate,
@@ -64,12 +64,12 @@ export const updateStatus = mutation({
       v.literal("expired"),
       v.literal("frozen")
     ),
-    xenditPaymentId: v.optional(v.string()),
+    midtransTransactionId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const updates: Record<string, unknown> = { status: args.status };
-    if (args.xenditPaymentId) {
-      updates.xenditPaymentId = args.xenditPaymentId;
+    if (args.midtransTransactionId) {
+      updates.midtransTransactionId = args.midtransTransactionId;
     }
     await ctx.db.patch(args.subscriptionId, updates);
   },

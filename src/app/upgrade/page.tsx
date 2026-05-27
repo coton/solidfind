@@ -195,7 +195,7 @@ export default function UpgradePage() {
             Upgrade to PRO — {billingCycle === "monthly" ? `${formatIdrPrice(monthlyPrice)}rp/mo` : `${formatIdrPrice(yearlyPrice)}rp/yr`}
           </button>
           <p className="text-[9px] text-[#333]/40 mt-3">
-            Secure payment via Xendit. Cancel anytime.
+            Secure payment via Midtrans. Cancel anytime.
           </p>
         </div>
       </main>

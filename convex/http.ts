@@ -5,32 +5,45 @@ import { internal } from "./_generated/api";
 const http = httpRouter();
 
 http.route({
-  path: "/webhooks/xendit",
+  path: "/webhooks/midtrans",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    // Verify callback token
-    const callbackToken = process.env.XENDIT_WEBHOOK_VERIFICATION_TOKEN;
-    const headerToken = request.headers.get("x-callback-token");
-
-    if (callbackToken && headerToken !== callbackToken) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-
     try {
       const body = await request.json();
+      const serverKey = process.env.MIDTRANS_SERVER_KEY;
+      const orderId = body.order_id;
+      const statusCode = body.status_code;
+      const grossAmount = body.gross_amount;
+      const signatureKey = body.signature_key;
 
-      const xenditInvoiceId = body.id ?? body.external_id;
-      const status = body.status;
-      const paymentId = body.payment_id;
+      if (!serverKey) {
+        console.error("MIDTRANS_SERVER_KEY not configured");
+        return new Response("Payment integration not configured", { status: 500 });
+      }
 
-      if (!xenditInvoiceId || !status) {
+      if (!orderId || !statusCode || !grossAmount || !signatureKey || !body.transaction_status) {
         return new Response("Missing required fields", { status: 400 });
       }
 
-      await ctx.runMutation(internal.xendit.handleWebhookPayment, {
-        xenditInvoiceId,
-        status,
-        paymentId,
+      const signatureInput = `${orderId}${statusCode}${grossAmount}${serverKey}`;
+      const digest = await crypto.subtle.digest(
+        "SHA-512",
+        new TextEncoder().encode(signatureInput)
+      );
+      const expectedSignature = Array.from(new Uint8Array(digest))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+
+      if (expectedSignature !== signatureKey.toLowerCase()) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+
+      await ctx.runMutation(internal.midtrans.handlePaymentNotification, {
+        midtransOrderId: orderId,
+        transactionStatus: body.transaction_status,
+        transactionId: body.transaction_id,
+        fraudStatus: body.fraud_status,
+        grossAmount,
       });
 
       return new Response("OK", { status: 200 });

@@ -110,7 +110,7 @@ export default function CompanyDashboardPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [billingPlan, setBillingPlan] = useState<"monthly" | "yearly">("monthly");
   const [proTermsView, setProTermsView] = useState<"english" | "indonesian" | null>(null);
-  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+  const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
   const [proCheckoutError, setProCheckoutError] = useState("");
   const [redirected, setRedirected] = useState(false);
   const router = useRouter();
@@ -119,7 +119,7 @@ export default function CompanyDashboardPage() {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const deleteAccount = useMutation(api.users.deleteAccount);
-  const createProInvoice = useAction(api.xendit.createInvoice);
+  const createProCheckout = useAction(api.midtrans.createCheckout);
 
   const handleSignOut = async () => {
     await signOut({ redirectUrl: "/" });
@@ -274,11 +274,11 @@ export default function CompanyDashboardPage() {
       return;
     }
 
-    setIsCreatingInvoice(true);
+    setIsCreatingCheckout(true);
     setProCheckoutError("");
 
     try {
-      const result = await createProInvoice({
+      const result = await createProCheckout({
         userId: currentUser._id,
         companyId: company._id,
         plan: billingPlan,
@@ -286,15 +286,15 @@ export default function CompanyDashboardPage() {
         companyName: company.name,
       });
 
-      if (result?.invoiceUrl) {
-        window.location.href = result.invoiceUrl;
+      if (result?.redirectUrl) {
+        window.location.href = result.redirectUrl;
       } else {
         setProCheckoutError("Payment link could not be created. Please try again.");
       }
     } catch (error) {
       setProCheckoutError(error instanceof Error ? error.message : "Payment link could not be created. Please try again.");
     } finally {
-      setIsCreatingInvoice(false);
+      setIsCreatingCheckout(false);
     }
   };
 
@@ -795,10 +795,10 @@ export default function CompanyDashboardPage() {
 
                 <button
                   onClick={handleBuyPro}
-                  disabled={isCreatingInvoice}
+                  disabled={isCreatingCheckout}
                   className="mx-auto flex items-center justify-center h-10 px-10 rounded-full border border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isCreatingInvoice ? "Creating link..." : "Buy now"}
+                  {isCreatingCheckout ? "Creating link..." : "Buy now"}
                 </button>
 
                 <p className="mt-4 text-center text-[10px] leading-[16px] text-[#333]/50">

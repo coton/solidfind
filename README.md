@@ -8,7 +8,7 @@ Bali business directory website built with Next.js, Clerk authentication, and Co
 - **Authentication**: [Clerk](https://clerk.com)
 - **Backend / Database**: [Convex](https://convex.dev)
 - **Styling**: Tailwind CSS 4 + Radix UI
-- **Payments**: Stripe
+- **Payments**: Midtrans Snap Redirect
 - **Font**: Sora (Google Fonts)
 
 ## Getting Started
@@ -94,7 +94,39 @@ Convex is used as the real-time backend database.
 - User data is synced from Clerk to Convex via `useStoreUserEffect` hook
 - Schema and mutations/queries are defined in `convex/` (e.g., `convex/users.ts`)
 
-### 5. Run the development server
+### 5. Midtrans Payments
+
+The PRO checkout uses Midtrans Snap Redirect: Convex creates the transaction and redirects the buyer to the Midtrans-hosted payment page. No browser SDK is required.
+
+1. Create a Midtrans Merchant Administration Portal account and retrieve the Sandbox Server Key.
+2. Add the key to the Convex development deployment, because payment requests and notifications run in Convex functions:
+   ```bash
+   npx convex env set MIDTRANS_SERVER_KEY 'SB-Mid-server-your-key'
+   npx convex env set MIDTRANS_IS_PRODUCTION 'false'
+   ```
+3. Deploy or run `npx convex dev`, then copy the HTTP Actions site URL from Convex deployment settings. It ends in `.convex.site`.
+4. In Midtrans Sandbox, configure the Payment Notification URL:
+   ```
+   https://<your-convex-site>.convex.site/webhooks/midtrans
+   ```
+5. In the Midtrans Snap redirect settings, set Finish, Unfinish, and Error redirect URLs to suitable application routes, such as:
+   ```
+   https://<your-app-host>/company-dashboard?payment=success
+   https://<your-app-host>/company-dashboard?payment=pending
+   https://<your-app-host>/company-dashboard?payment=failed
+   ```
+6. Complete a Sandbox payment and confirm the subscription becomes active from a signed notification.
+
+For production, repeat the configuration on the production Convex deployment with the Midtrans Production Server Key and set:
+
+```bash
+npx convex env set --prod MIDTRANS_SERVER_KEY 'Mid-server-your-production-key'
+npx convex env set --prod MIDTRANS_IS_PRODUCTION 'true'
+```
+
+Do not expose `MIDTRANS_SERVER_KEY` as a `NEXT_PUBLIC_` value or commit it to an environment file.
+
+### 6. Run the development server
 
 ```bash
 npm run dev

@@ -144,6 +144,9 @@ export default defineSchema({
       v.literal("expired"),
       v.literal("frozen")
     ),
+    midtransOrderId: v.optional(v.string()),
+    midtransTransactionId: v.optional(v.string()),
+    // Kept for subscriptions created before the Midtrans migration.
     xenditInvoiceId: v.optional(v.string()),
     xenditPaymentId: v.optional(v.string()),
     amount: v.number(),
@@ -155,6 +158,7 @@ export default defineSchema({
     .index("by_userId", ["userId"])
     .index("by_companyId", ["companyId"])
     .index("by_status", ["status"])
+    .index("by_midtransOrderId", ["midtransOrderId"])
     .index("by_xenditInvoiceId", ["xenditInvoiceId"]),
 
   accountDeletionFeedback: defineTable({
