@@ -40,24 +40,27 @@ function parseBulletLine(line: string) {
 }
 
 function renderFormattedParagraphs(text: string, className: string) {
-  return text.split("\n").map((line, index) => {
-    const trimmedLine = line.trim();
-    const bulletContent = parseBulletLine(trimmedLine);
+  return text
+    .replace(/\r\n/g, "\n")
+    .split(/\n{2,}/)
+    .map((block, index) => {
+      const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
+      const bulletLines = lines.map(parseBulletLine);
 
-    if (!trimmedLine) {
-      return <div key={`spacer-${index}`} className="h-1" aria-hidden="true" />;
-    }
+      if (lines.length === 0) {
+        return null;
+      }
 
-    if (bulletContent) {
-      return (
-        <p key={`line-${index}`} className={`${className} pl-8`}>
-          • {renderBoldTextLine(bulletContent)}
-        </p>
-      );
-    }
+      if (bulletLines.every(Boolean)) {
+        return bulletLines.map((bulletContent, bulletIndex) => (
+          <p key={`line-${index}-${bulletIndex}`} className={`${className} pl-8`}>
+            • {renderBoldTextLine(bulletContent || "")}
+          </p>
+        ));
+      }
 
-    return <p key={`line-${index}`} className={className}>{renderBoldTextLine(line)}</p>;
-  });
+      return <p key={`line-${index}`} className={className}>{renderBoldTextLine(lines.join(" "))}</p>;
+    });
 }
 
 export default function AboutPage() {
@@ -131,9 +134,9 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 pb-6 sm:pb-8 flex-grow w-full">
+      <main className="max-w-[900px] mx-auto px-4 sm:px-0 pt-0 pb-6 sm:pb-8 flex-grow w-full">
         {/* Back row */}
-        <div className="flex items-center mb-3 py-2 border-b border-[#333]/10">
+        <div className="flex items-center mb-3 pb-2 border-b border-[#333]/10">
           <Link
             href={backHref}
             className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
@@ -221,7 +224,7 @@ export default function AboutPage() {
             </p>
 
             {/* About Description */}
-            <div className="space-y-1 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]">
+            <div className="space-y-2 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]">
               {renderFormattedParagraphs(localized.description, "text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]")}
             </div>
 

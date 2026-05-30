@@ -548,7 +548,7 @@ export default function CompanyDashboardPage() {
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold text-[#333]">Reach a highly targeted audience</p>
-                  <p className="text-[12px] text-[#333]/70">Jangkau audiens yang sangat tertarget</p>
+                  <p className="text-[12px] text-[#333]/70">Jangkau audiens yang tepat.</p>
                 </div>
               </div>
 
@@ -560,7 +560,7 @@ export default function CompanyDashboardPage() {
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold text-[#333]">Increased visibility at key decision moments</p>
-                  <p className="text-[12px] text-[#333]/70">Peningkatan visibilitas pada momen-momen penting pengambilan keputusan</p>
+                  <p className="text-[12px] text-[#333]/70">Tingkatkan visibilitas pada momen penting pengambilan keputusan.</p>
                 </div>
               </div>
 
@@ -572,19 +572,19 @@ export default function CompanyDashboardPage() {
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold text-[#333]">Simple and cost-effective exposure</p>
-                  <p className="text-[12px] text-[#333]/70">Paparan yang sederhana dan hemat biaya</p>
+                  <p className="text-[12px] text-[#333]/70">Eksposur yang sederhana dan hemat biaya.</p>
                 </div>
               </div>
             </div>
 
             <p className="text-[11px] text-[#333]/70 text-center mb-6 leading-[18px]">
-              Your placement appears on category pages and search results — in front of people actively looking for professionals. Penempatan Anda muncul di halaman kategori dan hasil pencarian — di hadapan orang-orang yang aktif mencari profesional.
+              Your placement appears on category pages and search results — clearly visible to people actively looking for professionals. Iklan Anda akan tampil di halaman kategori dan hasil pencarian - di hadapan pengguna yang sedang aktif mencari tenaga profesional.
             </p>
 
             <p className="text-[12px] text-[#f14110] text-center mb-4">
               Contact us to know more about the pricing options.
               <br />
-              Hubungi kami untuk mengetahui pilihan harga.
+              Hubungi kami untuk mengetahui pilihan harga yang tersedia.
             </p>
 
             <a

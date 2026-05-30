@@ -86,7 +86,7 @@ test('about page keeps the back button aligned directly below the shared header'
 
   assert.match(
     aboutSource,
-    /<main className="max-w-\[900px\] mx-auto px-4 sm:px-0 pb-6 sm:pb-8 flex-grow w-full">/,
+    /<main className="max-w-\[900px\] mx-auto px-4 sm:px-0 pt-0 pb-6 sm:pb-8 flex-grow w-full">/,
     'expected the About page main container to keep bottom padding without adding top padding above the back row'
   );
 
@@ -94,6 +94,28 @@ test('about page keeps the back button aligned directly below the shared header'
     aboutSource,
     /px-4 sm:px-0 py-6 sm:py-8/,
     'expected the About page to avoid extra top padding above the back button'
+  );
+
+  assert.match(
+    aboutSource,
+    /<div className="flex items-center mb-3 pb-2 border-b border-\[#333\]\/10">/,
+    'expected the About page back row to avoid extra top padding inside the row itself'
+  );
+});
+
+test('about page treats single admin line breaks as normal paragraph flow', () => {
+  const aboutSource = readProjectFile('src/app/about/page.tsx');
+
+  assert.match(
+    aboutSource,
+    /\.split\(\/\\n\{2,\}\/\)/,
+    'expected only blank lines to create separate About page paragraphs'
+  );
+
+  assert.match(
+    aboutSource,
+    /renderBoldTextLine\(lines\.join\(" "\)\)/,
+    'expected single line breaks inside About copy to render with normal text spacing'
   );
 });
 
