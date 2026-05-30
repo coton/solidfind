@@ -41,6 +41,18 @@ test('email verification popup uses 10px helper text and a larger target email',
   );
 });
 
+test('auth modal uses the updated bilingual account and newsletter copy', () => {
+  const source = readProjectFile('src/components/AuthModal.tsx');
+
+  assert.match(source, /Subscribe to the newsletter/);
+  assert.match(source, /Save listings\/<br \/>Simpan listing/);
+  assert.match(source, /Already have an account\?[\s\S]*Sudah punya akun\?/);
+  assert.match(source, /Don&apos;t have an account\?[\s\S]*Tidak punya akun\?/);
+
+  assert.doesNotMatch(source, /Subscribe to newsletter<\/span>/);
+  assert.doesNotMatch(source, /Simpan daftar/);
+});
+
 test('secure sign-in warning shows only the secure continuation action', () => {
   const source = readProjectFile('src/components/AuthModal.tsx');
 

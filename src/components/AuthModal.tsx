@@ -808,7 +808,7 @@ export function AuthModal({
                 />
               </div>
               <p style={{ fontSize: '10px', color: '#999', margin: 0, lineHeight: 1.4 }}>
-                Save listings/<br />Simpan daftar
+                Save listings/<br />Simpan listing
               </p>
             </div>
           </div>
@@ -868,6 +868,8 @@ export function AuthModal({
             <>
               Don&apos;t have an account?
               <br />
+              Tidak punya akun?
+              <br />
               <button onClick={() => { setMode("register"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'underline' }}>
                 Sign up!
               </button>
@@ -875,6 +877,8 @@ export function AuthModal({
           ) : (
             <>
               Already have an account?
+              <br />
+              Sudah punya akun?
               <br />
               <button onClick={() => { setMode("login"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'underline' }}>
                 Log in
@@ -958,7 +962,7 @@ export function AuthModal({
                 />
               </div>
               <p style={{ fontSize: '10px', color: '#999', margin: 0, lineHeight: 1.4 }}>
-                Save listings/<br />Simpan daftar
+                Save listings/<br />Simpan listing
               </p>
             </div>
           </div>
@@ -997,7 +1001,7 @@ export function AuthModal({
         {/* Subscribe to newsletter (register only) */}
         {mode === "register" && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '9px' }}>
-            <span style={{ fontSize: '11px', color: '#333', letterSpacing: '0.22px' }}>Subscribe to newsletter</span>
+            <span style={{ fontSize: '11px', color: '#333', letterSpacing: '0.22px' }}>Subscribe to the newsletter</span>
             <Toggle
               checked={subscribeNewsletter}
               onChange={() => setSubscribeNewsletter(!subscribeNewsletter)}
@@ -1084,6 +1088,8 @@ export function AuthModal({
         {mode === "login" && (
           <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: 0 }}>
             Don&apos;t have an account?
+            <br />
+            Tidak punya akun?
             <br />
             <button onClick={() => { setMode("register"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'underline' }}>
               Sign up!
