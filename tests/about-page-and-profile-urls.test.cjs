@@ -81,6 +81,22 @@ test('about page only shows the Share label on hover', () => {
   );
 });
 
+test('about page keeps the back button aligned directly below the shared header', () => {
+  const aboutSource = readProjectFile('src/app/about/page.tsx');
+
+  assert.match(
+    aboutSource,
+    /<main className="max-w-\[900px\] mx-auto px-4 sm:px-0 pb-6 sm:pb-8 flex-grow w-full">/,
+    'expected the About page main container to keep bottom padding without adding top padding above the back row'
+  );
+
+  assert.doesNotMatch(
+    aboutSource,
+    /px-4 sm:px-0 py-6 sm:py-8/,
+    'expected the About page to avoid extra top padding above the back button'
+  );
+});
+
 test('about page exposes an EN ID language switch and localized platform settings', () => {
   const aboutSource = readProjectFile('src/app/about/page.tsx');
 

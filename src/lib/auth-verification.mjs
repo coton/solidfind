@@ -34,10 +34,15 @@ export function getAuthStatusMessage(
   {
     fallbackMessage = "Login requires additional verification.",
     needsSecondFactorMessage = "This account needs an extra secure verification step. Continue with secure sign in to finish.",
+    needsClientTrustMessage = "This sign in is from a new device. Continue with secure sign in to verify it is you.",
   } = {}
 ) {
   if (status === "needs_second_factor") {
     return needsSecondFactorMessage;
+  }
+
+  if (status === "needs_client_trust") {
+    return needsClientTrustMessage;
   }
 
   return fallbackMessage;

@@ -39,6 +39,23 @@ test('category filter helper supports toggling individual categories while clear
   );
 });
 
+test('renovation complete house filter deactivates when a room filter is selected', async () => {
+  const helpers = await import(path.join(projectRoot, 'src/lib/category-filter.mjs'));
+  const renovationOptions = [
+    { id: 'all', label: 'EVERY RENOVATIONS' },
+    { id: 'complete', label: 'COMPLETE HOUSE' },
+    { id: 'living', label: 'LIVING ROOM' },
+    { id: 'kitchen', label: 'KITCHEN' },
+    { id: 'bathroom', label: 'BATHROOM' },
+    { id: 'bedroom', label: 'BEDROOM' },
+  ];
+
+  assert.deepEqual(
+    helpers.toggleSubcategorySelection(['complete'], 'living', renovationOptions),
+    ['living']
+  );
+});
+
 test('category filter helper renders the expected button label for all, single, and multi-select states', async () => {
   const helpers = await import(path.join(projectRoot, 'src/lib/category-filter.mjs'));
 

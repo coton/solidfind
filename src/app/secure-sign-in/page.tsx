@@ -29,7 +29,7 @@ export default function SecureSignInPage() {
   useEffect(() => {
     if (!isLoaded || !signIn || hasPrepared.current) return;
 
-    if (signIn.status !== "needs_second_factor") {
+    if (signIn.status !== "needs_second_factor" && signIn.status !== "needs_client_trust") {
       setError("Please start secure sign in from the login pop-up.\nMulai secure sign in dari pop-up login.");
       return;
     }

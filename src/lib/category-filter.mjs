@@ -11,6 +11,8 @@ function getNormalizedOptionMap(options = []) {
   return map;
 }
 
+const COMPLETE_HOUSE_CHILD_FILTERS = new Set(['living', 'kitchen', 'bathroom', 'bedroom']);
+
 export function getChildSubcategoryIds(options = []) {
   return options
     .map((option) => normalizeOptionId(option?.id))
@@ -62,7 +64,9 @@ export function toggleSubcategorySelection(selectedValues = [], toggledValue, op
     return normalizeSubcategorySelection(selectedValues, options).includes('all') ? [] : ['all'];
   }
 
-  const current = normalizeSubcategorySelection(selectedValues, options).filter((id) => id !== 'all');
+  const current = normalizeSubcategorySelection(selectedValues, options)
+    .filter((id) => id !== 'all')
+    .filter((id) => !(COMPLETE_HOUSE_CHILD_FILTERS.has(toggledId) && id === 'complete'));
   const next = current.includes(toggledId)
     ? current.filter((id) => id !== toggledId)
     : [...current, toggledId];

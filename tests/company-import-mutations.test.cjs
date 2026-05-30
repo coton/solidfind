@@ -54,3 +54,25 @@ test('companies mutations accept import-owned fields for directory onboarding', 
     'expected companies mutations to accept reviewed status for imported/manual listings'
   );
 });
+
+test('companies mutations cap free profiles at four project images', () => {
+  const source = readProjectFile('convex/companies.ts');
+
+  assert.match(
+    source,
+    /const FREE_PROJECT_IMAGE_LIMIT = 4;/,
+    'expected free company profiles to have a backend project image limit'
+  );
+
+  assert.match(
+    source,
+    /function capFreeProjectImages[\s\S]*if \(args\.isPro === true\)[\s\S]*FREE_PROJECT_IMAGE_LIMIT/,
+    'expected Pro profiles to be the only profiles allowed past the free image cap'
+  );
+
+  assert.match(
+    source,
+    /filtered\.projectImageIds = cappedProjectImages\.projectImageIds;[\s\S]*filtered\.projectImageUrls = cappedProjectImages\.projectImageUrls;/,
+    'expected company updates to enforce the same free image cap as imports'
+  );
+});

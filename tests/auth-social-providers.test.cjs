@@ -57,6 +57,23 @@ test('secure sign-in warning shows only the secure continuation action', () => {
   );
 });
 
+test('custom sign-in handles Clerk client trust challenges with the secure continuation flow', () => {
+  const authSource = readProjectFile('src/components/AuthModal.tsx');
+  const secureSource = readProjectFile('src/app/secure-sign-in/page.tsx');
+
+  assert.match(
+    authSource,
+    /result\.status === "needs_second_factor" \|\| result\.status === "needs_client_trust"/,
+    'expected the login popup to route Client Trust challenges into the secure sign-in flow'
+  );
+
+  assert.match(
+    secureSource,
+    /signIn\.status !== "needs_second_factor" && signIn\.status !== "needs_client_trust"/,
+    'expected the secure sign-in page to accept Clerk Client Trust sign-in states'
+  );
+});
+
 test('secure sign-in page uses the custom SolidFind code UI instead of Clerk prebuilt UI', () => {
   const source = readProjectFile('src/app/secure-sign-in/page.tsx');
 

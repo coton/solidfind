@@ -211,6 +211,48 @@ test('company profile project thumbnails use the compact four-column treatment',
   );
 });
 
+test('company profile limits non-pro project images to four thumbnails', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /const allProjectImages: ProjectImageItem\[\] = \[[\s\S]*const projectImages = company\?\.isPro && proEnabled \? allProjectImages : allProjectImages\.slice\(0, 4\);/,
+    'Expected non-Pro public profiles to cap imported project images at four'
+  );
+});
+
+test('company profile expands broad project size and category values into explicit labels', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /expandProfileProjectSizes\(company\.projectSizes!\)/,
+    'Expected project size "any" to expand into concrete project size labels on public profiles'
+  );
+
+  assert.match(
+    source,
+    /formatProfileCategoryValues\(company\.renovationTypes!, categoryLabelMap, "renovation"\)/,
+    'Expected public profiles to expand broad renovation values such as complete/all into explicit labels'
+  );
+});
+
+test('company profile uses centered initials when no usable logo image exists', () => {
+  const source = readProfilePage();
+
+  assert.match(
+    source,
+    /function getCompanyInitials\(companyName: string\): string/,
+    'Expected company profiles to share the centered initials fallback used by listing cards'
+  );
+
+  assert.match(
+    source,
+    /company\.imageUrl && !isWeakExternalLogoUrl\(company\.imageUrl\)/,
+    'Expected weak external logo URLs to be treated as missing so initials render instead'
+  );
+});
+
 test('company profile services use body-width rows with four desktop columns', () => {
   const source = readProfilePage();
 

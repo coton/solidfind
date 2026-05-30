@@ -237,7 +237,7 @@ export function AuthModal({
         return;
       }
 
-      if (result.status === "needs_second_factor") {
+      if (result.status === "needs_second_factor" || result.status === "needs_client_trust") {
         setNeedsSecureSignIn(true);
       }
 
@@ -246,6 +246,8 @@ export function AuthModal({
           fallbackMessage: "Login requires additional verification before it can continue.",
           needsSecondFactorMessage:
             "This account needs an extra secure verification step. Continue with secure sign in to finish.",
+          needsClientTrustMessage:
+            "This sign in is from a new device. Continue with secure sign in to verify it is you.",
         })
       );
     } catch (err: unknown) {

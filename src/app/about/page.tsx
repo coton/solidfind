@@ -131,7 +131,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-6 sm:py-8 flex-grow w-full">
+      <main className="max-w-[900px] mx-auto px-4 sm:px-0 pb-6 sm:pb-8 flex-grow w-full">
         {/* Back row */}
         <div className="flex items-center mb-3 py-2 border-b border-[#333]/10">
           <Link

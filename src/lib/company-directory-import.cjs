@@ -12,6 +12,34 @@ const IMAGE_CONTENT_TYPES = {
   '.svg': 'image/svg+xml',
   '.webp': 'image/webp',
 };
+const STREET_MARKERS = [
+  /\bjl\.?\b/i,
+  /\bjalan\b/i,
+  /\braya\b/i,
+  /\bgang\b/i,
+  /\bbr\.?\b/i,
+  /\bbanjar\b/i,
+  /\bno\.?\s*\w+/i,
+];
+const PLACE_MARKERS = [
+  /\bbali\b/i,
+  /\bbadung\b/i,
+  /\bdenpasar\b/i,
+  /\btabanan\b/i,
+  /\bgianyar\b/i,
+  /\bklungkung\b/i,
+  /\bkarangasem\b/i,
+  /\bbangli\b/i,
+  /\bbuleleng\b/i,
+  /\bjembrana\b/i,
+  /\bkuta\b/i,
+  /\bubud\b/i,
+  /\bcanggu\b/i,
+  /\bseminyak\b/i,
+  /\bsanur\b/i,
+  /\bpecatu\b/i,
+];
+const GOOGLE_MAPS_URL = /^https?:\/\/(?:www\.)?(?:google\.[a-z.]+\/maps|maps\.app\.goo\.gl)\//i;
 
 function cleanString(value) {
   if (value === undefined || value === null) return undefined;
@@ -22,6 +50,40 @@ function cleanString(value) {
 function cleanEmail(value) {
   const normalized = cleanString(value);
   return normalized ? normalized.toLowerCase() : undefined;
+}
+
+function isLikelyCompanyAddress(address) {
+  const normalized = cleanString(address);
+  if (!normalized) return false;
+  if (GOOGLE_MAPS_URL.test(normalized)) return true;
+  if (normalized.length < 10) return false;
+  const words = normalized.match(/[A-Za-zÀ-ÿ0-9]+/g) || [];
+  if (words.length < 3) return false;
+  const hasSeparator = /[,/]/.test(normalized);
+  const hasNumber = /\d/.test(normalized);
+  const hasStreetMarker = STREET_MARKERS.some((pattern) => pattern.test(normalized));
+  const hasPlaceMarker = PLACE_MARKERS.some((pattern) => pattern.test(normalized));
+  return (hasStreetMarker && (hasNumber || hasPlaceMarker || hasSeparator))
+    || (hasPlaceMarker && hasSeparator && words.length >= 4);
+}
+
+function cleanAddress(value) {
+  const normalized = cleanString(value);
+  return normalized && isLikelyCompanyAddress(normalized) ? normalized : undefined;
+}
+
+function buildTemporaryCompanyEmail(companyName) {
+  const normalized = normalizeLookupName(companyName) || 'company';
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i += 1) {
+    hash = ((hash * 31) + normalized.charCodeAt(i)) >>> 0;
+  }
+  return `temp+${hash.toString(36).padStart(6, '0').slice(0, 6)}@solidfind.id`;
+}
+
+function buildTemporaryCompanyPassword(companyName) {
+  const localPart = buildTemporaryCompanyEmail(companyName).split('@')[0].replace(/[^a-z0-9]/gi, '');
+  return `Sf-${localPart}-A1!`;
 }
 
 function parseDelimitedCell(value) {
@@ -98,12 +160,15 @@ const CATEGORY_ALIASES = {
     kitchen: 'kitchen',
     bathroom: 'bathroom',
     bedroom: 'bedroom',
+    aircon: 'aircon',
+    ac: 'aircon',
     electricity: 'electricity',
     plumbing: 'plumbing',
     roofing: 'roofing',
     waterproofing: 'waterproofing',
     pool: 'pool',
     'mold treatment': 'mold',
+    'mold treament': 'mold',
     mold: 'mold',
     tiling: 'tiling',
     painting: 'painting',
@@ -163,8 +228,7 @@ function normalizeCategoryKeyword(value) {
 
 function mapCategorySelections(primaryCategory, rowCategoryValue) {
   const raw = cleanString(rowCategoryValue);
-  const categoryField = CATEGORY_FIELD_BY_PRIMARY[primaryCategory];
-  if (!raw || !categoryField) {
+  if (!raw || !CATEGORY_FIELD_BY_PRIMARY[primaryCategory]) {
     return {
       constructionTypes: [],
       renovationTypes: [],
@@ -174,26 +238,42 @@ function mapCategorySelections(primaryCategory, rowCategoryValue) {
     };
   }
 
-  const aliases = CATEGORY_ALIASES[primaryCategory] || {};
-  const selections = [...new Set(
-    parseDelimitedCell(raw)
-      .map((token) => aliases[normalizeCategoryKeyword(token)] || normalizeCategoryKeyword(token))
-      .filter(Boolean)
-  )];
-  const normalizedSelections = selections.includes('all')
-    ? ['all']
-    : selections.includes('every')
-      ? ['every']
-      : selections;
+  const tokens = parseDelimitedCell(raw).map((token) => normalizeCategoryKeyword(token)).filter(Boolean);
+  const mapSelectionsForCategory = (category, { includeUnknown = false } = {}) => {
+    const aliases = CATEGORY_ALIASES[category] || {};
+    const otherAliases = Object.entries(CATEGORY_ALIASES)
+      .filter(([otherCategory]) => otherCategory !== category)
+      .flatMap(([, otherCategoryAliases]) => Object.keys(otherCategoryAliases));
+    const selections = [...new Set(tokens
+      .map((token) => {
+        if (aliases[token]) return aliases[token];
+        if (otherAliases.includes(token)) return null;
+        return includeUnknown ? token : null;
+      })
+      .filter(Boolean))];
 
-  return {
+    if (selections.includes('all')) return ['all'];
+    if (selections.includes('every')) return ['every'];
+    return selections;
+  };
+
+  const result = {
     constructionTypes: [],
     renovationTypes: [],
     architectureTypes: [],
     interiorTypes: [],
     realEstateTypes: [],
-    [categoryField]: normalizedSelections,
   };
+  const primaryField = CATEGORY_FIELD_BY_PRIMARY[primaryCategory];
+  result[primaryField] = mapSelectionsForCategory(primaryCategory, { includeUnknown: true });
+
+  if (primaryCategory === 'construction') {
+    result.renovationTypes = mapSelectionsForCategory('renovation');
+  } else if (primaryCategory === 'renovation') {
+    result.constructionTypes = mapSelectionsForCategory('construction');
+  }
+
+  return result;
 }
 
 function collectPictureUrls(row) {
@@ -211,7 +291,8 @@ function collectPictureUrls(row) {
 function normalizeCompanyDirectoryRow(row, { sourceName } = {}) {
   const name = cleanString(row['Company Name']);
   const email = cleanEmail(row.Email);
-  const password = cleanString(row['Password Format']);
+  const accountEmail = email || buildTemporaryCompanyEmail(name);
+  const password = cleanString(row['Password Format']) || buildTemporaryCompanyPassword(name);
   const primaryCategory = inferPrimaryCategory({
     sourceName,
     rowCategoryValue: row.Categories,
@@ -222,12 +303,14 @@ function normalizeCompanyDirectoryRow(row, { sourceName } = {}) {
   return {
     name,
     email,
+    accountEmail,
+    usesTemporaryEmail: !email,
     password,
     description: cleanString(row.Description),
     primaryCategory,
     locationSelections,
     location: locationSelections[0] || 'bali',
-    address: cleanString(row.Address),
+    address: cleanAddress(row.Address),
     phone: cleanString(row['Phone Number']),
     website: cleanString(row.Website),
     whatsapp: cleanString(row.WhatsApp),
@@ -307,8 +390,26 @@ function arraysEqual(left, right) {
   return left.every((value, index) => value === right[index]);
 }
 
+async function fetchWithTimeout(fetchImpl, url, options = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetchImpl(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw new Error(`Timed out fetching media after ${timeoutMs}ms: ${url}`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function uploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchImpl = fetch }) {
-  const response = await fetchImpl(sourceUrl, {
+  const response = await fetchWithTimeout(fetchImpl, sourceUrl, {
     headers: {
       'user-agent': 'Mozilla/5.0 (compatible; SolidFindBot/1.0; +https://solidfind.id)',
       accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
@@ -320,11 +421,11 @@ async function uploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchI
 
   const uploadUrl = await generateUploadUrl();
   const contentType = response.headers?.get?.('content-type') || 'application/octet-stream';
-  const uploadResponse = await fetchImpl(uploadUrl, {
+  const uploadResponse = await fetchWithTimeout(fetchImpl, uploadUrl, {
     method: 'POST',
     headers: { 'Content-Type': contentType },
     body: Buffer.from(await response.arrayBuffer()),
-  });
+  }, 30000);
 
   if (!uploadResponse.ok) {
     throw new Error(`Failed to upload remote media into Convex storage: ${sourceUrl}`);
@@ -356,11 +457,11 @@ async function uploadLocalAssetToStorage({ filePath, generateUploadUrl, fetchImp
   const uploadUrl = await generateUploadUrl();
   const extension = path.extname(filePath).toLowerCase();
   const contentType = IMAGE_CONTENT_TYPES[extension] || 'application/octet-stream';
-  const uploadResponse = await fetchImpl(uploadUrl, {
+  const uploadResponse = await fetchWithTimeout(fetchImpl, uploadUrl, {
     method: 'POST',
     headers: { 'Content-Type': contentType },
     body: fs.readFileSync(filePath),
-  });
+  }, 30000);
 
   if (!uploadResponse.ok) {
     throw new Error(`Failed to upload local media into Convex storage: ${filePath}`);
@@ -603,4 +704,7 @@ module.exports = {
   tryUploadRemoteAssetToStorage,
   uploadLocalAssetToStorage,
   uploadRemoteAssetToStorage,
+  buildTemporaryCompanyEmail,
+  buildTemporaryCompanyPassword,
+  isLikelyCompanyAddress,
 };

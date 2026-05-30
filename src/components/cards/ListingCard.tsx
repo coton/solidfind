@@ -37,6 +37,10 @@ interface ListingCardProps {
   onBookmark?: () => void;
 }
 
+function isWeakExternalLogoUrl(url?: string) {
+  return Boolean(url && /\/\/lh3\.googleusercontent\.com\/sitesv\//i.test(url));
+}
+
 export function ListingCard({
   id,
   name,
@@ -64,7 +68,7 @@ export function ListingCard({
   onBookmark,
 }: ListingCardProps) {
   const logoUrl = useQuery(api.files.getUrl, logoId ? { storageId: logoId as Id<"_storage"> } : "skip");
-  const resolvedImageUrl = logoUrl ?? imageUrl;
+  const resolvedImageUrl = logoUrl ?? (isWeakExternalLogoUrl(imageUrl) ? undefined : imageUrl);
   const [isHovered, setIsHovered] = useState(false);
   const shouldShowRating = reviewsEnabled && reviewCount > 0;
   const serviceLocations = getServiceLocations({
@@ -76,12 +80,6 @@ export function ListingCard({
     interiorLocations,
     realEstateLocations,
   });
-  
-  // Debug logging
-  if (typeof window !== 'undefined' && resolvedImageUrl) {
-    console.log(`[ListingCard] ${name} imageUrl:`, resolvedImageUrl);
-  }
-
   const getInitials = (companyName: string) => {
     return companyName
       .split(/\s+/)

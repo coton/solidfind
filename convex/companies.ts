@@ -5,6 +5,8 @@ import { ensureUniqueCompanySlug, normalizeCompanySlug } from "../src/lib/compan
 import { COMPANY_ADDRESS_VALIDATION_MESSAGE, isLikelyCompanyAddress, normalizeCompanyAddress } from "../src/lib/company-address-validation.mjs";
 import { MIN_COMPANY_SINCE_YEAR, getMaxCompanySinceYear, isValidCompanySinceYear } from "../src/lib/company-since-year-validation.mjs";
 
+const FREE_PROJECT_IMAGE_LIMIT = 4;
+
 function ensureValidSinceYear(since: number | undefined) {
   if (since === undefined) return;
   if (!isValidCompanySinceYear(String(since), getMaxCompanySinceYear())) {
@@ -19,6 +21,29 @@ function companyHasCategory(company: any, category: string) {
   if (category === "interior") return (company.interiorTypes?.length ?? 0) > 0 || company.category === "interior";
   if (category === "real-estate") return (company.realEstateTypes?.length ?? 0) > 0 || company.category === "real-estate";
   return company.category === category;
+}
+
+function capFreeProjectImages(args: {
+  isPro?: boolean;
+  projectImageIds?: Id<"_storage">[];
+  projectImageUrls?: string[];
+}) {
+  if (args.isPro === true) {
+    return {
+      projectImageIds: args.projectImageIds,
+      projectImageUrls: args.projectImageUrls,
+    };
+  }
+
+  const projectImageIds = args.projectImageIds ?? [];
+  const projectImageUrls = args.projectImageUrls ?? [];
+  const cappedImageIds = projectImageIds.slice(0, FREE_PROJECT_IMAGE_LIMIT);
+  const remainingSlots = Math.max(0, FREE_PROJECT_IMAGE_LIMIT - cappedImageIds.length);
+
+  return {
+    projectImageIds: cappedImageIds,
+    projectImageUrls: projectImageUrls.slice(0, remainingSlots),
+  };
 }
 
 export const list = query({
@@ -211,8 +236,15 @@ export const create = mutation({
       companies.map((company) => company.slug ?? normalizeCompanySlug(company.name))
     );
 
+    const cappedProjectImages = capFreeProjectImages({
+      isPro: args.isPro,
+      projectImageIds: args.projectImageIds,
+      projectImageUrls: args.projectImageUrls,
+    });
+
     return await ctx.db.insert("companies", {
       ...args,
+      ...cappedProjectImages,
       address: normalizedAddress,
       slug,
       rating: 0,
@@ -288,6 +320,18 @@ export const update = mutation({
       if (value !== undefined) {
         filtered[key] = value;
       }
+    }
+
+    const cappedProjectImages = capFreeProjectImages({
+      isPro: updates.isPro ?? existingCompany.isPro,
+      projectImageIds: updates.projectImageIds ?? existingCompany.projectImageIds,
+      projectImageUrls: updates.projectImageUrls ?? existingCompany.projectImageUrls,
+    });
+    if (cappedProjectImages.projectImageIds !== undefined) {
+      filtered.projectImageIds = cappedProjectImages.projectImageIds;
+    }
+    if (cappedProjectImages.projectImageUrls !== undefined) {
+      filtered.projectImageUrls = cappedProjectImages.projectImageUrls;
     }
 
     if (updates.name !== undefined || updates.slug !== undefined) {

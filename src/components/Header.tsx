@@ -67,6 +67,7 @@ const renovationCategories = [
   { id: "kitchen", label: "KITCHEN" },
   { id: "bathroom", label: "BATHROOM" },
   { id: "bedroom", label: "BEDROOM" },
+  { id: "aircon", label: "AIRCON" },
   { id: "electricity", label: "ELECTRICITY" },
   { id: "plumbing", label: "PLUMBING" },
   { id: "roofing", label: "ROOFING" },

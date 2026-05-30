@@ -185,7 +185,7 @@ async function ensureClerkUser({ clerk, normalized, existingClerkUser, apply }) 
     });
   } else {
     clerkUser = await clerk.users.createUser({
-      emailAddress: [normalized.email],
+      emailAddress: [normalized.accountEmail],
       firstName: normalized.name,
       skipLegalChecks: true,
       ...passwordFields,
@@ -238,8 +238,8 @@ async function upsertCompanyDirectory(options) {
 
   for (const normalized of normalizedRows) {
     const existingCompany = existingCompanies.find((company) => (company.name || '').trim().toLowerCase() === normalized.name.toLowerCase());
-    const existingConvexUser = existingUsers.find((user) => (user.email || '').trim().toLowerCase() === normalized.email);
-    const clerkMatches = await clerk.users.getUserList({ emailAddress: [normalized.email], limit: 10 });
+    const existingConvexUser = existingUsers.find((user) => (user.email || '').trim().toLowerCase() === normalized.accountEmail);
+    const clerkMatches = await clerk.users.getUserList({ emailAddress: [normalized.accountEmail], limit: 10 });
     const existingClerkUser = clerkMatches.data[0] || null;
 
     const clerkResult = await ensureClerkUser({
@@ -255,7 +255,7 @@ async function upsertCompanyDirectory(options) {
     if (options.apply) {
       convexUserId = await fetchMutation(anyApi.users.createOrGetUser, {
         clerkId,
-        email: normalized.email,
+        email: normalized.accountEmail,
         name: normalized.name,
         accountType: 'company',
         companyName: normalized.name,
@@ -302,7 +302,9 @@ async function upsertCompanyDirectory(options) {
 
     results.push({
       name: normalized.name,
-      email: normalized.email,
+      email: normalized.accountEmail,
+      publicEmail: normalized.email || null,
+      usesTemporaryEmail: normalized.usesTemporaryEmail,
       primaryCategory: normalized.primaryCategory,
       sourceFile: sourceName,
       clerk: {

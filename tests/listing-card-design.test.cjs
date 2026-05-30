@@ -88,3 +88,19 @@ test('listing card hover state shows service locations instead of address', () =
     'expected the hover state to stop rendering the company address'
   );
 });
+
+test('listing card treats weak external text-logo urls as missing and falls back to initials', () => {
+  const source = readProjectFile('src/components/cards/ListingCard.tsx');
+
+  assert.match(
+    source,
+    /function isWeakExternalLogoUrl\(url\?: string\)[\s\S]*lh3\\\.googleusercontent\\\.com\\\/sitesv/,
+    'expected listing cards to reject weak imported Google Sites text-logo images'
+  );
+
+  assert.match(
+    source,
+    /const resolvedImageUrl = logoUrl \?\? \(isWeakExternalLogoUrl\(imageUrl\) \? undefined : imageUrl\);/,
+    'expected weak external logos to render through the initials fallback'
+  );
+});

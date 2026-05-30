@@ -20,7 +20,7 @@ import { Star } from "lucide-react";
 import { starFillColor, starColor } from "@/lib/starColors";
 import { buildCompanyAddressHref } from '@/lib/company-address-link.mjs';
 import { buildCompanyProfilePath, buildCompanyReviewsPath } from '@/lib/company-profile-url.mjs';
-import { buildCategoryOptionLabelMap, formatCategoryValues } from "@/lib/category-display.mjs";
+import { buildCategoryOptionLabelMap, expandProfileProjectSizes, formatProfileCategoryValues } from "@/lib/category-display.mjs";
 
 /** Capitalize first letter of each word in every array element, then join */
 function capitalizeJoin(arr: string[]): string {
@@ -31,6 +31,20 @@ function capitalizeJoin(arr: string[]): string {
 
 function uniqueValues(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean)));
+}
+
+function getCompanyInitials(companyName: string): string {
+  return companyName
+    .split(/\s+/)
+    .map((word) => word[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function isWeakExternalLogoUrl(url?: string) {
+  return Boolean(url && /\/\/lh3\.googleusercontent\.com\/sitesv\//i.test(url));
 }
 
 function useStorageUrl(storageId: Id<"_storage"> | undefined) {
@@ -339,7 +353,7 @@ export default function ProfilePageClient() {
   const isBookmarked = savedStatus ?? isSaved;
 
   const externalProjectImages = (company?.projectImageUrls ?? []).filter(Boolean);
-  const projectImages: ProjectImageItem[] = [
+  const allProjectImages: ProjectImageItem[] = [
     ...externalProjectImages.map((src, index) => ({
       kind: "external" as const,
       src,
@@ -351,6 +365,7 @@ export default function ProfilePageClient() {
       alt: `Project ${externalProjectImages.length + index + 1}`,
     })),
   ];
+  const projectImages = company?.isPro && proEnabled ? allProjectImages : allProjectImages.slice(0, 4);
   const currentImage = currentImageIndex !== null ? projectImages[currentImageIndex] ?? null : null;
   const isFirstImage = currentImageIndex === 0;
   const isLastImage = currentImageIndex === projectImages.length - 1;
@@ -500,25 +515,25 @@ export default function ProfilePageClient() {
     : capitalizeJoin([company.location ?? "bali"]);
   const profileMetaServices = [
     (company.projectSizes?.length ?? 0) > 0
-      ? { label: "PROJECT SIZE", value: capitalizeJoin(company.projectSizes!) }
+      ? { label: "PROJECT SIZE", value: capitalizeJoin(expandProfileProjectSizes(company.projectSizes!)) }
       : null,
     { label: "LOCATION", value: profileLocationValue },
   ].filter(Boolean) as Array<{ label: string; value: string }>;
   const workCategoryServices = [
     (company.constructionTypes?.length ?? 0) > 0
-      ? { label: "CONSTRUCTION", value: formatCategoryValues(company.constructionTypes!, categoryLabelMap, "construction") }
+      ? { label: "CONSTRUCTION", value: formatProfileCategoryValues(company.constructionTypes!, categoryLabelMap, "construction") }
       : null,
     (company.renovationTypes?.length ?? 0) > 0
-      ? { label: "RENOVATION", value: formatCategoryValues(company.renovationTypes!, categoryLabelMap, "renovation") }
+      ? { label: "RENOVATION", value: formatProfileCategoryValues(company.renovationTypes!, categoryLabelMap, "renovation") }
       : null,
     (company.architectureTypes?.length ?? 0) > 0
-      ? { label: "ARCHITECTURE", value: formatCategoryValues(company.architectureTypes!, categoryLabelMap, "architecture") }
+      ? { label: "ARCHITECTURE", value: formatProfileCategoryValues(company.architectureTypes!, categoryLabelMap, "architecture") }
       : null,
     (company.interiorTypes?.length ?? 0) > 0
-      ? { label: "INTERIOR", value: formatCategoryValues(company.interiorTypes!, categoryLabelMap, "interior") }
+      ? { label: "INTERIOR", value: formatProfileCategoryValues(company.interiorTypes!, categoryLabelMap, "interior") }
       : null,
     (company.realEstateTypes?.length ?? 0) > 0
-      ? { label: "REAL ESTATE", value: formatCategoryValues(company.realEstateTypes!, categoryLabelMap, "real-estate") }
+      ? { label: "REAL ESTATE", value: formatProfileCategoryValues(company.realEstateTypes!, categoryLabelMap, "real-estate") }
       : null,
   ].filter(Boolean) as Array<{ label: string; value: string }>;
 
@@ -615,20 +630,16 @@ export default function ProfilePageClient() {
                 <div className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
                   {company.logoId ? (
                     <StorageImage storageId={company.logoId} alt={company.name} fill className="object-cover w-full h-full" />
-                  ) : company.imageUrl ? (
+                  ) : company.imageUrl && !isWeakExternalLogoUrl(company.imageUrl) ? (
                     <ExternalImage
                       src={company.imageUrl}
                       alt={company.name}
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div
-                      className="w-full h-full"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3C/svg%3E")`,
-                        backgroundSize: '20px 20px'
-                      }}
-                    />
+                    <div className="flex h-full w-full items-center justify-center bg-[#d8d8d8]">
+                      <span className="text-[38px] font-bold text-[#333]">{getCompanyInitials(company.name)}</span>
+                    </div>
                   )}
                 </div>
               </div>

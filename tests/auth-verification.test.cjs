@@ -77,6 +77,18 @@ test('getAuthStatusMessage explains when Clerk needs a second factor instead of 
   );
 });
 
+test('getAuthStatusMessage explains Clerk client trust challenges from new devices', async () => {
+  const { getAuthStatusMessage } = await import(verificationModuleUrl);
+
+  assert.equal(
+    getAuthStatusMessage('needs_client_trust', {
+      fallbackMessage: 'Login requires additional verification.',
+      needsClientTrustMessage: 'This device needs to be verified before sign in can continue.',
+    }),
+    'This device needs to be verified before sign in can continue.'
+  );
+});
+
 test('getAuthStatusMessage falls back for other incomplete Clerk statuses', async () => {
   const { getAuthStatusMessage } = await import(verificationModuleUrl);
 

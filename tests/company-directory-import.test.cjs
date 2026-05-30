@@ -71,7 +71,38 @@ test('mapCategorySelections keeps filter keyword categories instead of collapsin
   assert.deepEqual(normalized.constructionTypes, ['residential', 'commercial']);
 });
 
-test('normalizeCompanyDirectoryRow allows password-free rows and treats folder notes as media placeholders', () => {
+test('mapCategorySelections routes mixed construction and renovation service keywords to both category arrays', () => {
+  const normalized = importer.normalizeCompanyDirectoryRow(
+    {
+      'Company Name': 'Mixed Services Builder',
+      Email: 'mixed@example.com',
+      Provinces: 'Badung',
+      Categories: 'RESIDENTIAL, COMMERCIAL, Hospitality, COMPLETE HOUSE, Electricity, Plumbing, Pool',
+    },
+    { sourceName: 'Living_id_Construction_Directory_TEST.xlsx' }
+  );
+
+  assert.equal(normalized.primaryCategory, 'construction');
+  assert.deepEqual(normalized.constructionTypes, ['residential', 'commercial', 'hospitality']);
+  assert.deepEqual(normalized.renovationTypes, ['complete', 'electricity', 'plumbing', 'pool']);
+});
+
+test('mapCategorySelections normalizes renovation typos and aircon services into known filter ids', () => {
+  const normalized = importer.normalizeCompanyDirectoryRow(
+    {
+      'Company Name': 'Aircon Mold Renovation',
+      Email: 'aircon@example.com',
+      Provinces: 'Badung',
+      Categories: 'MOLD TREAMENT, Aircon',
+    },
+    { sourceName: 'Living_id_Renovation_Directory_TEST.xlsx' }
+  );
+
+  assert.equal(normalized.primaryCategory, 'renovation');
+  assert.deepEqual(normalized.renovationTypes, ['mold', 'aircon']);
+});
+
+test('normalizeCompanyDirectoryRow adds a temporary password for password-free rows and treats folder notes as media placeholders', () => {
   const normalized = importer.normalizeCompanyDirectoryRow(
     {
       'Company Name': 'Folder Media Builder',
@@ -85,9 +116,41 @@ test('normalizeCompanyDirectoryRow allows password-free rows and treats folder n
     { sourceName: 'Living_id_Construction_Directory_TEST.xlsx' }
   );
 
-  assert.equal(normalized.password, undefined);
+  assert.equal(normalized.password, importer.buildTemporaryCompanyPassword('Folder Media Builder'));
   assert.equal(normalized.imageUrl, undefined);
   assert.deepEqual(normalized.projectImageUrls, ['https://example.com/project.jpg']);
+});
+
+test('normalizeCompanyDirectoryRow assigns a temporary account email when the public email is missing', () => {
+  const normalized = importer.normalizeCompanyDirectoryRow(
+    {
+      'Company Name': 'Ninety’s Waterproofing DPS',
+      Email: '',
+      Provinces: 'Badung',
+      Categories: 'Waterproofing',
+    },
+    { sourceName: 'Living_id_Renovation_Directory_TEST.xlsx' }
+  );
+
+  assert.equal(normalized.email, undefined);
+  assert.match(normalized.accountEmail, /^temp\+[a-z0-9]{6}@solidfind\.id$/);
+  assert.equal(normalized.accountEmail, importer.buildTemporaryCompanyEmail('Ninety’s Waterproofing DPS'));
+  assert.equal(normalized.usesTemporaryEmail, true);
+});
+
+test('normalizeCompanyDirectoryRow drops weak address fragments that would fail profile validation', () => {
+  const normalized = importer.normalizeCompanyDirectoryRow(
+    {
+      'Company Name': 'Address Fragment Builder',
+      Email: 'address@example.com',
+      Address: 'Denpasar, Bali',
+      Provinces: 'Bali',
+      Categories: 'Residential',
+    },
+    { sourceName: 'Living_id_Construction_Directory_TEST.xlsx' }
+  );
+
+  assert.equal(normalized.address, undefined);
 });
 
 test('loadRowsFromFile preserves empty spreadsheet columns when parsing xlsx uploads', () => {

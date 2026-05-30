@@ -125,13 +125,37 @@ Options:
 `);
 }
 
-function normalizeNames(values) {
-  return [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))];
+function normalizeEntries(values) {
+  const seen = new Set();
+  const entries = [];
+  for (const value of values) {
+    const entry = typeof value === 'string'
+      ? { companyName: value, category: '' }
+      : {
+          companyName: value.companyName,
+          category: value.category || value.source || '',
+        };
+    const companyName = String(entry.companyName || '').trim();
+    if (!companyName) continue;
+    const key = companyName.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    entries.push({
+      companyName,
+      category: String(entry.category || '').trim(),
+    });
+  }
+  return entries;
 }
 
-function companyNamesFromFile(filePath) {
+function companyEntriesFromFile(filePath) {
   const rows = loadRowsFromFile(path.resolve(filePath));
-  return rows.map((row) => row['Company Name'] || row.companyName || row.name || '').filter(Boolean);
+  return rows
+    .map((row) => ({
+      companyName: row['Company Name'] || row.companyName || row.name || '',
+      category: row.Source || row.source || row.Category || row.category || '',
+    }))
+    .filter((row) => row.companyName);
 }
 
 function buildAppUrl(target) {
@@ -150,13 +174,18 @@ function writeCsv(csvPath, rows) {
     }
     return stringValue;
   };
-  const header = ['Company Name', 'Magic Link'];
-  const lines = [header.join(',')].concat(rows.map((row) => [row.companyName, row.magicLink].map(escape).join(',')));
+  const header = ['Company Name', 'Category', 'Magic Link'];
+  const lines = [header.join(',')].concat(rows.map((row) => [row.companyName, row.category, row.magicLink].map(escape).join(',')));
   fs.writeFileSync(csvPath, `${lines.join('\n')}\n`, 'utf8');
 }
 
 function writeXlsx(xlsxPath, rows) {
   const payload = JSON.stringify(rows);
+  const bundledPython = path.join(
+    process.env.HOME || '',
+    '.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3'
+  );
+  const python = fs.existsSync(bundledPython) ? bundledPython : 'python3';
   const script = `
 import json
 from openpyxl import Workbook
@@ -164,14 +193,15 @@ rows = json.loads(${JSON.stringify(payload)})
 wb = Workbook()
 ws = wb.active
 ws.title = 'Magic Links'
-ws.append(['Company Name', 'Magic Link'])
+ws.append(['Company Name', 'Category', 'Magic Link'])
 for row in rows:
-    ws.append([row.get('companyName', ''), row.get('magicLink', '')])
+    ws.append([row.get('companyName', ''), row.get('category', ''), row.get('magicLink', '')])
 ws.column_dimensions['A'].width = 32
-ws.column_dimensions['B'].width = 84
+ws.column_dimensions['B'].width = 18
+ws.column_dimensions['C'].width = 84
 wb.save(${JSON.stringify(xlsxPath)})
 `;
-  const result = spawnSync('python3', ['-c', script], { encoding: 'utf8' });
+  const result = spawnSync(python, ['-c', script], { encoding: 'utf8' });
   if (result.status !== 0) {
     throw new Error(result.stderr || result.stdout || 'Failed to write XLSX file');
   }
@@ -198,9 +228,9 @@ async function main() {
   if (!signingSecret) {
     throw new Error('Missing magic-link signing secret configuration. Set MAGIC_LINK_SIGNING_SECRET or CLERK_SECRET_KEY.');
   }
-  const names = normalizeNames([
+  const entries = normalizeEntries([
     ...args.companyNames,
-    ...(args.file ? companyNamesFromFile(args.file) : []),
+    ...(args.file ? companyEntriesFromFile(args.file) : []),
   ]);
 
   const companies = await fetchQuery(anyApi.companies.listAll, {}, { url: runtime.convexUrl });
@@ -209,10 +239,10 @@ async function main() {
   const appUrl = buildAppUrl(args.target);
 
   const exportedRows = [];
-  for (const companyName of names) {
-    const company = companies.find((item) => String(item.name || '').trim().toLowerCase() === companyName.toLowerCase());
+  for (const entry of entries) {
+    const company = companies.find((item) => String(item.name || '').trim().toLowerCase() === entry.companyName.toLowerCase());
     if (!company) {
-      throw new Error(`Company not found in ${args.target}: ${companyName}`);
+      throw new Error(`Company not found in ${args.target}: ${entry.companyName}`);
     }
     const owner = users.find((item) => item._id === company.ownerId);
     if (!owner) {
@@ -252,6 +282,7 @@ async function main() {
 
     exportedRows.push({
       companyName: company.name,
+      category: entry.category || company.category || '',
       magicLink: `${appUrl}/m/${args.long ? token : shortCode}`,
     });
   }
