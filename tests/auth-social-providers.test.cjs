@@ -75,13 +75,13 @@ test('custom sign-in handles Clerk client trust challenges with the secure conti
 
   assert.match(
     authSource,
-    /result\.status === "needs_second_factor" \|\| result\.status === "needs_client_trust"/,
+    /resultStatus === "needs_second_factor" \|\| resultStatus === "needs_client_trust"/,
     'expected the login popup to route Client Trust challenges into the secure sign-in flow'
   );
 
   assert.match(
     secureSource,
-    /signIn\.status !== "needs_second_factor" && signIn\.status !== "needs_client_trust"/,
+    /signInStatus !== "needs_second_factor" && signInStatus !== "needs_client_trust"/,
     'expected the secure sign-in page to accept Clerk Client Trust sign-in states'
   );
 });

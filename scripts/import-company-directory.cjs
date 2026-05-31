@@ -149,6 +149,7 @@ function resolveMediaRoot(options) {
 }
 
 async function ensureClerkUser({ clerk, normalized, existingClerkUser, apply }) {
+  const accountEmail = normalized.accountEmail || normalized.email;
   const metadata = {
     publicMetadata: {
       accountType: 'company',
@@ -185,7 +186,7 @@ async function ensureClerkUser({ clerk, normalized, existingClerkUser, apply }) 
     });
   } else {
     clerkUser = await clerk.users.createUser({
-      emailAddress: [normalized.accountEmail],
+      emailAddress: [accountEmail],
       firstName: normalized.name,
       skipLegalChecks: true,
       ...passwordFields,

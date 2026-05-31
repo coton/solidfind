@@ -228,6 +228,7 @@ export function AuthModal({
         identifier: email,
         password,
       });
+      const resultStatus = result.status as string | null;
 
       if (result.status === "complete" && setSignInActive) {
         await setSignInActive({ session: result.createdSessionId });
@@ -237,12 +238,12 @@ export function AuthModal({
         return;
       }
 
-      if (result.status === "needs_second_factor" || result.status === "needs_client_trust") {
+      if (resultStatus === "needs_second_factor" || resultStatus === "needs_client_trust") {
         setNeedsSecureSignIn(true);
       }
 
       setError(
-        getAuthStatusMessage(result.status, {
+        getAuthStatusMessage(resultStatus, {
           fallbackMessage: "Login requires additional verification before it can continue.",
           needsSecondFactorMessage:
             "This account needs an extra secure verification step. Continue with secure sign in to finish.",
