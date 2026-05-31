@@ -8,6 +8,7 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ComingSoonPage } from "@/components/ComingSoonPage";
 import { WelcomeCard, FeaturedCard, ListingCard } from "@/components/cards";
 import { Pagination } from "@/components/Pagination";
 import { SortDropdown } from "@/components/SortDropdown";
@@ -18,6 +19,8 @@ import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { getEffectiveSubcategoryFilters, parseSubcategoryParam } from "@/lib/category-filter.mjs";
 import { expandRenovationTypes } from "@/lib/category-display.mjs";
 
+const SHOW_PRELAUNCH_COMING_SOON_HOME = true;
+
 function getCompanyCategoryTypes(company: any, category: string) {
   if (category === "renovation") return expandRenovationTypes(company.renovationTypes ?? []);
   if (category === "architecture") return company.architectureTypes ?? [];
@@ -27,6 +30,10 @@ function getCompanyCategoryTypes(company: any, category: string) {
 }
 
 export default function Home() {
+  if (SHOW_PRELAUNCH_COMING_SOON_HOME) {
+    return <ComingSoonPage />;
+  }
+
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#ececec]" />}>
       <HomeContent />

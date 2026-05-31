@@ -35,3 +35,19 @@ test('coming-soon background photo asset exists in public assets', () => {
   const backgroundPhotoPath = path.join(projectRoot, 'public/coming-soon/bg-photo.jpg');
   assert.equal(fs.existsSync(backgroundPhotoPath), true, 'expected public/coming-soon/bg-photo.jpg to exist');
 });
+
+test('production prelaunch home page renders the coming-soon experience', () => {
+  const homeSource = readProjectFile('src/app/page.tsx');
+
+  assert.match(
+    homeSource,
+    /const SHOW_PRELAUNCH_COMING_SOON_HOME = true;/,
+    'expected the production branch homepage to stay in prelaunch coming-soon mode'
+  );
+
+  assert.match(
+    homeSource,
+    /if \(SHOW_PRELAUNCH_COMING_SOON_HOME\) \{[\s\S]*return <ComingSoonPage \/>;/,
+    'expected the homepage to render ComingSoonPage before the directory experience'
+  );
+});
