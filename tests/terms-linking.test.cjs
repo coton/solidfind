@@ -175,7 +175,7 @@ test('legal text views keep manual line breaks tight and indent bullet lists', (
   for (const source of [termsPageSource, companyDashboardSource]) {
     assert.match(
       source,
-      /className="space-y-0\.5 pl-8 mb-1"/,
+      /className="space-y-0\.5 pl-8 ml-2 mb-1"/,
       'expected public legal bullet lists to be indented without adding large vertical gaps'
     );
 

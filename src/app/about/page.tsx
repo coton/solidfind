@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useQuery } from "convex/react";
@@ -40,26 +40,62 @@ function parseBulletLine(line: string) {
 }
 
 function renderFormattedParagraphs(text: string, className: string) {
+  const renderParagraph = (lines: string[], key: string) => {
+    if (lines.length === 0) return null;
+    return <p key={key} className={className}>{renderBoldTextLine(lines.join(" "))}</p>;
+  };
+
+  const renderBulletList = (items: string[], key: string) => {
+    if (items.length === 0) return null;
+    return (
+      <div key={key} className="space-y-0.5">
+        {items.map((item, itemIndex) => (
+          <p key={`${key}-${itemIndex}`} className={`${className} pl-8`}>
+            • {renderBoldTextLine(item)}
+          </p>
+        ))}
+      </div>
+    );
+  };
+
   return text
     .replace(/\r\n/g, "\n")
     .split(/\n{2,}/)
     .map((block, index) => {
       const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
-      const bulletLines = lines.map(parseBulletLine);
-
       if (lines.length === 0) {
         return null;
       }
 
-      if (bulletLines.every(Boolean)) {
-        return bulletLines.map((bulletContent, bulletIndex) => (
-          <p key={`line-${index}-${bulletIndex}`} className={`${className} pl-8`}>
-            • {renderBoldTextLine(bulletContent || "")}
-          </p>
-        ));
-      }
+      const runs: ReactNode[] = [];
+      let paragraphLines: string[] = [];
+      let bulletItems: string[] = [];
 
-      return <p key={`line-${index}`} className={className}>{renderBoldTextLine(lines.join(" "))}</p>;
+      const flushParagraph = () => {
+        const rendered = renderParagraph(paragraphLines, `paragraph-${index}-${runs.length}`);
+        if (rendered) runs.push(rendered);
+        paragraphLines = [];
+      };
+      const flushBullets = () => {
+        const rendered = renderBulletList(bulletItems, `bullets-${index}-${runs.length}`);
+        if (rendered) runs.push(rendered);
+        bulletItems = [];
+      };
+
+      for (const line of lines) {
+        const bulletContent = parseBulletLine(line);
+        if (bulletContent) {
+          flushParagraph();
+          bulletItems.push(bulletContent);
+        } else {
+          flushBullets();
+          paragraphLines.push(line);
+        }
+      }
+      flushParagraph();
+      flushBullets();
+
+      return <div key={`block-${index}`} className="space-y-1">{runs}</div>;
     });
 }
 

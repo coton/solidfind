@@ -151,8 +151,14 @@ test('about page indents admin-authored bullet lines including real bullet chara
 
   assert.match(
     aboutSource,
-    /className=\{`\$\{className\} pl-8`\}/,
+    /const renderBulletList[\s\S]*className=\{`\$\{className\} pl-8`\}/,
     'expected About page bullet lines to render with a visible four-space-style indent'
+  );
+
+  assert.match(
+    aboutSource,
+    /flushParagraph\(\);[\s\S]*bulletItems\.push\(bulletContent\);[\s\S]*flushBullets\(\);[\s\S]*paragraphLines\.push\(line\);/,
+    'expected About page mixed paragraphs and bullet lines to keep bullet indentation instead of collapsing into one paragraph'
   );
 });
 
