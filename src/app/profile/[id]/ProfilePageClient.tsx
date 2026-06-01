@@ -1016,8 +1016,8 @@ export default function ProfilePageClient() {
       {showImageViewer && currentImage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90">
           <div className="absolute inset-0" onClick={closeImageViewer} />
-          <div className="relative z-10 flex w-full max-w-[90vw] flex-col items-center gap-3 px-4 py-6 sm:gap-4 sm:max-w-[92vw]">
-            <div className="flex w-full max-w-[960px] items-center justify-between gap-3">
+          <div className="relative z-10 flex h-full w-full max-w-[90vw] flex-col items-center justify-center gap-[10px] px-4 py-6 sm:max-w-[92vw]">
+            <div className="flex w-full max-w-[520px] items-center justify-between gap-3 sm:max-w-[960px]">
               <span className="font-bam text-[9px] uppercase tracking-[0.18px] text-white/65">
                 {currentImageIndex !== null ? `${currentImageIndex + 1} / ${projectImages.length}` : ""}
               </span>
@@ -1083,7 +1083,7 @@ export default function ProfilePageClient() {
               </button>
             </div>
 
-            <p className="font-bam text-[9px] uppercase tracking-[0.18px] text-white/45 sm:hidden">
+            <p className="absolute bottom-6 font-bam text-[9px] uppercase tracking-[0.18px] text-white/45 sm:hidden">
               Swipe to navigate
             </p>
           </div>

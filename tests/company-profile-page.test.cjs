@@ -455,8 +455,20 @@ test('company profile image viewer supports previous/next controls and mobile sw
 
   assert.match(
     source,
-    /className="flex w-full max-w-\[520px\] items-center justify-between gap-3 sm:max-w-\[960px\] sm:gap-4"/,
-    'Expected mobile image viewer controls to sit closer to the image while desktop keeps the wider control row'
+    /className="relative z-10 flex h-full w-full max-w-\[90vw\] flex-col items-center justify-center gap-\[10px\] px-4 py-6 sm:max-w-\[92vw\]"/,
+    'Expected mobile image viewer controls to sit 10px above and below the image frame'
+  );
+
+  assert.match(
+    source,
+    /className="flex w-full max-w-\[520px\] items-center justify-between gap-3 sm:max-w-\[960px\]/,
+    'Expected mobile image viewer controls to sit close to the image while desktop keeps the wider control row'
+  );
+
+  assert.match(
+    source,
+    /className="absolute bottom-6 font-bam text-\[9px\] uppercase tracking-\[0\.18px\] text-white\/45 sm:hidden"/,
+    'Expected the swipe hint to remain at the bottom of the mobile viewer'
   );
 });
 

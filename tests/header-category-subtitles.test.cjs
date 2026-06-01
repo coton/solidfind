@@ -20,7 +20,7 @@ test('shared header stays fixed inside a framed workspace gutter', () => {
 
   assert.match(
     source,
-    /className=\{useMobileProfileHeader \? "h-\[168px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\} aria-hidden="true" \/>[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">/,
+    /className=\{useMobileProfileHeader \? "h-\[120px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\} aria-hidden="true" \/>[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">/,
     'expected the shared header to reserve page space while the visible header remains fixed in a 10px framed gutter'
   );
 });
@@ -68,14 +68,26 @@ test('mobile company profile header shows only the top bar while desktop keeps n
 
   assert.match(
     source,
-    /className=\{useMobileProfileHeader \? "h-\[168px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\}/,
-    'expected profile pages to reserve the taller compact mobile header height'
+    /className=\{useMobileProfileHeader \? "h-\[120px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\}/,
+    'expected profile pages to reserve the requested 120px compact mobile header height'
   );
 
   assert.match(
     source,
-    /useMobileProfileHeader \? "min-h-\[148px\] pt-0 pb-0 flex flex-col justify-center sm:min-h-0 sm:block sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-\[8px\] sm:pb-4"/,
-    'expected profile pages to vertically center the top bar inside the taller mobile header'
+    /<div className="relative z-10 px-5 sm:px-0 pt-4 sm:pt-6 pb-\[8px\] sm:pb-4">/,
+    'expected profile pages to use the same vertical top-bar rhythm as the homepage'
+  );
+
+  assert.match(
+    source,
+    /useMobileProfileHeader \? "justify-center gap-4 mb-0" : "justify-between mb-8"/,
+    'expected profile pages to center the mobile logo and button group horizontally'
+  );
+
+  assert.match(
+    source,
+    /useMobileProfileHeader \? "max-w-\[150px\] sm:max-w-none" : ""/,
+    'expected profile pages to cap the mobile logo width so it cannot overlap the button'
   );
 
   assert.match(
