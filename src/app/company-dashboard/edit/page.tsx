@@ -481,8 +481,11 @@ export default function EditProfilePage() {
   const canSave = hasCategory && !missingProjectSize && !missingLocation && !missingDescription && !missingEmail && !missingAddress && !invalidAddress && !invalidFoundedYear && !hasInvalidContactField;
   const isFirstCompanyConnection = searchParams.get("firstConnection") === "1";
   const hasSetupAccountQuery = searchParams.get("setupAccount") === "1";
-  const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;
-  const isResolvingSetupAccount = hasSetupAccountQuery && (!clerkUser || currentUser === undefined || company === undefined);
+  const hasCompletedSetupSignInMethod = Boolean(
+    clerkUser?.passwordEnabled || (clerkUser?.externalAccounts?.length ?? 0) > 0
+  );
+  const shouldPromptSetupAccount = !!clerkUser && (hasSetupAccountQuery || !hasCompletedSetupSignInMethod);
+  const isResolvingSetupAccount = (hasSetupAccountQuery || shouldPromptSetupAccount) && (!clerkUser || currentUser === undefined || company === undefined);
   const primaryCompanyEmail = clerkUser?.primaryEmailAddress?.emailAddress || "";
   const storedCompanyEmail = company?.email || primaryCompanyEmail;
   const setupDisplayEmail = setupLoginEmail || storedCompanyEmail;

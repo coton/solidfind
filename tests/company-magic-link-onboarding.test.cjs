@@ -36,8 +36,8 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /const hasSetupAccountQuery = searchParams\.get\("setupAccount"\) === "1";[\s\S]*const shouldPromptSetupAccount = hasSetupAccountQuery && !!clerkUser;/,
-    'expected the company editor to gate setup-account onboarding on the setupAccount query for every company magic-link session'
+    /const hasSetupAccountQuery = searchParams\.get\("setupAccount"\) === "1";[\s\S]*const hasCompletedSetupSignInMethod = Boolean\([\s\S]*clerkUser\?\.passwordEnabled \|\| \(clerkUser\?\.externalAccounts\?\.length \?\? 0\) > 0[\s\S]*const shouldPromptSetupAccount = !!clerkUser && \(hasSetupAccountQuery \|\| !hasCompletedSetupSignInMethod\);/,
+    'expected the company editor to keep unregistered magic-link sessions behind setup even if the setup query is lost on reload'
   );
 
   assert.match(
@@ -156,7 +156,7 @@ test('company dashboard edit blocks company magic-link users behind the setup-ac
 
   assert.match(
     source,
-    /const isResolvingSetupAccount = hasSetupAccountQuery && \(!clerkUser \|\| currentUser === undefined \|\| company === undefined\);[\s\S]*return <MagicLinkLoadingPage \/>;/,
+    /const isResolvingSetupAccount = \(hasSetupAccountQuery \|\| shouldPromptSetupAccount\) && \(!clerkUser \|\| currentUser === undefined \|\| company === undefined\);[\s\S]*return <MagicLinkLoadingPage \/>;/,
     'expected the company editor to keep a dedicated loading screen visible while setup-account access checks resolve'
   );
 

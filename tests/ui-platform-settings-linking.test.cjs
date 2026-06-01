@@ -327,7 +327,7 @@ test('admin UI replaces New User Image with split dashboard media uploads for im
 
   assert.match(
     companyDashboardSource,
-    /<DashboardHeroMedia className="mb-8" alt="" mobileAspectRatio="2 \/ 1" variant="company" \/>/,
-    'expected the company dashboard to use the configurable company dashboard media'
+    /<DashboardHeroMedia className="mb-8" alt="" desktopAspectRatio="900 \/ 160" mobileAspectRatio="5 \/ 2" variant="company" \/>/,
+    'expected the company dashboard to use the configurable company dashboard media at the reduced 80% height'
   );
 });

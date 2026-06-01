@@ -347,7 +347,7 @@ function HeaderInner() {
     : isProfilePage
       ? (fromCategory || null)
       : (searchParams.get("category") ?? "construction");
-  const useMobileProfileHeader = isProfilePage;
+  const useMobileCompactHeader = isProfilePage || isDashboardPage;
 
   useEffect(() => {
     const updateMobileCategoryEndSpacer = () => {
@@ -570,8 +570,8 @@ function HeaderInner() {
 
   return (
     <>
-    <div className={useMobileProfileHeader ? "h-[120px] sm:h-[220px]" : "h-[330px] sm:h-[220px]"} aria-hidden="true" />
-    <header className="fixed top-0 left-0 right-0 z-40 p-[10px]">
+    <div className={useMobileCompactHeader ? "h-[110px] sm:h-[220px]" : "h-[330px] sm:h-[220px]"} aria-hidden="true" />
+    <header className="fixed top-0 left-0 right-0 z-40 bg-[#ececec] p-[10px]">
       <div className="relative rounded-[6px]">
       {headerMedia.url ? (
         <>
@@ -610,12 +610,12 @@ function HeaderInner() {
         </>
       )}
 
-      <div className="relative z-10 px-5 sm:px-0 pt-4 sm:pt-6 pb-[8px] sm:pb-4">
+      <div className={`relative z-10 px-5 sm:px-0 ${useMobileCompactHeader ? "flex h-[90px] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-[8px] sm:pb-4"}`}>
         {/* Top Bar */}
-        <div className={`max-w-[900px] mx-auto flex items-center sm:justify-between sm:mb-6 ${useMobileProfileHeader ? "justify-center gap-4 mb-0" : "justify-between mb-8"}`}>
+        <div className={`max-w-[900px] mx-auto flex items-center sm:justify-between sm:mb-6 ${useMobileCompactHeader ? "w-full justify-center gap-4 mb-0" : "justify-between mb-8"}`}>
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className={`h-[19px] w-auto ${useMobileProfileHeader ? "max-w-[150px] sm:max-w-none" : ""}`} />
+            <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className={`h-[19px] w-auto ${useMobileCompactHeader ? "max-w-[160px] sm:max-w-none" : ""}`} />
           </Link>
 
           {/* Right Side Buttons */}
@@ -674,7 +674,7 @@ function HeaderInner() {
         </div>
 
         {/* Category Tabs - Horizontal scroll on mobile */}
-        <div className={`max-w-[900px] mx-auto transition-all duration-200 sm:mb-4 sm:max-h-none sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto ${useMobileProfileHeader ? "hidden sm:block" : ""} ${
+        <div className={`max-w-[900px] mx-auto transition-all duration-200 sm:mb-4 sm:max-h-none sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto ${useMobileCompactHeader ? "hidden sm:block" : ""} ${
           mobileHeaderCompact
             ? "max-h-0 mb-0 -translate-y-2 overflow-hidden opacity-0 pointer-events-none"
             : "max-h-[140px] mb-4 translate-y-0 opacity-100"
@@ -797,7 +797,7 @@ function HeaderInner() {
           </div>
 
           {/* Mobile: Stack vertically with equal-width filters */}
-          <div className={`${useMobileProfileHeader ? "hidden" : "flex"} sm:hidden flex-col gap-[2px]`}>
+          <div className={`${useMobileCompactHeader ? "hidden" : "flex"} sm:hidden flex-col gap-[2px]`}>
             {/* Keywords Input with Search Button */}
             <div className="flex items-center gap-[2px] mb-[2px]">
               <div className="flex-1 h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">

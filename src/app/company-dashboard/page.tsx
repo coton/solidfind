@@ -303,34 +303,33 @@ export default function CompanyDashboardPage() {
       <Header />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
-        {/* Header Row */}
-        <div className="flex items-start justify-between mb-[5px]">
-          <div>
-            <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
-            <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-0">
-              {company?._id ? (
-                <Link href={buildCompanyProfilePath(company)} className="hover:text-[#f14110] transition-colors">
-                  {data.name}
-                </Link>
-              ) : (
-                data.name
-              )}
-            </h1>
-          </div>
-
+        <div className="mb-7 flex justify-end">
           <div className="text-right">
             {isPro && proEnabled ? (
-              <p className="text-[11px] font-medium tracking-[0.22px] mb-1 text-[#f14110]">PRO ACCOUNT</p>
-            ) : proEnabled ? (
-              <p className="text-[11px] font-medium tracking-[0.22px] mb-1 text-[#333]/60">FREE ACCOUNT</p>
-            ) : null}
+              <p className="mb-2 text-[11px] font-medium tracking-[0.22px] text-[#f14110]">PRO ACCOUNT</p>
+            ) : (
+              <p className="mb-2 text-[11px] font-medium tracking-[0.22px] text-[#333]/60">FREE ACCOUNT</p>
+            )}
             {clerkUser?.emailAddresses?.[0]?.emailAddress && (
-              <p className="text-[10px] text-[#333]/60 tracking-[0.2px] mb-1">
+              <p className="text-[10px] text-[#333]/60 tracking-[0.2px] underline underline-offset-2">
                 {clerkUser.emailAddresses[0].emailAddress}
               </p>
             )}
-
           </div>
+        </div>
+
+        {/* Header Row */}
+        <div className="mb-6">
+          <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
+          <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-0">
+            {company?._id ? (
+              <Link href={buildCompanyProfilePath(company)} className="hover:text-[#f14110] transition-colors">
+                {data.name}
+              </Link>
+            ) : (
+              data.name
+            )}
+          </h1>
         </div>
 
         <div className="mb-6">
@@ -474,7 +473,7 @@ export default function CompanyDashboardPage() {
 
         {/* Banner Image */}
         {!isPro && proEnabled && (
-          <DashboardHeroMedia className="mb-8" alt="" mobileAspectRatio="2 / 1" variant="company" />
+          <DashboardHeroMedia className="mb-8" alt="" desktopAspectRatio="900 / 160" mobileAspectRatio="5 / 2" variant="company" />
         )}
 
         {/* Reviews Section */}

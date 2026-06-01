@@ -20,8 +20,8 @@ test('shared header stays fixed inside a framed workspace gutter', () => {
 
   assert.match(
     source,
-    /className=\{useMobileProfileHeader \? "h-\[120px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\} aria-hidden="true" \/>[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">/,
-    'expected the shared header to reserve page space while the visible header remains fixed in a 10px framed gutter'
+    /className=\{useMobileCompactHeader \? "h-\[110px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\} aria-hidden="true" \/>[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 bg-\[#ececec\] p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">/,
+    'expected the shared header to reserve page space while the visible header remains fixed in an opaque 10px framed gutter'
   );
 });
 
@@ -57,48 +57,48 @@ test('shared footer uses the same 10px framed workspace gutter', () => {
   );
 });
 
-test('mobile company profile header shows only the top bar while desktop keeps navigation and filters', () => {
+test('mobile profile and dashboard headers show only the top bar while desktop keeps navigation and filters', () => {
   const source = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
 
   assert.match(
     source,
-    /const useMobileProfileHeader = isProfilePage;/,
-    'expected profile pages to opt into the compact mobile header'
+    /const useMobileCompactHeader = isProfilePage \|\| isDashboardPage;/,
+    'expected profile and dashboard pages to opt into the compact mobile header'
   );
 
   assert.match(
     source,
-    /className=\{useMobileProfileHeader \? "h-\[120px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\}/,
-    'expected profile pages to reserve the requested 120px compact mobile header height'
+    /className=\{useMobileCompactHeader \? "h-\[110px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\}/,
+    'expected compact mobile pages to reserve the requested 110px header height'
   );
 
   assert.match(
     source,
-    /<div className="relative z-10 px-5 sm:px-0 pt-4 sm:pt-6 pb-\[8px\] sm:pb-4">/,
-    'expected profile pages to use the same vertical top-bar rhythm as the homepage'
+    /useMobileCompactHeader \? "flex h-\[90px\] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-\[8px\] sm:pb-4"/,
+    'expected compact mobile pages to center the top-bar inside the 110px framed header'
   );
 
   assert.match(
     source,
-    /useMobileProfileHeader \? "justify-center gap-4 mb-0" : "justify-between mb-8"/,
-    'expected profile pages to center the mobile logo and button group horizontally'
+    /useMobileCompactHeader \? "w-full justify-center gap-4 mb-0" : "justify-between mb-8"/,
+    'expected compact mobile pages to center the mobile logo and button group horizontally'
   );
 
   assert.match(
     source,
-    /useMobileProfileHeader \? "max-w-\[150px\] sm:max-w-none" : ""/,
-    'expected profile pages to cap the mobile logo width so it cannot overlap the button'
+    /useMobileCompactHeader \? "max-w-\[160px\] sm:max-w-none" : ""/,
+    'expected compact mobile pages to cap the mobile logo width so it cannot overlap the button'
   );
 
   assert.match(
     source,
-    /useMobileProfileHeader \? "hidden sm:block" : ""/,
-    'expected profile pages to hide category navigation on mobile while preserving it on desktop'
+    /useMobileCompactHeader \? "hidden sm:block" : ""/,
+    'expected compact mobile pages to hide category navigation on mobile while preserving it on desktop'
   );
 
   assert.match(
     source,
-    /className=\{`\$\{useMobileProfileHeader \? "hidden" : "flex"\} sm:hidden flex-col gap-\[2px\]`\}/,
-    'expected profile pages to hide mobile filters while keeping the desktop filter row available'
+    /className=\{`\$\{useMobileCompactHeader \? "hidden" : "flex"\} sm:hidden flex-col gap-\[2px\]`\}/,
+    'expected compact mobile pages to hide mobile filters while keeping the desktop filter row available'
   );
 });

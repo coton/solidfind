@@ -170,14 +170,26 @@ test('company dashboard intro copy spans the mobile content width', () => {
   );
 });
 
-test('company dashboard account badge only appears when Pro features are enabled', () => {
+test('company dashboard account badge sits above the greeting while editor still follows Pro availability', () => {
   const source = readProjectFile('src/app/company-dashboard/page.tsx');
   const editSource = readProjectFile('src/app/company-dashboard/edit/page.tsx');
 
   assert.match(
     source,
-    /isPro && proEnabled[\s\S]*PRO ACCOUNT[\s\S]*: proEnabled \? \([\s\S]*FREE ACCOUNT[\s\S]*\) : null/,
-    'expected the company dashboard header to hide FREE/PRO labels while Pro features are off'
+    /<div className="mb-7 flex justify-end">/,
+    'expected the company dashboard account label to have its own spaced row'
+  );
+
+  assert.match(
+    source,
+    /PRO ACCOUNT[\s\S]*FREE ACCOUNT[\s\S]*clerkUser\.emailAddresses\[0\]\.emailAddress/,
+    'expected the company dashboard account row to include the account label and email'
+  );
+
+  assert.match(
+    source,
+    /\{\/\* Header Row \*\/\}\s*<div className="mb-6">[\s\S]*Hello/,
+    'expected the company dashboard account label and email to sit above the greeting block with breathing room'
   );
 
   assert.match(
