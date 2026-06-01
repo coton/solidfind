@@ -20,7 +20,7 @@ test('shared header stays fixed inside a framed workspace gutter', () => {
 
   assert.match(
     source,
-    /<div className="h-\[330px\] sm:h-\[220px\]" aria-hidden="true" \/>[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">/,
+    /className=\{useMobileProfileHeader \? "h-\[84px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\} aria-hidden="true" \/>[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">/,
     'expected the shared header to reserve page space while the visible header remains fixed in a 10px framed gutter'
   );
 });
@@ -54,5 +54,33 @@ test('shared footer uses the same 10px framed workspace gutter', () => {
     source,
     /<div className="px-\[10px\] pb-\[10px\]">[\s\S]*<footer className="relative h-\[150px\] sm:h-\[190px\] rounded-\[6px\] overflow-hidden z-0">/,
     'expected the footer to sit inside a matching 10px frame with rounded corners'
+  );
+});
+
+test('mobile company profile header shows only the top bar while desktop keeps navigation and filters', () => {
+  const source = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
+
+  assert.match(
+    source,
+    /const useMobileProfileHeader = isProfilePage;/,
+    'expected profile pages to opt into the compact mobile header'
+  );
+
+  assert.match(
+    source,
+    /className=\{useMobileProfileHeader \? "h-\[84px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\}/,
+    'expected profile pages to reserve only the compact mobile header height'
+  );
+
+  assert.match(
+    source,
+    /useMobileProfileHeader \? "hidden sm:block" : ""/,
+    'expected profile pages to hide category navigation on mobile while preserving it on desktop'
+  );
+
+  assert.match(
+    source,
+    /className=\{`\$\{useMobileProfileHeader \? "hidden" : "flex"\} sm:hidden flex-col gap-\[2px\]`\}/,
+    'expected profile pages to hide mobile filters while keeping the desktop filter row available'
   );
 });

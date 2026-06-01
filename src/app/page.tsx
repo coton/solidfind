@@ -39,6 +39,7 @@ function HomeContent() {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("latest");
+  const [isMobileResults, setIsMobileResults] = useState(false);
   const { user: clerkUser } = useUser();
 
   const proEnabled = useProEnabled();
@@ -95,8 +96,10 @@ function HomeContent() {
   // five rows of company listings and remove the About/featured cards.
   const DEFAULT_GRID_CARD_COUNT = 8;
   const FILTERED_LISTING_CARD_COUNT = 20;
+  const MOBILE_LISTING_CARD_COUNT = 15;
   const specialCardCount = hasFilters ? 0 : 1 + (visibleArticles?.length ?? 1); // 1 for WelcomeCard + featured articles (default 1 while loading)
-  const itemsPerPage = hasFilters ? FILTERED_LISTING_CARD_COUNT : Math.max(1, DEFAULT_GRID_CARD_COUNT - specialCardCount);
+  const desktopItemsPerPage = hasFilters ? FILTERED_LISTING_CARD_COUNT : Math.max(1, DEFAULT_GRID_CARD_COUNT - specialCardCount);
+  const itemsPerPage = isMobileResults ? MOBILE_LISTING_CARD_COUNT : desktopItemsPerPage;
 
   // Get current user for bookmarks
   const currentUser = useQuery(
@@ -193,6 +196,17 @@ function HomeContent() {
   useEffect(() => {
     setCurrentPage(1);
   }, [categoryParam, subcategoryParam, locationParam, searchParam, projectSizeParam]);
+
+  useEffect(() => {
+    const updateResultsLayout = () => {
+      setIsMobileResults(window.innerWidth < 640);
+    };
+
+    updateResultsLayout();
+    window.addEventListener("resize", updateResultsLayout);
+
+    return () => window.removeEventListener("resize", updateResultsLayout);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#ececec] flex flex-col">

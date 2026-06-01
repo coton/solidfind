@@ -34,6 +34,18 @@ test('homepage defaults to two grid rows and filtered search uses five rows with
 test('mobile homepage uses paginated listings instead of silently truncating to ten results', () => {
   const source = readProjectFile('src/app/page.tsx');
 
+  assert.match(
+    source,
+    /const MOBILE_LISTING_CARD_COUNT = 15;/,
+    'expected mobile result pages to show fifteen company cards before pagination'
+  );
+
+  assert.match(
+    source,
+    /const itemsPerPage = isMobileResults \? MOBILE_LISTING_CARD_COUNT : desktopItemsPerPage;/,
+    'expected mobile and desktop result page sizes to be calculated separately'
+  );
+
   assert.doesNotMatch(
     source,
     /listings\.slice\(0, 10\)/,
