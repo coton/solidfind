@@ -249,7 +249,7 @@ function Dropdown({
 
 export function Header() {
   return (
-    <Suspense fallback={<header className="relative"><div className="h-[200px]" /></header>}>
+    <Suspense fallback={<div className="h-[258px] sm:h-[220px]" />}>
       <HeaderInner />
     </Suspense>
   );
@@ -528,10 +528,12 @@ function HeaderInner() {
 
   return (
     <>
-    <header className="relative">
+    <div className="h-[258px] sm:h-[220px]" aria-hidden="true" />
+    <header className="fixed top-0 left-0 right-0 z-40 p-[10px]">
+      <div className="relative rounded-[6px]">
       {headerMedia.url ? (
         <>
-          <div className="absolute inset-0 rounded-b-[6px] overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden rounded-[6px]">
             {headerMedia.type === "video" ? (
               <video src={headerMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
             ) : (
@@ -544,21 +546,21 @@ function HeaderInner() {
               />
             )}
           </div>
-          <div className="absolute inset-0 rounded-b-[6px] bg-black/25" />
+          <div className="absolute inset-0 rounded-[6px] bg-black/25" />
         </>
       ) : headerMediaState.isLoading ? (
-        <div className="absolute inset-0 rounded-b-[6px] bg-[#e4e4e4]" />
+        <div className="absolute inset-0 rounded-[6px] bg-[#e4e4e4]" />
       ) : (
         <>
           {/* Gradient Background - Desktop: #E4E4E4 to #F14110, Mobile: #E9A28E to #F14110 */}
           <div
-            className="absolute inset-0 rounded-b-[6px]"
+            className="absolute inset-0 rounded-[6px]"
             style={{
               background: "linear-gradient(to right, #E9A28E, #F14110)"
             }}
           />
           <div
-            className="hidden sm:block absolute inset-0 rounded-b-[6px]"
+            className="hidden sm:block absolute inset-0 rounded-[6px]"
             style={{
               background: "linear-gradient(to right, #E4E4E4, #F14110)"
             }}
@@ -847,6 +849,7 @@ function HeaderInner() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </header>
 

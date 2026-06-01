@@ -11,6 +11,8 @@ interface AdBannerProps {
   alt?: string;
 }
 
+const MOBILE_VIDEO_FALLBACK_IMAGE = "/images/ad-kini-resort.png";
+
 /**
  * Horizontal ad banner — 700×150px at full size.
  * On narrower viewports the banner scales down proportionally
@@ -41,7 +43,18 @@ export function AdBanner({ imageSrc: propImageSrc, alt = "Advertisement" }: AdBa
       }}
     >
       {displayType === "video" ? (
-        <AutoplayBannerVideo src={displayUrl} />
+        <>
+          <Image
+            src={MOBILE_VIDEO_FALLBACK_IMAGE}
+            alt={alt}
+            fill
+            sizes="100vw"
+            className="object-cover sm:hidden"
+          />
+          <div className="hidden h-full w-full sm:block">
+            <AutoplayBannerVideo src={displayUrl} />
+          </div>
+        </>
       ) : (
         <Image
           src={displayUrl}

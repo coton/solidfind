@@ -21,7 +21,13 @@ test('horizontal ad banner renders uploaded videos with autoplay looping playbac
   assert.match(
     source,
     /displayType === "video"[\s\S]*<AutoplayBannerVideo src=\{displayUrl\} \/>/,
-    'expected horizontal ad videos to autoplay, loop, stay muted, and play inline on mobile'
+    'expected horizontal ad videos to autoplay, loop, stay muted, and play inline on desktop'
+  );
+
+  assert.match(
+    source,
+    /const MOBILE_VIDEO_FALLBACK_IMAGE = "\/images\/ad-kini-resort\.png";[\s\S]*className="object-cover sm:hidden"[\s\S]*className="hidden h-full w-full sm:block"/,
+    'expected mobile to render an image fallback for video ads instead of the native mobile video player'
   );
 
   assert.match(

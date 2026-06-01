@@ -91,12 +91,12 @@ function HomeContent() {
     return cats.some((cat) => cat.toLowerCase() === categoryParam.toLowerCase());
   });
 
-  // Always display exactly 12 cards total on the homepage grid (desktop).
-  // Special cards = 1 (WelcomeCard) + number of visible featured articles.
-  // With filters/search, show 26 listing cards (no special cards in grid).
-  const TOTAL_GRID_CARDS = 12;
-  const specialCardCount = 1 + (visibleArticles?.length ?? 1); // 1 for WelcomeCard + featured articles (default 1 while loading)
-  const itemsPerPage = hasFilters ? 26 : Math.max(1, TOTAL_GRID_CARDS - specialCardCount);
+  // Default landing keeps the grid to two rows. Filtered/search results use
+  // five rows of company listings and remove the About/featured cards.
+  const DEFAULT_GRID_CARD_COUNT = 8;
+  const FILTERED_LISTING_CARD_COUNT = 20;
+  const specialCardCount = hasFilters ? 0 : 1 + (visibleArticles?.length ?? 1); // 1 for WelcomeCard + featured articles (default 1 while loading)
+  const itemsPerPage = hasFilters ? FILTERED_LISTING_CARD_COUNT : Math.max(1, DEFAULT_GRID_CARD_COUNT - specialCardCount);
 
   // Get current user for bookmarks
   const currentUser = useQuery(
@@ -250,20 +250,24 @@ function HomeContent() {
           </div>
         ) : (
           <>
-            {/* Mobile: Horizontal Scroll (1 row) */}
+            {/* Mobile: Horizontal Scroll */}
             <div className="sm:hidden mb-8">
               <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
                 <div className="flex gap-5 pb-2">
-                  <WelcomeCard />
-                  {visibleArticles === undefined
-                    ? <HomeFeaturedCard loading />
-                    : visibleArticles.map((article) => (
-                      <HomeFeaturedCard key={article._id} article={article} />
-                    ))
-                  }
+                  {!hasFilters && (
+                    <>
+                      <WelcomeCard />
+                      {visibleArticles === undefined
+                        ? <HomeFeaturedCard loading />
+                        : visibleArticles.map((article) => (
+                          <HomeFeaturedCard key={article._id} article={article} />
+                        ))
+                      }
+                    </>
+                  )}
                   {companies === undefined
-                    ? Array.from({ length: 6 }).map((_, i) => <ListingCardSkeleton key={i} />)
-                    : listings.slice(0, 10).map((listing) => (
+                    ? Array.from({ length: itemsPerPage }).map((_, i) => <ListingCardSkeleton key={i} />)
+                    : paginatedListings.map((listing) => (
                       <ListingCard
                         key={listing.id}
                         {...listing}
@@ -276,19 +280,29 @@ function HomeContent() {
                   }
                 </div>
               </div>
+              <div className="flex justify-start mt-4">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
             </div>
 
             {/* Desktop: Grid with Pagination */}
             <div className="hidden sm:block">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-                {/* First Row: Welcome + Featured + Listing Cards */}
-                <WelcomeCard />
-                {visibleArticles === undefined
-                  ? <HomeFeaturedCard loading />
-                  : visibleArticles.map((article) => (
-                    <HomeFeaturedCard key={article._id} article={article} />
-                  ))
-                }
+                {!hasFilters && (
+                  <>
+                    <WelcomeCard />
+                    {visibleArticles === undefined
+                      ? <HomeFeaturedCard loading />
+                      : visibleArticles.map((article) => (
+                        <HomeFeaturedCard key={article._id} article={article} />
+                      ))
+                    }
+                  </>
+                )}
 
                 {/* Listing Cards - show skeletons while Convex loads */}
                 {companies === undefined
