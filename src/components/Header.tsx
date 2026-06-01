@@ -249,7 +249,7 @@ function Dropdown({
 
 export function Header() {
   return (
-    <Suspense fallback={<div className="h-[258px] sm:h-[220px]" />}>
+    <Suspense fallback={<div className="h-[330px] sm:h-[220px]" />}>
       <HeaderInner />
     </Suspense>
   );
@@ -312,7 +312,9 @@ function HeaderInner() {
     searchParams.get("location") ? searchParams.get("location")!.split(",") : []
   );
   const lastCategoryButtonRef = useRef<HTMLButtonElement | null>(null);
+  const lastScrollYRef = useRef(0);
   const [mobileCategoryEndSpacerWidth, setMobileCategoryEndSpacerWidth] = useState(0);
+  const [mobileHeaderCompact, setMobileHeaderCompact] = useState(false);
 
   // Auth modal state
   const [showLogoutPrompt, setShowLogoutPrompt] = useState(false);
@@ -365,6 +367,45 @@ function HeaderInner() {
 
     return () => window.removeEventListener("resize", updateMobileCategoryEndSpacer);
   }, [dynamicCategories]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    lastScrollYRef.current = window.scrollY;
+    let ticking = false;
+
+    const updateMobileHeaderCompact = () => {
+      const currentScrollY = window.scrollY;
+      const isMobile = window.innerWidth < 640;
+      const scrollDelta = currentScrollY - lastScrollYRef.current;
+
+      if (!isMobile || currentScrollY < 24) {
+        setMobileHeaderCompact(false);
+      } else if (scrollDelta > 4) {
+        setMobileHeaderCompact(true);
+      } else if (scrollDelta < -4) {
+        setMobileHeaderCompact(false);
+      }
+
+      lastScrollYRef.current = currentScrollY;
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateMobileHeaderCompact);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+    };
+  }, []);
 
   // Determine user type from Clerk metadata (default to "individual")
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
@@ -528,7 +569,7 @@ function HeaderInner() {
 
   return (
     <>
-    <div className="h-[258px] sm:h-[220px]" aria-hidden="true" />
+    <div className="h-[330px] sm:h-[220px]" aria-hidden="true" />
     <header className="fixed top-0 left-0 right-0 z-40 p-[10px]">
       <div className="relative rounded-[6px]">
       {headerMedia.url ? (
@@ -632,7 +673,11 @@ function HeaderInner() {
         </div>
 
         {/* Category Tabs - Horizontal scroll on mobile */}
-        <div className="max-w-[900px] mx-auto mb-4">
+        <div className={`max-w-[900px] mx-auto transition-all duration-200 sm:mb-4 sm:max-h-none sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto ${
+          mobileHeaderCompact
+            ? "max-h-0 mb-0 -translate-y-2 overflow-hidden opacity-0 pointer-events-none"
+            : "max-h-[140px] mb-4 translate-y-0 opacity-100"
+        }`}>
           <div className="relative overflow-visible">
           <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-2 min-w-max">

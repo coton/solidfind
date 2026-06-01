@@ -20,8 +20,30 @@ test('shared header stays fixed inside a framed workspace gutter', () => {
 
   assert.match(
     source,
-    /<div className="h-\[258px\] sm:h-\[220px\]" aria-hidden="true" \/>[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">/,
+    /<div className="h-\[330px\] sm:h-\[220px\]" aria-hidden="true" \/>[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">/,
     'expected the shared header to reserve page space while the visible header remains fixed in a 10px framed gutter'
+  );
+});
+
+test('mobile fixed header collapses category tabs and description while scrolling down', () => {
+  const source = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
+
+  assert.match(
+    source,
+    /const \[mobileHeaderCompact, setMobileHeaderCompact\] = useState\(false\);/,
+    'expected the header to track a mobile compact state'
+  );
+
+  assert.match(
+    source,
+    /scrollDelta > 4[\s\S]*setMobileHeaderCompact\(true\)[\s\S]*scrollDelta < -4[\s\S]*setMobileHeaderCompact\(false\)[\s\S]*window\.addEventListener\("scroll", requestUpdate, \{ passive: true \}\);/,
+    'expected mobile header compact mode to follow scroll direction'
+  );
+
+  assert.match(
+    source,
+    /mobileHeaderCompact[\s\S]*"max-h-0 mb-0 -translate-y-2 overflow-hidden opacity-0 pointer-events-none"[\s\S]*"max-h-\[140px\] mb-4 translate-y-0 opacity-100"/,
+    'expected compact mode to hide the category tabs and category description on mobile'
   );
 });
 
