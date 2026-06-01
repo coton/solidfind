@@ -266,7 +266,7 @@ type HeaderProps = {
 };
 
 export function Header(props: HeaderProps = {}) {
-  const fallbackSpacer = props.showResultsBar ? "h-[350px] sm:h-[250px]" : "h-[330px] sm:h-[260px]";
+  const fallbackSpacer = props.showResultsBar ? "h-[375px] sm:h-[300px]" : "h-[330px] sm:h-[260px]";
 
   return (
     <Suspense fallback={<div className={fallbackSpacer} />}>
@@ -353,6 +353,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   };
 
   const isDashboardPage = pathname.startsWith("/dashboard") || pathname.startsWith("/company-dashboard");
+  const isCompanyDashboardPage = pathname.startsWith("/company-dashboard");
   const rootNonProfilePages = new Set(["/", "/about", "/admin", "/auth-complete", "/coming-soon", "/register-business", "/reviews", "/sso-callback", "/terms", "/upgrade"]);
   const isProfilePage = pathname.startsWith("/profile") || (
     pathname.split("/").filter(Boolean).length === 1 &&
@@ -370,6 +371,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       ? (fromCategory || null)
       : (searchParams.get("category") ?? "construction");
   const useMobileCompactHeader = isProfilePage || isDashboardPage;
+  const useTopBarOnlyHeader = isCompanyDashboardPage;
   const showProfileBackBar = isProfilePage && !isDashboardPage && !showResultsBar;
   const contentBarVisible = showResultsBar || showProfileBackBar;
   const profileBackHref = searchParams.get("returnTo") === "dashboard" && user ? "/dashboard" : "/";
@@ -633,17 +635,19 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     <div
       className={
         showResultsBar
-          ? "h-[350px] sm:h-[250px]"
+          ? "h-[375px] sm:h-[300px]"
           : showProfileBackBar
             ? "h-[145px] sm:h-[285px]"
-            : useMobileCompactHeader
+            : useTopBarOnlyHeader
+              ? "h-[110px]"
+              : useMobileCompactHeader
               ? "h-[110px] sm:h-[260px]"
               : "h-[330px] sm:h-[260px]"
       }
       aria-hidden="true"
     />
     <header className="fixed top-0 left-0 right-0 z-40 bg-[#ececec] p-[10px]">
-      <div className="relative z-10 rounded-[6px]">
+      <div className="relative z-30 rounded-[6px]">
       {headerMedia.url ? (
         <>
           <div className="absolute inset-0 overflow-hidden rounded-[6px]">
@@ -675,9 +679,9 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         </>
       )}
 
-      <div className={`relative z-10 px-5 sm:px-0 ${useMobileCompactHeader ? "flex h-[90px] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-[8px] sm:pb-4"}`}>
+      <div className={`relative z-10 px-5 sm:px-0 ${useTopBarOnlyHeader ? "flex h-[90px] flex-col justify-center" : useMobileCompactHeader ? "flex h-[90px] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-[8px] sm:pb-4"}`}>
         {/* Top Bar */}
-        <div className={`max-w-[900px] mx-auto flex items-center sm:justify-between sm:mb-6 ${useMobileCompactHeader ? "w-full justify-between gap-4 mb-0" : "justify-between mb-8"}`}>
+        <div className={`max-w-[900px] mx-auto flex items-center ${useTopBarOnlyHeader ? "w-full justify-between gap-4 mb-0" : `sm:justify-between sm:mb-6 ${useMobileCompactHeader ? "w-full justify-between gap-4 mb-0" : "justify-between mb-8"}`}`}>
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className="h-[19px] w-auto" />
@@ -739,7 +743,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         </div>
 
         {/* Category Tabs - Horizontal scroll on mobile */}
-        <div className={`max-w-[900px] mx-auto transition-all duration-200 sm:mb-4 sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto sm:max-h-none ${useMobileCompactHeader ? "hidden sm:block" : ""} ${
+        <div className={`max-w-[900px] mx-auto transition-all duration-200 sm:mb-4 sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto sm:max-h-none ${useTopBarOnlyHeader ? "hidden" : useMobileCompactHeader ? "hidden sm:block" : ""} ${
           mobileHeaderCompact
             ? "max-h-0 mb-0 -translate-y-2 overflow-hidden opacity-0 pointer-events-none"
             : "max-h-[140px] mb-4 translate-y-0 opacity-100"
@@ -777,7 +781,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         </div>
 
         {/* Search Bar */}
-        <div className="max-w-[900px] mx-auto">
+        <div className={`max-w-[900px] mx-auto ${useTopBarOnlyHeader ? "hidden" : ""}`}>
           {/* Desktop: Flex with Clear button positioned right */}
           <div className="hidden items-center justify-between gap-0 sm:flex">
             {/* Left side: Keywords + Filters */}
@@ -963,7 +967,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       </div>
       </div>
       {showResultsBar && (
-        <div className="relative z-10 mx-auto flex max-w-[900px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
+        <div className="relative z-20 mx-auto flex max-w-[900px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
           <h2 className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]">
             {homepageResultCount} Solid Finds
           </h2>
@@ -971,7 +975,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         </div>
       )}
       {showProfileBackBar && (
-        <div className="relative z-10 mx-auto flex max-w-[900px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
+        <div className="relative z-20 mx-auto flex max-w-[900px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
           <Link
             href={profileBackHref}
             className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
@@ -985,7 +989,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       )}
       <div
         className={`pointer-events-none absolute left-0 right-0 z-0 bg-gradient-to-b from-[#ececec] to-transparent ${
-          contentBarVisible ? "bottom-0 h-[58px]" : "top-full h-5"
+          contentBarVisible ? "top-full h-8" : "top-full h-5"
         }`}
       />
     </header>

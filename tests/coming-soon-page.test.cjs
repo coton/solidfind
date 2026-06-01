@@ -35,3 +35,19 @@ test('coming-soon background photo asset exists in public assets', () => {
   const backgroundPhotoPath = path.join(projectRoot, 'public/coming-soon/bg-photo.jpg');
   assert.equal(fs.existsSync(backgroundPhotoPath), true, 'expected public/coming-soon/bg-photo.jpg to exist');
 });
+
+test('apex and www production domains rewrite to the coming-soon page', () => {
+  const proxySource = readProjectFile('src/proxy.ts');
+
+  assert.match(
+    proxySource,
+    /hostname === "solidfind\.id" \|\| hostname === "www\.solidfind\.id"/,
+    'expected both solidfind.id and www.solidfind.id to stay on the coming-soon page'
+  );
+
+  assert.match(
+    proxySource,
+    /url\.pathname = "\/coming-soon";[\s\S]*NextResponse\.rewrite\(url\)/,
+    'expected production-domain requests to rewrite locally instead of reaching auth routes'
+  );
+});

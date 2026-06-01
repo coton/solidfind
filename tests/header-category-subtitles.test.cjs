@@ -20,7 +20,7 @@ test('shared header stays fixed inside a framed workspace gutter', () => {
 
   assert.match(
     source,
-    /showResultsBar[\s\S]*"h-\[350px\] sm:h-\[250px\]"[\s\S]*showProfileBackBar[\s\S]*"h-\[145px\] sm:h-\[285px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 bg-\[#ececec\] p-\[10px\]">[\s\S]*<div className="relative z-10 rounded-\[6px\]">[\s\S]*contentBarVisible \? "bottom-0 h-\[58px\]" : "top-full h-5"/,
+    /showResultsBar[\s\S]*"h-\[375px\] sm:h-\[300px\]"[\s\S]*showProfileBackBar[\s\S]*"h-\[145px\] sm:h-\[285px\]"[\s\S]*useTopBarOnlyHeader[\s\S]*"h-\[110px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 bg-\[#ececec\] p-\[10px\]">[\s\S]*<div className="relative z-30 rounded-\[6px\]">[\s\S]*contentBarVisible \? "top-full h-8" : "top-full h-5"/,
     'expected the shared header to reserve page space while the visible header remains fixed in an opaque 10px framed gutter'
   );
 });
@@ -164,19 +164,19 @@ test('mobile profile and dashboard headers show only the top bar while desktop k
 
   assert.match(
     source,
-    /showProfileBackBar[\s\S]*"h-\[145px\] sm:h-\[285px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"/,
+    /showProfileBackBar[\s\S]*"h-\[145px\] sm:h-\[285px\]"[\s\S]*useTopBarOnlyHeader[\s\S]*"h-\[110px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"/,
     'expected compact mobile pages to reserve the requested 110px header height'
   );
 
   assert.match(
     source,
-    /useMobileCompactHeader \? "flex h-\[90px\] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-\[8px\] sm:pb-4"/,
+    /useTopBarOnlyHeader \? "flex h-\[90px\] flex-col justify-center" : useMobileCompactHeader \? "flex h-\[90px\] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-\[8px\] sm:pb-4"/,
     'expected compact mobile pages to center the top-bar inside the 110px framed header'
   );
 
   assert.match(
     source,
-    /useMobileCompactHeader \? "w-full justify-between gap-4 mb-0" : "justify-between mb-8"/,
+    /useTopBarOnlyHeader \? "w-full justify-between gap-4 mb-0"[\s\S]*useMobileCompactHeader \? "w-full justify-between gap-4 mb-0" : "justify-between mb-8"/,
     'expected compact mobile pages to keep the same horizontal top-bar alignment as the main header'
   );
 
@@ -188,13 +188,41 @@ test('mobile profile and dashboard headers show only the top bar while desktop k
 
   assert.match(
     source,
-    /useMobileCompactHeader \? "hidden sm:block" : ""/,
+    /useTopBarOnlyHeader \? "hidden" : useMobileCompactHeader \? "hidden sm:block" : ""/,
     'expected compact mobile pages to hide category navigation on mobile while preserving it on desktop'
   );
 
   assert.match(
     source,
-    /className=\{`\$\{useMobileCompactHeader \? "hidden" : "flex"\} sm:hidden flex-col gap-\[2px\]`\}/,
+    /<div className=\{`max-w-\[900px\] mx-auto \$\{useTopBarOnlyHeader \? "hidden" : ""\}`\}>[\s\S]*className=\{`\$\{useMobileCompactHeader \? "hidden" : "flex"\} sm:hidden flex-col gap-\[2px\]`\}/,
     'expected compact mobile pages to hide mobile filters while keeping the desktop filter row available'
+  );
+});
+
+test('company dashboard uses a top-bar-only header on every viewport', () => {
+  const source = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
+
+  assert.match(
+    source,
+    /const isCompanyDashboardPage = pathname\.startsWith\("\/company-dashboard"\);[\s\S]*const useTopBarOnlyHeader = isCompanyDashboardPage;/,
+    'expected only company dashboard routes to opt into the top-bar-only header'
+  );
+
+  assert.match(
+    source,
+    /useTopBarOnlyHeader[\s\S]*\? "h-\[110px\]"/,
+    'expected company dashboard routes to reserve only the compact header height'
+  );
+
+  assert.match(
+    source,
+    /useTopBarOnlyHeader \? "hidden" : useMobileCompactHeader \? "hidden sm:block" : ""/,
+    'expected company dashboard routes to hide category tabs on desktop and mobile'
+  );
+
+  assert.match(
+    source,
+    /<div className=\{`max-w-\[900px\] mx-auto \$\{useTopBarOnlyHeader \? "hidden" : ""\}`\}>/,
+    'expected company dashboard routes to hide all search and filter controls'
   );
 });

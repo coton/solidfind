@@ -16,7 +16,7 @@ function normalizeHostname(value: string | null | undefined) {
 }
 
 function shouldServeComingSoon(hostname: string) {
-  return hostname === "www.solidfind.id";
+  return hostname === "solidfind.id" || hostname === "www.solidfind.id";
 }
 
 export default clerkMiddleware(async (auth, req) => {
