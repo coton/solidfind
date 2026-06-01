@@ -277,7 +277,6 @@ export default function ProfilePageClient() {
   const searchParams = useSearchParams();
   const companyIdentifier = (params.companySlug ?? params.id) as string;
   const fromCategory = searchParams.get("from");
-  const returnTo = searchParams.get("returnTo");
   const { user: clerkUser } = useUser();
   const [isSaved, setIsSaved] = useState(false);
   const proEnabled = useProEnabled();
@@ -549,30 +548,10 @@ export default function ProfilePageClient() {
     text: r.content,
     date: new Date(r.createdAt).toLocaleDateString("en-CA").replace(/-/g, "/"),
   }));
-  const backHref = returnTo === "dashboard" && currentUser ? "/dashboard" : "/";
 
   return (
     <>
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 sm:pb-8 flex-grow w-full">
-        {/* Back Button Row */}
-        <div className="flex items-center justify-between mb-3 py-2 border-b border-[#333]/10">
-          <Link
-            href={backHref}
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
-          >
-            <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-              <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>BACK</span>
-          </Link>
-
-          {company.isPro && proEnabled && (
-            <div className="flex items-center justify-center rounded-[10px] bg-[#E4E4E4]" style={{ width: '90px', height: '16px' }}>
-              <span className="font-bam text-[9px] text-[#333]/35 tracking-[0.18px]">Pro Account</span>
-            </div>
-          )}
-        </div>
-
         {/* Company Name + Desktop Actions */}
         <div className="mb-4 flex items-start justify-between gap-4 sm:mb-6">
           <h1 className="text-[20px] sm:text-[26px] font-semibold text-[#333] leading-tight sm:leading-[30px]">

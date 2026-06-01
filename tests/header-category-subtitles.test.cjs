@@ -20,7 +20,7 @@ test('shared header stays fixed inside a framed workspace gutter', () => {
 
   assert.match(
     source,
-    /showResultsBar[\s\S]*"h-\[155px\] sm:h-\[305px\]"[\s\S]*"h-\[375px\] sm:h-\[305px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 bg-\[#ececec\] p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">[\s\S]*top-full h-5 bg-gradient-to-b from-\[#ececec\] to-transparent/,
+    /contentBarVisible[\s\S]*"h-\[155px\] sm:h-\[305px\]"[\s\S]*"h-\[375px\] sm:h-\[305px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 bg-\[#ececec\] p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">[\s\S]*contentBarVisible \? "top-\[calc\(100%-52px\)\] h-\[72px\]" : "top-full h-5"/,
     'expected the shared header to reserve page space while the visible header remains fixed in an opaque 10px framed gutter'
   );
 });
@@ -64,8 +64,31 @@ test('home page can attach result count and sorting to the fixed header frame', 
 
   assert.match(
     source,
-    /\{showResultsBar && \([\s\S]*\{homepageResultCount\} Solid Finds[\s\S]*<SortDropdown value=\{sortBy\} onChange=\{setSortBy\} reviewsEnabled=\{reviewsEnabled\} \/>[\s\S]*\)\}[\s\S]*top-full h-5 bg-gradient-to-b/,
-    'expected results and sorting to render inside the fixed header, above the bottom gradient'
+    /\{showResultsBar && \([\s\S]*\{homepageResultCount\} Solid Finds[\s\S]*<SortDropdown value=\{sortBy\} onChange=\{setSortBy\} reviewsEnabled=\{reviewsEnabled\} \/>[\s\S]*contentBarVisible \? "top-\[calc\(100%-52px\)\] h-\[72px\]" : "top-full h-5"/,
+    'expected results and sorting to render inside the fixed header, over the raised bottom gradient'
+  );
+});
+
+test('profile back navigation attaches to the fixed header frame', () => {
+  const source = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
+  const profileSource = fs.readFileSync(path.join(projectRoot, 'src/app/profile/[id]/ProfilePageClient.tsx'), 'utf8');
+
+  assert.match(
+    source,
+    /const showProfileBackBar = isProfilePage && !isDashboardPage && !showResultsBar;[\s\S]*const profileBackHref = searchParams\.get\("returnTo"\) === "dashboard" && user \? "\/dashboard" : "\/";/,
+    'expected profile pages to attach a guarded back link to the persistent header'
+  );
+
+  assert.match(
+    source,
+    /\{showProfileBackBar && \([\s\S]*href=\{profileBackHref\}[\s\S]*<span>BACK<\/span>[\s\S]*\)\}/,
+    'expected the profile back button to render inside the header content row'
+  );
+
+  assert.doesNotMatch(
+    profileSource,
+    /Back Button Row|href=\{backHref\}[\s\S]*<span>BACK<\/span>/,
+    'expected the public profile page body to stop rendering a separate back row'
   );
 });
 
@@ -79,6 +102,12 @@ test('root and slug profile routes share persistent site chrome', () => {
     layoutSource,
     /<SiteChrome>\{children\}<\/SiteChrome>/,
     'expected root layout to keep selected site chrome outside page transitions'
+  );
+
+  assert.doesNotMatch(
+    layoutSource,
+    /ViewTransitions|next-view-transitions/,
+    'expected route view transitions to stay disabled so the persistent orange header does not flash as a transition bar'
   );
 
   assert.match(

@@ -303,7 +303,7 @@ export default function CompanyDashboardPage() {
       <Header />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
-        <div className="mb-7 flex items-center justify-between gap-4">
+        <div className="mb-7 flex max-w-full items-center justify-start gap-5 sm:max-w-[440px]">
           <p className="min-w-0 truncate text-[10px] text-[#333]/60 tracking-[0.2px] underline underline-offset-2">
             {clerkUser?.emailAddresses?.[0]?.emailAddress ?? ""}
           </p>

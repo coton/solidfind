@@ -20,6 +20,10 @@ function readCompanyDashboardPage() {
   return fs.readFileSync(companyDashboardPagePath, 'utf8');
 }
 
+function readProjectFile(relativePath) {
+  return fs.readFileSync(path.join(projectRoot, relativePath), 'utf8');
+}
+
 test('company profile page avoids invalid nested Convex hooks so profile content can render', () => {
   const source = readProfilePage();
 
@@ -86,24 +90,25 @@ test('company profile hides testimonial score and count when there are no review
 });
 
 test('company profile returns to the individual dashboard only from dashboard-origin visits', () => {
-  const source = readProfilePage();
+  const source = readProjectFile('src/components/Header.tsx');
+  const profileSource = readProfilePage();
 
   assert.match(
     source,
-    /const returnTo = searchParams\.get\("returnTo"\);/,
-    'Expected profile page to read the explicit return target from the URL'
-  );
-
-  assert.match(
-    source,
-    /const backHref = returnTo === "dashboard" && currentUser \? "\/dashboard" : "\/";/,
+    /const profileBackHref = searchParams\.get\("returnTo"\) === "dashboard" && user \? "\/dashboard" : "\/";/,
     'Expected profile back link to return to dashboard only for logged-in dashboard-origin visits'
   );
 
   assert.match(
     source,
-    /<Link\s*href=\{backHref\}[\s\S]*<span>BACK<\/span>/,
-    'Expected the top profile back link to use the guarded back href'
+    /<Link\s*href=\{profileBackHref\}[\s\S]*<span>BACK<\/span>/,
+    'Expected the fixed header profile back link to use the guarded back href'
+  );
+
+  assert.doesNotMatch(
+    profileSource,
+    /Back Button Row|href=\{backHref\}/,
+    'Expected the profile content body to avoid a duplicate back row'
   );
 });
 

@@ -4,7 +4,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { DeletionBannerWrapper } from "@/components/DeletionBannerWrapper";
 import { SiteChrome } from "@/components/SiteChrome";
-import { ViewTransitions } from "next-view-transitions";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 
@@ -79,31 +78,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ViewTransitions>
-      <ClerkProvider
-        publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-        dynamic
-        signInUrl="/sign-in"
-        signUpUrl="/sign-up"
-        signInFallbackRedirectUrl="/auth-complete"
-        signUpFallbackRedirectUrl="/auth-complete"
-        signInForceRedirectUrl="/auth-complete"
-        signUpForceRedirectUrl="/auth-complete"
-        localization={clerkLocalization}
-      >
-        <html lang="en">
-          <body
-            className={`${sora.variable} font-sans antialiased`}
-            style={{ fontFamily: "var(--font-sora), sans-serif" }}
-          >
-            <NextTopLoader color="#f14110" showSpinner={false} height={3} />
-            <ConvexClientProvider>
-              <DeletionBannerWrapper />
-              <SiteChrome>{children}</SiteChrome>
-            </ConvexClientProvider>
-          </body>
-        </html>
-      </ClerkProvider>
-    </ViewTransitions>
+    <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      dynamic
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      signInFallbackRedirectUrl="/auth-complete"
+      signUpFallbackRedirectUrl="/auth-complete"
+      signInForceRedirectUrl="/auth-complete"
+      signUpForceRedirectUrl="/auth-complete"
+      localization={clerkLocalization}
+    >
+      <html lang="en">
+        <body
+          className={`${sora.variable} font-sans antialiased`}
+          style={{ fontFamily: "var(--font-sora), sans-serif" }}
+        >
+          <NextTopLoader color="#f14110" showSpinner={false} height={3} />
+          <ConvexClientProvider>
+            <DeletionBannerWrapper />
+            <SiteChrome>{children}</SiteChrome>
+          </ConvexClientProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
