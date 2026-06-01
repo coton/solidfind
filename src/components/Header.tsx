@@ -570,7 +570,7 @@ function HeaderInner() {
 
   return (
     <>
-    <div className={useMobileProfileHeader ? "h-[84px] sm:h-[220px]" : "h-[330px] sm:h-[220px]"} aria-hidden="true" />
+    <div className={useMobileProfileHeader ? "h-[168px] sm:h-[220px]" : "h-[330px] sm:h-[220px]"} aria-hidden="true" />
     <header className="fixed top-0 left-0 right-0 z-40 p-[10px]">
       <div className="relative rounded-[6px]">
       {headerMedia.url ? (
@@ -610,7 +610,7 @@ function HeaderInner() {
         </>
       )}
 
-      <div className="relative z-10 px-5 sm:px-0 pt-4 sm:pt-6 pb-[8px] sm:pb-4">
+      <div className={`relative z-10 px-5 sm:px-0 ${useMobileProfileHeader ? "min-h-[148px] pt-0 pb-0 flex flex-col justify-center sm:min-h-0 sm:block sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-[8px] sm:pb-4"}`}>
         {/* Top Bar */}
         <div className={`max-w-[900px] mx-auto flex items-center justify-between sm:mb-6 ${useMobileProfileHeader ? "mb-0" : "mb-8"}`}>
           {/* Logo */}

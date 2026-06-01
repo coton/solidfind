@@ -407,13 +407,13 @@ test('company profile image viewer supports previous/next controls and mobile sw
 
   assert.match(
     source,
-    /<span className="font-bam text-\[9px\][\s\S]*aria-label="Close image viewer"[\s\S]*<\/div>\s*<div\s*className="relative flex max-h-\[72vh\]/,
+    /<span className="font-bam text-\[9px\][\s\S]*aria-label="Close image viewer"[\s\S]*<\/div>\s*<div\s*className="relative flex max-h-\[58vh\]/,
     'Expected the image viewer close button to sit top-right above the image frame'
   );
 
   assert.doesNotMatch(
     source,
-    /className="relative flex max-h-\[72vh\][\s\S]*aria-label="Close image viewer"/,
+    /className="relative flex max-h-\[58vh\][\s\S]*aria-label="Close image viewer"/,
     'Expected the image viewer close button to stay outside the image frame'
   );
 
@@ -445,6 +445,18 @@ test('company profile image viewer supports previous/next controls and mobile sw
     source,
     /aria-label="Close image viewer"[\s\S]*<svg width="16" height="16"/,
     'Expected the close affordance to use the reduced 16px icon size'
+  );
+
+  assert.match(
+    source,
+    /max-h-\[58vh\][^"]*sm:max-h-\[72vh\][\s\S]*className="max-w-full max-h-\[58vh\][^"]*sm:max-h-\[72vh\]"/,
+    'Expected the mobile image viewer frame to stay content-focused instead of pushing controls to the viewport bottom'
+  );
+
+  assert.match(
+    source,
+    /className="flex w-full max-w-\[520px\] items-center justify-between gap-3 sm:max-w-\[960px\] sm:gap-4"/,
+    'Expected mobile image viewer controls to sit closer to the image while desktop keeps the wider control row'
   );
 });
 

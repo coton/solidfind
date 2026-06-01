@@ -1016,7 +1016,7 @@ export default function ProfilePageClient() {
       {showImageViewer && currentImage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90">
           <div className="absolute inset-0" onClick={closeImageViewer} />
-          <div className="relative z-10 flex w-full max-w-[90vw] flex-col items-center gap-4 px-4 py-6 sm:max-w-[92vw]">
+          <div className="relative z-10 flex w-full max-w-[90vw] flex-col items-center gap-3 px-4 py-6 sm:gap-4 sm:max-w-[92vw]">
             <div className="flex w-full max-w-[960px] items-center justify-between gap-3">
               <span className="font-bam text-[9px] uppercase tracking-[0.18px] text-white/65">
                 {currentImageIndex !== null ? `${currentImageIndex + 1} / ${projectImages.length}` : ""}
@@ -1034,7 +1034,7 @@ export default function ProfilePageClient() {
             </div>
 
             <div
-              className="relative flex max-h-[72vh] w-full max-w-[960px] items-center justify-center overflow-hidden rounded-[6px]"
+              className="relative flex max-h-[58vh] w-full max-w-[960px] items-center justify-center overflow-hidden rounded-[6px] sm:max-h-[72vh]"
               onTouchStart={handleViewerTouchStart}
               onTouchEnd={handleViewerTouchEnd}
             >
@@ -1042,10 +1042,10 @@ export default function ProfilePageClient() {
                 <img
                   src={currentImage.src}
                   alt={currentImage.alt}
-                  className="max-w-full max-h-[72vh] object-contain rounded-[6px]"
+                  className="max-w-full max-h-[58vh] object-contain rounded-[6px] sm:max-h-[72vh]"
                 />
               ) : (
-                <div className="relative h-[72vh] w-full">
+                <div className="relative h-[58vh] w-full sm:h-[72vh]">
                   <StorageImage
                     storageId={currentImage.storageId}
                     alt={currentImage.alt}
@@ -1057,7 +1057,7 @@ export default function ProfilePageClient() {
               )}
             </div>
 
-            <div className="flex w-full max-w-[960px] items-center justify-between gap-3 sm:gap-4">
+            <div className="flex w-full max-w-[520px] items-center justify-between gap-3 sm:max-w-[960px] sm:gap-4">
               <button
                 type="button"
                 onClick={goToPreviousImage}
