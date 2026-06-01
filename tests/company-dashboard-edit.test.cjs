@@ -245,8 +245,8 @@ test('company edit page requires email and shows the public profile explainer in
 
   assert.match(
     source,
-    /<span className="block sm:inline">Company<\/span>[\s\S]*<span className="block sm:inline sm:ml-2">profile<\/span>[\s\S]*shrink-0 pt-1 text-right[\s\S]*PRO ACCOUNT[\s\S]*DELETE PROFILE/,
-    'Expected the mobile title to split into two lines opposite account status/delete controls'
+    /company\?\.email \|\| email \|\| clerkUser\?\.primaryEmailAddress\?\.emailAddress[\s\S]*PRO ACCOUNT[\s\S]*FREE ACCOUNT[\s\S]*<span className="block sm:inline">Company<\/span>[\s\S]*<span className="block sm:inline sm:ml-2">profile<\/span>[\s\S]*DELETE PROFILE/,
+    'Expected the mobile title to split into two lines below the aligned email/account status row'
   );
 });
 

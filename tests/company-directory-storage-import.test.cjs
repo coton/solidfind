@@ -145,6 +145,33 @@ test('resolveStoredCompanyMedia keeps protected remote images as external fallba
   assert.equal(media.projectImageUploadErrors.length, 1);
 });
 
+test('resolveStoredCompanyMedia does not upload HTML pages as project images', async () => {
+  const media = await importer.resolveStoredCompanyMedia({
+    normalized: {
+      projectImageUrls: ['https://example.com/project-page'],
+    },
+    existingCompany: null,
+    generateUploadUrl: async () => {
+      throw new Error('should not request an upload URL for non-image responses');
+    },
+    fetchImpl: async () => ({
+      ok: true,
+      headers: {
+        get(name) {
+          return name.toLowerCase() === 'content-type' ? 'text/html; charset=utf-8' : null;
+        },
+      },
+      async arrayBuffer() {
+        return Buffer.from('<html></html>');
+      },
+    }),
+  });
+
+  assert.deepEqual(media.projectImageIds, []);
+  assert.deepEqual(media.projectImageUrls, ['https://example.com/project-page']);
+  assert.match(media.projectImageUploadErrors[0].error, /not an image/);
+});
+
 test('discoverCompanyMedia finds logo and project images in Category/Company folders', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'solidfind-media-test-'));
   const companyDir = path.join(root, 'Construction', 'Folder Media Builder');

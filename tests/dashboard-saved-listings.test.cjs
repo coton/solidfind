@@ -165,8 +165,8 @@ test('company dashboard intro copy spans the mobile content width', () => {
 
   assert.match(
     source,
-    /<div className="mb-6">\s*<p className="w-full max-w-none text-\[11px\][^"]*sm:max-w-\[600px\]">/,
-    'expected company dashboard intro copy to use full mobile width with desktop max width only on larger screens'
+    /<div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-8">\s*<p className="w-full max-w-none text-\[11px\][^"]*">[\s\S]*Your profile is live[\s\S]*<p className="w-full max-w-none text-\[11px\][^"]*">[\s\S]*Profil Anda sudah aktif/,
+    'expected company dashboard intro copy to use full mobile width and split English/Indonesian into desktop columns'
   );
 });
 
@@ -176,13 +176,13 @@ test('company dashboard account badge sits above the greeting while editor still
 
   assert.match(
     source,
-    /<div className="mb-7 flex justify-end">/,
-    'expected the company dashboard account label to have its own spaced row'
+    /<div className="mb-7 flex items-center justify-between gap-4">/,
+    'expected the company dashboard account label and email to share one spaced row'
   );
 
   assert.match(
     source,
-    /PRO ACCOUNT[\s\S]*FREE ACCOUNT[\s\S]*clerkUser\.emailAddresses\[0\]\.emailAddress/,
+    /clerkUser\?\.emailAddresses\?\.\[0\]\?\.emailAddress[\s\S]*PRO ACCOUNT[\s\S]*FREE ACCOUNT/,
     'expected the company dashboard account row to include the account label and email'
   );
 
@@ -194,7 +194,7 @@ test('company dashboard account badge sits above the greeting while editor still
 
   assert.match(
     editSource,
-    /company\?\.isPro && proEnabled[\s\S]*PRO ACCOUNT[\s\S]*: proEnabled \? \([\s\S]*FREE ACCOUNT[\s\S]*\) : null/,
-    'expected the company profile editor header to hide FREE/PRO labels while Pro features are off'
+    /company\?\.email \|\| email \|\| clerkUser\?\.primaryEmailAddress\?\.emailAddress[\s\S]*PRO ACCOUNT[\s\S]*FREE ACCOUNT/,
+    'expected the company profile editor header to align company email and account status in one row'
   );
 });

@@ -299,23 +299,19 @@ export default function CompanyDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
+    <div className="min-h-screen bg-[#ececec] flex flex-col">
       <Header />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
-        <div className="mb-7 flex justify-end">
-          <div className="text-right">
-            {isPro && proEnabled ? (
-              <p className="mb-2 text-[11px] font-medium tracking-[0.22px] text-[#f14110]">PRO ACCOUNT</p>
-            ) : (
-              <p className="mb-2 text-[11px] font-medium tracking-[0.22px] text-[#333]/60">FREE ACCOUNT</p>
-            )}
-            {clerkUser?.emailAddresses?.[0]?.emailAddress && (
-              <p className="text-[10px] text-[#333]/60 tracking-[0.2px] underline underline-offset-2">
-                {clerkUser.emailAddresses[0].emailAddress}
-              </p>
-            )}
-          </div>
+        <div className="mb-7 flex items-center justify-between gap-4">
+          <p className="min-w-0 truncate text-[10px] text-[#333]/60 tracking-[0.2px] underline underline-offset-2">
+            {clerkUser?.emailAddresses?.[0]?.emailAddress ?? ""}
+          </p>
+          {isPro && proEnabled ? (
+            <p className="shrink-0 text-[11px] font-medium tracking-[0.22px] text-[#f14110]">PRO ACCOUNT</p>
+          ) : (
+            <p className="shrink-0 text-[11px] font-medium tracking-[0.22px] text-[#333]/60">FREE ACCOUNT</p>
+          )}
         </div>
 
         {/* Header Row */}
@@ -332,11 +328,11 @@ export default function CompanyDashboardPage() {
           </h1>
         </div>
 
-        <div className="mb-6">
-          <p className="w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px] sm:max-w-[600px]">
+        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-8">
+          <p className="w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
             Your profile is live on SolidFind. As the platform grows, so does your visibility. Make sure you are showing your best profile : )
           </p>
-          <p className="mt-3 w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px] sm:max-w-[600px]">
+          <p className="w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
             Profil Anda sudah aktif di SolidFind. Seiring platform berkembang, begitu pula jangkauan Anda. Pastikan kamu menampilkan profil terbaikmu : )
           </p>
         </div>

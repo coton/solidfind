@@ -249,7 +249,7 @@ function Dropdown({
 
 export function Header() {
   return (
-    <Suspense fallback={<div className="h-[330px] sm:h-[220px]" />}>
+    <Suspense fallback={<div className="h-[330px] sm:h-[260px]" />}>
       <HeaderInner />
     </Suspense>
   );
@@ -348,6 +348,12 @@ function HeaderInner() {
       ? (fromCategory || null)
       : (searchParams.get("category") ?? "construction");
   const useMobileCompactHeader = isProfilePage || isDashboardPage;
+  const hasActiveFilters = Boolean(
+    searchParams.get("location") ||
+    searchParams.get("search") ||
+    searchParams.get("projectSize") ||
+    searchParams.get("subcategory")
+  );
 
   useEffect(() => {
     const updateMobileCategoryEndSpacer = () => {
@@ -377,10 +383,10 @@ function HeaderInner() {
 
     const updateMobileHeaderCompact = () => {
       const currentScrollY = window.scrollY;
-      const isMobile = window.innerWidth < 640;
+      const shouldAutoCompact = window.innerWidth < 640 || hasActiveFilters;
       const scrollDelta = currentScrollY - lastScrollYRef.current;
 
-      if (!isMobile || currentScrollY < 24) {
+      if (!shouldAutoCompact || currentScrollY < 24) {
         setMobileHeaderCompact(false);
       } else if (scrollDelta > 4) {
         setMobileHeaderCompact(true);
@@ -406,7 +412,7 @@ function HeaderInner() {
       window.removeEventListener("scroll", requestUpdate);
       window.removeEventListener("resize", requestUpdate);
     };
-  }, []);
+  }, [hasActiveFilters]);
 
   // Determine user type from Clerk metadata (default to "individual")
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
@@ -570,7 +576,7 @@ function HeaderInner() {
 
   return (
     <>
-    <div className={useMobileCompactHeader ? "h-[110px] sm:h-[220px]" : "h-[330px] sm:h-[220px]"} aria-hidden="true" />
+    <div className={useMobileCompactHeader ? "h-[110px] sm:h-[260px]" : "h-[330px] sm:h-[260px]"} aria-hidden="true" />
     <header className="fixed top-0 left-0 right-0 z-40 bg-[#ececec] p-[10px]">
       <div className="relative rounded-[6px]">
       {headerMedia.url ? (
@@ -612,7 +618,7 @@ function HeaderInner() {
 
       <div className={`relative z-10 px-5 sm:px-0 ${useMobileCompactHeader ? "flex h-[90px] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-[8px] sm:pb-4"}`}>
         {/* Top Bar */}
-        <div className={`max-w-[900px] mx-auto flex items-center sm:justify-between sm:mb-6 ${useMobileCompactHeader ? "w-full justify-center gap-4 mb-0" : "justify-between mb-8"}`}>
+        <div className={`max-w-[900px] mx-auto flex items-center sm:justify-between ${mobileHeaderCompact && hasActiveFilters ? "sm:mb-0" : "sm:mb-6"} ${useMobileCompactHeader ? "w-full justify-center gap-4 mb-0" : "justify-between mb-8"}`}>
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className={`h-[19px] w-auto ${useMobileCompactHeader ? "max-w-[160px] sm:max-w-none" : ""}`} />
@@ -674,7 +680,7 @@ function HeaderInner() {
         </div>
 
         {/* Category Tabs - Horizontal scroll on mobile */}
-        <div className={`max-w-[900px] mx-auto transition-all duration-200 sm:mb-4 sm:max-h-none sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto ${useMobileCompactHeader ? "hidden sm:block" : ""} ${
+        <div className={`max-w-[900px] mx-auto transition-all duration-200 sm:mb-4 sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto ${useMobileCompactHeader ? "hidden sm:block" : ""} ${mobileHeaderCompact && hasActiveFilters ? "sm:max-h-0 sm:mb-0 sm:-translate-y-2 sm:overflow-hidden sm:opacity-0 sm:pointer-events-none" : "sm:max-h-none"} ${
           mobileHeaderCompact
             ? "max-h-0 mb-0 -translate-y-2 overflow-hidden opacity-0 pointer-events-none"
             : "max-h-[140px] mb-4 translate-y-0 opacity-100"
@@ -714,7 +720,7 @@ function HeaderInner() {
         {/* Search Bar */}
         <div className="max-w-[900px] mx-auto">
           {/* Desktop: Flex with Clear button positioned right */}
-          <div className="hidden sm:flex items-center justify-between gap-0">
+          <div className={`hidden items-center justify-between gap-0 ${mobileHeaderCompact && hasActiveFilters ? "sm:hidden" : "sm:flex"}`}>
             {/* Left side: Keywords + Filters */}
             <div className="flex items-center gap-[2px]">
               {/* Keywords Input - extended width on desktop */}
@@ -897,6 +903,7 @@ function HeaderInner() {
         </div>
       </div>
       </div>
+      <div className="pointer-events-none absolute left-0 right-0 top-full h-5 bg-gradient-to-b from-[#ececec] to-transparent" />
     </header>
 
     {/* Auth modal — rendered outside header so it can overlay everything */}

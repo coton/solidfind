@@ -1008,7 +1008,7 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
+    <div className="min-h-screen bg-[#ececec] flex flex-col">
       <Header />
 
       {/* Hidden file inputs */}
@@ -1028,6 +1028,16 @@ export default function EditProfilePage() {
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
         {/* Header Row */}
         <div className="mb-6">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <p className="min-w-0 truncate text-[10px] text-[#333]/60 tracking-[0.2px] underline underline-offset-2">
+              {company?.email || email || clerkUser?.primaryEmailAddress?.emailAddress || ""}
+            </p>
+            {company?.isPro && proEnabled ? (
+              <p className="shrink-0 text-[11px] text-[#f14110] font-medium tracking-[0.22px]">PRO ACCOUNT</p>
+            ) : (
+              <p className="shrink-0 text-[11px] text-[#333]/60 font-medium tracking-[0.22px]">FREE ACCOUNT</p>
+            )}
+          </div>
           <div className="mb-5 flex items-start justify-between gap-4">
             {company ? (
               <button
@@ -1046,12 +1056,6 @@ export default function EditProfilePage() {
             )}
 
             <div className="shrink-0 pt-1 text-right">
-              {company?.isPro && proEnabled ? (
-                <p className="text-[11px] text-[#f14110] font-medium tracking-[0.22px] mb-1">PRO ACCOUNT</p>
-              ) : proEnabled ? (
-                <p className="text-[11px] text-[#333]/60 font-medium tracking-[0.22px] mb-1">FREE ACCOUNT</p>
-              ) : null}
-
               <div className="flex items-center gap-4 justify-end">
                 <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
                   DELETE PROFILE

@@ -20,12 +20,12 @@ test('shared header stays fixed inside a framed workspace gutter', () => {
 
   assert.match(
     source,
-    /className=\{useMobileCompactHeader \? "h-\[110px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\} aria-hidden="true" \/>[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 bg-\[#ececec\] p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">/,
+    /className=\{useMobileCompactHeader \? "h-\[110px\] sm:h-\[260px\]" : "h-\[330px\] sm:h-\[260px\]"\} aria-hidden="true" \/>[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 bg-\[#ececec\] p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">[\s\S]*top-full h-5 bg-gradient-to-b from-\[#ececec\] to-transparent/,
     'expected the shared header to reserve page space while the visible header remains fixed in an opaque 10px framed gutter'
   );
 });
 
-test('mobile fixed header collapses category tabs and description while scrolling down', () => {
+test('fixed header collapses category tabs and description while scrolling down on mobile or filtered desktop', () => {
   const source = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
 
   assert.match(
@@ -36,8 +36,8 @@ test('mobile fixed header collapses category tabs and description while scrollin
 
   assert.match(
     source,
-    /scrollDelta > 4[\s\S]*setMobileHeaderCompact\(true\)[\s\S]*scrollDelta < -4[\s\S]*setMobileHeaderCompact\(false\)[\s\S]*window\.addEventListener\("scroll", requestUpdate, \{ passive: true \}\);/,
-    'expected mobile header compact mode to follow scroll direction'
+    /const hasActiveFilters = Boolean\([\s\S]*searchParams\.get\("subcategory"\)[\s\S]*const shouldAutoCompact = window\.innerWidth < 640 \|\| hasActiveFilters;[\s\S]*scrollDelta > 4[\s\S]*setMobileHeaderCompact\(true\)[\s\S]*scrollDelta < -4[\s\S]*setMobileHeaderCompact\(false\)[\s\S]*window\.addEventListener\("scroll", requestUpdate, \{ passive: true \}\);/,
+    'expected header compact mode to follow scroll direction on mobile and filtered desktop searches'
   );
 
   assert.match(
@@ -68,7 +68,7 @@ test('mobile profile and dashboard headers show only the top bar while desktop k
 
   assert.match(
     source,
-    /className=\{useMobileCompactHeader \? "h-\[110px\] sm:h-\[220px\]" : "h-\[330px\] sm:h-\[220px\]"\}/,
+    /className=\{useMobileCompactHeader \? "h-\[110px\] sm:h-\[260px\]" : "h-\[330px\] sm:h-\[260px\]"\}/,
     'expected compact mobile pages to reserve the requested 110px header height'
   );
 

@@ -20,7 +20,7 @@ export default function CompanyReviewsPage() {
 
   if (!reviewsEnabled) {
     return (
-      <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
+      <div className="min-h-screen bg-[#ececec] flex flex-col">
         <Header />
         <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
           <Link
@@ -37,7 +37,7 @@ export default function CompanyReviewsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
+    <div className="min-h-screen bg-[#ececec] flex flex-col">
       <Header />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">

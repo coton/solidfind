@@ -419,8 +419,12 @@ async function uploadRemoteAssetToStorage({ sourceUrl, generateUploadUrl, fetchI
     throw new Error(`Failed to download remote media (${response.status}): ${sourceUrl}`);
   }
 
-  const uploadUrl = await generateUploadUrl();
   const contentType = response.headers?.get?.('content-type') || 'application/octet-stream';
+  if (!/^image\//i.test(contentType)) {
+    throw new Error(`Remote media is not an image (${contentType}): ${sourceUrl}`);
+  }
+
+  const uploadUrl = await generateUploadUrl();
   const uploadResponse = await fetchWithTimeout(fetchImpl, uploadUrl, {
     method: 'POST',
     headers: { 'Content-Type': contentType },

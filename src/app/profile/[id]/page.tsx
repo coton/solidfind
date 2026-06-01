@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function ProfilePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#e4e4e4]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#ececec]" />}>
       <ProfilePageClient />
     </Suspense>
   );

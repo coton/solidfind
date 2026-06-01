@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
+    <div className="min-h-screen bg-[#ececec] flex flex-col">
       {/* Header placeholder */}
       <div className="h-[60px] bg-gradient-to-r from-[#E9A28E] to-[#F14110]" />
 

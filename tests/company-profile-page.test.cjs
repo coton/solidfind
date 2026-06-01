@@ -407,14 +407,14 @@ test('company profile image viewer supports previous/next controls and mobile sw
 
   assert.match(
     source,
-    /<span className="font-bam text-\[9px\][\s\S]*aria-label="Close image viewer"[\s\S]*<\/div>\s*<div\s*className="relative flex max-h-\[58vh\]/,
-    'Expected the image viewer close button to sit top-right above the image frame'
+    /className="absolute left-0 right-0 bottom-\[calc\(100%\+10px\)\] flex items-center justify-between gap-3"[\s\S]*<span className="font-bam text-\[9px\][\s\S]*aria-label="Close image viewer"/,
+    'Expected the image viewer close button to sit 10px above the image frame'
   );
 
-  assert.doesNotMatch(
+  assert.match(
     source,
-    /className="relative flex max-h-\[58vh\][\s\S]*aria-label="Close image viewer"/,
-    'Expected the image viewer close button to stay outside the image frame'
+    /bottom-\[calc\(100%\+10px\)\][\s\S]*aria-label="Close image viewer"/,
+    'Expected the image viewer close button to be positioned outside the image content'
   );
 
   assert.doesNotMatch(
@@ -455,13 +455,13 @@ test('company profile image viewer supports previous/next controls and mobile sw
 
   assert.match(
     source,
-    /className="relative z-10 flex h-full w-full max-w-\[90vw\] flex-col items-center justify-center gap-\[10px\] px-4 py-6 sm:max-w-\[92vw\]"/,
+    /className="absolute left-0 right-0 top-\[calc\(100%\+10px\)\] flex items-center justify-between gap-3 sm:gap-4"/,
     'Expected mobile image viewer controls to sit 10px above and below the image frame'
   );
 
   assert.match(
     source,
-    /className="flex w-full max-w-\[520px\] items-center justify-between gap-3 sm:max-w-\[960px\]/,
+    /className="relative z-10 flex h-full w-full max-w-\[90vw\] items-center justify-center px-4 py-6 sm:max-w-\[92vw\]"/,
     'Expected mobile image viewer controls to sit close to the image while desktop keeps the wider control row'
   );
 
