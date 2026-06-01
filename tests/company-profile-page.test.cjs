@@ -270,8 +270,14 @@ test('company profile services use body-width rows with four desktop columns', (
 
   assert.match(
     source,
-    /const profileLocationValue = profileLocations\.length > 0[\s\S]*capitalizeJoin\(profileLocations\)[\s\S]*capitalizeJoin\(\[company\.location \?\? "bali"\]\)/,
-    'Expected profile location display to fall back to the legacy single location only when category locations are missing'
+    /const profileLocationValue = profileLocations\.length > 0[\s\S]*uppercaseJoin\(profileLocations\)[\s\S]*uppercaseJoin\(\[company\.location \?\? "bali"\]\)/,
+    'Expected profile location display to fall back to the legacy single location only when category locations are missing and render in full caps'
+  );
+
+  assert.match(
+    source,
+    /PROJECT SIZE", value: uppercaseJoin\(expandProfileProjectSizes\(company\.projectSizes!\)\)/,
+    'Expected profile project sizes to render in full caps like category descriptions'
   );
 
   assert.match(
@@ -449,8 +455,8 @@ test('company profile image viewer supports previous/next controls and mobile sw
 
   assert.match(
     source,
-    /max-h-\[58vh\][^"]*sm:max-h-\[72vh\][\s\S]*className="max-w-full max-h-\[58vh\][^"]*sm:max-h-\[72vh\]"/,
-    'Expected the mobile image viewer frame to stay content-focused instead of pushing controls to the viewport bottom'
+    /className="relative inline-flex max-h-\[58vh\] max-w-\[90vw\][^"]*sm:max-h-\[72vh\] sm:max-w-\[92vw\]"[\s\S]*className="block h-auto max-h-\[58vh\] max-w-full object-contain rounded-\[6px\] sm:max-h-\[72vh\]"/,
+    'Expected the mobile image viewer frame to shrink-wrap the rendered image instead of pushing controls to the viewport edges'
   );
 
   assert.match(
@@ -461,8 +467,8 @@ test('company profile image viewer supports previous/next controls and mobile sw
 
   assert.match(
     source,
-    /className="relative z-10 flex h-full w-full max-w-\[90vw\] items-center justify-center px-4 py-6 sm:max-w-\[92vw\]"/,
-    'Expected mobile image viewer controls to sit close to the image while desktop keeps the wider control row'
+    /className="relative z-10 flex h-full w-full items-center justify-center px-4 py-6"/,
+    'Expected the image viewer centering layer to let the inner frame shrink-wrap the rendered image'
   );
 
   assert.match(

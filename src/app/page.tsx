@@ -6,11 +6,8 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { WelcomeCard, FeaturedCard, ListingCard } from "@/components/cards";
 import { Pagination } from "@/components/Pagination";
-import { SortDropdown } from "@/components/SortDropdown";
 import { AdBanner } from "@/components/AdBanner";
 import { ListingCardSkeleton } from "@/components/ui/ListingCardSkeleton";
 import { useProEnabled } from "@/hooks/useProEnabled";
@@ -38,7 +35,6 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState("latest");
   const [isMobileResults, setIsMobileResults] = useState(false);
   const { user: clerkUser } = useUser();
 
@@ -209,16 +205,8 @@ function HomeContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#ececec] flex flex-col">
-      <Header />
-
+    <>
       <main className="max-w-[900px] mx-auto px-5 sm:px-0 pt-3 sm:pt-4 flex-grow w-full flex flex-col">
-        {/* Results Header */}
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h2 className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]">{listings.length} Solid Finds</h2>
-          {!showEmptyState && <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />}
-        </div>
-
         {showEmptyState ? (
           /* Empty State — flex column filling remaining height */
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -352,8 +340,7 @@ function HomeContent() {
         </div>
       </main>
 
-      <Footer />
-    </div>
+    </>
   );
 }
 

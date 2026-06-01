@@ -1,13 +1,15 @@
 "use client";
 
-import { Suspense, useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { Suspense, useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { SignedIn, SignedOut, useClerk } from "@clerk/nextjs";
 import { AuthModal } from "@/components/AuthModal";
+import { SortDropdown } from "@/components/SortDropdown";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import {
   HEADER_MEDIA_PLATFORM_SETTING_KEY,
   resolveMediaSetting,
@@ -15,12 +17,22 @@ import {
 } from "@/lib/platform-settings.mjs";
 import {
   encodeSubcategoryParam,
+  getEffectiveSubcategoryFilters,
   getSubcategoryDisplayText,
   isSubcategoryFilterActive,
   isSubcategoryOptionSelected,
   parseSubcategoryParam,
   toggleSubcategorySelection,
 } from "@/lib/category-filter.mjs";
+import { expandRenovationTypes } from "@/lib/category-display.mjs";
+
+function getCompanyCategoryTypes(company: any, category: string) {
+  if (category === "renovation") return expandRenovationTypes(company.renovationTypes ?? []);
+  if (category === "architecture") return company.architectureTypes ?? [];
+  if (category === "interior") return company.interiorTypes ?? [];
+  if (category === "real-estate") return company.realEstateTypes ?? [];
+  return company.constructionTypes ?? (company.subcategory ? [company.subcategory] : []);
+}
 
 // Fallback categories shown while DB config is loading or if empty
 // Only include the initially visible ones to prevent flash of hidden tabs
@@ -247,16 +259,23 @@ function Dropdown({
   );
 }
 
-export function Header() {
+type HeaderProps = {
+  resultCount?: number;
+  sortControl?: ReactNode;
+  showResultsBar?: boolean;
+};
+
+export function Header(props: HeaderProps = {}) {
   return (
-    <Suspense fallback={<div className="h-[330px] sm:h-[260px]" />}>
-      <HeaderInner />
+    <Suspense fallback={<div className={props.showResultsBar ? "h-[375px] sm:h-[305px]" : "h-[330px] sm:h-[260px]"} />}>
+      <HeaderInner {...props} />
     </Suspense>
   );
 }
 
-function HeaderInner() {
+function HeaderInner({ resultCount, sortControl, showResultsBar = false }: HeaderProps) {
   const { user, signOut } = useClerk();
+  const reviewsEnabled = useReviewsEnabled();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -311,6 +330,7 @@ function HeaderInner() {
   const [locations, setLocations] = useState<string[]>(
     searchParams.get("location") ? searchParams.get("location")!.split(",") : []
   );
+  const [sortBy, setSortBy] = useState("latest");
   const lastCategoryButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastScrollYRef = useRef(0);
   const [mobileCategoryEndSpacerWidth, setMobileCategoryEndSpacerWidth] = useState(0);
@@ -348,11 +368,40 @@ function HeaderInner() {
       ? (fromCategory || null)
       : (searchParams.get("category") ?? "construction");
   const useMobileCompactHeader = isProfilePage || isDashboardPage;
-  const hasActiveFilters = Boolean(
+  const homepageSubcategories = getEffectiveSubcategoryFilters(parseSubcategoryParam(searchParams.get("subcategory") || undefined));
+  const homepageCompanies = useQuery(
+    api.companies.list,
+    showResultsBar
+      ? {
+        category: activeCategory ?? "construction",
+        location: searchParams.get("location") || undefined,
+        search: searchParams.get("search") || undefined,
+        projectSize: searchParams.get("projectSize") || undefined,
+      }
+      : "skip"
+  );
+  const visibleCategoryIds = pageConfigs?.map((p) => p.categoryId) ?? null;
+  const homepageResultCount = useMemo(() => {
+    if (!showResultsBar) return resultCount ?? 0;
+    if (!homepageCompanies) return resultCount ?? 0;
+    return homepageCompanies
+      .filter((company) => !visibleCategoryIds || visibleCategoryIds.includes(company.category))
+      .filter((company) => {
+        if (homepageSubcategories.length === 0) return true;
+        const companyTypes = getCompanyCategoryTypes(company, activeCategory ?? "construction").map((type: string) => type.toLowerCase());
+        return (
+          companyTypes.includes("all") ||
+          companyTypes.includes("every") ||
+          homepageSubcategories.some((subcategory) => companyTypes.includes(subcategory))
+        );
+      })
+      .length;
+  }, [activeCategory, homepageCompanies, homepageSubcategories, resultCount, showResultsBar, visibleCategoryIds]);
+  const showHomepageEmptyState = showResultsBar && homepageCompanies !== undefined && homepageResultCount === 0 && Boolean(
     searchParams.get("location") ||
     searchParams.get("search") ||
     searchParams.get("projectSize") ||
-    searchParams.get("subcategory")
+    homepageSubcategories.length
   );
 
   useEffect(() => {
@@ -383,7 +432,7 @@ function HeaderInner() {
 
     const updateMobileHeaderCompact = () => {
       const currentScrollY = window.scrollY;
-      const shouldAutoCompact = window.innerWidth < 640 || hasActiveFilters;
+      const shouldAutoCompact = window.innerWidth < 640;
       const scrollDelta = currentScrollY - lastScrollYRef.current;
 
       if (!shouldAutoCompact || currentScrollY < 24) {
@@ -412,7 +461,7 @@ function HeaderInner() {
       window.removeEventListener("scroll", requestUpdate);
       window.removeEventListener("resize", requestUpdate);
     };
-  }, [hasActiveFilters]);
+  }, []);
 
   // Determine user type from Clerk metadata (default to "individual")
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
@@ -576,7 +625,18 @@ function HeaderInner() {
 
   return (
     <>
-    <div className={useMobileCompactHeader ? "h-[110px] sm:h-[260px]" : "h-[330px] sm:h-[260px]"} aria-hidden="true" />
+    <div
+      className={
+        showResultsBar
+          ? useMobileCompactHeader
+            ? "h-[155px] sm:h-[305px]"
+            : "h-[375px] sm:h-[305px]"
+          : useMobileCompactHeader
+            ? "h-[110px] sm:h-[260px]"
+            : "h-[330px] sm:h-[260px]"
+      }
+      aria-hidden="true"
+    />
     <header className="fixed top-0 left-0 right-0 z-40 bg-[#ececec] p-[10px]">
       <div className="relative rounded-[6px]">
       {headerMedia.url ? (
@@ -618,10 +678,10 @@ function HeaderInner() {
 
       <div className={`relative z-10 px-5 sm:px-0 ${useMobileCompactHeader ? "flex h-[90px] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-[8px] sm:pb-4"}`}>
         {/* Top Bar */}
-        <div className={`max-w-[900px] mx-auto flex items-center sm:justify-between ${mobileHeaderCompact && hasActiveFilters ? "sm:mb-0" : "sm:mb-6"} ${useMobileCompactHeader ? "w-full justify-center gap-4 mb-0" : "justify-between mb-8"}`}>
+        <div className={`max-w-[900px] mx-auto flex items-center sm:justify-between sm:mb-6 ${useMobileCompactHeader ? "w-full justify-between gap-4 mb-0" : "justify-between mb-8"}`}>
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className={`h-[19px] w-auto ${useMobileCompactHeader ? "max-w-[160px] sm:max-w-none" : ""}`} />
+            <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className="h-[19px] w-auto" />
           </Link>
 
           {/* Right Side Buttons */}
@@ -680,7 +740,7 @@ function HeaderInner() {
         </div>
 
         {/* Category Tabs - Horizontal scroll on mobile */}
-        <div className={`max-w-[900px] mx-auto transition-all duration-200 sm:mb-4 sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto ${useMobileCompactHeader ? "hidden sm:block" : ""} ${mobileHeaderCompact && hasActiveFilters ? "sm:max-h-0 sm:mb-0 sm:-translate-y-2 sm:overflow-hidden sm:opacity-0 sm:pointer-events-none" : "sm:max-h-none"} ${
+        <div className={`max-w-[900px] mx-auto transition-all duration-200 sm:mb-4 sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto sm:max-h-none ${useMobileCompactHeader ? "hidden sm:block" : ""} ${
           mobileHeaderCompact
             ? "max-h-0 mb-0 -translate-y-2 overflow-hidden opacity-0 pointer-events-none"
             : "max-h-[140px] mb-4 translate-y-0 opacity-100"
@@ -720,7 +780,7 @@ function HeaderInner() {
         {/* Search Bar */}
         <div className="max-w-[900px] mx-auto">
           {/* Desktop: Flex with Clear button positioned right */}
-          <div className={`hidden items-center justify-between gap-0 ${mobileHeaderCompact && hasActiveFilters ? "sm:hidden" : "sm:flex"}`}>
+          <div className="hidden items-center justify-between gap-0 sm:flex">
             {/* Left side: Keywords + Filters */}
             <div className="flex items-center gap-[2px]">
               {/* Keywords Input - extended width on desktop */}
@@ -903,6 +963,14 @@ function HeaderInner() {
         </div>
       </div>
       </div>
+      {showResultsBar && (
+        <div className="relative z-10 mx-auto flex max-w-[900px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
+          <h2 className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]">
+            {homepageResultCount} Solid Finds
+          </h2>
+          {sortControl ?? (!showHomepageEmptyState && <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />)}
+        </div>
+      )}
       <div className="pointer-events-none absolute left-0 right-0 top-full h-5 bg-gradient-to-b from-[#ececec] to-transparent" />
     </header>
 

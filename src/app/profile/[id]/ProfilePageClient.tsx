@@ -8,8 +8,6 @@ import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
 import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
@@ -22,10 +20,10 @@ import { buildCompanyAddressHref } from '@/lib/company-address-link.mjs';
 import { buildCompanyProfilePath, buildCompanyReviewsPath } from '@/lib/company-profile-url.mjs';
 import { buildCategoryOptionLabelMap, expandProfileProjectSizes, formatProfileCategoryValues } from "@/lib/category-display.mjs";
 
-/** Capitalize first letter of each word in every array element, then join */
-function capitalizeJoin(arr: string[]): string {
+/** Profile service values use the same full-caps treatment as category values. */
+function uppercaseJoin(arr: string[]): string {
   return arr
-    .map((s) => s.replace(/\b\w/g, (c) => c.toUpperCase()))
+    .map((s) => s.replace(/-/g, " ").trim().toUpperCase())
     .join(", ");
 }
 
@@ -55,6 +53,18 @@ function StorageImage({ storageId, alt, className, width, height, fill, sizes }:
   const url = useStorageUrl(storageId);
   if (!url) return <div className={className} style={{ width, height, background: '#d8d8d8' }} />;
   return fill ? <Image src={url} alt={alt} fill sizes={sizes ?? "210px"} className={className} unoptimized /> : <Image src={url} alt={alt} width={width ?? 210} height={height ?? 210} className={className} unoptimized />;
+}
+
+function StorageModalImage({ storageId, alt }: { storageId: Id<"_storage">; alt: string }) {
+  const url = useStorageUrl(storageId);
+  if (!url) return <div className="h-[240px] w-[320px] max-w-full rounded-[6px] bg-[#d8d8d8]" />;
+  return (
+    <img
+      src={url}
+      alt={alt}
+      className="block h-auto max-h-[58vh] max-w-full rounded-[6px] object-contain sm:max-h-[72vh]"
+    />
+  );
 }
 
 function ExternalImage({
@@ -457,8 +467,7 @@ export default function ProfilePageClient() {
 
   if (company === undefined) {
     return (
-      <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
-        <Header />
+      <>
         <main className="max-w-[900px] mx-auto px-4 sm:px-0 sm:pb-8 flex-grow w-full">
           {/* Back row */}
           <div className="h-[36px] mb-6 border-b border-[#333]/10" />
@@ -486,20 +495,17 @@ export default function ProfilePageClient() {
             ))}
           </div>
         </main>
-        <Footer />
-      </div>
+      </>
     );
   }
 
   if (company === null) {
     return (
-      <div className="min-h-screen bg-[#e4e4e4] flex flex-col">
-        <Header />
+      <>
         <main className="max-w-[900px] mx-auto px-6 py-8 flex-grow w-full">
           <p className="text-[#333]">Company not found.</p>
         </main>
-        <Footer />
-      </div>
+      </>
     );
   }
 
@@ -511,11 +517,11 @@ export default function ProfilePageClient() {
     ...(company.realEstateLocations ?? []),
   ]);
   const profileLocationValue = profileLocations.length > 0
-    ? capitalizeJoin(profileLocations)
-    : capitalizeJoin([company.location ?? "bali"]);
+    ? uppercaseJoin(profileLocations)
+    : uppercaseJoin([company.location ?? "bali"]);
   const profileMetaServices = [
     (company.projectSizes?.length ?? 0) > 0
-      ? { label: "PROJECT SIZE", value: capitalizeJoin(expandProfileProjectSizes(company.projectSizes!)) }
+      ? { label: "PROJECT SIZE", value: uppercaseJoin(expandProfileProjectSizes(company.projectSizes!)) }
       : null,
     { label: "LOCATION", value: profileLocationValue },
   ].filter(Boolean) as Array<{ label: string; value: string }>;
@@ -546,9 +552,7 @@ export default function ProfilePageClient() {
   const backHref = returnTo === "dashboard" && currentUser ? "/dashboard" : "/";
 
   return (
-    <div className="min-h-screen bg-[#ececec] flex flex-col">
-      <Header />
-
+    <>
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 sm:pb-8 flex-grow w-full">
         {/* Back Button Row */}
         <div className="flex items-center justify-between mb-3 py-2 border-b border-[#333]/10">
@@ -983,8 +987,6 @@ export default function ProfilePageClient() {
         </div>
       </main>
 
-      <Footer />
-
       {/* Testimonial Modals */}
       {reviewsEnabled && validId && currentUser && canWriteReview && (
         <WriteReviewModal
@@ -1016,9 +1018,9 @@ export default function ProfilePageClient() {
       {showImageViewer && currentImage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90">
           <div className="absolute inset-0" onClick={closeImageViewer} />
-          <div className="relative z-10 flex h-full w-full max-w-[90vw] items-center justify-center px-4 py-6 sm:max-w-[92vw]">
+          <div className="relative z-10 flex h-full w-full items-center justify-center px-4 py-6">
             <div
-              className="relative flex max-h-[58vh] w-full max-w-[960px] items-center justify-center rounded-[6px] sm:max-h-[72vh]"
+              className="relative inline-flex max-h-[58vh] max-w-[90vw] items-center justify-center rounded-[6px] sm:max-h-[72vh] sm:max-w-[92vw]"
               onTouchStart={handleViewerTouchStart}
               onTouchEnd={handleViewerTouchEnd}
             >
@@ -1026,18 +1028,13 @@ export default function ProfilePageClient() {
                 <img
                   src={currentImage.src}
                   alt={currentImage.alt}
-                  className="max-w-full max-h-[58vh] object-contain rounded-[6px] sm:max-h-[72vh]"
+                  className="block h-auto max-h-[58vh] max-w-full object-contain rounded-[6px] sm:max-h-[72vh]"
                 />
               ) : (
-                <div className="relative h-[58vh] w-full sm:h-[72vh]">
-                  <StorageImage
-                    storageId={currentImage.storageId}
-                    alt={currentImage.alt}
-                    fill
-                    sizes="90vw"
-                    className="object-contain"
-                  />
-                </div>
+                <StorageModalImage
+                  storageId={currentImage.storageId}
+                  alt={currentImage.alt}
+                />
               )}
 
               <div className="absolute left-0 right-0 bottom-[calc(100%+10px)] flex items-center justify-between gap-3">
@@ -1089,6 +1086,6 @@ export default function ProfilePageClient() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

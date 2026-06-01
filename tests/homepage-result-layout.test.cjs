@@ -58,3 +58,33 @@ test('mobile homepage uses paginated listings instead of silently truncating to 
     'expected mobile homepage to render the same paginated result set as desktop'
   );
 });
+
+test('homepage lets the persistent site chrome own result count and sorting controls', () => {
+  const source = readProjectFile('src/app/page.tsx');
+  const chromeSource = readProjectFile('src/components/SiteChrome.tsx');
+  const headerSource = readProjectFile('src/components/Header.tsx');
+
+  assert.doesNotMatch(
+    source,
+    /<Header|<Footer/,
+    'expected the homepage to stop remounting shared chrome during profile navigation'
+  );
+
+  assert.match(
+    chromeSource,
+    /<Header showResultsBar=\{pathname === "\/"\} \/>[\s\S]*<Footer \/>/,
+    'expected the shared site chrome to keep the homepage header and footer mounted around the route content'
+  );
+
+  assert.match(
+    headerSource,
+    /homepageResultCount[\s\S]*<SortDropdown value=\{sortBy\} onChange=\{setSortBy\} reviewsEnabled=\{reviewsEnabled\} \/>/,
+    'expected the persistent header to own the homepage result count and sorting UI'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /\{\/\* Results Header \*\/\}/,
+    'expected the old in-content results row to be removed so it cannot hide under the fixed header'
+  );
+});
