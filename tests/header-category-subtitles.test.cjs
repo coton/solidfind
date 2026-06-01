@@ -20,8 +20,31 @@ test('shared header stays fixed inside a framed workspace gutter', () => {
 
   assert.match(
     source,
-    /contentBarVisible[\s\S]*"h-\[155px\] sm:h-\[305px\]"[\s\S]*"h-\[375px\] sm:h-\[305px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 bg-\[#ececec\] p-\[10px\]">[\s\S]*<div className="relative rounded-\[6px\]">[\s\S]*contentBarVisible \? "top-\[calc\(100%-52px\)\] h-\[72px\]" : "top-full h-5"/,
+    /showResultsBar[\s\S]*"h-\[350px\] sm:h-\[250px\]"[\s\S]*showProfileBackBar[\s\S]*"h-\[145px\] sm:h-\[285px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 bg-\[#ececec\] p-\[10px\]">[\s\S]*<div className="relative z-10 rounded-\[6px\]">[\s\S]*contentBarVisible \? "bottom-0 h-\[58px\]" : "top-full h-5"/,
     'expected the shared header to reserve page space while the visible header remains fixed in an opaque 10px framed gutter'
+  );
+});
+
+test('header gradient matches the footer gradient colors', () => {
+  const headerSource = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
+  const footerSource = fs.readFileSync(path.join(projectRoot, 'src/components/Footer.tsx'), 'utf8');
+
+  assert.match(
+    headerSource,
+    /linear-gradient\(to right, #E9A28E, #F14110\)/,
+    'expected the header gradient to use the footer color pair'
+  );
+
+  assert.match(
+    footerSource,
+    /linear-gradient\(to right, #E9A28E, #F14110\)/,
+    'expected the footer gradient to keep the shared color pair'
+  );
+
+  assert.doesNotMatch(
+    headerSource,
+    /linear-gradient\(to right, #E4E4E4, #F14110\)/,
+    'expected the header to stop using a separate desktop gradient'
   );
 });
 
@@ -64,7 +87,7 @@ test('home page can attach result count and sorting to the fixed header frame', 
 
   assert.match(
     source,
-    /\{showResultsBar && \([\s\S]*\{homepageResultCount\} Solid Finds[\s\S]*<SortDropdown value=\{sortBy\} onChange=\{setSortBy\} reviewsEnabled=\{reviewsEnabled\} \/>[\s\S]*contentBarVisible \? "top-\[calc\(100%-52px\)\] h-\[72px\]" : "top-full h-5"/,
+    /\{showResultsBar && \([\s\S]*\{homepageResultCount\} Solid Finds[\s\S]*<SortDropdown value=\{sortBy\} onChange=\{setSortBy\} reviewsEnabled=\{reviewsEnabled\} \/>[\s\S]*className=\{`pointer-events-none absolute left-0 right-0 z-0 bg-gradient-to-b from-\[#ececec\] to-transparent/,
     'expected results and sorting to render inside the fixed header, over the raised bottom gradient'
   );
 });
@@ -141,7 +164,7 @@ test('mobile profile and dashboard headers show only the top bar while desktop k
 
   assert.match(
     source,
-    /showResultsBar[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"/,
+    /showProfileBackBar[\s\S]*"h-\[145px\] sm:h-\[285px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"/,
     'expected compact mobile pages to reserve the requested 110px header height'
   );
 

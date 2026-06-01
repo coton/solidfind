@@ -335,7 +335,7 @@ function HomeContent() {
           </>
         )}
 
-        <div className="mt-auto mb-[32px] sm:mb-[52px] lg:mb-[200px]">
+        <div className="mt-auto mb-[32px] sm:mb-[52px]">
           <AdBanner alt="Advertisement" />
         </div>
       </main>

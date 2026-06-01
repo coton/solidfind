@@ -266,8 +266,10 @@ type HeaderProps = {
 };
 
 export function Header(props: HeaderProps = {}) {
+  const fallbackSpacer = props.showResultsBar ? "h-[350px] sm:h-[250px]" : "h-[330px] sm:h-[260px]";
+
   return (
-    <Suspense fallback={<div className={props.showResultsBar ? "h-[375px] sm:h-[305px]" : "h-[330px] sm:h-[260px]"} />}>
+    <Suspense fallback={<div className={fallbackSpacer} />}>
       <HeaderInner {...props} />
     </Suspense>
   );
@@ -630,18 +632,18 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     <>
     <div
       className={
-        contentBarVisible
-          ? useMobileCompactHeader
-            ? "h-[155px] sm:h-[305px]"
-            : "h-[375px] sm:h-[305px]"
-          : useMobileCompactHeader
-            ? "h-[110px] sm:h-[260px]"
-            : "h-[330px] sm:h-[260px]"
+        showResultsBar
+          ? "h-[350px] sm:h-[250px]"
+          : showProfileBackBar
+            ? "h-[145px] sm:h-[285px]"
+            : useMobileCompactHeader
+              ? "h-[110px] sm:h-[260px]"
+              : "h-[330px] sm:h-[260px]"
       }
       aria-hidden="true"
     />
     <header className="fixed top-0 left-0 right-0 z-40 bg-[#ececec] p-[10px]">
-      <div className="relative rounded-[6px]">
+      <div className="relative z-10 rounded-[6px]">
       {headerMedia.url ? (
         <>
           <div className="absolute inset-0 overflow-hidden rounded-[6px]">
@@ -663,17 +665,11 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         <div className="absolute inset-0 rounded-[6px] bg-[#e4e4e4]" />
       ) : (
         <>
-          {/* Gradient Background - Desktop: #E4E4E4 to #F14110, Mobile: #E9A28E to #F14110 */}
+          {/* Gradient Background - matches footer */}
           <div
             className="absolute inset-0 rounded-[6px]"
             style={{
               background: "linear-gradient(to right, #E9A28E, #F14110)"
-            }}
-          />
-          <div
-            className="hidden sm:block absolute inset-0 rounded-[6px]"
-            style={{
-              background: "linear-gradient(to right, #E4E4E4, #F14110)"
             }}
           />
         </>
@@ -988,8 +984,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         </div>
       )}
       <div
-        className={`pointer-events-none absolute left-0 right-0 bg-gradient-to-b from-[#ececec] to-transparent ${
-          contentBarVisible ? "top-[calc(100%-52px)] h-[72px]" : "top-full h-5"
+        className={`pointer-events-none absolute left-0 right-0 z-0 bg-gradient-to-b from-[#ececec] to-transparent ${
+          contentBarVisible ? "bottom-0 h-[58px]" : "top-full h-5"
         }`}
       />
     </header>

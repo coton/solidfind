@@ -87,4 +87,16 @@ test('homepage lets the persistent site chrome own result count and sorting cont
     /\{\/\* Results Header \*\/\}/,
     'expected the old in-content results row to be removed so it cannot hide under the fixed header'
   );
+
+  assert.match(
+    source,
+    /<div className="mt-auto mb-\[32px\] sm:mb-\[52px\]">[\s\S]*<AdBanner alt="Advertisement" \/>/,
+    'expected the ad banner to sit near the footer without the oversized desktop-only gap'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /lg:mb-\[200px\]/,
+    'expected the old 200px footer gap to stay removed'
+  );
 });

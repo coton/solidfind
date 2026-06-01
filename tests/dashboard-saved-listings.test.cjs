@@ -176,8 +176,8 @@ test('company dashboard account badge sits above the greeting while editor still
 
   assert.match(
     source,
-    /<div className="mb-7 flex max-w-full items-center justify-start gap-5 sm:max-w-\[440px\]">/,
-    'expected the company dashboard account label and email to share one compact row'
+    /<main className="max-w-\[900px\] mx-auto px-4 sm:px-0 pt-4 pb-8 flex-grow w-full">[\s\S]*<div className="mb-7 flex items-center justify-between gap-4">/,
+    'expected the company dashboard account row to keep its balanced layout while sitting closer to the header'
   );
 
   assert.match(
