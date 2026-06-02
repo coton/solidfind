@@ -266,10 +266,8 @@ type HeaderProps = {
 };
 
 export function Header(props: HeaderProps = {}) {
-  const fallbackSpacer = props.showResultsBar ? "h-[375px] sm:h-[300px]" : "h-[330px] sm:h-[260px]";
-
   return (
-    <Suspense fallback={<div className={fallbackSpacer} />}>
+    <Suspense fallback={null}>
       <HeaderInner {...props} />
     </Suspense>
   );
@@ -334,9 +332,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   );
   const [sortBy, setSortBy] = useState("latest");
   const lastCategoryButtonRef = useRef<HTMLButtonElement | null>(null);
-  const lastScrollYRef = useRef(0);
   const [mobileCategoryEndSpacerWidth, setMobileCategoryEndSpacerWidth] = useState(0);
-  const [mobileHeaderCompact, setMobileHeaderCompact] = useState(false);
 
   // Auth modal state
   const [showLogoutPrompt, setShowLogoutPrompt] = useState(false);
@@ -373,7 +369,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   const useMobileCompactHeader = isProfilePage || isDashboardPage;
   const useTopBarOnlyHeader = isCompanyDashboardPage;
   const showProfileBackBar = isProfilePage && !isDashboardPage && !showResultsBar;
-  const contentBarVisible = showResultsBar || showProfileBackBar;
   const profileBackHref = searchParams.get("returnTo") === "dashboard" && user ? "/dashboard" : "/";
   const homepageSubcategories = getEffectiveSubcategoryFilters(parseSubcategoryParam(searchParams.get("subcategory") || undefined));
   const homepageCompanies = useQuery(
@@ -430,45 +425,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
     return () => window.removeEventListener("resize", updateMobileCategoryEndSpacer);
   }, [dynamicCategories]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    lastScrollYRef.current = window.scrollY;
-    let ticking = false;
-
-    const updateMobileHeaderCompact = () => {
-      const currentScrollY = window.scrollY;
-      const shouldAutoCompact = window.innerWidth < 640;
-      const scrollDelta = currentScrollY - lastScrollYRef.current;
-
-      if (!shouldAutoCompact || currentScrollY < 24) {
-        setMobileHeaderCompact(false);
-      } else if (scrollDelta > 4) {
-        setMobileHeaderCompact(true);
-      } else if (scrollDelta < -4) {
-        setMobileHeaderCompact(false);
-      }
-
-      lastScrollYRef.current = currentScrollY;
-      ticking = false;
-    };
-
-    const requestUpdate = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateMobileHeaderCompact);
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
-
-    return () => {
-      window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestUpdate);
-    };
-  }, []);
 
   // Determine user type from Clerk metadata (default to "individual")
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
@@ -632,21 +588,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   return (
     <>
-    <div
-      className={
-        showResultsBar
-          ? "h-[375px] sm:h-[300px]"
-          : showProfileBackBar
-            ? "h-[145px] sm:h-[285px]"
-            : useTopBarOnlyHeader
-              ? "h-[110px]"
-              : useMobileCompactHeader
-              ? "h-[110px] sm:h-[260px]"
-              : "h-[330px] sm:h-[260px]"
-      }
-      aria-hidden="true"
-    />
-    <header className="fixed top-0 left-0 right-0 z-40 bg-[#ececec] p-[10px]">
+    <header className="relative z-40 bg-[#ececec] px-[10px]">
       <div className="relative z-30 rounded-[6px]">
       {headerMedia.url ? (
         <>
@@ -743,11 +685,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         </div>
 
         {/* Category Tabs - Horizontal scroll on mobile */}
-        <div className={`max-w-[900px] mx-auto transition-all duration-200 sm:mb-4 sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto sm:max-h-none ${useTopBarOnlyHeader ? "hidden" : useMobileCompactHeader ? "hidden sm:block" : ""} ${
-          mobileHeaderCompact
-            ? "max-h-0 mb-0 -translate-y-2 overflow-hidden opacity-0 pointer-events-none"
-            : "max-h-[140px] mb-4 translate-y-0 opacity-100"
-        }`}>
+        <div className={`max-w-[900px] mx-auto mb-4 sm:mb-4 ${useTopBarOnlyHeader ? "hidden" : useMobileCompactHeader ? "hidden sm:block" : ""}`}>
           <div className="relative overflow-visible">
           <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-2 min-w-max">
@@ -987,11 +925,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
           </Link>
         </div>
       )}
-      <div
-        className={`pointer-events-none absolute left-0 right-0 z-0 bg-gradient-to-b from-[#ececec] to-transparent ${
-          contentBarVisible ? "top-full h-8" : "top-full h-5"
-        }`}
-      />
     </header>
 
     {/* Auth modal — rendered outside header so it can overlay everything */}

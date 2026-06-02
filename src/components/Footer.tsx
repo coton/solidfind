@@ -47,7 +47,7 @@ export function Footer() {
   // - If not logged in: open AuthModal
 
   return (
-    <div className="px-[10px] pb-[10px]">
+    <div className="p-[10px]">
       <footer className="relative h-[150px] sm:h-[190px] rounded-[6px] overflow-hidden z-0">
       {/* AuthModal */}
       <AuthModal

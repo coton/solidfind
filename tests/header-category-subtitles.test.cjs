@@ -15,13 +15,19 @@ test('header category descriptions use the larger mobile-safe 11px mono style', 
   );
 });
 
-test('shared header stays fixed inside a framed workspace gutter', () => {
+test('shared header scrolls with the page inside a side-only workspace gutter', () => {
   const source = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
 
   assert.match(
     source,
-    /showResultsBar[\s\S]*"h-\[375px\] sm:h-\[300px\]"[\s\S]*showProfileBackBar[\s\S]*"h-\[145px\] sm:h-\[285px\]"[\s\S]*useTopBarOnlyHeader[\s\S]*"h-\[110px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"[\s\S]*<header className="fixed top-0 left-0 right-0 z-40 bg-\[#ececec\] p-\[10px\]">[\s\S]*<div className="relative z-30 rounded-\[6px\]">[\s\S]*contentBarVisible \? "top-full h-8" : "top-full h-5"/,
-    'expected the shared header to reserve page space while the visible header remains fixed in an opaque 10px framed gutter'
+    /<header className="relative z-40 bg-\[#ececec\] px-\[10px\]">[\s\S]*<div className="relative z-30 rounded-\[6px\]">/,
+    'expected the shared header to sit in normal page flow with side padding only'
+  );
+
+  assert.doesNotMatch(
+    source,
+    /fixed top-0 left-0 right-0|<div[\s\S]{0,160}aria-hidden="true"[\s\S]{0,160}\/>[\s\S]{0,80}<header|bg-gradient-to-b from-\[#ececec\] to-transparent|contentBarVisible/,
+    'expected the moving header to avoid fixed positioning, spacer reservation, and the grey bottom fade'
   );
 });
 
@@ -48,35 +54,23 @@ test('header gradient matches the footer gradient colors', () => {
   );
 });
 
-test('fixed header collapses category tabs and description while scrolling down on mobile only', () => {
+test('moving header keeps category tabs stable while scrolling', () => {
   const source = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
-
-  assert.match(
-    source,
-    /const \[mobileHeaderCompact, setMobileHeaderCompact\] = useState\(false\);/,
-    'expected the header to track a mobile compact state'
-  );
-
-  assert.match(
-    source,
-    /const shouldAutoCompact = window\.innerWidth < 640;[\s\S]*scrollDelta > 4[\s\S]*setMobileHeaderCompact\(true\)[\s\S]*scrollDelta < -4[\s\S]*setMobileHeaderCompact\(false\)[\s\S]*window\.addEventListener\("scroll", requestUpdate, \{ passive: true \}\);/,
-    'expected header compact mode to follow scroll direction on mobile only'
-  );
 
   assert.doesNotMatch(
     source,
-    /window\.innerWidth < 640 \|\| hasActiveFilters/,
-    'expected filtered desktop searches to keep the full fixed header'
+    /mobileHeaderCompact|lastScrollYRef|setMobileHeaderCompact|window\.addEventListener\("scroll", requestUpdate/,
+    'expected the moving header to stop auto-collapsing category tabs on scroll'
   );
 
   assert.match(
     source,
-    /mobileHeaderCompact[\s\S]*"max-h-0 mb-0 -translate-y-2 overflow-hidden opacity-0 pointer-events-none"[\s\S]*"max-h-\[140px\] mb-4 translate-y-0 opacity-100"/,
-    'expected compact mode to hide the category tabs and category description on mobile'
+    /<div className=\{`max-w-\[900px\] mx-auto mb-4 sm:mb-4 \$\{useTopBarOnlyHeader \? "hidden" : useMobileCompactHeader \? "hidden sm:block" : ""\}`\}>/,
+    'expected category tabs to keep a stable in-flow layout'
   );
 });
 
-test('home page can attach result count and sorting to the fixed header frame', () => {
+test('home page can attach result count and sorting below the moving header', () => {
   const source = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
 
   assert.match(
@@ -87,12 +81,12 @@ test('home page can attach result count and sorting to the fixed header frame', 
 
   assert.match(
     source,
-    /\{showResultsBar && \([\s\S]*\{homepageResultCount\} Solid Finds[\s\S]*<SortDropdown value=\{sortBy\} onChange=\{setSortBy\} reviewsEnabled=\{reviewsEnabled\} \/>[\s\S]*className=\{`pointer-events-none absolute left-0 right-0 z-0 bg-gradient-to-b from-\[#ececec\] to-transparent/,
-    'expected results and sorting to render inside the fixed header, over the raised bottom gradient'
+    /\{showResultsBar && \([\s\S]*\{homepageResultCount\} Solid Finds[\s\S]*<SortDropdown value=\{sortBy\} onChange=\{setSortBy\} reviewsEnabled=\{reviewsEnabled\} \/>/,
+    'expected results and sorting to render with the moving header'
   );
 });
 
-test('profile back navigation attaches to the fixed header frame', () => {
+test('profile back navigation attaches to the moving header', () => {
   const source = fs.readFileSync(path.join(projectRoot, 'src/components/Header.tsx'), 'utf8');
   const profileSource = fs.readFileSync(path.join(projectRoot, 'src/app/profile/[id]/ProfilePageClient.tsx'), 'utf8');
 
@@ -105,7 +99,7 @@ test('profile back navigation attaches to the fixed header frame', () => {
   assert.match(
     source,
     /\{showProfileBackBar && \([\s\S]*href=\{profileBackHref\}[\s\S]*<span>BACK<\/span>[\s\S]*\)\}/,
-    'expected the profile back button to render inside the header content row'
+    'expected the profile back button to render inside the header area'
   );
 
   assert.doesNotMatch(
@@ -143,12 +137,12 @@ test('root and slug profile routes share persistent site chrome', () => {
   assert.doesNotMatch(profileSource, /<Header|<Footer/, 'expected company profile to avoid page-level header/footer remounts');
 });
 
-test('shared footer uses the same 10px framed workspace gutter', () => {
+test('shared footer keeps a 10px framed workspace gutter on all sides', () => {
   const source = fs.readFileSync(path.join(projectRoot, 'src/components/Footer.tsx'), 'utf8');
 
   assert.match(
     source,
-    /<div className="px-\[10px\] pb-\[10px\]">[\s\S]*<footer className="relative h-\[150px\] sm:h-\[190px\] rounded-\[6px\] overflow-hidden z-0">/,
+    /<div className="p-\[10px\]">[\s\S]*<footer className="relative h-\[150px\] sm:h-\[190px\] rounded-\[6px\] overflow-hidden z-0">/,
     'expected the footer to sit inside a matching 10px frame with rounded corners'
   );
 });
@@ -162,10 +156,10 @@ test('mobile profile and dashboard headers show only the top bar while desktop k
     'expected profile and dashboard pages to opt into the compact mobile header'
   );
 
-  assert.match(
+  assert.doesNotMatch(
     source,
-    /showProfileBackBar[\s\S]*"h-\[145px\] sm:h-\[285px\]"[\s\S]*useTopBarOnlyHeader[\s\S]*"h-\[110px\]"[\s\S]*"h-\[110px\] sm:h-\[260px\]"[\s\S]*"h-\[330px\] sm:h-\[260px\]"/,
-    'expected compact mobile pages to reserve the requested 110px header height'
+    /h-\[145px\] sm:h-\[285px\]|h-\[330px\] sm:h-\[260px\]|<div[\s\S]{0,160}aria-hidden="true"[\s\S]{0,160}\/>[\s\S]{0,80}<header/,
+    'expected compact mobile pages to rely on the moving header height instead of reserved spacer blocks'
   );
 
   assert.match(
@@ -208,10 +202,10 @@ test('company dashboard uses a top-bar-only header on every viewport', () => {
     'expected only company dashboard routes to opt into the top-bar-only header'
   );
 
-  assert.match(
+  assert.doesNotMatch(
     source,
     /useTopBarOnlyHeader[\s\S]*\? "h-\[110px\]"/,
-    'expected company dashboard routes to reserve only the compact header height'
+    'expected company dashboard routes to avoid a reserved fixed-header spacer'
   );
 
   assert.match(
