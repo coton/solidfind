@@ -199,7 +199,7 @@ function Dropdown({
         style={{ letterSpacing: '0.12px' }}
       >
         <span className="sf-dd-label">{label}</span>
-        <span className={`sf-dd-value ${buttonIsActive ? 'text-[#f14110]' : ''}`}>
+        <span className={`sf-dd-value ${buttonIsActive ? 'is-active text-[#f14110]' : 'is-ph'}`}>
           {getButtonText().replace(/^PROJECT SIZE$/i, "Any size").replace(/^CATEGORIES$/i, "All types").replace(/^LOCATION$/i, "Anywhere")}
         </span>
       </button>
@@ -362,7 +362,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       ? (fromCategory || null)
       : (searchParams.get("category") ?? "construction");
   const useMobileCompactHeader = isProfilePage || isDashboardPage;
-  const useTopBarOnlyHeader = isCompanyDashboardPage;
+  const useTopBarOnlyHeader = isCompanyDashboardPage || isProfilePage;
   const homepageSubcategories = getEffectiveSubcategoryFilters(parseSubcategoryParam(searchParams.get("subcategory") || undefined));
   const homepageCompanies = useQuery(
     api.companies.list,

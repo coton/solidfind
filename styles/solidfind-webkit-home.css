@@ -443,6 +443,17 @@
   color: #fff;
 }
 
+.sf-btn-ghost {
+  border: 1px solid var(--sf-border-1);
+  background: #fff;
+  color: var(--sf-ink);
+}
+
+.sf-btn-ghost:hover {
+  border-color: var(--sf-orange);
+  color: var(--sf-orange);
+}
+
 .sf-shell-actions .sf-btn-pri {
   background: #fff;
   color: var(--sf-orange, #f14110);
@@ -934,6 +945,14 @@
   font-weight: 500;
   line-height: 1.2;
   white-space: nowrap;
+}
+
+.sf-dd-value.is-ph {
+  color: var(--sf-fg-3);
+}
+
+.sf-dd-value.is-active {
+  color: var(--sf-orange);
 }
 
 .sf-dd-value::after {
@@ -1622,29 +1641,31 @@
 
 .sf-social {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
 }
 
 .sf-social-btn {
   display: inline-flex;
-  min-width: 42px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
+  flex: none;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--sf-border-1);
   border-radius: 999px;
+  background: var(--sf-stone-200);
   color: var(--sf-ink-soft);
-  font-size: 12px;
-  font-weight: 600;
   transition: background var(--sf-dur-fast) var(--sf-ease-out), border-color var(--sf-dur-fast) var(--sf-ease-out), color var(--sf-dur-fast) var(--sf-ease-out), transform var(--sf-dur-fast) var(--sf-ease-out);
 }
 
 .sf-social-btn:hover {
   transform: translateY(-1px);
   border-color: var(--sf-orange);
-  background: var(--sf-orange);
-  color: #fff;
+  color: var(--sf-orange);
+}
+
+.sf-social-btn svg {
+  flex: none;
 }
 
 .sf-work-head,

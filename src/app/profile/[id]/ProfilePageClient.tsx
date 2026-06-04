@@ -14,7 +14,6 @@ import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { Star } from "lucide-react";
 import { starFillColor, starColor } from "@/lib/starColors";
-import { buildCompanyAddressHref } from '@/lib/company-address-link.mjs';
 import { buildCompanyProfilePath, buildCompanyReviewsPath } from '@/lib/company-profile-url.mjs';
 import { buildCategoryOptionLabelMap, expandProfileProjectSizes, formatProfileCategoryValues } from "@/lib/category-display.mjs";
 
@@ -100,8 +99,48 @@ function ExternalImage({
 }
 
 function formatWhatsApp(num: string): string {
-  return num.replace(/^[+0]+/, "");
+  return num.replace(/[^0-9]/g, "");
 }
+
+function normalizeSocialHandle(value: string | undefined, prefix: string): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `${prefix}${trimmed.replace(/^@/, "")}`;
+}
+
+const socialGlyphs = {
+  email: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="m4 7 8 6 8-6" />
+    </svg>
+  ),
+  whatsapp: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+      <path d="M12 2a10 10 0 0 0-8.6 15.05L2 22l5.07-1.33A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3 .79.8-2.93-.2-.31A8.2 8.2 0 1 1 12 20.2Zm4.5-6.13c-.25-.13-1.46-.72-1.69-.8-.23-.08-.39-.13-.56.13-.16.25-.64.8-.78.97-.14.16-.29.18-.54.06a6.73 6.73 0 0 1-1.98-1.22 7.4 7.4 0 0 1-1.37-1.7c-.14-.25 0-.38.11-.5.11-.12.25-.29.37-.43.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.4-.41-.56-.42h-.48c-.16 0-.43.06-.65.31-.23.25-.86.84-.86 2.05s.88 2.38 1 2.54c.13.17 1.74 2.65 4.2 3.72.59.25 1.05.4 1.4.52.6.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.2-.58.2-1.07.14-1.18-.06-.1-.22-.16-.47-.28Z" />
+    </svg>
+  ),
+  facebook: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+      <path d="M14 8.5V7c0-.7.3-1 1-1h1.5V3H14c-2.2 0-3.5 1.4-3.5 3.7V8.5H8V11.5h2.5V21H14v-9.5h2.4l.4-3H14Z" />
+    </svg>
+  ),
+  instagram: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  linkedin: (
+    <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
+      <rect x="1" y="1" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M4 11.1942H6.31836V19H4V11.1942ZM11.4785 13.1344C10.2734 13.1344 10.0879 14.1199 10.0879 15.138V19H7.77148V11.1942H9.99609V12.2614H10.0273C10.3379 11.6481 11.0938 11 12.2207 11C14.5664 11 15 12.6172 15 14.7189V19H12.6836V15.2034C12.6836 14.2977 12.666 13.1344 11.4785 13.1344Z" fill="currentColor" />
+      <circle cx="5" cy="9" r="1" fill="currentColor" />
+    </svg>
+  ),
+};
 
 type ProjectImageItem =
   | { kind: "external"; src: string; alt: string }
@@ -604,6 +643,13 @@ export default function ProfilePageClient() {
     ? workCategoryServices
     : [{ label: company.category?.replace(/-/g, " ").toUpperCase() || "SERVICES", value: company.subcategory?.replace(/-/g, " ").toUpperCase() || "GENERAL" }];
   const projectSizeValue = profileMetaServices.find((item) => item.label === "PROJECT SIZE")?.value || "-";
+  const socialLinks = [
+    company.email ? { key: "email" as const, label: "Email", href: `mailto:${company.email}` } : null,
+    company.whatsapp ? { key: "whatsapp" as const, label: "WhatsApp", href: `https://wa.me/${formatWhatsApp(company.whatsapp)}` } : null,
+    company.facebook ? { key: "facebook" as const, label: "Facebook", href: normalizeSocialHandle(company.facebook, "https://facebook.com/") } : null,
+    company.instagram ? { key: "instagram" as const, label: "Instagram", href: normalizeSocialHandle(company.instagram, "https://instagram.com/") } : null,
+    company.linkedin ? { key: "linkedin" as const, label: "LinkedIn", href: normalizeSocialHandle(company.linkedin, "https://linkedin.com/company/") } : null,
+  ].filter((item): item is { key: keyof typeof socialGlyphs; label: string; href: string } => Boolean(item?.href));
 
   return (
     <>
@@ -727,10 +773,19 @@ export default function ProfilePageClient() {
             <div className="sf-detail-card">
               <span className="sf-tag-mono">Company details</span>
               <div className="sf-social">
-                {company.website && <a className="sf-social-btn" href={company.website.startsWith("http") ? company.website : `https://${company.website}`} target="_blank" rel="noopener noreferrer">Web</a>}
-                {company.email && <a className="sf-social-btn" href={`mailto:${company.email}`}>Mail</a>}
-                {company.whatsapp && <a className="sf-social-btn" href={`https://wa.me/${formatWhatsApp(company.whatsapp)}`} target="_blank" rel="noopener noreferrer">WA</a>}
-                <a className="sf-social-btn" href={buildCompanyAddressHref(company)} target="_blank" rel="noopener noreferrer">Map</a>
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.key}
+                    className="sf-social-btn"
+                    href={social.href}
+                    target={social.key === "email" ? undefined : "_blank"}
+                    rel={social.key === "email" ? undefined : "noopener noreferrer"}
+                    aria-label={social.label}
+                    title={social.label}
+                  >
+                    {socialGlyphs[social.key]}
+                  </a>
+                ))}
               </div>
               <hr />
               <dl className="sf-kv">
@@ -738,8 +793,8 @@ export default function ProfilePageClient() {
                 <dt>Projects</dt><dd>{company.projects != null ? `${company.projects}+ completed` : "—"}</dd>
                 <dt>Team size</dt><dd>{company.teamSize != null ? `${company.teamSize}+ people` : "—"}</dd>
                 <dt>Founded</dt><dd>{foundedYear}</dd>
-                <dt>Phone</dt><dd>{company.phone || "—"}</dd>
-                <dt>Address</dt><dd>{profileAddress}</dd>
+                <dt>Avg. project</dt><dd>IDR 250–600 jt</dd>
+                <dt>Languages</dt><dd>Bahasa, English</dd>
               </dl>
               <hr />
               <button className={`sf-btn ${isBookmarked ? "sf-btn-pri" : "sf-btn-ghost"}`} style={{ width: "100%" }} onClick={handleToggleSave}>
