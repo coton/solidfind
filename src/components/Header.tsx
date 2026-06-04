@@ -13,7 +13,6 @@ import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import {
   HEADER_MEDIA_PLATFORM_SETTING_KEY,
   resolveMediaSetting,
-  resolveTextSetting,
 } from "@/lib/platform-settings.mjs";
 import {
   encodeSubcategoryParam,
@@ -283,10 +282,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   const headerMediaValue = useQuery(api.platformSettings.get, { key: HEADER_MEDIA_PLATFORM_SETTING_KEY });
   const headerMediaState = resolveMediaSetting(headerMediaValue, { url: "", type: "image" });
   const headerMedia = headerMediaState.media;
-  const igUrl = useQuery(api.platformSettings.get, { key: "ig_url" });
-  const igUrlState = resolveTextSetting(igUrl, "#");
-  const igVisible = useQuery(api.platformSettings.get, { key: "ig_visible" });
-  const igVisibleState = resolveTextSetting(igVisible, "true");
 
   const handleSignOut = async () => {
     await signOut({ redirectUrl: "/" });
@@ -624,13 +619,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
           {/* Right Side Buttons */}
           <div className="sf-shell-actions">
-            {/* Desktop: IG (first) */}
-            {igVisibleState.value !== "false" && (
-              <a href={igUrlState.value || "#"} target="_blank" rel="noopener noreferrer" className="hidden sm:inline-flex text-[#f8f8f8] hover:opacity-80 transition-opacity">
-                <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
-              </a>
-            )}
-
             <SignedIn>
               {/* Account icon (mobile + desktop) */}
               <Link
@@ -679,9 +667,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
         {/* Category Tabs - Horizontal scroll on mobile */}
         <div className={`${useTopBarOnlyHeader ? "hidden" : useMobileCompactHeader ? "hidden sm:block" : ""}`}>
-          <h1 className="sf-shell-lead">
-            {(activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction}
-          </h1>
           <nav className="sf-catnav relative overflow-visible">
           <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-2 min-w-max">
@@ -705,6 +690,9 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
           {/* Gradient fade on right edge — mobile only, extends to screen edge past padding */}
           <div className="sm:hidden pointer-events-none absolute -right-4 top-0 bottom-0 w-20" style={{ background: 'linear-gradient(to right, transparent, #F14110)' }} />
           </nav>
+          <h1 className="sf-shell-lead">
+            {(activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction}
+          </h1>
         </div>
 
         {/* Search Bar */}

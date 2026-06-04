@@ -47,8 +47,8 @@ export function Footer() {
   // - If not logged in: open AuthModal
 
   return (
-    <div className="p-[10px]">
-      <footer className="relative h-[150px] sm:h-[190px] rounded-[6px] overflow-hidden z-0">
+    <div className="sf-footer-wrap">
+      <footer className="sf-footer-v2 relative overflow-hidden z-0">
       {/* AuthModal */}
       <AuthModal
         isOpen={isAuthModalOpen}
@@ -75,16 +75,11 @@ export function Footer() {
       ) : footerMediaState.isLoading ? (
         <div className="absolute inset-0 bg-[#e4e4e4]" />
       ) : (
-        <div
-          className="absolute inset-0"
-          style={{
-            background: "linear-gradient(to right, #E9A28E, #F14110)"
-          }}
-        />
+        <div className="sf-footer-bg" />
       )}
       {/* Mobile Layout - Right-aligned */}
       <div className="sm:hidden absolute inset-0 flex items-center justify-end p-5 z-10">
-        <div className="flex flex-col items-end gap-3">
+        <div className="sf-footer-content">
           {/* Description */}
           <div className="text-right max-w-[320px]">
             <p className="text-white text-[9px] leading-[12px] font-medium tracking-[0.18px]">
@@ -140,7 +135,7 @@ export function Footer() {
 
       {/* Desktop Layout */}
       <div className="hidden sm:flex absolute inset-0 items-center justify-end px-10 z-10">
-        <div className="flex flex-col items-end gap-4">
+        <div className="sf-footer-content">
           {/* Description */}
           <div className="text-right max-w-[426px]">
             <p className="text-white text-[12px] leading-[18px] tracking-[0.24px]">

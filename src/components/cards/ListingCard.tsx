@@ -68,10 +68,11 @@ export function ListingCard({
     interiorLocations,
     realEstateLocations,
   });
+  const primaryLocation = getPrimaryLocation(serviceLocations, location);
   const serviceLabel = [
-    category ? category.replace(/-/g, " ") : "Professional",
-    serviceLocations && serviceLocations !== "Bali" ? serviceLocations : location,
-  ].filter(Boolean).join(" - ");
+    getCategoryLabel(categoryContext ?? category),
+    primaryLocation,
+  ].filter(Boolean).join(" · ");
 
   return (
     <Link
@@ -138,13 +139,37 @@ export function ListingCard({
           <p className="sf-pro-meta">{serviceLabel}</p>
           <p className="sf-pro-desc">{description}</p>
           <div className="sf-pro-foot">
-            <span className="sf-tag-mono">{shouldShowRating ? `${reviewCount} reviews` : projects > 0 ? `${projects}+ projects` : team > 0 ? `${team}+ team` : serviceLocations}</span>
+            <span className="sf-tag-mono">{shouldShowRating ? `${reviewCount} reviews` : primaryLocation || (projects > 0 ? `${projects}+ projects` : team > 0 ? `${team}+ team` : serviceLocations)}</span>
             <span className="sf-pri-link">View →</span>
           </div>
         </div>
       </article>
     </Link>
   );
+}
+
+function getCategoryLabel(category?: string) {
+  const labels: Record<string, string> = {
+    construction: "Construction",
+    renovation: "Home renovation",
+    architecture: "Architecture",
+    interior: "Interior",
+    "real-estate": "Real estate",
+  };
+  return category ? labels[category] ?? toTitleCase(category.replace(/-/g, " ")) : "Professional";
+}
+
+function getPrimaryLocation(serviceLocations?: string, fallbackLocation?: string) {
+  const raw = (serviceLocations || fallbackLocation || "").split(",")[0]?.trim();
+  if (!raw || raw.toLowerCase() === "bali") return undefined;
+  return toTitleCase(raw);
+}
+
+function toTitleCase(value: string) {
+  return value
+    .replace(/-/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function getServiceLocations({
