@@ -588,8 +588,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   return (
     <>
-    <header className="relative z-40 bg-[#ececec] px-[10px]">
-      <div className="relative z-30 rounded-[6px]">
+    <header className="relative z-40 bg-[#ececec]">
+      <div className="relative z-30 overflow-hidden rounded-b-[8px]">
       {headerMedia.url ? (
         <>
           <div className="absolute inset-0 overflow-hidden rounded-[6px]">
@@ -613,20 +613,27 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         <>
           {/* Gradient Background - matches footer */}
           <div
-            className="absolute inset-0 rounded-[6px]"
+            className="absolute inset-0 rounded-b-[8px]"
             style={{
-              background: "linear-gradient(to right, #E9A28E, #F14110)"
+              background: "linear-gradient(105deg, #F14110 0%, #f2552a 58%, #ee9a80 100%)"
             }}
+          />
+          <Image
+            src="/assets/solidfind-icon.svg"
+            alt=""
+            width={220}
+            height={220}
+            className="pointer-events-none absolute right-[28px] top-[12px] hidden opacity-[0.16] sm:block"
           />
         </>
       )}
 
-      <div className={`relative z-10 px-5 sm:px-0 ${useTopBarOnlyHeader ? "flex h-[90px] flex-col justify-center" : useMobileCompactHeader ? "flex h-[90px] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-[8px] sm:pb-4"}`}>
+      <div className={`relative z-10 px-5 sm:px-0 ${useTopBarOnlyHeader ? "flex h-[90px] flex-col justify-center" : useMobileCompactHeader ? "flex h-[90px] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-5 sm:pb-7"}`}>
         {/* Top Bar */}
-        <div className={`max-w-[900px] mx-auto flex items-center ${useTopBarOnlyHeader ? "w-full justify-between gap-4 mb-0" : `sm:justify-between sm:mb-6 ${useMobileCompactHeader ? "w-full justify-between gap-4 mb-0" : "justify-between mb-8"}`}`}>
+        <div className={`max-w-[1344px] mx-auto flex items-center ${useTopBarOnlyHeader ? "w-full justify-between gap-4 mb-0" : `sm:justify-between sm:mb-6 ${useMobileCompactHeader ? "w-full justify-between gap-4 mb-0" : "justify-between mb-7"}`}`}>
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className="h-[19px] w-auto" />
+            <Image src="/images/logo-full-white.svg" alt="SolidFind.id" width={175} height={19} className="h-[19px] w-auto" />
           </Link>
 
           {/* Right Side Buttons */}
@@ -651,14 +658,14 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               {userType === "company" ? (
                 <button
                   onClick={handleSignOut}
-                  className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
+                  className="h-9 px-4 rounded-[6px] bg-white text-[#f14110] text-[12px] font-bold hover:bg-white/90 transition-colors flex items-center"
                 >
                   Log out
                 </button>
               ) : (
                 <button
                   onClick={handleSignOut}
-                  className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
+                  className="h-9 px-4 rounded-[6px] bg-white text-[#f14110] text-[12px] font-bold hover:bg-white/90 transition-colors flex items-center"
                 >
                   Log out
                 </button>
@@ -676,16 +683,19 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               {/* List your business → opens REGISTER modal, company pre-selected */}
               <button
                 onClick={() => openAuthModal("company", "register")}
-                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
+                className="h-9 px-4 rounded-[6px] bg-white text-[#f14110] text-[12px] font-bold hover:bg-white/90 transition-colors flex items-center"
               >
-                List your business
+                List your services
               </button>
             </SignedOut>
           </div>
         </div>
 
         {/* Category Tabs - Horizontal scroll on mobile */}
-        <div className={`max-w-[900px] mx-auto mb-4 sm:mb-4 ${useTopBarOnlyHeader ? "hidden" : useMobileCompactHeader ? "hidden sm:block" : ""}`}>
+        <div className={`max-w-[1344px] mx-auto mb-4 sm:mb-4 ${useTopBarOnlyHeader ? "hidden" : useMobileCompactHeader ? "hidden sm:block" : ""}`}>
+          <p className="max-w-[880px] text-[#fff] text-[24px] sm:text-[28px] font-normal leading-[1.12] mb-5">
+            {(activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction}
+          </p>
           <div className="relative overflow-visible">
           <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-2 min-w-max">
@@ -694,10 +704,10 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                   key={cat.id}
                   ref={index === dynamicCategories.length - 1 ? lastCategoryButtonRef : undefined}
                   onClick={() => handleCategoryTab(cat.id)}
-                  className={`h-10 px-4 sm:px-5 rounded-full text-[11px] sm:text-[12px] font-medium transition-colors whitespace-nowrap ${
+                  className={`h-9 px-4 sm:px-5 rounded-full text-[11px] sm:text-[12px] font-medium transition-colors whitespace-nowrap ${
                     activeCategory === cat.id
                       ? "bg-white text-[#f14110] hover:bg-white opacity-100 hover:opacity-100"
-                      : "text-[#f8f8f8] border border-transparent hover:border-white hover:text-[#FFF]"
+                      : "text-[#f8f8f8] border border-white/45 hover:border-white hover:text-[#FFF]"
                   }`}
                 >
                   {cat.label}
@@ -713,22 +723,19 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
           {/* Gradient fade on right edge — mobile only, extends to screen edge past padding */}
           <div className="sm:hidden pointer-events-none absolute -right-4 top-0 bottom-0 w-20" style={{ background: 'linear-gradient(to right, transparent, #F14110)' }} />
           </div>
-          <p className="font-bam text-[#f8f8f8] text-[11px] mt-4 leading-[15px]">
-            {(activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction}
-          </p>
         </div>
 
         {/* Search Bar */}
-        <div className={`max-w-[900px] mx-auto ${useTopBarOnlyHeader ? "hidden" : ""}`}>
+        <div className={`max-w-[1344px] mx-auto ${useTopBarOnlyHeader ? "hidden" : ""}`}>
           {/* Desktop: Flex with Clear button positioned right */}
-          <div className="hidden items-center justify-between gap-0 sm:flex">
+          <div className="hidden items-center justify-between gap-4 sm:flex">
             {/* Left side: Keywords + Filters */}
-            <div className="flex items-center gap-[2px]">
+            <div className="flex flex-1 items-center gap-2">
               {/* Keywords Input - extended width on desktop */}
-              <div className="w-[390px] h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
+              <div className="min-w-[320px] flex-1 h-12 bg-[#f8f8f8] rounded-[6px] flex items-center px-4">
                 <input
                   type="text"
-                  placeholder="Search by keywords"
+                  placeholder="Search construction pros..."
                   value={keywords}
                   onChange={(e) => setKeywords(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -789,8 +796,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               />
 
               {/* Search Button - 40x40 container with 34x34 icon centered */}
-              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[#f8f8f8] rounded-[6px]">
-                <Image src="/images/btn-search.svg" alt="Search" width={34} height={34} className="w-[34px] h-[34px]" />
+              <button onClick={handleSearch} className="h-12 px-7 flex-shrink-0 flex items-center justify-center bg-[#f14110] rounded-[6px] text-white text-[12px] font-bold">
+                Search
               </button>
             </div>
 
@@ -905,15 +912,15 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       </div>
       </div>
       {showResultsBar && (
-        <div className="relative z-20 mx-auto flex max-w-[900px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
-          <h2 className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]">
-            {homepageResultCount} Solid Finds
+        <div className="sf-results-bar relative z-20">
+          <h2 className="sf-results-count">
+            <strong>{homepageResultCount}</strong> Solidfinds
           </h2>
           {sortControl ?? (!showHomepageEmptyState && <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />)}
         </div>
       )}
       {showProfileBackBar && (
-        <div className="relative z-20 mx-auto flex max-w-[900px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
+        <div className="relative z-20 mx-auto flex max-w-[1344px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
           <Link
             href={profileBackHref}
             className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"

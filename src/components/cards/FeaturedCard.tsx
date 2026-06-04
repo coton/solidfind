@@ -29,34 +29,30 @@ export function FeaturedCard({
 
   return (
     <Link href={linkHref} className="block">
-      <div className="relative w-[210px] h-[220px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
-        {/* Background image with title overlay */}
-        <div className="absolute top-0 left-0 right-0 h-[120px] rounded-t-[6px] flex items-end p-[10px]">
+      <article className="sf-pro-card sf-feature-card">
+        <div className="sf-pro-photo">
           {coverUrl ? (
             <Image
               src={coverUrl}
               alt={articleTitle}
               fill
-              sizes="210px"
+              sizes="(max-width: 640px) 78vw, 260px"
               loading="eager"
-              className="object-cover rounded-t-[6px]"
+              className="object-cover"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#f14110] to-[#e9a28e]" />
+            <div className="sf-feature-fallback" />
           )}
-          {/* Title overlaid on image */}
-          <h3 className="relative z-10 font-semibold text-[16px] leading-[16px] tracking-[0.32px] text-white uppercase">
-            {articleTitle}
-          </h3>
         </div>
-
-        {/* Description - same styling as WelcomeCard */}
-        <div className="absolute top-[140px] left-[10px] right-[10px] bottom-[20px]">
-          <p className="text-[11px] leading-[15px] tracking-[0.22px] text-[#333] font-bold line-clamp-4" style={{ fontFamily: "'Sora', sans-serif" }}>
-            {articleDescription}
-          </p>
+        <div className="sf-pro-body">
+          <h3>{articleTitle}</h3>
+          <p className="sf-pro-desc">{articleDescription}</p>
+          <div className="sf-pro-foot">
+            <span>Article</span>
+            <span>{"Read ->"}</span>
+          </div>
         </div>
-      </div>
+      </article>
     </Link>
   );
 }

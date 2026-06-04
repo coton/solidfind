@@ -8,7 +8,6 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { WelcomeCard, FeaturedCard, ListingCard } from "@/components/cards";
 import { Pagination } from "@/components/Pagination";
-import { AdBanner } from "@/components/AdBanner";
 import { ListingCardSkeleton } from "@/components/ui/ListingCardSkeleton";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
@@ -90,7 +89,7 @@ function HomeContent() {
 
   // Default landing keeps the grid to two rows. Filtered/search results use
   // five rows of company listings and remove the About/featured cards.
-  const DEFAULT_GRID_CARD_COUNT = 8;
+  const DEFAULT_GRID_CARD_COUNT = 15;
   const FILTERED_LISTING_CARD_COUNT = 20;
   const MOBILE_LISTING_CARD_COUNT = 15;
   const specialCardCount = hasFilters ? 0 : 1 + (visibleArticles?.length ?? 1); // 1 for WelcomeCard + featured articles (default 1 while loading)
@@ -206,7 +205,7 @@ function HomeContent() {
 
   return (
     <>
-      <main className="max-w-[900px] mx-auto px-5 sm:px-0 pt-3 sm:pt-4 flex-grow w-full flex flex-col">
+      <main className="sf-home-shell pt-0 flex-grow flex flex-col">
         {showEmptyState ? (
           /* Empty State — flex column filling remaining height */
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -236,7 +235,7 @@ function HomeContent() {
               </div>
 
               {/* Desktop: 4-column grid of latest profiles */}
-              <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="hidden sm:grid sf-grid">
                 {latestListings.map((listing) => (
                   <ListingCard
                     key={listing.id}
@@ -254,8 +253,8 @@ function HomeContent() {
           <>
             {/* Mobile: Horizontal Scroll */}
             <div className="sm:hidden mb-8">
-              <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
-                <div className="flex gap-5 pb-2">
+              <div className="overflow-x-auto scrollbar-hide">
+                <div className="sf-grid pb-2">
                   {!hasFilters && (
                     <>
                       <WelcomeCard />
@@ -293,7 +292,18 @@ function HomeContent() {
 
             {/* Desktop: Grid with Pagination */}
             <div className="hidden sm:block">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+              {proEnabled && (
+                <div className="sf-sponsored-strip">
+                  <div>
+                    <p>Sponsored</p>
+                    <h2>{"Sponsored - top construction companies advertise here"}</h2>
+                    <p>{"97% -> 128"}</p>
+                  </div>
+                  <button type="button">{"Advertise ->"}</button>
+                </div>
+              )}
+
+              <div className="sf-grid mb-8">
                 {!hasFilters && (
                   <>
                     <WelcomeCard />
@@ -335,9 +345,6 @@ function HomeContent() {
           </>
         )}
 
-        <div className="mt-auto mb-[32px] sm:mb-[52px]">
-          <AdBanner alt="Advertisement" />
-        </div>
       </main>
 
     </>
@@ -353,7 +360,7 @@ function HomeFeaturedCard({ article, loading }: { article?: { _id: Id<"featuredA
   // While loading, show a placeholder skeleton instead of fallback text
   if (loading) {
     return (
-      <div className="w-[210px] h-[220px] bg-[#e4e4e4] rounded-[6px] animate-pulse" />
+      <div className="sf-pro-card bg-[#e4e4e4] animate-pulse" />
     );
   }
 
