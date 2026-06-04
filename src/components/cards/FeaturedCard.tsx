@@ -45,11 +45,11 @@ export function FeaturedCard({
           )}
         </div>
         <div className="sf-pro-body">
-          <h3>{articleTitle}</h3>
+          <h3 className="sf-pro-name">{articleTitle}</h3>
           <p className="sf-pro-desc">{articleDescription}</p>
           <div className="sf-pro-foot">
-            <span>Article</span>
-            <span>{"Read ->"}</span>
+            <span className="sf-tag-mono">Article</span>
+            <span className="sf-pri-link">Read →</span>
           </div>
         </div>
       </article>

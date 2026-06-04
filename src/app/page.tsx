@@ -296,10 +296,10 @@ function HomeContent() {
                 <div className="sf-sponsored-strip">
                   <div>
                     <p>Sponsored</p>
-                    <h2>{"Sponsored - top construction companies advertise here"}</h2>
-                    <p>{"97% -> 128"}</p>
+                    <h2>Sponsored - top construction companies advertise here</h2>
+                    <p>97% → 128</p>
                   </div>
-                  <button type="button">{"Advertise ->"}</button>
+                  <button type="button">Advertise →</button>
                 </div>
               )}
 

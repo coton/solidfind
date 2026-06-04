@@ -20,11 +20,11 @@ export function WelcomeCard() {
           <Image src="/assets/solidfind-icon.svg" alt="" width={92} height={92} />
         </div>
         <div className="sf-pro-body">
-          <h3 className="sf-about-title">SolidFind<span>.id</span></h3>
+          <h3 className="sf-pro-name sf-about-title">SolidFind<span>.id</span></h3>
           <p className="sf-pro-desc">{description}</p>
           <div className="sf-pro-foot">
-            <span>About</span>
-            <span>{"About ->"}</span>
+            <span className="sf-tag-mono">About</span>
+            <span className="sf-pri-link">About →</span>
           </div>
         </div>
       </article>
