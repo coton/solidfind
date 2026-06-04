@@ -206,7 +206,7 @@ function HomeContent() {
 
   return (
     <>
-      <main className="max-w-[900px] mx-auto px-5 sm:px-0 pt-3 sm:pt-4 flex-grow w-full flex flex-col">
+      <main className="mx-auto flex w-full max-w-[var(--sf-content)] flex-grow flex-col px-5 pt-4 sm:px-10">
         {showEmptyState ? (
           /* Empty State — flex column filling remaining height */
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -236,7 +236,7 @@ function HomeContent() {
               </div>
 
               {/* Desktop: 4-column grid of latest profiles */}
-              <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="hidden sm:grid sm:grid-cols-3 xl:grid-cols-5 gap-4">
                 {latestListings.map((listing) => (
                   <ListingCard
                     key={listing.id}
@@ -293,7 +293,7 @@ function HomeContent() {
 
             {/* Desktop: Grid with Pagination */}
             <div className="hidden sm:block">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+              <div className="grid grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
                 {!hasFilters && (
                   <>
                     <WelcomeCard />
@@ -353,7 +353,7 @@ function HomeFeaturedCard({ article, loading }: { article?: { _id: Id<"featuredA
   // While loading, show a placeholder skeleton instead of fallback text
   if (loading) {
     return (
-      <div className="w-[210px] h-[220px] bg-[#e4e4e4] rounded-[6px] animate-pulse" />
+      <div className="h-[320px] w-[210px] animate-pulse rounded-[var(--sf-radius-lg)] bg-[var(--sf-stone-300)]" />
     );
   }
 

@@ -1,0 +1,333 @@
+/*
+ * ═══════════════════════════════════════════════════════
+ *  SolidFind — Design Tokens
+ *  Single source of truth for the OpenClaw integration
+ *
+ *  Generated from: colors_and_type.css + web-v2/styles.css
+ *  Date: June 2026   Version: Web v2 + Mobile v2
+ *
+ *  USAGE
+ *  ─────
+ *  1. Copy this file to your Next.js project as:
+ *       styles/solidfind-tokens.css
+ *  2. Import in globals.css:
+ *       @import './solidfind-tokens.css';
+ *  3. Reference via var(--sf-*) throughout all components.
+ *
+ *  FONTS
+ *  ─────
+ *  Display / body: Sora (variable, self-hosted)
+ *    File: /fonts/Sora-VariableFont_wght.ttf  (axes: wght 100–800)
+ *    @font-face declaration is included below.
+ *
+ *  Mono (tags, eyebrows, tables): JetBrains Mono
+ *    Load via Google Fonts in _document.tsx:
+ *    https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap
+ *
+ * ═══════════════════════════════════════════════════════
+ */
+
+@font-face {
+  font-family: "Sora";
+  src: url("/fonts/Sora-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-wght.ttf") format("truetype-variations");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-Italic-wght.ttf") format("truetype-variations");
+  font-weight: 100 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+
+  /* ──────────────────────────────────────────────────────
+     BRAND COLORS
+     ────────────────────────────────────────────────────── */
+  --sf-orange:          #F14110;   /* Primary / CTA — "SolidFind orange"      */
+  --sf-orange-deep:     #EC3300;   /* Press / strong accent                   */
+  --sf-orange-darker:   #BB0000;   /* Danger / rare extreme                   */
+  --sf-orange-warm:     #C32A00;   /* Shadow tone on orange surfaces          */
+
+  /* Signature gradients */
+  --sf-grad-orange:     linear-gradient(180deg, #F14110 0%, #E9A28E 100%);
+  --sf-grad-orange-x:   linear-gradient(90deg,  #F14110 0%, #E9A28E 100%);
+  --sf-grad-mute:       linear-gradient(180deg, #F14110 0%, #E4E4E4 100%);
+  --sf-grad-fade-w:     linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.75) 100%);
+
+  /* Hero band (Header + About hero + orange cards) */
+  --sf-grad-hero:       linear-gradient(165deg, #F14110 0%, #EC5A2C 52%, #E9A28E 100%);
+
+
+  /* ──────────────────────────────────────────────────────
+     INK (FOREGROUND)
+     ────────────────────────────────────────────────────── */
+  --sf-ink:             #231F20;   /* Primary type, near-black (rich)         */
+  --sf-ink-soft:        #333333;   /* Body, secondary headings                */
+
+
+  /* ──────────────────────────────────────────────────────
+     NEUTRAL SCALE
+     ────────────────────────────────────────────────────── */
+  --sf-stone-100:       #FFFFFF;
+  --sf-stone-200:       #F8F8F8;   /* Default page / muted surface            */
+  --sf-stone-300:       #E4E4E4;   /* Hairline / divider                      */
+  --sf-stone-400:       #D8D8D8;   /* Stronger divider, disabled bg           */
+  --sf-stone-500:       #BFBFBF;
+  --sf-stone-600:       #8C8C8C;   /* Placeholder / tertiary text             */
+  --sf-stone-700:       #4A4A4A;
+
+
+  /* ──────────────────────────────────────────────────────
+     COMPLEMENT — WARM PEACH SCALE
+     Used for: hover states, Pro card tints, completion rings
+     ────────────────────────────────────────────────────── */
+  --sf-peach-100:       #FBE6DE;   /* Tint background (selected state)        */
+  --sf-peach-200:       #F0C5B9;
+  --sf-peach-300:       #E9A28E;   /* Mid peach — chart bars, ring base       */
+  --sf-peach-400:       #F7896A;
+  --sf-peach-500:       #F36D48;
+  --sf-peach-mist:      #A2CDD7;   /* Only cool secondary in system           */
+
+
+  /* ──────────────────────────────────────────────────────
+     SEMANTIC ALIASES
+     Always use these in component code, not raw hex above.
+     ────────────────────────────────────────────────────── */
+  --sf-fg-1:            var(--sf-ink);
+  --sf-fg-2:            var(--sf-ink-soft);
+  --sf-fg-3:            var(--sf-stone-600);
+  --sf-fg-on-orange:    #FFFFFF;
+  --sf-fg-link:         var(--sf-orange);
+
+  --sf-bg-page:         var(--sf-stone-200);   /* <body> background           */
+  --sf-bg-surface:      var(--sf-stone-100);   /* Cards, modals               */
+  --sf-bg-elevated:     #FFFFFF;
+  --sf-bg-muted:        var(--sf-stone-200);   /* Inputs, subtle panels       */
+  --sf-bg-orange:       var(--sf-orange);
+
+  --sf-border-1:        var(--sf-stone-300);   /* Default border              */
+  --sf-border-2:        var(--sf-stone-400);   /* Stronger border / ghost btn */
+  --sf-border-strong:   var(--sf-ink-soft);
+
+  --sf-success:         #2E7D55;
+  --sf-warning:         #C28319;
+  --sf-danger:          var(--sf-orange-darker);
+
+
+  /* ──────────────────────────────────────────────────────
+     TYPOGRAPHY — FAMILIES
+     ────────────────────────────────────────────────────── */
+  --sf-font-display:    "Sora", system-ui, sans-serif;
+  --sf-font-body:       "Sora", system-ui, sans-serif;
+  --sf-font-mono:       "JetBrains Mono", ui-monospace, monospace;
+
+
+  /* ──────────────────────────────────────────────────────
+     TYPOGRAPHY — WEB UI SCALE
+     Desktop canonical — used throughout web-v2
+     ────────────────────────────────────────────────────── */
+  --sf-fs-hero:         52px;   /* Home marketing headline                    */
+  --sf-fs-display:      40px;   /* Page hero headlines (About, Article, Pro)  */
+  --sf-fs-h1:           32px;   /* Page titles, dashboard greeting            */
+  --sf-fs-h2:           24px;   /* Section headings, modal titles             */
+  --sf-fs-h3:           18px;   /* Card & sub-headings                        */
+  --sf-fs-lead:         20px;   /* Lead / standfirst paragraphs               */
+  --sf-fs-read:         18px;   /* Long-form article body                     */
+  --sf-fs-body:         16px;   /* Default body copy                          */
+  --sf-fs-small:        14px;   /* Secondary copy                             */
+  --sf-fs-meta:         13px;   /* Captions, fine print                       */
+  --sf-fs-eyebrow:      11px;   /* Mono eyebrow labels (ALWAYS UPPERCASE)     */
+
+
+  /* ──────────────────────────────────────────────────────
+     TYPOGRAPHY — LARGE SURFACE SCALE
+     Used in Brand Guidelines, IG posts, print
+     ────────────────────────────────────────────────────── */
+  --sf-fs-display-xl:   96px;
+  --sf-fs-display-l:    64px;
+  --sf-fs-display-sm:   48px;
+  --sf-fs-mono-tag:     13px;   /* Web; 34px in print/Figma                  */
+
+
+  /* ──────────────────────────────────────────────────────
+     TYPOGRAPHY — LEADING & TRACKING
+     ────────────────────────────────────────────────────── */
+  --sf-lh-tight:        1.05;
+  --sf-lh-display:      1.1;
+  --sf-lh-heading:      1.2;
+  --sf-lh-body:         1.45;
+  --sf-lh-loose:        1.6;
+
+  --sf-tr-tight:       -0.01em;
+  --sf-tr-normal:       0em;
+  --sf-tr-wide:         0.02em;
+  --sf-tr-mono:         0.04em;   /* Monos always tracked out                */
+
+  --sf-fw-light:        300;
+  --sf-fw-regular:      400;
+  --sf-fw-medium:       500;
+  --sf-fw-semibold:     600;
+  --sf-fw-bold:         700;
+
+
+  /* ──────────────────────────────────────────────────────
+     SPACING — 4pt step, 8pt default unit
+     ────────────────────────────────────────────────────── */
+  --sf-space-0:    0;
+  --sf-space-1:    4px;
+  --sf-space-2:    8px;
+  --sf-space-3:    12px;
+  --sf-space-4:    16px;
+  --sf-space-5:    20px;
+  --sf-space-6:    24px;
+  --sf-space-8:    32px;
+  --sf-space-10:   40px;
+  --sf-space-12:   48px;
+  --sf-space-16:   64px;
+  --sf-space-20:   80px;
+
+
+  /* ──────────────────────────────────────────────────────
+     LAYOUT
+     ────────────────────────────────────────────────────── */
+  --sf-content:    1680px;   /* Max content width                            */
+  --sf-gutter:     max(40px, calc((100% - var(--sf-content)) / 2));
+                              /* Responsive horizontal gutter                */
+
+  /* Grid: 5-col result grid (desktop) */
+  --sf-grid-cols:  5;         /* 3 @ ≤1200px, 2 @ ≤760px                    */
+  --sf-grid-gap:   16px;
+
+
+  /* ──────────────────────────────────────────────────────
+     BREAKPOINTS (reference — use in media queries)
+     ────────────────────────────────────────────────────── */
+  /* --sf-bp-xl:   1200px   — grid drops from 5 to 3 cols  */
+  /* --sf-bp-md:    760px   — grid drops from 3 to 2 cols  */
+  /* --sf-bp-sm:    640px   — single-col layout / mobile   */
+  /* Mobile design canvas width: 390px                      */
+
+
+  /* ──────────────────────────────────────────────────────
+     RADII
+     ────────────────────────────────────────────────────── */
+  --sf-radius-xs:   4px;
+  --sf-radius-sm:   6px;    /* Small UI: buttons, chips                     */
+  --sf-radius-md:   8px;    /* Inputs, small cards                          */
+  --sf-radius-lg:   12px;   /* Hero blocks, cards                           */
+  --sf-radius-xl:   16px;   /* Larger cards, modals                         */
+  --sf-radius-2xl:  20px;   /* Mobile popups                                */
+  --sf-radius-page: 20px;   /* Page-frame / hero                            */
+  --sf-radius-pill: 999px;  /* Chips, badges, toggles                       */
+
+
+  /* ──────────────────────────────────────────────────────
+     ELEVATION — soft shadows, never colored
+     ────────────────────────────────────────────────────── */
+  --sf-shadow-1:      0 1px 2px rgba(35,31,32,0.06),
+                      0 1px 1px rgba(35,31,32,0.04);    /* Cards              */
+  --sf-shadow-2:      0 4px 12px rgba(35,31,32,0.08),
+                      0 2px 4px rgba(35,31,32,0.04);    /* Raised cards       */
+  --sf-shadow-3:      0 12px 32px rgba(35,31,32,0.12),
+                      0 4px 8px rgba(35,31,32,0.06);    /* Modals, menus      */
+  --sf-shadow-orange: 0 12px 28px rgba(241,65,16,0.20); /* CTA buttons        */
+  --sf-shadow-inset:  inset 0 0 0 1px var(--sf-stone-300);
+
+
+  /* ──────────────────────────────────────────────────────
+     MOTION
+     ────────────────────────────────────────────────────── */
+  --sf-ease-out:    cubic-bezier(0.2, 0.7, 0.2, 1);
+  --sf-ease-in-out: cubic-bezier(0.45, 0, 0.2, 1);
+  --sf-dur-fast:    140ms;   /* Hover states, micro-interactions             */
+  --sf-dur-base:    220ms;   /* Modal in/out, card hover                     */
+  --sf-dur-slow:    360ms;   /* Bar charts, page transitions                 */
+
+}
+
+
+/* ════════════════════════════════════════════════════════
+   BASE RESETS & BODY DEFAULTS
+   ════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { color-scheme: light; }
+
+body {
+  font-family: var(--sf-font-body);
+  font-size: var(--sf-fs-body);
+  line-height: var(--sf-lh-body);
+  color: var(--sf-fg-1);
+  background: var(--sf-bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  text-wrap: pretty;
+}
+
+a { text-decoration: none; }
+
+
+/* ════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   Apply via className throughout the app
+   ════════════════════════════════════════════════════════ */
+
+/* Eyebrow / mono tag — ALWAYS uppercase, tracked out, used sparingly */
+.sf-tag-mono {
+  font-family: var(--sf-font-mono);
+  font-size: var(--sf-fs-eyebrow);
+  font-weight: var(--sf-fw-medium);
+  letter-spacing: var(--sf-tr-mono);
+  text-transform: uppercase;
+  color: var(--sf-fg-3);
+}
+/* Light variant (on orange surfaces) */
+.sf-tag-light {
+  font-family: var(--sf-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+}
+
+/* Orange accent text */
+.sf-accent { color: var(--sf-orange); font-weight: var(--sf-fw-bold); }
+
+/* Pro pill badge */
+.sf-pro-pill {
+  font-family: var(--sf-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--sf-orange);
+  padding: 3px 10px;
+  border-radius: var(--sf-radius-pill);
+}
+
+/* Inline brand mark (SVG mask of solidfind-icon.svg) */
+.sf-mark {
+  display: inline-block;
+  width: 0.7em; height: 0.7em;
+  margin-left: 0.32em;
+  background: currentColor;
+  -webkit-mask: url("/assets/solidfind-icon.svg") center / contain no-repeat;
+  mask: url("/assets/solidfind-icon.svg") center / contain no-repeat;
+  vertical-align: -0.04em;
+}

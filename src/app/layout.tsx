@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
-import { Sora } from "next/font/google";
+import type { CSSProperties } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { DeletionBannerWrapper } from "@/components/DeletionBannerWrapper";
 import { SiteChrome } from "@/components/SiteChrome";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
-
-const sora = Sora({
-  variable: "--font-sora",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
 
 const clerkLocalization = {
   signIn: {
@@ -91,10 +85,10 @@ export default function RootLayout({
     >
       <html lang="en">
         <body
-          className={`${sora.variable} font-sans antialiased`}
-          style={{ fontFamily: "var(--font-sora), sans-serif" }}
+          className="font-sans antialiased"
+          style={{ "--font-sora": "var(--sf-font-body)" } as CSSProperties}
         >
-          <NextTopLoader color="#f14110" showSpinner={false} height={3} />
+          <NextTopLoader color="var(--sf-orange)" showSpinner={false} height={3} />
           <ConvexClientProvider>
             <DeletionBannerWrapper />
             <SiteChrome>{children}</SiteChrome>
