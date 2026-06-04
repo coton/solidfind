@@ -12,7 +12,6 @@ import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { starFillColor, starColor } from "@/lib/starColors";
 import { buildCompanyAddressHref } from '@/lib/company-address-link.mjs';
@@ -510,35 +509,40 @@ export default function ProfilePageClient() {
 
   if (company === undefined) {
     return (
-      <>
-        <main className="max-w-[900px] mx-auto px-4 sm:px-0 sm:pb-8 flex-grow w-full">
-          {/* Back row */}
-          <div className="h-[36px] mb-6 border-b border-[#333]/10" />
-          {/* Title */}
-          <Skeleton className="h-[28px] w-[200px] mb-6" />
-          {/* Main grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-[210px_210px_1fr_70px] gap-5 mb-8">
-            <Skeleton className="w-full aspect-square rounded-[6px]" />
-            <div className="space-y-3">
-              <Skeleton className="h-[14px] w-[120px]" />
-              <Skeleton className="h-[14px] w-[80px]" />
-              <Skeleton className="h-[60px] w-full" />
+      <main className="sf-detail">
+        <div className="sf-skel sf-skel-back" />
+        <section className="sf-detail-hero sf-skel" />
+        <div className="sf-detail-body">
+          <section className="sf-detail-main">
+            <div className="sf-skel sf-skel-title" />
+            <div className="sf-skel-lines">
+              <span />
+              <span />
+              <span />
             </div>
-            <div className="space-y-2">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-[36px] w-full" />
+            <div className="sf-work-head">
+              <div className="sf-skel sf-skel-title" />
+              <div className="sf-skel sf-skel-chip" />
+            </div>
+            <div className="sf-gallery">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div className="sf-thumb sf-skel" key={index} />
               ))}
-              <Skeleton className="h-[60px] w-full mt-4" />
             </div>
-          </div>
-          {/* Image grid */}
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-8">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="w-full aspect-square rounded-[6px]" />
-            ))}
-          </div>
-        </main>
-      </>
+          </section>
+          <aside className="sf-detail-side">
+            <div className="sf-detail-card">
+              <div className="sf-skel sf-skel-chip" />
+              <div className="sf-skel-lines">
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
+          </aside>
+        </div>
+      </main>
     );
   }
 

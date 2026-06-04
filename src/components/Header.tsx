@@ -363,8 +363,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       : (searchParams.get("category") ?? "construction");
   const useMobileCompactHeader = isProfilePage || isDashboardPage;
   const useTopBarOnlyHeader = isCompanyDashboardPage;
-  const showProfileBackBar = isProfilePage && !isDashboardPage && !showResultsBar;
-  const profileBackHref = searchParams.get("returnTo") === "dashboard" && user ? "/dashboard" : "/";
   const homepageSubcategories = getEffectiveSubcategoryFilters(parseSubcategoryParam(searchParams.get("subcategory") || undefined));
   const homepageCompanies = useQuery(
     api.companies.list,
@@ -869,19 +867,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
           <div className="sf-results-meta">
             {sortControl ?? (!showHomepageEmptyState && <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />)}
           </div>
-        </div>
-      )}
-      {showProfileBackBar && (
-        <div className="relative z-20 mx-auto flex max-w-[1344px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
-          <Link
-            href={profileBackHref}
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
-          >
-            <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-              <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>BACK</span>
-          </Link>
         </div>
       )}
     </header>
