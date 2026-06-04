@@ -1005,11 +1005,18 @@
   box-shadow: var(--sf-shadow-2);
 }
 
-.sf-pro-photo {
+.sf-pro-photo,
+.sf-about-art {
   position: relative;
   height: auto;
   aspect-ratio: 16 / 10;
   background-color: var(--sf-stone-100);
+}
+
+.sf-about-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sf-pro-badge {
