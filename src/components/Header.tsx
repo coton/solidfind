@@ -768,13 +768,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               />
             </div>
 
-            {/* Clear Filters - aligned to right of 900px container */}
-            <button
-              onClick={clearFilters}
-              className="text-[#f8f8f8] text-[11px] font-medium underline tracking-[0.22px] whitespace-nowrap"
-            >
-              Clear
-            </button>
           </form>
 
           {/* Mobile: Stack vertically with equal-width filters */}
@@ -797,7 +790,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               </button>
             </div>
 
-            {/* Filters Row + Clear - with vertical centering */}
+            {/* Filters Row */}
             <div className="flex items-center gap-[2px]">
               {/* Filters Row - Equal width with 2px gap */}
               <div className="flex-1 flex items-center gap-[2px]">
@@ -864,26 +857,17 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                 </div>
               </div>
             </div>
-
-            {/* Clear Filters - aligned right, vertically centered */}
-            <div className="flex justify-end mt-2">
-              <button
-                onClick={clearFilters}
-                className="text-[#f8f8f8] text-[10px] font-medium underline tracking-[0.22px]"
-              >
-                Clear
-              </button>
-            </div>
           </div>
         </div>
       </div>
       </div>
       {showResultsBar && (
         <div className="sf-results-bar relative z-20">
-          <h2 className="sf-results-count">
-            <strong>{homepageResultCount}</strong> Solidfinds
-          </h2>
-          {sortControl ?? (!showHomepageEmptyState && <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />)}
+          <span className="sf-results-count"><b>{homepageResultCount}</b></span>
+          <span className="sf-results-sub">solidfinds</span>
+          <div className="sf-results-meta">
+            {sortControl ?? (!showHomepageEmptyState && <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />)}
+          </div>
         </div>
       )}
       {showProfileBackBar && (
