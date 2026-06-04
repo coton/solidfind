@@ -8,7 +8,6 @@ import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { AdBanner } from "@/components/AdBanner";
 import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
 import { useProEnabled } from "@/hooks/useProEnabled";
@@ -184,6 +183,51 @@ function ProjectImagesGrid({
           />
         )
       )}
+    </div>
+  );
+}
+
+function DetailGalleryThumb({
+  image,
+  index,
+  onImageClick,
+}: {
+  image: ProjectImageItem;
+  index: number;
+  onImageClick: (index: number) => void;
+}) {
+  const storageUrl = useStorageUrl(image.kind === "storage" ? image.storageId : undefined);
+  const src = image.kind === "external" ? image.src : storageUrl;
+
+  return (
+    <button
+      type="button"
+      className="sf-thumb sf-thumb-clickable"
+      style={src ? { backgroundImage: `url(${src})` } : undefined}
+      onClick={() => src && onImageClick(index)}
+      aria-label={`Open project image ${index + 1}`}
+    />
+  );
+}
+
+function DetailGallery({
+  items,
+  onImageClick,
+}: {
+  items: ProjectImageItem[];
+  onImageClick: (index: number) => void;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div className="sf-gallery">
+      {items.map((image, index) => (
+        <DetailGalleryThumb
+          key={image.kind === "external" ? `detail-url-${image.src}-${index}` : `detail-storage-${image.storageId}`}
+          image={image}
+          index={index}
+          onImageClick={onImageClick}
+        />
+      ))}
     </div>
   );
 }
@@ -548,421 +592,174 @@ export default function ProfilePageClient() {
     text: r.content,
     date: new Date(r.createdAt).toLocaleDateString("en-CA").replace(/-/g, "/"),
   }));
+  const heroImage = externalProjectImages[0] || company.imageUrl || "/assets/company-cover-fallback.jpg";
+  const showProfileReviews = reviewsEnabled && (company.reviewCount ?? 0) > 0;
+  const accountLabel = proEnabled ? (company.isPro ? "Pro Account" : "Free account") : null;
+  const foundedYear = company.since ?? new Date(company.createdAt).getFullYear();
+  const servicesForDetail = workCategoryServices.length > 0
+    ? workCategoryServices
+    : [{ label: company.category?.replace(/-/g, " ").toUpperCase() || "SERVICES", value: company.subcategory?.replace(/-/g, " ").toUpperCase() || "GENERAL" }];
+  const projectSizeValue = profileMetaServices.find((item) => item.label === "PROJECT SIZE")?.value || "-";
 
   return (
     <>
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 sm:pb-8 flex-grow w-full">
-        {/* Company Name + Desktop Actions */}
-        <div className="mb-4 flex items-start justify-between gap-4 sm:mb-6">
-          <h1 className="text-[20px] sm:text-[26px] font-semibold text-[#333] leading-tight sm:leading-[30px]">
-            {company.name}
-          </h1>
-          <div className="hidden lg:flex items-center justify-end gap-6 pt-1">
-            <button
-              onClick={handleToggleSave}
-              aria-label="Bookmark company"
-              className="group flex items-center gap-2 text-[#333]/35 transition-colors"
-            >
-              <span className={`font-bam text-[9px] ${company.bookmarkCount ? 'text-[#F14110]' : '#666'}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
-              <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
-                className={`transition-colors ${isBookmarked
-                  ? 'fill-[#f14110] stroke-[#f14110] group-hover:fill-transparent group-hover:stroke-[#D8D8D8]'
-                  : 'fill-transparent stroke-[#D8D8D8] group-hover:fill-[#f14110] group-hover:stroke-[#f14110]'
-                }`}
-                style={{ strokeWidth: 2, strokeLinejoin: 'round' as const }}
-              >
-                <path d="M1 1H14.2353V19.1985L7.61765 14.2353L1 19.1985V1Z" />
-              </svg>
-            </button>
-            <button
-              onClick={handleShare}
-              aria-label="Share company"
-              className="group relative flex items-center text-[#333]/35 transition-colors"
-            >
-              <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
-                className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-              >
-                <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
-              </svg>
-              {showCopiedToast && (
-                <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
-              )}
-            </button>
-            <button
-              onClick={() => setShowReportModal(true)}
-              aria-label="Report company"
-              className="group flex items-center text-[#333]/35 transition-colors"
-            >
-              <svg width="15" height="17" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"
-                className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-              >
-                <path d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
-              </svg>
-            </button>
+      <main className="sf-detail">
+        <button className="sf-back" onClick={() => router.back()}>← Back to results</button>
+        <section className="sf-detail-hero" style={{ backgroundImage: `url(${heroImage})` }}>
+          <div className="sf-detail-hero-shade" />
+          <div className="sf-detail-hero-copy">
+            <div className="sf-detail-lockup">
+              <span className="sf-detail-logo" aria-hidden="true">{getCompanyInitials(company.name)}</span>
+              <div className="sf-detail-lockup-text">
+                <h1>{company.name}<span className="dot" /></h1>
+                <div className="sf-detail-meta">
+                  <span>{profileLocationValue}</span>
+                  {showProfileReviews && (
+                    <>
+                      <span className="dotsep" />
+                      <span className="sf-meta-score">
+                        <Star className="sf-star" size={13} fill={starColor(company.rating ?? 0)} color={starColor(company.rating ?? 0)} />
+                        {company.rating ?? 0} · {company.reviewCount ?? 0} reviews
+                      </span>
+                    </>
+                  )}
+                  {accountLabel && (
+                    <>
+                      <span className="dotsep" />
+                      <span>{accountLabel}</span>
+                    </>
+                  )}
+                  <span className="sf-detail-title">{company.category?.replace(/-/g, " ") || "Company"}</span>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[440px_1fr] lg:gap-5 mb-8">
-          <div className="space-y-3 lg:self-start">
-            <div className="grid grid-cols-[160px_1fr] gap-4 lg:grid-cols-2 lg:gap-5">
-              {/* Logo */}
-              <div className="w-full lg:self-start">
-                <div className="w-full aspect-square rounded-[6px] bg-[#d8d8d8] overflow-hidden relative">
-                  {company.logoId ? (
-                    <StorageImage storageId={company.logoId} alt={company.name} fill className="object-cover w-full h-full" />
-                  ) : company.imageUrl && !isWeakExternalLogoUrl(company.imageUrl) ? (
-                    <ExternalImage
-                      src={company.imageUrl}
-                      alt={company.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-[#d8d8d8]">
-                      <span className="text-[38px] font-bold text-[#333]">{getCompanyInitials(company.name)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Contact Info */}
-              <div className="w-full flex flex-col h-[160px] lg:h-[210px] lg:self-start">
-                <div className="h-[32px] flex items-center border-b border-[#333]/10">
-                  <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
-                    Tel. {company.phone || "-"}
-                  </p>
-                </div>
-
-                <div className="h-[32px] flex items-center border-b border-[#333]/10 mb-4">
-                  {company.website ? (
-                    <a
-                      href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11px] font-medium text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
-                    >
-                      WEBSITE
-                    </a>
-                  ) : (
-                    <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">WEBSITE -</p>
-                  )}
-                </div>
-
-                {/* Social Icons */}
-                <div className="flex items-center gap-5 mb-2 lg:mb-6" style={{ height: 20 }}>
-                  {company.email && (
-                    <a href={`mailto:${company.email}`} className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                      <svg height="20" viewBox="0 0 24 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="1" y="1" width="22" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
-                        <path d="M1 3L12 10L23 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </a>
-                  )}
-                  {company.whatsapp && (
-                    <a href={`https://wa.me/${formatWhatsApp(company.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9.99023 1H9.99316C11.1636 0.996123 12.3233 1.2251 13.4043 1.67383C14.485 2.12248 15.4656 2.7819 16.2891 3.61328L16.293 3.61719C17.9749 5.29915 18.9004 7.53456 18.9004 9.91992C18.9004 14.8276 14.8978 18.83 9.99023 18.8301C8.49894 18.8301 7.03299 18.4529 5.72852 17.7422L5.37988 17.5518L4.99609 17.6533L1.41895 18.5928L2.36523 15.123L2.47363 14.7227L2.26758 14.3623C1.49363 13.0123 1.0801 11.4838 1.08008 9.91016C1.08008 5.00244 5.08252 1 9.99023 1Z" stroke="currentColor" strokeWidth="2"/>
-                        <path d="M12.82 11.1801C13.04 11.2701 14.26 11.8701 14.51 11.9901C14.76 12.1101 14.91 12.1601 14.98 12.2701C15.05 12.3801 15.05 12.8701 14.84 13.4501C14.64 14.0301 13.65 14.5601 13.17 14.6301C12.74 14.6901 12.2 14.7201 11.61 14.5301C11.25 14.4201 10.79 14.2701 10.2 14.0101C7.72002 12.9401 6.09002 10.4401 5.97002 10.2701L5.96808 10.2675C5.84074 10.0977 4.96002 8.9237 4.96002 7.71008C4.96002 6.49008 5.60002 5.89008 5.82002 5.64008C6.05002 5.39008 6.31002 5.33008 6.48002 5.33008H6.96002C7.11002 5.34008 7.32002 5.28008 7.52002 5.76008C7.72002 6.26008 8.22002 7.48008 8.28002 7.60008C8.34002 7.72008 8.38002 7.86008 8.30002 8.03008C8.22002 8.19008 8.17002 8.30008 8.05002 8.44008C7.93002 8.58008 7.79002 8.76008 7.68002 8.87008C7.55002 9.00008 7.43002 9.13008 7.57002 9.38008C7.72002 9.63008 8.21002 10.4401 8.95002 11.1001C9.89002 11.9401 10.69 12.2101 10.94 12.3301C11.19 12.4601 11.34 12.4401 11.48 12.2701C11.62 12.1101 12.09 11.5501 12.26 11.3001C12.43 11.0601 12.59 11.1001 12.82 11.1801Z" fill="currentColor"/>
-                      </svg>
-                    </a>
-                  )}
-                  {company.instagram && (
-                    <a href={company.instagram.startsWith("http") ? company.instagram : `https://instagram.com/${company.instagram}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5.7998 1H14.2002C16.8478 1.00011 18.9999 3.15224 19 5.7998V14.2002C18.9999 15.4732 17.4939 16.6936 16.5938 17.5938C15.6936 18.4939 14.4732 18.9999 13.2002 19H5.7998C3.15224 18.9999 1.00011 16.8478 1 14.2002V5.7998C1.00005 4.52684 1.50612 3.30638 2.40625 2.40625C3.30638 1.50612 4.52684 1.00005 5.7998 1Z" stroke="currentColor" strokeWidth="2"/>
-                        <circle cx="10" cy="10" r="4" stroke="currentColor" strokeWidth="2"/>
-                        <circle cx="15.5" cy="4.5" r="1.5" fill="currentColor"/>
-                      </svg>
-                    </a>
-                  )}
-                  {company.facebook && (
-                    <a href={company.facebook.startsWith("http") ? company.facebook : `https://${company.facebook}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="1" y="1" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2"/>
-                        <path d="M8 11.0793H10.2866V18H12.5731V11.0793L14.6465 11.0735L14.9733 8.71666H12.5745V7.70884C12.5731 7.553 12.5839 7.3973 12.6068 7.24325C12.7022 6.65186 13.0164 6.35833 13.6814 6.35833H15V4.10266L14.986 4.10122C14.7545 4.06796 14.2663 4 13.3587 4C11.42 4 10.2866 5.05554 10.2866 7.4558V8.72245H8V11.0793Z" fill="currentColor"/>
-                      </svg>
-                    </a>
-                  )}
-                  {company.linkedin && (
-                    <a href={company.linkedin.startsWith("http") ? company.linkedin : `https://${company.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:text-[#f14110] transition-colors flex items-center h-[20px]">
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="1" y="1" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2"/>
-                        <path fillRule="evenodd" clipRule="evenodd" d="M4 11.1942H6.31836V19H4V11.1942ZM11.4785 13.1344C10.2734 13.1344 10.0879 14.1199 10.0879 15.138V19H7.77148V11.1942H9.99609V12.2614H10.0273C10.3379 11.6481 11.0938 11 12.2207 11C14.5664 11 15 12.6172 15 14.7189V19H12.6836V15.2034C12.6836 14.2977 12.666 13.1344 11.4785 13.1344Z" fill="currentColor"/>
-                        <circle cx="5" cy="9" r="1" fill="currentColor" stroke="currentColor"/>
-                      </svg>
-                    </a>
-                  )}
-                </div>
-
-                {/* Address */}
-                <div className="flex flex-col lg:mt-auto">
-                  <a
-                    href={buildCompanyAddressHref(company)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex w-full cursor-pointer flex-col items-start gap-1.5"
-                  >
-                    <svg width="14" height="17" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#333] group-hover:text-[#f14110] transition-colors flex-shrink-0">
-                      <path d="M8 1C4.13 1 1 4.13 1 8C1 13.5 8 19 8 19C8 19 15 13.5 15 8C15 4.13 11.87 1 8 1Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
-                    </svg>
-                    <span
-                      className="font-bam w-full break-words text-[9px] leading-[14px] text-[#333]/50 transition-colors group-hover:text-[#f14110]"
-                      style={{
-                        display: "-webkit-box",
-                        WebkitBoxOrient: "vertical",
-                        WebkitLineClamp: 3,
-                        overflow: "hidden",
-                      }}
-                    >
-                      {profileAddress}
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile only: Save/Share/Report directly above the project thumbnails */}
-            <div className="mt-3 flex lg:hidden items-center gap-4">
-              <button onClick={handleToggleSave} aria-label="Bookmark company" className="group flex items-center gap-1.5 text-[#333]/35 transition-colors">
-                <span className={`font-bam text-[9px] ${company.bookmarkCount ? 'text-[#F14110]' : '#666'}`}>{String(company.bookmarkCount ?? 0).padStart(2, '0')}</span>
-                <svg width="15" height="20" viewBox="0 0 15.2353 20.1985" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  className={`transition-colors ${isBookmarked
-                    ? 'fill-[#f14110] stroke-[#f14110] group-hover:fill-transparent group-hover:stroke-[#D8D8D8]'
-                    : 'fill-transparent stroke-[#D8D8D8] group-hover:fill-[#f14110] group-hover:stroke-[#f14110]'
-                  }`}
-                  style={{ strokeWidth: 2, strokeLinejoin: 'round' as const }}
-                >
-                  <path d="M1 1H14.2353V19.1985L7.61765 14.2353L1 19.1985V1Z" />
-                </svg>
-              </button>
-              <button onClick={handleShare} aria-label="Share company" className="group flex items-center text-[#333]/35 transition-colors relative">
-                <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                  style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-                >
-                  <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
-                </svg>
-                {showCopiedToast && (
-                  <span className="absolute -top-6 right-0 text-[9px] text-[#f14110] font-medium whitespace-nowrap bg-white px-2 py-1 rounded shadow">Link copied!</span>
-                )}
-              </button>
-              <button onClick={() => setShowReportModal(true)} aria-label="Report company" className="group flex items-center text-[#333]/35 transition-colors">
-                <svg width="15" height="17" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                  style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-                >
-                  <path d="M1 16.4545V10.1759M1 10.1759C5.90894 6.26941 9.59106 14.0823 14.5 10.1759V2.1277C9.59106 6.03416 5.90894 -1.77876 1 2.1277V10.1759Z" />
-                </svg>
-              </button>
-            </div>
-
-            {projectImages.length > 0 && (
-              <ProjectImagesGrid
-                items={projectImages}
-                onImageClick={handleImageClick}
-              />
-            )}
-          </div>
-
-          {/* Profile stats and description */}
-          <div className="lg:self-start">
-
-            <div className="mb-4">
-              <div className="w-full">
-                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/10">
-                  <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Projects</span>
-                  <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.projects ?? 0}</span>
-                </div>
-                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/10">
-                  <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Team</span>
-                  <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">+{company.teamSize ?? 0}</span>
-                </div>
-                <div className="h-[32px] flex items-center justify-between border-b border-[#333]/10">
-                  <span className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Since</span>
-                  <span className="text-[18px] font-semibold text-[#333] tracking-[0.36px]">{company.since ?? new Date(company.createdAt).getFullYear()}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Description */}
-            <p className="text-[10px] text-[#333] leading-[18px] tracking-[0.2px] whitespace-pre-line mb-4" style={{ wordBreak: "break-word", overflowWrap: "break-word" }}>
-              {company.description ?? ""}
-            </p>
-            <div className="space-y-1 font-bam text-[9px] leading-[13px] text-[#333]/35 tracking-[0.18px]">
-              <p>*SolidFind lists this company based on publicly available information and has not independently verified their work quality or operating status.</p>
+        <div className="sf-detail-body">
+          <section className="sf-detail-main">
+            <h2 className="sf-h2-static" style={{ marginTop: 0 }}>About</h2>
+            <div className="sf-detail-p">
+              <p>{company.description ?? `${company.name} is listed on SolidFind for construction, renovation and design projects in Bali.`}</p>
+              <p>SolidFind keeps company profiles connected to public details, contact links, service coverage and review activity so visitors can compare professionals with more clarity.</p>
               {company.isReviewed === false && (
-                <p>**This listing has not been confirmed by the company.</p>
+                <p>This listing has not yet been confirmed by the company.</p>
               )}
             </div>
 
-          </div>
-        </div>
-
-        {/* Services */}
-        <div className="mb-8">
-          {proEnabled && (
-            <div className="space-y-6">
-              {profileMetaServices.length > 0 && (
-                <div className="grid grid-cols-2 gap-x-5 gap-y-5 lg:grid-cols-4">
-                  {profileMetaServices.map((service) => (
-                    <div key={service.label}>
-                      <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">{service.label}</p>
-                      <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{service.value}</p>
+            <h2 className="sf-h2-static">Services &amp; coverage</h2>
+            <dl className="sf-svc">
+              <div className="sf-svc-row">
+                <dt className="sf-svc-term">Provided services</dt>
+                <dd className="sf-svc-def">
+                  {servicesForDetail.map((service) => (
+                    <div className="sf-svc-service" key={service.label}>
+                      <span className="sf-svc-name">{service.label}</span>
+                      <p className="sf-svc-desc">{service.value}</p>
                     </div>
                   ))}
-                </div>
-              )}
-              {workCategoryServices.length > 0 && (
-                <div className="grid grid-cols-2 gap-x-5 gap-y-6 lg:grid-cols-4">
-                  {workCategoryServices.map((service) => (
-                    <div key={service.label}>
-                      <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">{service.label}</p>
-                      <p className="text-[10px] text-[#333]/50 leading-[18px] tracking-[0.2px]">{service.value}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Testimonials Section */}
-        {reviewsEnabled && <div className="mb-8 border-t border-[#333]/10 pt-4">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className={(company.reviewCount ?? 0) > 0 ? "" : "opacity-50"}>
-                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Latest testimonials /</p>
-                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">Ulasan terbaru</p>
+                </dd>
               </div>
-              {(company.reviewCount ?? 0) > 0 && (
-                <div className="flex items-center gap-1">
-                  <svg width="16" height="15" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7.93511 0.71955C8.31202 -0.239851 9.68798 -0.23985 10.0649 0.719551L11.6204 4.67914C11.7825 5.09161 12.1742 5.37238 12.6219 5.39695L16.9196 5.63291C17.9609 5.69008 18.3861 6.98113 17.5777 7.63124L14.2414 10.3144C13.8938 10.5939 13.7442 11.0481 13.8589 11.4758L14.9595 15.5812C15.2262 16.576 14.113 17.3739 13.2364 16.8163L9.61892 14.5149C9.24208 14.2752 8.75792 14.2752 8.38108 14.5149L4.76355 16.8163C3.88703 17.3739 2.77385 16.576 3.04053 15.5812L4.14114 11.4758C4.25579 11.0481 4.10618 10.5939 3.75863 10.3144L0.422255 7.63124C-0.386142 6.98113 0.0390565 5.69008 1.08039 5.63291L5.37814 5.39695C5.82584 5.37238 6.21753 5.09161 6.37957 4.67914L7.93511 0.71955Z" fill={starColor(company.rating ?? 0)}/>
-                  </svg>
-                  <span className="font-bam text-[18px] font-bold tracking-[-0.2em]" style={{ color: starColor(company.rating ?? 0) }}>{company.rating ?? 0}</span>
-                  <span className="text-[10px] tracking-[0.2px]" style={{ color: starColor(company.rating ?? 0) + 'B3' }}>({company.reviewCount ?? 0})</span>
-                </div>
-              )}
+              <div className="sf-svc-row">
+                <dt className="sf-svc-term">Project size</dt>
+                <dd className="sf-svc-def">
+                  <p className="sf-svc-desc sf-svc-inline">{projectSizeValue}</p>
+                </dd>
+              </div>
+              <div className="sf-svc-row">
+                <dt className="sf-svc-term">Locations</dt>
+                <dd className="sf-svc-def">
+                  <p className="sf-svc-desc sf-svc-inline">{profileLocationValue}</p>
+                </dd>
+              </div>
+            </dl>
+
+            <div className="sf-work-head">
+              <h2 className="sf-h2-static" style={{ margin: 0 }}>Recent work</h2>
+              {projectImages.length > 0 && <span className="sf-tag-mono">{projectImages.length} {projectImages.length === 1 ? "project" : "projects"}</span>}
             </div>
-            <div className="flex items-center gap-3">
-              {clerkUser && canWriteReview && (
-                <button
-                  onClick={() => setShowReviewModal(true)}
-                  className="hidden sm:flex rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors items-center justify-center"
-                  style={{ width: '140px', height: '40px' }}
-                >
-                  Write a Testimonial
+            <DetailGallery items={projectImages} onImageClick={handleImageClick} />
+
+            {reviewsEnabled && reviewsList.length > 0 && (
+              <>
+                <div className="sf-reviews-head">
+                  <h2 className="sf-h2-static" style={{ margin: 0 }}>Reviews</h2>
+                  <Link className="sf-btn sf-btn-ghost" href={buildCompanyReviewsPath(company)}>See all {company.reviewCount ?? reviewsList.length} reviews →</Link>
+                </div>
+                <div className="sf-reviews">
+                  {reviewsList.slice(0, 2).map((review, index) => (
+                    <div className="sf-review" key={`${review.name}-${index}`}>
+                      <div className="sf-review-head"><b>{review.name}</b><span>· {review.date}</span></div>
+                      <p>"{review.text}"</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {companyArticles && companyArticles.length > 0 && (
+              <>
+                <div className="sf-work-head">
+                  <h2 className="sf-h2-static" style={{ margin: 0 }}>Featured articles</h2>
+                  <span className="sf-tag-mono">{companyArticles.length} articles</span>
+                </div>
+                <div className="sf-gallery">
+                  {companyArticles.map((article) => (
+                    <Link
+                      key={article._id}
+                      href={`/article/${article._id}`}
+                      className="sf-review"
+                    >
+                      <div className="sf-review-head"><b>{article.title}</b></div>
+                      {article.subtitle && <p>{article.subtitle}</p>}
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </section>
+
+          <aside className="sf-detail-side">
+            <div className="sf-detail-card">
+              <span className="sf-tag-mono">Company details</span>
+              <div className="sf-social">
+                {company.website && <a className="sf-social-btn" href={company.website.startsWith("http") ? company.website : `https://${company.website}`} target="_blank" rel="noopener noreferrer">Web</a>}
+                {company.email && <a className="sf-social-btn" href={`mailto:${company.email}`}>Mail</a>}
+                {company.whatsapp && <a className="sf-social-btn" href={`https://wa.me/${formatWhatsApp(company.whatsapp)}`} target="_blank" rel="noopener noreferrer">WA</a>}
+                <a className="sf-social-btn" href={buildCompanyAddressHref(company)} target="_blank" rel="noopener noreferrer">Map</a>
+              </div>
+              <hr />
+              <dl className="sf-kv">
+                <dt>Region</dt><dd>{profileLocationValue}</dd>
+                <dt>Projects</dt><dd>{company.projects != null ? `${company.projects}+ completed` : "—"}</dd>
+                <dt>Team size</dt><dd>{company.teamSize != null ? `${company.teamSize}+ people` : "—"}</dd>
+                <dt>Founded</dt><dd>{foundedYear}</dd>
+                <dt>Phone</dt><dd>{company.phone || "—"}</dd>
+                <dt>Address</dt><dd>{profileAddress}</dd>
+              </dl>
+              <hr />
+              <button className={`sf-btn ${isBookmarked ? "sf-btn-pri" : "sf-btn-ghost"}`} style={{ width: "100%" }} onClick={handleToggleSave}>
+                {isBookmarked ? "Saved to shortlist ✓" : "Save to shortlist"}
+              </button>
+              {reviewsEnabled && currentUser?.accountType === "individual" && canWriteReview && (
+                <button className="sf-btn sf-btn-ghost" style={{ width: "100%", marginTop: 8 }} onClick={() => setShowReviewModal(true)}>
+                  Write a review
+                  <Star size={15} />
                 </button>
               )}
-              {(company.reviewCount ?? 0) > 0 && (
-                <Link
-                  href={company ? buildCompanyReviewsPath(company) : "/"}
-                  className="rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
-                  style={{ width: '140px', height: '40px' }}
-                >
-                  See all
-                </Link>
-              )}
+              <div className="sf-detail-share-row">
+                <button className="sf-btn sf-btn-ghost sf-share-btn" onClick={handleShare}>
+                  Share
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+                </button>
+                <button className="sf-report" onClick={() => setShowReportModal(true)}>
+                  Report
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg>
+                </button>
+              </div>
+              {showCopiedToast && <p className="sf-tag-mono" style={{ marginTop: 12, color: "var(--sf-orange)" }}>Link copied</p>}
             </div>
-          </div>
-
-          {/* Mobile: 3 testimonials full width */}
-          <div className="lg:hidden space-y-5">
-            {reviewsList.slice(0, 3).map((review, index) => (
-              <ReviewCard key={index} {...review} mobile />
-            ))}
-          </div>
-          {/* Desktop: 4 testimonials in grid */}
-          <div className="hidden lg:grid lg:grid-cols-4 gap-5">
-            {reviewsList.slice(0, 4).map((review, index) => (
-              <ReviewCard key={index} {...review} />
-            ))}
-          </div>
-          {/* Mobile: Write a Testimonial button */}
-          {clerkUser && canWriteReview && (
-            <button
-              onClick={() => setShowReviewModal(true)}
-              className="sm:hidden mt-4 rounded-full bg-[#f14110] text-[11px] font-medium text-white tracking-[0.22px] hover:bg-[#d93a0e] transition-colors inline-flex items-center justify-center"
-              style={{ width: '140px', height: '40px' }}
-            >
-              Write a Testimonial
-            </button>
-          )}
-        </div>}
-
-        {/* Featured Articles */}
-        {companyArticles && companyArticles.length > 0 && (
-          <div className="mb-8">
-            <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-4">Featured Articles</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {companyArticles.map((article) => (
-                <Link
-                  key={article._id}
-                  href={`/article/${article._id}`}
-                  className="bg-white rounded-[8px] border border-[#e4e4e4] overflow-hidden hover:border-[#333] transition-colors"
-                >
-                  {article.coverImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={article.coverImageUrl} alt={article.title} className="w-full aspect-video object-cover" />
-                  ) : article.coverImageId ? (
-                    <div className="w-full aspect-video bg-[#d8d8d8] relative">
-                      <StorageImage storageId={article.coverImageId} alt={article.title} fill className="object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-full aspect-video bg-[#f5f5f5] flex items-center justify-center">
-                      <span className="text-[10px] text-[#333]/30">No image</span>
-                    </div>
-                  )}
-                  <div className="p-3">
-                    <p className="text-[12px] font-medium text-[#333] leading-tight mb-1">{article.title}</p>
-                    {article.subtitle && (
-                      <p className="text-[10px] text-[#333]/50 line-clamp-2">{article.subtitle}</p>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Navigation */}
-        <div className="flex items-center justify-between mb-8 border-t border-[#333]/10 pt-4">
-          {adjacentIds?.prevCompany ? (
-            <Link
-              href={buildCompanyProfilePath(adjacentIds.prevCompany)}
-              className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
-            >
-              <svg width="8" height="5" viewBox="0 0 16 10" fill="none" className="flex-shrink-0"><path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              <span>PREVIOUS</span>
-            </Link>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333]/30 tracking-[0.22px]">
-              <svg width="8" height="5" viewBox="0 0 16 10" fill="none" className="flex-shrink-0"><path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              <span>PREVIOUS</span>
-            </span>
-          )}
-          {adjacentIds?.nextCompany ? (
-            <Link
-              href={buildCompanyProfilePath(adjacentIds.nextCompany)}
-              className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
-            >
-              <span>NEXT</span>
-              <svg width="8" height="5" viewBox="0 0 16 10" fill="none" className="flex-shrink-0"><path d="M15 5H1M15 5L11 1M15 5L11 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </Link>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333]/30 tracking-[0.22px]">
-              <span>NEXT</span>
-              <svg width="8" height="5" viewBox="0 0 16 10" fill="none" className="flex-shrink-0"><path d="M15 5H1M15 5L11 1M15 5L11 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </span>
-          )}
-        </div>
-
-        {/* Ad Banner */}
-        <div className="mb-8">
-          <AdBanner alt="Advertisement" />
+          </aside>
         </div>
       </main>
 
