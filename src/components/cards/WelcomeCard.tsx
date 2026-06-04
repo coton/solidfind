@@ -15,23 +15,27 @@ export function WelcomeCard() {
 
   return (
     <Link href="/about" className="block">
-      <article className="relative h-[320px] w-[210px] overflow-hidden rounded-[var(--sf-radius-lg)] border border-[var(--sf-border-1)] bg-[var(--sf-bg-surface)] shadow-[var(--sf-shadow-1)] transition duration-[var(--sf-dur-base)] ease-[var(--sf-ease-out)] hover:-translate-y-0.5 hover:shadow-[var(--sf-shadow-2)]">
+      <div className="relative w-[210px] h-[220px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
+        {/* Orange gradient top section - rounded top, square bottom */}
         <div
-          className="relative flex h-[156px] items-end p-4"
-          style={{ background: "var(--sf-grad-hero)" }}
+          className="absolute top-0 left-0 right-0 h-[120px] rounded-t-[6px] flex items-end p-[10px]"
+          style={{
+            background: "linear-gradient(to left, #f14110, #e9a28e)"
+          }}
         >
-          <div className="flex flex-col gap-4">
-            <Image src="/images/logo-full-white.svg" alt="SolidFind.id" width={130} height={14} className="h-[14px] w-auto" />
-            <p className="sf-tag-light">About SolidFind</p>
+          {/* Logo */}
+          <div className="flex items-baseline h-[13px]">
+            <Image src="/images/logo-full-white.svg" alt="SolidFind.id" width={120} height={13} className="h-[13px] w-auto" />
           </div>
         </div>
-        <div className="p-4">
-          <h3 className="mb-3 text-[18px] font-semibold leading-[var(--sf-lh-heading)] text-[var(--sf-fg-1)]">Find with context</h3>
-          <p className="line-clamp-6 text-[13px] leading-[var(--sf-lh-body)] text-[var(--sf-fg-2)]">
+
+        {/* Text bottom section - 11px font size, 4 lines max, 20px from gradient */}
+        <div className="absolute top-[140px] left-[10px] right-[10px] bottom-[20px]">
+          <p className="text-[11px] leading-[15px] tracking-[0.22px] text-[#333] font-bold line-clamp-4" style={{ fontFamily: "'Sora', sans-serif" }}>
             {description}
           </p>
         </div>
-      </article>
+      </div>
     </Link>
   );
 }

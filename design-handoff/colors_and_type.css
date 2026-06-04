@@ -1,0 +1,251 @@
+/* ─────────────────────────────────────────────────────────────
+   SolidFind — Colors & Type
+   Building an independent platform for clarity, trust & perspective
+   in construction, renovation and real estate (Indonesia).
+   ───────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: "Sora";
+  src: url("./fonts/Sora-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* "Basically A Mono" is a paid Indian Type Foundry face. We substitute
+   JetBrains Mono Medium as the closest free equivalent until original
+   files are licensed. Flagged in README. */
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+:root {
+  /* ── Brand core ─────────────────────────────────────────── */
+  --sf-orange:        #F14110;   /* primary, "SolidFind orange" */
+  --sf-orange-deep:   #EC3300;   /* press / strong accent */
+  --sf-orange-darker: #BB0000;   /* rare, very strong */
+  --sf-orange-warm:   #C32A00;   /* shadow tone on orange surface */
+
+  --sf-ink:           #231F20;   /* primary type, near-black (rich) */
+  --sf-ink-soft:      #333333;   /* body, secondary headings */
+
+  /* ── Neutral architecture ───────────────────────────────── */
+  --sf-paper:         #F8F8F8;   /* default page surface */
+  --sf-stone-100:     #FFFFFF;
+  --sf-stone-200:     #F8F8F8;
+  --sf-stone-300:     #E4E4E4;   /* hairline / divider */
+  --sf-stone-400:     #D8D8D8;   /* stronger divider, disabled bg */
+  --sf-stone-500:     #BFBFBF;
+  --sf-stone-600:     #8C8C8C;
+  --sf-stone-700:     #4A4A4A;
+
+  /* ── Complement (warm peach scale, "trust-warm") ────────── */
+  --sf-peach-100:     #FBE6DE;
+  --sf-peach-200:     #F0C5B9;
+  --sf-peach-300:     #E9A28E;
+  --sf-peach-400:     #F7896A;   /* surprisingly bright */
+  --sf-peach-500:     #F36D48;
+  --sf-peach-mist:    #A2CDD7;   /* the only cool secondary in file */
+
+  /* ── Semantic ───────────────────────────────────────────── */
+  --sf-fg-1:          var(--sf-ink);
+  --sf-fg-2:          var(--sf-ink-soft);
+  --sf-fg-3:          var(--sf-stone-600);
+  --sf-fg-on-orange:  #FFFFFF;
+  --sf-fg-link:       var(--sf-orange);
+
+  --sf-bg-page:       var(--sf-stone-200);
+  --sf-bg-surface:    var(--sf-stone-100);
+  --sf-bg-elevated:   #FFFFFF;
+  --sf-bg-muted:      var(--sf-stone-200);
+  --sf-bg-orange:     var(--sf-orange);
+
+  --sf-border-1:      var(--sf-stone-300);
+  --sf-border-2:      var(--sf-stone-400);
+  --sf-border-strong: var(--sf-ink-soft);
+
+  --sf-success:       #2E7D55;
+  --sf-warning:       #C28319;
+  --sf-danger:        var(--sf-orange-darker);
+
+  /* Signature gradient (used as page hero block, full-bleed cards) */
+  --sf-grad-orange:   linear-gradient(180deg, #F14110 0%, #E9A28E 100%);
+  --sf-grad-orange-x: linear-gradient(90deg,  #F14110 0%, #E9A28E 100%);
+  --sf-grad-mute:     linear-gradient(180deg, #F14110 0%, #E4E4E4 100%);
+  --sf-grad-fade-w:   linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.75) 100%);
+
+  /* ── Type — families ────────────────────────────────────── */
+  --sf-font-display:  "Sora", "Sora Fallback", system-ui, sans-serif;
+  --sf-font-body:     "Sora", "Sora Fallback", system-ui, sans-serif;
+  --sf-font-mono:     "JetBrains Mono", "Basically A Mono", ui-monospace, monospace;
+
+  /* ── Type — scale (1080×1350 IG / large surfaces) ───────── */
+  /* The Figma file leans into BIG type. Body 30–45 px isn't unusual.
+     For UI/web we map down to a typical web scale below.            */
+  --sf-fs-display-xl: 96px;   /* 6rem — splash headline      (190 in fig) */
+  --sf-fs-display-l:  64px;   /* 4rem — hero headline         (168) */
+  --sf-fs-display:    48px;   /* 3rem                         (50)  */
+  --sf-fs-h1:         40px;   /* 2.5rem                       (45)  */
+  --sf-fs-h2:         32px;
+  --sf-fs-h3:         24px;
+  --sf-fs-h4:         20px;
+  --sf-fs-body-l:     18px;
+  --sf-fs-body:       16px;
+  --sf-fs-body-s:     14px;
+  --sf-fs-caption:    12px;
+  --sf-fs-mono-tag:   13px;   /* "Basically A Mono" 34 px in fig */
+
+  /* ── Type — leading & tracking ─────────────────────────── */
+  --sf-lh-tight:    1.05;
+  --sf-lh-display:  1.1;     /* tight on display */
+  --sf-lh-heading:  1.2;
+  --sf-lh-body:     1.45;    /* 60/45 in fig ≈ 1.33; slightly looser for screen */
+  --sf-lh-loose:    1.6;
+
+  --sf-tr-tight:   -0.01em;
+  --sf-tr-normal:   0em;
+  --sf-tr-wide:     0.02em;
+  --sf-tr-mono:     0.04em;  /* monos always tracked out */
+
+  --sf-fw-light:    300;
+  --sf-fw-regular:  400;
+  --sf-fw-medium:   500;
+  --sf-fw-semibold: 600;
+  --sf-fw-bold:     700;
+
+  /* ── Spacing (4-pt step, 8 default) ─────────────────────── */
+  --sf-space-0:   0;
+  --sf-space-1:   4px;
+  --sf-space-2:   8px;
+  --sf-space-3:   12px;
+  --sf-space-4:   16px;
+  --sf-space-5:   20px;
+  --sf-space-6:   24px;
+  --sf-space-8:   32px;
+  --sf-space-10:  40px;
+  --sf-space-12:  48px;
+  --sf-space-16:  64px;
+  --sf-space-20:  80px;
+
+  /* Edge gutter on full-bleed visuals — lifted from Figma's recurring
+     40 px white margin around 1000-px hero blocks on a 1080 board. */
+  --sf-gutter:    40px;
+
+  /* ── Radii ──────────────────────────────────────────────── */
+  --sf-radius-xs:    4px;
+  --sf-radius-sm:    6px;     /* small UI (buttons, chips)        */
+  --sf-radius-md:    8px;
+  --sf-radius-lg:   12px;     /* hero blocks, cards (Figma value) */
+  --sf-radius-xl:   20px;     /* page-frame radius (BG component) */
+  --sf-radius-pill: 999px;
+
+  /* ── Elevation — soft, never colored ────────────────────── */
+  --sf-shadow-1: 0 1px 2px rgba(35,31,32,0.06), 0 1px 1px rgba(35,31,32,0.04);
+  --sf-shadow-2: 0 4px 12px rgba(35,31,32,0.08), 0 2px 4px rgba(35,31,32,0.04);
+  --sf-shadow-3: 0 12px 32px rgba(35,31,32,0.12), 0 4px 8px rgba(35,31,32,0.06);
+  --sf-shadow-orange: 0 12px 28px rgba(241,65,16,0.20);
+  --sf-shadow-inset:  inset 0 0 0 1px var(--sf-stone-300);
+
+  /* ── Motion ─────────────────────────────────────────────── */
+  --sf-ease-out:    cubic-bezier(0.2, 0.7, 0.2, 1);
+  --sf-ease-in-out: cubic-bezier(0.45, 0, 0.2, 1);
+  --sf-dur-fast:    140ms;
+  --sf-dur-base:    220ms;
+  --sf-dur-slow:    360ms;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Semantic primitives — apply these classes (or use as base)
+   for consistent type across products.
+   ═══════════════════════════════════════════════════════════ */
+
+html { color-scheme: light; }
+body {
+  font-family: var(--sf-font-body);
+  font-size: var(--sf-fs-body);
+  line-height: var(--sf-lh-body);
+  color: var(--sf-fg-1);
+  background: var(--sf-bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.sf-display-xl,
+.sf-display-l,
+.sf-display,
+.sf-h1, .sf-h2, .sf-h3, .sf-h4 {
+  font-family: var(--sf-font-display);
+  color: var(--sf-fg-1);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.sf-display-xl {
+  font-size: var(--sf-fs-display-xl);
+  font-weight: var(--sf-fw-semibold);
+  line-height: var(--sf-lh-display);
+  letter-spacing: var(--sf-tr-tight);
+}
+.sf-display-l {
+  font-size: var(--sf-fs-display-l);
+  font-weight: var(--sf-fw-semibold);
+  line-height: var(--sf-lh-display);
+  letter-spacing: var(--sf-tr-tight);
+}
+.sf-display {
+  font-size: var(--sf-fs-display);
+  font-weight: var(--sf-fw-semibold);
+  line-height: var(--sf-lh-heading);
+}
+.sf-h1 { font-size: var(--sf-fs-h1); font-weight: var(--sf-fw-light); line-height: var(--sf-lh-heading); }
+.sf-h2 { font-size: var(--sf-fs-h2); font-weight: var(--sf-fw-light); line-height: var(--sf-lh-heading); }
+.sf-h3 { font-size: var(--sf-fs-h3); font-weight: var(--sf-fw-semibold); line-height: var(--sf-lh-heading); }
+.sf-h4 { font-size: var(--sf-fs-h4); font-weight: var(--sf-fw-semibold); line-height: var(--sf-lh-heading); }
+
+.sf-lead {
+  font-family: var(--sf-font-body);
+  font-size: var(--sf-fs-body-l);
+  font-weight: var(--sf-fw-light);
+  line-height: var(--sf-lh-body);
+  color: var(--sf-fg-2);
+  letter-spacing: var(--sf-tr-wide);
+}
+
+.sf-body  { font-size: var(--sf-fs-body);   line-height: var(--sf-lh-body); color: var(--sf-fg-2); }
+.sf-body-s{ font-size: var(--sf-fs-body-s); line-height: var(--sf-lh-body); color: var(--sf-fg-2); }
+.sf-caption {
+  font-size: var(--sf-fs-caption);
+  line-height: var(--sf-lh-heading);
+  color: var(--sf-fg-3);
+  letter-spacing: var(--sf-tr-wide);
+}
+
+/* The mono "tag" — used in Figma as 34-px section labels.
+   ALWAYS uppercase, tracked out, used sparingly. */
+.sf-tag {
+  font-family: var(--sf-font-mono);
+  font-size: var(--sf-fs-mono-tag);
+  font-weight: var(--sf-fw-medium);
+  letter-spacing: var(--sf-tr-mono);
+  text-transform: uppercase;
+  color: var(--sf-fg-2);
+}
+
+/* Accent — the "Welcome : )" treatment: heavy bold orange */
+.sf-accent {
+  color: var(--sf-orange);
+  font-weight: var(--sf-fw-bold);
+  letter-spacing: var(--sf-tr-wide);
+}
+
+/* Mark — tiny dot motif from the .id of the logo. The brand uses
+   a small filled circle as a finish glyph at the end of statements. */
+.sf-dot::after {
+  content: "";
+  display: inline-block;
+  width: 0.36em;
+  height: 0.36em;
+  margin-left: 0.18em;
+  background: var(--sf-orange);
+  border-radius: 50%;
+  vertical-align: 0.18em;
+}

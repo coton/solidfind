@@ -196,10 +196,10 @@ function Dropdown({
     <div className={`relative ${width} ${isOpen ? 'z-[80]' : ''}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="h-10 bg-[var(--sf-stone-200)] rounded-[var(--sf-radius-lg)] flex items-center justify-between px-3 w-full"
+        className="h-10 bg-[#f8f8f8] rounded-[6px] flex items-center justify-between px-3 w-full"
         style={{ letterSpacing: '0.12px' }}
       >
-        <span className={`text-[11px] font-semibold leading-[11px] ${buttonIsActive ? 'text-[var(--sf-orange)]' : 'text-[#333]'}`}>
+        <span className={`text-[11px] font-semibold leading-[11px] ${buttonIsActive ? 'text-[#f14110]' : 'text-[#333]'}`}>
           {getButtonText()}
         </span>
         <Image src="/images/btn-down.svg" alt="" width={8} height={5} className="rotate-90 flex-shrink-0" />
@@ -209,7 +209,7 @@ function Dropdown({
         <>
           <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
           <div 
-            className={`absolute top-full mt-[2px] z-[70] bg-white rounded-[var(--sf-radius-lg)] shadow-lg w-max max-w-[calc(100vw-40px)] ${
+            className={`absolute top-full mt-[2px] z-[70] bg-white rounded-[6px] shadow-lg w-max max-w-[calc(100vw-40px)] ${
               alignRight ? 'right-0' : 'left-0'
             } ${menuClassName}`}
           >
@@ -233,7 +233,7 @@ function Dropdown({
                     className={`w-full text-left py-2 text-[11px] flex items-center gap-[5px] ${
                       index < options.length - 1 ? 'mb-[2px]' : ''
                     } ${
-                      isSelected ? 'text-[var(--sf-orange)]' : 'text-[#333]'
+                      isSelected ? 'text-[#f14110]' : 'text-[#333]'
                     }`}
                     style={{ 
                       fontFamily: 'var(--font-sora), sans-serif', 
@@ -244,7 +244,7 @@ function Dropdown({
                   >
                     <span className="min-w-0 flex-1 inline-flex items-center min-h-3 leading-[14px]">{option.label}</span>
                     <div 
-                      className={`flex-shrink-0 w-6 h-3 rounded-full ${isSelected ? 'bg-gradient-to-l from-[var(--sf-orange)] to-[var(--sf-peach-300)]' : 'bg-[#333]/25'}`}
+                      className={`flex-shrink-0 w-6 h-3 rounded-full ${isSelected ? 'bg-gradient-to-l from-[#f14110] to-[#e9a28e]' : 'bg-[#333]/25'}`}
                     >
                       <div className={`w-2 h-2 bg-white rounded-full mt-0.5 transition-all ${isSelected ? 'ml-3.5' : 'ml-0.5'}`} />
                     </div>
@@ -588,11 +588,11 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   return (
     <>
-    <header className="relative z-40 bg-[var(--sf-bg-page)] px-[10px]">
-      <div className="relative z-30 rounded-[var(--sf-radius-lg)]">
+    <header className="relative z-40 bg-[#ececec] px-[10px]">
+      <div className="relative z-30 rounded-[6px]">
       {headerMedia.url ? (
         <>
-          <div className="absolute inset-0 overflow-hidden rounded-[var(--sf-radius-lg)]">
+          <div className="absolute inset-0 overflow-hidden rounded-[6px]">
             {headerMedia.type === "video" ? (
               <video src={headerMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
             ) : (
@@ -605,17 +605,17 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               />
             )}
           </div>
-          <div className="absolute inset-0 rounded-[var(--sf-radius-lg)] bg-black/25" />
+          <div className="absolute inset-0 rounded-[6px] bg-black/25" />
         </>
       ) : headerMediaState.isLoading ? (
-        <div className="absolute inset-0 rounded-[var(--sf-radius-lg)] bg-[#e4e4e4]" />
+        <div className="absolute inset-0 rounded-[6px] bg-[#e4e4e4]" />
       ) : (
         <>
           {/* Gradient Background - matches footer */}
           <div
-            className="absolute inset-0 rounded-[var(--sf-radius-lg)]"
+            className="absolute inset-0 rounded-[6px]"
             style={{
-              background: "linear-gradient(to right, var(--sf-peach-300), var(--sf-orange))"
+              background: "linear-gradient(to right, #E9A28E, #F14110)"
             }}
           />
         </>
@@ -623,7 +623,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
       <div className={`relative z-10 px-5 sm:px-0 ${useTopBarOnlyHeader ? "flex h-[90px] flex-col justify-center" : useMobileCompactHeader ? "flex h-[90px] flex-col justify-center sm:block sm:h-auto sm:pt-6 sm:pb-4" : "pt-4 sm:pt-6 pb-[8px] sm:pb-4"}`}>
         {/* Top Bar */}
-        <div className={`max-w-[var(--sf-content)] mx-auto flex items-center ${useTopBarOnlyHeader ? "w-full justify-between gap-4 mb-0" : `sm:justify-between sm:mb-6 ${useMobileCompactHeader ? "w-full justify-between gap-4 mb-0" : "justify-between mb-8"}`}`}>
+        <div className={`max-w-[900px] mx-auto flex items-center ${useTopBarOnlyHeader ? "w-full justify-between gap-4 mb-0" : `sm:justify-between sm:mb-6 ${useMobileCompactHeader ? "w-full justify-between gap-4 mb-0" : "justify-between mb-8"}`}`}>
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image src="/images/logo-full.svg" alt="SolidFind.id" width={175} height={19} className="h-[19px] w-auto" />
@@ -633,7 +633,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
           <div className="flex items-center gap-3 sm:gap-5">
             {/* Desktop: IG (first) */}
             {igVisibleState.value !== "false" && (
-              <a href={igUrlState.value || "#"} target="_blank" rel="noopener noreferrer" className="hidden sm:block text-[var(--sf-stone-200)] hover:opacity-80 transition-opacity">
+              <a href={igUrlState.value || "#"} target="_blank" rel="noopener noreferrer" className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity">
                 <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
               </a>
             )}
@@ -642,7 +642,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               {/* Account icon (mobile + desktop) */}
               <Link
                 href={userType === "company" ? "/company-dashboard" : "/dashboard"}
-                className="text-[var(--sf-stone-200)] hover:opacity-80 transition-opacity"
+                className="text-[#f8f8f8] hover:opacity-80 transition-opacity"
                 title="Dashboard"
               >
                 <Image src="/images/icon-account.svg" alt="Dashboard" width={19} height={20} />
@@ -651,14 +651,14 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               {userType === "company" ? (
                 <button
                   onClick={handleSignOut}
-                  className="h-10 px-4 rounded-full border border-[var(--sf-stone-200)] text-[var(--sf-stone-200)] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[var(--sf-orange)] transition-colors flex items-center"
+                  className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
                 >
                   Log out
                 </button>
               ) : (
                 <button
                   onClick={handleSignOut}
-                  className="h-10 px-4 rounded-full border border-[var(--sf-stone-200)] text-[var(--sf-stone-200)] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[var(--sf-orange)] transition-colors flex items-center"
+                  className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
                 >
                   Log out
                 </button>
@@ -669,14 +669,14 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               {/* Desktop: Account icon → opens LOGIN modal */}
               <button
                 onClick={() => openAuthModal("individual", "login")}
-                className="hidden sm:block text-[var(--sf-stone-200)] hover:opacity-80 transition-opacity"
+                className="hidden sm:block text-[#f8f8f8] hover:opacity-80 transition-opacity"
               >
                 <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
               </button>
               {/* List your business → opens REGISTER modal, company pre-selected */}
               <button
                 onClick={() => openAuthModal("company", "register")}
-                className="h-10 px-4 rounded-full border border-[var(--sf-stone-200)] text-[var(--sf-stone-200)] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[var(--sf-orange)] transition-colors flex items-center"
+                className="h-10 px-4 rounded-full border border-[#f8f8f8] text-[#f8f8f8] text-[11px] font-medium tracking-[0.22px] hover:bg-white hover:text-[#F14110] transition-colors flex items-center"
               >
                 List your business
               </button>
@@ -685,7 +685,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         </div>
 
         {/* Category Tabs - Horizontal scroll on mobile */}
-        <div className={`max-w-[var(--sf-content)] mx-auto mb-4 sm:mb-4 ${useTopBarOnlyHeader ? "hidden" : useMobileCompactHeader ? "hidden sm:block" : ""}`}>
+        <div className={`max-w-[900px] mx-auto mb-4 sm:mb-4 ${useTopBarOnlyHeader ? "hidden" : useMobileCompactHeader ? "hidden sm:block" : ""}`}>
           <div className="relative overflow-visible">
           <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-2 min-w-max">
@@ -696,8 +696,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                   onClick={() => handleCategoryTab(cat.id)}
                   className={`h-10 px-4 sm:px-5 rounded-full text-[11px] sm:text-[12px] font-medium transition-colors whitespace-nowrap ${
                     activeCategory === cat.id
-                      ? "bg-white text-[var(--sf-orange)] hover:bg-white opacity-100 hover:opacity-100"
-                      : "text-[var(--sf-stone-200)] border border-transparent hover:border-white hover:text-[#FFF]"
+                      ? "bg-white text-[#f14110] hover:bg-white opacity-100 hover:opacity-100"
+                      : "text-[#f8f8f8] border border-transparent hover:border-white hover:text-[#FFF]"
                   }`}
                 >
                   {cat.label}
@@ -711,21 +711,21 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             </div>
           </div>
           {/* Gradient fade on right edge — mobile only, extends to screen edge past padding */}
-          <div className="sm:hidden pointer-events-none absolute -right-4 top-0 bottom-0 w-20" style={{ background: 'linear-gradient(to right, transparent, var(--sf-orange))' }} />
+          <div className="sm:hidden pointer-events-none absolute -right-4 top-0 bottom-0 w-20" style={{ background: 'linear-gradient(to right, transparent, #F14110)' }} />
           </div>
-          <p className="font-bam text-[var(--sf-stone-200)] text-[11px] mt-4 leading-[15px]">
+          <p className="font-bam text-[#f8f8f8] text-[11px] mt-4 leading-[15px]">
             {(activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction}
           </p>
         </div>
 
         {/* Search Bar */}
-        <div className={`max-w-[var(--sf-content)] mx-auto ${useTopBarOnlyHeader ? "hidden" : ""}`}>
+        <div className={`max-w-[900px] mx-auto ${useTopBarOnlyHeader ? "hidden" : ""}`}>
           {/* Desktop: Flex with Clear button positioned right */}
           <div className="hidden items-center justify-between gap-0 sm:flex">
             {/* Left side: Keywords + Filters */}
             <div className="flex items-center gap-[2px]">
               {/* Keywords Input - extended width on desktop */}
-              <div className="w-[390px] h-10 bg-[var(--sf-stone-200)] rounded-[var(--sf-radius-lg)] flex items-center px-3">
+              <div className="w-[390px] h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
                 <input
                   type="text"
                   placeholder="Search by keywords"
@@ -789,7 +789,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               />
 
               {/* Search Button - 40x40 container with 34x34 icon centered */}
-              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[var(--sf-stone-200)] rounded-[var(--sf-radius-lg)]">
+              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[#f8f8f8] rounded-[6px]">
                 <Image src="/images/btn-search.svg" alt="Search" width={34} height={34} className="w-[34px] h-[34px]" />
               </button>
             </div>
@@ -797,7 +797,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             {/* Clear Filters - aligned to right of 900px container */}
             <button
               onClick={clearFilters}
-              className="text-[var(--sf-stone-200)] text-[11px] font-medium underline tracking-[0.22px] whitespace-nowrap"
+              className="text-[#f8f8f8] text-[11px] font-medium underline tracking-[0.22px] whitespace-nowrap"
             >
               Clear
             </button>
@@ -807,7 +807,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
           <div className={`${useMobileCompactHeader ? "hidden" : "flex"} sm:hidden flex-col gap-[2px]`}>
             {/* Keywords Input with Search Button */}
             <div className="flex items-center gap-[2px] mb-[2px]">
-              <div className="flex-1 h-10 bg-[var(--sf-stone-200)] rounded-[var(--sf-radius-lg)] flex items-center px-3">
+              <div className="flex-1 h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
                 <input
                   type="text"
                   placeholder="Enter Keywords"
@@ -818,7 +818,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                 />
               </div>
               {/* Search Button */}
-              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[var(--sf-stone-200)] rounded-[var(--sf-radius-lg)]">
+              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[#f8f8f8] rounded-[6px]">
                 <Image src="/images/btn-search.svg" alt="Search" width={34} height={34} className="w-[34px] h-[34px]" />
               </button>
             </div>
@@ -895,7 +895,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             <div className="flex justify-end mt-2">
               <button
                 onClick={clearFilters}
-                className="text-[var(--sf-stone-200)] text-[10px] font-medium underline tracking-[0.22px]"
+                className="text-[#f8f8f8] text-[10px] font-medium underline tracking-[0.22px]"
               >
                 Clear
               </button>
@@ -905,7 +905,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       </div>
       </div>
       {showResultsBar && (
-        <div className="relative z-20 mx-auto flex max-w-[var(--sf-content)] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
+        <div className="relative z-20 mx-auto flex max-w-[900px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
           <h2 className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]">
             {homepageResultCount} Solid Finds
           </h2>
@@ -913,10 +913,10 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         </div>
       )}
       {showProfileBackBar && (
-        <div className="relative z-20 mx-auto flex max-w-[var(--sf-content)] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
+        <div className="relative z-20 mx-auto flex max-w-[900px] items-center justify-between gap-4 px-5 pb-2 pt-3 sm:px-0">
           <Link
             href={profileBackHref}
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[var(--sf-orange)] transition-colors"
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
           >
             <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
               <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -939,14 +939,14 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     {showLogoutPrompt && (
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/50" onClick={() => setShowLogoutPrompt(false)} />
-        <div className="relative bg-white w-full max-w-[380px] rounded-[var(--sf-radius-lg)] p-8 text-center">
+        <div className="relative bg-white w-full max-w-[380px] rounded-[6px] p-8 text-center">
           <h3 className="text-[18px] font-bold text-[#333] mb-3">Register Your Company</h3>
           <p className="text-[12px] text-[#333]/70 mb-6 leading-[18px]">
             Log out first to register your company profile.
           </p>
           <button
             onClick={() => setShowLogoutPrompt(false)}
-            className="h-10 min-w-[140px] px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[var(--sf-orange)] hover:text-[var(--sf-orange)] transition-colors"
+            className="h-10 min-w-[140px] px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors"
           >
             OK
           </button>

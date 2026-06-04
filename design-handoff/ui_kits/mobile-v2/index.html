@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>SolidFind — Mobile UI Kit</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="icon" href="../../assets/favicon.png"/>
+<link rel="stylesheet" href="../../colors_and_type.css"/>
+<link rel="stylesheet" href="mobile.css"/>
+<style>html, body { margin: 0; height: 100%; background: #f0eee9; }</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="mobile-chrome.jsx"></script>
+<script type="text/babel" src="mobile-main.jsx"></script>
+<script type="text/babel" src="mobile-article.jsx"></script>
+<script type="text/babel" src="mobile-about.jsx"></script>
+<script type="text/babel" src="mobile-dashboard.jsx"></script>
+<script type="text/babel" src="mobile-edit.jsx"></script>
+<script type="text/babel" src="mobile-profile.jsx"></script>
+<script type="text/babel" src="mobile-legal.jsx"></script>
+<script type="text/babel" src="mobile-pro-guidelines.jsx"></script>
+<script type="text/babel" src="mobile-popups.jsx"></script>
+<script type="text/babel" src="mobile-user-dashboard.jsx"></script>
+<script type="text/babel" src="mobile-dashboard-free.jsx"></script>
+
+<script type="text/babel">
+const W = 390;
+function App() {
+  return (
+    <DesignCanvas>
+
+      {/* ── 1. Main page ─────────────────────────────────────── */}
+      <DCSection id="main" title="Main page" subtitle="Compact list · scrolled · filters · menu">
+        <DCArtboard id="main-a"        label="A · Compact list"           width={W} height={2900}><MainA/></DCArtboard>
+        <DCArtboard id="main-scrolled" label="A · Scrolled (mini header)" width={W} height={1780}><MainAScrolled/></DCArtboard>
+        <DCArtboard id="main-filters"  label="Filters — open"             width={W} height={960}><MainFilters/></DCArtboard>
+        <DCArtboard id="main-menu"     label="Menu — drawer"              width={W} height={820}><MainMenu/></DCArtboard>
+      </DCSection>
+
+      {/* ── 2. Article page ──────────────────────────────────── */}
+      <DCSection id="article" title="Article page" subtitle="Editorial reading view with cover, blocks & share">
+        <DCArtboard id="art-1" label="Building permits in Bali" width={W} height={2200}><MobileArticle/></DCArtboard>
+      </DCSection>
+
+      {/* ── 3. Company pages ─────────────────────────────────── */}
+      <DCSection id="company" title="Company pages" subtitle="Public profile · Pro dashboard · Free dashboard · Edit profile">
+        <DCArtboard id="profile-1"    label="Company profile"     width={W} height={1700}><MobileProfile/></DCArtboard>
+        <DCArtboard id="dash-1"       label="Company dashboard"   width={W} height={1680}><MobileDashboard/></DCArtboard>
+        <DCArtboard id="dash-free-1"  label="Dashboard — Free"    width={W} height={1400}><MobileDashboardFree/></DCArtboard>
+        <DCArtboard id="edit-1"       label="Edit profile"        width={W} height={3000}><MobileEdit/></DCArtboard>
+      </DCSection>
+
+      {/* ── 4. Individual dashboard ──────────────────────────── */}
+      <DCSection id="user" title="Individual dashboard" subtitle="Saved companies · reviews">
+        <DCArtboard id="user-dash" label="Individual dashboard" width={W} height={2600}><MobileUserDashboard/></DCArtboard>
+      </DCSection>
+
+      {/* ── 5. Content pages ─────────────────────────────────── */}
+      <DCSection id="content" title="Content pages" subtitle="About · Terms and Conditions · Pro guidelines">
+        <DCArtboard id="about-1" label="About"                width={W} height={2150}><MobileAbout/></DCArtboard>
+        <DCArtboard id="legal-1" label="Terms and Conditions" width={W} height={3200}><MobileLegal/></DCArtboard>
+        <DCArtboard id="pro-1"   label="Pro guidelines"       width={W} height={2600}><MobileProGuidelines/></DCArtboard>
+      </DCSection>
+
+      {/* ── 6. Popup system ──────────────────────────────────── */}
+      <DCSection id="popups" title="Popup system" subtitle="Login · Signup · Get Pro · Get Ads · Delete account · Write review">
+        <DCArtboard id="pop-login"   label="Log in"           width={W} height={740}><PopupLogin/></DCArtboard>
+        <DCArtboard id="pop-signup"  label="Sign up"          width={W} height={800}><PopupSignup/></DCArtboard>
+        <DCArtboard id="pop-pro"     label="Get Pro"          width={W} height={860}><PopupGetPro/></DCArtboard>
+        <DCArtboard id="pop-ads"     label="Get Ads"          width={W} height={640}><PopupGetAds/></DCArtboard>
+        <DCArtboard id="pop-delete"  label="Delete account"   width={W} height={640}><PopupDeleteAccount/></DCArtboard>
+        <DCArtboard id="pop-review"  label="Write review"     width={W} height={900}><PopupWriteReview/></DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

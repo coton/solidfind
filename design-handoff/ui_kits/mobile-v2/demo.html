@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>SolidFind — Mobile Demo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="icon" href="../../assets/favicon.png"/>
+<link rel="stylesheet" href="../../colors_and_type.css"/>
+<link rel="stylesheet" href="mobile.css"/>
+<style>
+  html, body { margin: 0; height: 100%; background: #f0eee9; display: flex; align-items: center; justify-content: center; }
+  #root { width: 390px; height: 844px; border-radius: 44px; overflow: hidden; box-shadow: 0 32px 80px rgba(35,31,32,0.28), 0 0 0 1px rgba(35,31,32,0.08); position: relative; background: #fff; }
+  @media (max-height: 900px) { #root { height: calc(100vh - 40px); border-radius: 28px; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="mobile-chrome.jsx"></script>
+<script type="text/babel" src="mobile-article.jsx"></script>
+<script type="text/babel" src="mobile-about.jsx"></script>
+<script type="text/babel" src="mobile-dashboard.jsx"></script>
+<script type="text/babel" src="mobile-edit.jsx"></script>
+<script type="text/babel" src="mobile-profile.jsx"></script>
+<script type="text/babel" src="mobile-legal.jsx"></script>
+<script type="text/babel" src="mobile-pro-guidelines.jsx"></script>
+<script type="text/babel" src="mobile-popups.jsx"></script>
+<script type="text/babel" src="mobile-user-dashboard.jsx"></script>
+
+<script type="text/babel">
+// ── Demo App — state-based router ────────────────────────────
+const NAV = React.createContext(null);
+
+function useNav() { return React.useContext(NAV); }
+
+// Scrollable screen wrapper that resets scroll on page change
+function Screen({ children, page }) {
+  const ref = React.useRef(null);
+  React.useEffect(() => { if (ref.current) ref.current.scrollTop = 0; }, [page]);
+  return (
+    <div ref={ref} style={{ width: '100%', height: '100%', overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
+      {children}
+    </div>
+  );
+}
+
+// ── Nav-aware wrappers for each page ─────────────────────────
+
+function DemoHome() {
+  const nav = useNav();
+  const [activeCat, setActiveCat] = React.useState(nav.data?.cat || 'Construction');
+  const pros = PROS.filter(p => p.main === activeCat).slice(0, 5);
+  const [openSeg, setOpenSeg] = React.useState(null);
+  const article = (typeof ARTICLES !== 'undefined') ? ARTICLES.find(a => (a.cats || []).includes(activeCat)) : null;
+  return (
+    <div className="m-screen" style={{ height: 'auto', minHeight: '100%' }}>
+      <MSearchHeader activeCat={activeCat} onActiveCat={setActiveCat} openSeg={openSeg} onSegToggle={setOpenSeg} onMenu={() => nav.push('menu')} />
+      <div style={{ position: 'relative' }}>
+        {openSeg === 'Location' && <MFilterMenu />}
+        {openSeg === 'Size'     && <MSizeMenu />}
+        {openSeg === 'Type'     && <MTypeMenu activeCat={activeCat} />}
+      </div>
+      <MResultsBar count={pros.length} />
+      <div className="m-list">
+        <div style={{ cursor: 'pointer' }} onClick={() => nav.push('about')}><MAboutCard /></div>
+        {article && (
+          <div style={{ cursor: 'pointer' }} onClick={() => nav.push('article')}><MArticleCard article={article} /></div>
+        )}
+        {pros.map(p => (
+          <div key={p.id} style={{ cursor: 'pointer' }} onClick={() => nav.push('profile', { ...p, _cat: activeCat })}><MCardH pro={p} /></div>
+        ))}
+      </div>
+      <MPager />
+      <MAdSlot />
+      <MFooter />
+    </div>
+  );
+}
+
+function DemoProfile() {
+  const nav = useNav();
+  const c = nav.data || COMPANY;
+  const services = c.services || [{ name: c.main, subs: c.subs || [] }];
+  const allAreas = (c.areas || []).length >= LOCATIONS.length;
+  const sizeLabel = (s) => s + (SIZE_RANGE[s] ? ' (' + SIZE_RANGE[s] + ')' : '');
+  const gallery = (c.gallery || []).slice(0, 12);
+  const [svcOpen, setSvcOpen] = React.useState(false);
+  const [showReview, setShowReview] = React.useState(false);
+  const socials = [
+    { k: 'email', ico: MGLYPHS.email }, { k: 'whatsapp', ico: MGLYPHS.whatsapp },
+    { k: 'facebook', ico: MGLYPHS.facebook }, { k: 'instagram', ico: MGLYPHS.instagram },
+    { k: 'linkedin', ico: MGLYPHS.linkedin },
+  ].filter(s => c.contact && c.contact[s.k]);
+  const flag = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg>;
+  return (
+    <div className="m-screen" style={{ height: 'auto', minHeight: '100%' }}>
+      <div className="m-scroll" style={{ overflow: 'visible' }}>
+        <div className="m-pf-hero" style={{ backgroundImage: `url(${c.photo})` }}>
+          <div className="shade"/>
+          <button className="m-pf-back" onClick={() => nav.back()}>← Back</button>
+          <div className="m-pf-hero-acts">
+            <button aria-label="Share">{I.share}</button>
+            <button aria-label="Bookmark">{I.bookmark}</button>
+          </div>
+          <div className="m-pf-lockup">
+            <span className="m-pf-logo">{c.name.charAt(0)}</span>
+            <div className="m-pf-lockup-text">
+              <h1>{c.name}</h1>
+              <div className="m-pf-meta">
+                <span>{c.city}</span><span className="dotsep"/>
+                <span className="score">{I.star} {c.rating} · {c.reviewCount} reviews</span>
+                <span className="dotsep"/>
+                <span>{c.verified ? 'Pro Account' : 'Free account'}</span>
+                <span className="cat">{c.main}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="m-pf-section">
+          <div className="m-pf-h2row"><h2 className="m-h2" style={{ margin: 0 }}>About</h2><button className="m-pf-detailbtn">Company details ↓</button></div>
+          <div className="m-pf-prose"><p>{c.name} is a {c.discipline.toLowerCase()} based in {c.city}.</p></div>
+        </div>
+        <div className="m-pf-section">
+          <div className={'m-acc2' + (svcOpen ? ' open' : '')}>
+            <button className="m-acc2-head" onClick={() => setSvcOpen(o => !o)}>
+              <span className="t">Services &amp; coverage</span><span className="chev">{I.chevD}</span>
+            </button>
+            {svcOpen && (
+              <div className="m-acc2-body">
+                {services.map(svc => <div className="m-svc-svc" key={svc.name}><span className="m-svc-name">{svc.name}</span></div>)}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="m-pf-section">
+          <div className="m-pf-h2row"><h2 className="m-h2" style={{ margin: 0 }}>Recent work</h2><span className="m-eyebrow">{gallery.length} projects</span></div>
+          <div className="m-hscroll">
+            {gallery.map((src, i) => <div className="m-thumb" key={i} style={{ backgroundImage: `url(${src})` }}>{i % 5 === 2 && <span className="play">▶</span>}</div>)}
+          </div>
+        </div>
+        <div className="m-pf-section">
+          <h2 className="m-h2">Company details</h2>
+          <div className="m-pf-social">{socials.map(s => <a key={s.k} aria-label={s.k}>{s.ico}</a>)}</div>
+          <dl className="m-pf-kv">
+            <dt>Region</dt><dd>{c.city}</dd>
+            <dt>Projects</dt><dd>{c.projects}+ completed</dd>
+            <dt>Team</dt><dd>{c.team}+ people</dd>
+          </dl>
+        </div>
+        <div className="m-pf-section">
+          <div className="m-pf-actions">
+            <button className="m-btn m-btn-pri m-btn-block">Save to shortlist</button>
+            <button className="m-btn m-btn-ghost m-btn-block" onClick={() => setShowReview(true)}>Write a review <MSFStar size={15} outline/></button>
+          </div>
+        </div>
+        <MFooter />
+      </div>
+      {showReview && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 40, overflowY: 'auto' }} onClick={() => setShowReview(false)}>
+          <div style={{ minHeight: '100%' }} onClick={e => e.stopPropagation()}><PopupWriteReview /></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DemoMenu() {
+  const nav = useNav();
+  const sections = [
+    { lbl: 'Categories', items: MAIN_CATS.map((c,i) => ({ label: String(i+1).padStart(2,'0') + ' · ' + c.name, page: 'home' })) },
+    { lbl: 'Build', items: [{ label: 'For individuals', page: 'user-dashboard' }, { label: 'List your service', page: 'home' }, { label: 'Pro guidelines', page: 'pro-guidelines' }] },
+    { lbl: 'Solid', items: [{ label: 'About', page: 'about' }, { label: 'Terms and Conditions', page: 'legal' }, { label: 'Contact', page: 'home' }] },
+  ];
+  const [open, setOpen] = React.useState({ Categories: true });
+  const toggle = (lbl) => setOpen(o => o[lbl] ? {} : { [lbl]: true });
+  return (
+    <div className="m-screen" style={{ height: '100%', position: 'relative' }}>
+      <MSearchHeader activeCat="Construction" />
+      <div className="m-scroll">
+        <MResultsBar count={5} />
+        <div className="m-list">{PROS.filter(p => p.main === 'Construction').slice(0, 3).map(p => <MCardH key={p.id} pro={p} />)}</div>
+      </div>
+      <div className="m-overlay">
+        <div className="m-scrim" onClick={() => nav.back()}/>
+        <div className="m-drawer">
+          <div className="m-drawer-top">
+            <div className="m-drawer-head">
+            <span style={{ color: '#fff', display: 'flex', alignItems: 'center' }}><MSFIcon size={30}/></span>
+              <span className="m-topbar-sp"/>
+              <span className="m-lang m-drawer-lang"><button className="on">EN</button><button>ID</button></span>
+              <button className="m-iconbtn m-drawer-close" onClick={() => nav.back()}>{I.close}</button>
+            </div>
+          </div>
+          <div className="m-drawer-nav">
+            {sections.map(a => (
+              <div key={a.lbl} className={'m-acc' + (open[a.lbl] ? ' open' : '')}>
+                <button className="m-acc-head" onClick={() => toggle(a.lbl)}><span className="lbl">{a.lbl}</span>{I.chevD}</button>
+                {open[a.lbl] && <div className="m-acc-body">{a.items.map(it => <a key={it.label} style={{ cursor: 'pointer', display: 'block' }} onClick={() => nav.push(it.page)}>{it.label}</a>)}</div>}
+              </div>
+            ))}
+          </div>
+          <div className="m-drawer-foot">
+            <button className="m-btn m-btn-pri m-btn-block" onClick={() => nav.push('signup')}>List your service</button>
+            <button className="m-btn m-btn-ghost m-btn-block" onClick={() => nav.push('login')}>Log in</button>
+          </div>
+          <div className="m-drawer-divide"/>
+          <div className="m-drawer-legal">
+            <span className="cc">© 2026 SolidFind.id</span>
+            <a href="https://instagram.com/solidfind.id" target="_blank" rel="noopener noreferrer">Instagram</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DemoAbout() {
+  const nav = useNav();
+  const A = ABOUT_CONTENT;
+  function mRich(text) { return text.split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : <React.Fragment key={i}>{part}</React.Fragment>); }
+  const accounts = [{ k: 'Individual account', t: A.individualDesc }, { k: 'Company account', t: A.companyDesc }, { k: 'Pro company account', t: A.proDesc }];
+  const paras = (A.description || '').split(/\n\n+/);
+  return (
+    <div className="m-screen" style={{ height: 'auto', minHeight: '100%' }}>
+      <div className="m-about-hero">
+        <div className="m-topbar">
+          <span className="m-brand" style={{ cursor: 'pointer' }} onClick={() => nav.push('home')}><img src="../../assets/solidfind-logo.svg" alt="SolidFind"/><span className="id">.id</span></span>
+          <span className="m-topbar-sp"/>
+          <button className="m-iconbtn">{I.user}</button>
+          <button className="m-iconbtn" onClick={() => nav.push('menu')}>{I.menu}</button>
+        </div>
+        <span className="m-eyebrow light" style={{ margin: '14px 20px 0' }}>About</span>
+        <h1>{mRich(A.tagline || '')}</h1>
+        <p>{A.heroSub}</p>
+      </div>
+      <button className="m-back" style={{ display: 'block', margin: '12px 20px 0', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, color: 'var(--sf-fg-3)', padding: 0 }} onClick={() => nav.back()}>← Back</button>
+      <div className="m-pad"><h2 className="m-h2">Why we exist</h2><div className="m-prose">{paras.map((p, i) => <p key={i}>{mRich(p)}</p>)}</div></div>
+      <div className="m-pad" style={{ marginTop: 20 }}>
+        <h2 className="m-h2">How it works</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {accounts.map((a, i) => (
+            <div className="m-acct-card" key={i}><span className="n">{String(i+1).padStart(2,'0')}</span><div><span className="m-eyebrow">{a.k}</span><p>{a.t}</p></div></div>
+          ))}
+        </div>
+      </div>
+      <div className="m-pad" style={{ marginTop: 20, marginBottom: 28 }}>
+        <div className="m-jump">
+          <button onClick={() => nav.push('home')}><b>Start browsing listings</b><span>Find professionals across Bali →</span></button>
+          <button onClick={() => nav.push('legal')}><b>Terms and Conditions</b><span>Read our legal terms →</span></button>
+        </div>
+      </div>
+      <MFooter />
+    </div>
+  );
+}
+
+function DemoPopupPage({ component: Comp, onBack }) {
+  const nav = useNav();
+  return (
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 50 }}>
+        <button className="m-btn m-btn-ghost" style={{ padding: '8px 14px', fontSize: 13, minHeight: 'unset', background: 'rgba(255,255,255,0.9)' }} onClick={() => nav.back()}>← Back</button>
+      </div>
+      <Comp />
+    </div>
+  );
+}
+
+// ── Router ────────────────────────────────────────────────────
+function DemoApp() {
+  const [stack, setStack] = React.useState([{ page: 'home', data: null }]);
+  const current = stack[stack.length - 1];
+
+  const nav = {
+    push: (page, data = null) => setStack(s => [...s, { page, data }]),
+    back: () => setStack(s => s.length > 1 ? s.slice(0, -1) : s),
+    replace: (page, data = null) => setStack(s => [...s.slice(0, -1), { page, data }]),
+    data: current.data,
+  };
+
+  const renderPage = () => {
+    switch (current.page) {
+      case 'home':           return <DemoHome />;
+      case 'profile':        return <DemoProfile />;
+      case 'menu':           return <DemoMenu />;
+      case 'about':          return <DemoAbout />;
+      case 'article':        return <MobileArticle article={ARTICLES && ARTICLES[0]} />;
+      case 'legal':          return <MobileLegal />;
+      case 'pro-guidelines': return <MobileProGuidelines />;
+      case 'user-dashboard': return <MobileUserDashboard />;
+      case 'company-dash':   return <MobileDashboard />;
+      case 'login':          return <DemoPopupPage component={PopupLogin} />;
+      case 'signup':         return <DemoPopupPage component={PopupSignup} />;
+      case 'get-pro':        return <DemoPopupPage component={PopupGetPro} />;
+      default:               return <DemoHome />;
+    }
+  };
+
+  return (
+    <NAV.Provider value={nav}>
+      <Screen page={current.page} key={current.page}>
+        {renderPage()}
+      </Screen>
+    </NAV.Provider>
+  );
+}
+
+// load remaining page components
+</script>
+<script type="text/babel" src="mobile-about.jsx"></script>
+<script type="text/babel" src="mobile-dashboard.jsx"></script>
+
+<script type="text/babel">
+ReactDOM.createRoot(document.getElementById('root')).render(<DemoApp/>);
+</script>
+</body>
+</html>

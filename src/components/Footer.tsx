@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { usePathname } from "next/navigation";
@@ -17,7 +17,6 @@ import {
 
 export function Footer() {
   const footerMediaValue = useQuery(api.platformSettings.get, { key: FOOTER_MEDIA_PLATFORM_SETTING_KEY });
-  const pageConfigs = useQuery(api.pageConfigs.listVisible);
   const pathname = usePathname();
   const footerMediaState = resolveMediaSetting(footerMediaValue, { url: "", type: "image" });
   const footerMedia = footerMediaState.media;
@@ -33,15 +32,14 @@ export function Footer() {
   const showIg = igVisibleState.value !== "false";
   const { user } = useUser();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [aboutHref, setAboutHref] = useState("/about");
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
   const accountDashboardHref = userType === "company" ? "/company-dashboard" : "/dashboard";
-  const aboutHref = pathname === "/about" ? "/about" : `/about?from=${encodeURIComponent(pathname)}`;
-  const footerCategories = pageConfigs?.length
-    ? pageConfigs.map((page) => ({ id: page.categoryId, label: page.label.replace(/^\d+\.\s*/, "") }))
-    : [
-      { id: "construction", label: "Construction" },
-      { id: "renovation", label: "Renovation" },
-    ];
+
+  useEffect(() => {
+    const currentPath = `${window.location.pathname}${window.location.search}`;
+    setAboutHref(window.location.pathname === "/about" ? currentPath : `/about?from=${encodeURIComponent(currentPath)}`);
+  }, [pathname]);
 
   // Footer Account button behavior (same as Header):
   // - If logged in as individual: link to /dashboard
@@ -49,8 +47,8 @@ export function Footer() {
   // - If not logged in: open AuthModal
 
   return (
-    <div className="px-3 pb-3 pt-8 sm:px-5 sm:pb-5">
-      <footer className="relative z-0 min-h-[280px] overflow-hidden rounded-t-[var(--sf-radius-page)] bg-[var(--sf-ink)] text-white">
+    <div className="p-[10px]">
+      <footer className="relative h-[150px] sm:h-[190px] rounded-[6px] overflow-hidden z-0">
       {/* AuthModal */}
       <AuthModal
         isOpen={isAuthModalOpen}
@@ -77,56 +75,122 @@ export function Footer() {
       ) : footerMediaState.isLoading ? (
         <div className="absolute inset-0 bg-[#e4e4e4]" />
       ) : (
-        <div className="absolute inset-0 bg-[var(--sf-ink)]" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(to right, #E9A28E, #F14110)"
+          }}
+        />
       )}
-      <div className="relative z-10 mx-auto grid max-w-[var(--sf-content)] gap-10 px-6 py-10 sm:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr] sm:px-10 sm:py-14">
-        <div>
-          <Image src="/images/logo-full-white.svg" alt="SolidFind.id" width={176} height={20} className="mb-6 h-5 w-auto" />
-          <p className="max-w-[420px] text-[14px] leading-[var(--sf-lh-loose)] text-white/72">
-            SolidFind.id is an independent platform built to bring clarity, trust, and perspective to the places we live in.
-          </p>
-          <div className="mt-7 flex items-center gap-4">
+      {/* Mobile Layout - Right-aligned */}
+      <div className="sm:hidden absolute inset-0 flex items-center justify-end p-5 z-10">
+        <div className="flex flex-col items-end gap-3">
+          {/* Description */}
+          <div className="text-right max-w-[320px]">
+            <p className="text-white text-[9px] leading-[12px] font-medium tracking-[0.18px]">
+              <span className="font-bold">SOLIDFIND.ID</span>
+              {" is an independent platform built to bring clarity,"}
+              <br />
+              {"trust, and perspective to the places we live in."}
+            </p>
+          </div>
+
+          {/* Social Icons & About */}
+          <div className="flex items-center gap-5">
             {showIg && (
-              <a href={igHref} target="_blank" rel="noopener noreferrer" className="grid h-9 w-9 place-items-center rounded-full border border-white/18">
-                <Image src="/images/footer-ig.svg" alt="Instagram" width={18} height={18} />
+              <a href={igHref} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                <Image src="/images/footer-ig.svg" alt="Instagram" width={20} height={20} />
               </a>
             )}
-            <a href={mailHref} className="grid h-9 w-9 place-items-center rounded-full border border-white/18">
-              <Image src="/images/footer-mail.svg" alt="Email" width={21} height={17} />
+            {/* Footer Account button - same behavior as header */}
+            {user ? (
+              <Link href={accountDashboardHref} className="hover:opacity-80 transition-opacity">
+                <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
+              </Link>
+            ) : (
+              <button 
+                onClick={() => setIsAuthModalOpen(true)}
+                className="hover:opacity-80 transition-opacity"
+              >
+                <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
+              </button>
+            )}
+            <a href={mailHref} className="hover:opacity-80 transition-opacity">
+              <Image src="/images/footer-mail.svg" alt="Email" width={25} height={20} />
             </a>
+            <Link
+              href={aboutHref}
+              className="text-white font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
+            >
+              ABOUT
+            </Link>
+          </div>
+
+          {/* Bottom Links */}
+          <div className="flex items-center gap-5 text-white">
+            <Link href="/terms" className="text-[8px] font-bold tracking-[0.4px] underline hover:opacity-80">
+              Terms & Conditions.
+            </Link>
+            <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
+              SOLIDFIND.ID © 2026
+            </span>
           </div>
         </div>
-        <div>
-          <p className="sf-tag-light mb-4">Categories</p>
-          <nav className="flex flex-col gap-3 text-[14px] text-white/72">
-            {footerCategories.map((category) => (
-              <Link key={category.id} href={`/?category=${category.id}`}>{category.label}</Link>
-            ))}
-          </nav>
-        </div>
-        <div>
-          <p className="sf-tag-light mb-4">Build</p>
-          <nav className="flex flex-col gap-3 text-[14px] text-white/72">
-            <Link href={aboutHref}>About</Link>
-            {user ? (
-              <Link href={accountDashboardHref}>Dashboard</Link>
-            ) : (
-              <button onClick={() => setIsAuthModalOpen(true)} className="text-left">For individuals</button>
-            )}
-            <button onClick={() => setIsAuthModalOpen(true)} className="text-left">List your services</button>
-          </nav>
-        </div>
-        <div>
-          <p className="sf-tag-light mb-4">Solid</p>
-          <nav className="flex flex-col gap-3 text-[14px] text-white/72">
-            <Link href="/terms">Terms & Conditions</Link>
-            <a href={mailHref}>Contact</a>
-          </nav>
-        </div>
       </div>
-      <div className="relative z-10 mx-auto flex max-w-[var(--sf-content)] flex-col gap-2 border-t border-white/10 px-6 py-5 text-[11px] text-white/45 sm:flex-row sm:items-center sm:justify-between sm:px-10">
-        <span>© {new Date().getFullYear()} SolidFind.id</span>
-        <span>An independent platform for the places we live in.</span>
+
+      {/* Desktop Layout */}
+      <div className="hidden sm:flex absolute inset-0 items-center justify-end px-10 z-10">
+        <div className="flex flex-col items-end gap-4">
+          {/* Description */}
+          <div className="text-right max-w-[426px]">
+            <p className="text-white text-[12px] leading-[18px] tracking-[0.24px]">
+              <span className="font-semibold text-[13px] leading-[17px]">SOLIDFIND</span>
+              <span className="font-semibold text-[13px] leading-[17px]">.id </span>
+              <span className="font-normal">is an independent platform built to bring clarity, trust, and perspective to the places we live in.</span>
+            </p>
+          </div>
+
+          {/* Social Icons & About */}
+          <div className="flex items-center gap-5">
+            {showIg && (
+              <a href={igHref} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                <Image src="/images/footer-ig.svg" alt="Instagram" width={20} height={20} />
+              </a>
+            )}
+            {/* Footer Account button - same behavior as header */}
+            {user ? (
+              <Link href={accountDashboardHref} className="hover:opacity-80 transition-opacity">
+                <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
+              </Link>
+            ) : (
+              <button 
+                onClick={() => setIsAuthModalOpen(true)}
+                className="hover:opacity-80 transition-opacity"
+              >
+                <Image src="/images/footer-account.svg" alt="Account" width={19} height={20} />
+              </button>
+            )}
+            <a href={mailHref} className="hover:opacity-80 transition-opacity">
+              <Image src="/images/footer-mail.svg" alt="Email" width={25} height={20} />
+            </a>
+            <Link
+              href={aboutHref}
+              className="text-white font-semibold text-[18px] tracking-[0.36px] hover:opacity-80 transition-opacity ml-2"
+            >
+              ABOUT
+            </Link>
+          </div>
+
+          {/* Bottom Links */}
+          <div className="flex items-center gap-5 text-white">
+            <Link href="/terms" className="text-[8px] font-bold tracking-[0.4px] underline hover:opacity-80">
+              Terms & Conditions.
+            </Link>
+            <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
+              SOLIDFIND.ID © 2026
+            </span>
+          </div>
+        </div>
       </div>
       </footer>
     </div>

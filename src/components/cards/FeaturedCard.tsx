@@ -29,8 +29,9 @@ export function FeaturedCard({
 
   return (
     <Link href={linkHref} className="block">
-      <article className="relative h-[320px] w-[210px] overflow-hidden rounded-[var(--sf-radius-lg)] border border-[var(--sf-border-1)] bg-[var(--sf-bg-surface)] shadow-[var(--sf-shadow-1)] transition duration-[var(--sf-dur-base)] ease-[var(--sf-ease-out)] hover:-translate-y-0.5 hover:shadow-[var(--sf-shadow-2)]">
-        <div className="relative h-[156px] p-4 flex items-end">
+      <div className="relative w-[210px] h-[220px] bg-[#f8f8f8] rounded-[6px] overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
+        {/* Background image with title overlay */}
+        <div className="absolute top-0 left-0 right-0 h-[120px] rounded-t-[6px] flex items-end p-[10px]">
           {coverUrl ? (
             <Image
               src={coverUrl}
@@ -38,24 +39,24 @@ export function FeaturedCard({
               fill
               sizes="210px"
               loading="eager"
-              className="object-cover"
+              className="object-cover rounded-t-[6px]"
             />
           ) : (
-            <div className="absolute inset-0 bg-[var(--sf-grad-hero)]" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#f14110] to-[#e9a28e]" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
-          <p className="sf-tag-light absolute left-4 top-4">Editorial</p>
-          <h3 className="relative z-10 line-clamp-3 text-[18px] font-semibold leading-[var(--sf-lh-heading)] text-white">
+          {/* Title overlaid on image */}
+          <h3 className="relative z-10 font-semibold text-[16px] leading-[16px] tracking-[0.32px] text-white uppercase">
             {articleTitle}
           </h3>
         </div>
-        <div className="p-4">
-          <p className="mb-3 sf-tag-mono">Read next</p>
-          <p className="line-clamp-5 text-[13px] leading-[var(--sf-lh-body)] text-[var(--sf-fg-2)]">
+
+        {/* Description - same styling as WelcomeCard */}
+        <div className="absolute top-[140px] left-[10px] right-[10px] bottom-[20px]">
+          <p className="text-[11px] leading-[15px] tracking-[0.22px] text-[#333] font-bold line-clamp-4" style={{ fontFamily: "'Sora', sans-serif" }}>
             {articleDescription}
           </p>
         </div>
-      </article>
+      </div>
     </Link>
   );
 }

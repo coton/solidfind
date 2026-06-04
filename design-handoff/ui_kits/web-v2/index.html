@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>SolidFind — Web UI Kit</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="icon" href="../../assets/favicon.png"/>
+<link rel="stylesheet" href="../../colors_and_type.css"/>
+<link rel="stylesheet" href="styles.css"/>
+<style>
+  body { font-family: var(--sf-font-display); color: var(--sf-ink); }
+  .sf-app { min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root" class="sf-app"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="Social.jsx"></script>
+<script type="text/babel" src="BudgetRange.jsx"></script>
+<script type="text/babel" src="ServiceMatrix.jsx"></script>
+<script type="text/babel" src="Dropdown.jsx"></script>
+<script type="text/babel" src="Header.jsx"></script>
+<script type="text/babel" src="Filters.jsx"></script>
+<script type="text/babel" src="ProCard.jsx"></script>
+<script type="text/babel" src="ArticleCard.jsx"></script>
+<script type="text/babel" src="ProDetail.jsx"></script>
+<script type="text/babel" src="FreeDashboard.jsx"></script>
+<script type="text/babel" src="Dashboard.jsx"></script>
+<script type="text/babel" src="EditProfile.jsx"></script>
+<script type="text/babel" src="AdModal.jsx"></script>
+<script type="text/babel" src="ProModal.jsx"></script>
+<script type="text/babel" src="UserDashboard.jsx"></script>
+<script type="text/babel" src="About.jsx"></script>
+<script type="text/babel" src="Legal.jsx"></script>
+<script type="text/babel" src="LoginModal.jsx"></script>
+<script type="text/babel" src="SignUpModal.jsx"></script>
+<script type="text/babel" src="LeaveReviewModal.jsx"></script>
+<script type="text/babel" src="ReviewsModal.jsx"></script>
+<script type="text/babel" src="ShareModal.jsx"></script>
+<script type="text/babel" src="Footer.jsx"></script>
+
+<script type="text/babel">
+function App() {
+  const [view, setView] = React.useState('browse'); // browse | detail | dashboard | edit | userdash | about
+  const [pro, setPro] = React.useState(null);
+  const [loginOpen, setLoginOpen] = React.useState(false);
+  const [reviewsFor, setReviewsFor] = React.useState(null);
+  const [adOpen, setAdOpen] = React.useState(false);
+  const [proOpen, setProOpen] = React.useState(false);
+
+  // saved-company removals from the individual dashboard.
+  // pendingRemoved: un-bookmarked this session (still undoable). removedSaved:
+  // committed on logout & persisted — those cards don't return on next login.
+  const SF_RM_KEY = 'sf_committed_removed';
+  const [removedSaved, setRemovedSaved] = React.useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem(SF_RM_KEY) || '[]')); } catch (e) { return new Set(); }
+  });
+  const [pendingRemoved, setPendingRemoved] = React.useState(() => new Set());
+  const removeSaved = (id) => setPendingRemoved(s => { const n = new Set(s); n.add(id); return n; });
+  const undoSaved = (id) => setPendingRemoved(s => { const n = new Set(s); n.delete(id); return n; });
+  const visibleSavedByCat = React.useMemo(() => (
+    MAIN_CATS.map(m => ({ cat: m.name, num: m.num, items: SAVED.filter(p => p.main === m.name && !removedSaved.has(p.id)) })).filter(g => g.items.length > 0)
+  ), [removedSaved]);
+  const [account, setAccount] = React.useState(null); // null | 'company' | 'individual'
+  const [signupRole, setSignupRole] = React.useState(null); // null | 'company' | 'individual'
+  const [emailRole, setEmailRole] = React.useState(null);
+  const [reviewPro, setReviewPro] = React.useState(null);
+  const [prevView, setPrevView] = React.useState('browse');
+  const [article, setArticle] = React.useState(null);
+  const goView = (v) => { setPrevView(view); setView(v); window.scrollTo(0, 0); };
+  const openArticle = (a) => { setPrevView(view); setArticle(a); setView('article'); window.scrollTo(0, 0); };
+
+  const finishAuth = (role) => {
+    setLoginOpen(false); setSignupRole(null); setEmailRole(null);
+    if (role === 'company') { setAccount('company'); setView('freedash'); }
+    else { setAccount('individual'); setView('userdash'); }
+    window.scrollTo(0, 0);
+  };
+
+  React.useEffect(() => {
+    const open = () => setAdOpen(true);
+    window.addEventListener('sf-open-ad', open);
+    const openPro = () => setProOpen(true);
+    window.addEventListener('sf-open-pro', openPro);
+    const rev = () => setReviewsFor(COMPANY);
+    window.addEventListener('sf-see-reviews', rev);
+    const shr = (e) => setSharePro(e.detail);
+    window.addEventListener('sf-share', shr);
+    return () => { window.removeEventListener('sf-open-ad', open); window.removeEventListener('sf-open-pro', openPro); window.removeEventListener('sf-see-reviews', rev); window.removeEventListener('sf-share', shr); };
+  }, []);
+
+  const INITIAL = { query: '', main: 'Construction', sizes: [], subs: [], locations: [], budget: [3, 5] };
+  const [filters, setFilters] = React.useState(INITIAL);
+  const [verifiedOnly, setVerifiedOnly] = React.useState(false);
+  const [sort, setSort] = React.useState('Latest');
+  const [page, setPage] = React.useState(1);
+  const [sharePro, setSharePro] = React.useState(null);
+  const PER_PAGE = 15;
+
+  // a search is "active" once a query or any filter is applied
+  const searchActive = filters.query.trim() !== '' || filters.sizes.length > 0 || filters.subs.length > 0 || filters.locations.length > 0 || verifiedOnly;
+
+  const reset = () => {
+    // logging out commits any pending un-bookmarks — they won't return next login
+    setRemovedSaved(prev => {
+      const next = new Set(prev); pendingRemoved.forEach(id => next.add(id));
+      try { localStorage.setItem(SF_RM_KEY, JSON.stringify([...next])); } catch (e) {}
+      return next;
+    });
+    setPendingRemoved(new Set());
+    setFilters(INITIAL); setVerifiedOnly(false); setView('browse'); setAccount(null); window.scrollTo(0, 0);
+  };
+
+  // results scoped to the active main category, then narrowed by the filters
+  const inMain = React.useMemo(() => PROS.filter(p => p.main === filters.main), [filters.main]);
+
+  // featured articles visible on this category page (managed in back office)
+  const featuredArticles = React.useMemo(
+    () => (typeof ARTICLES !== 'undefined' ? ARTICLES.filter(a => a.visible && (a.cats || []).includes(filters.main)) : []),
+    [filters.main]
+  );
+
+  const results = React.useMemo(() => {
+    const q = filters.query.trim().toLowerCase();
+    let list = inMain.filter(p =>
+      (filters.sizes.length === 0 || filters.sizes.includes(p.size)) &&
+      (filters.subs.length === 0  || p.subs.some(s => filters.subs.includes(s))) &&
+      (filters.locations.length === 0 || filters.locations.includes(p.city)) &&
+      (!verifiedOnly || p.verified) &&
+      (q === '' || (p.name + ' ' + p.discipline + ' ' + p.subs.join(' ') + ' ' + p.city).toLowerCase().includes(q))
+    );
+    const byId = (a, b) => (a.id < b.id ? -1 : 1);
+    switch (sort) {
+      case 'Ranking':                  list = [...list].sort((a, b) => (b.verified - a.verified) || b.rating - a.rating); break;
+      case 'Favorites':                list = [...list].sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount); break;
+      case 'Team size: Smallest first': list = [...list].sort((a, b) => a.team - b.team); break;
+      case 'Team size: Largest first':  list = [...list].sort((a, b) => b.team - a.team); break;
+      case 'Projects: Few → More':       list = [...list].sort((a, b) => a.projects - b.projects); break;
+      case 'Projects: More → Few':       list = [...list].sort((a, b) => b.projects - a.projects); break;
+      default:                          list = [...list].sort(byId); break; // Latest
+    }
+    return list;
+  }, [inMain, filters, verifiedOnly, sort]);
+
+  // reset to page 1 whenever the result set or ordering changes
+  React.useEffect(() => { setPage(1); }, [filters, verifiedOnly, sort]);
+
+  // pagination — 3 rows of 5 (15) per page; about card + featured articles take slots on the unfiltered first page
+  const aboutShown = !searchActive;
+  const reserved = aboutShown ? 1 + featuredArticles.length : 0;
+  const firstCap = Math.max(1, PER_PAGE - reserved);
+  const pages = React.useMemo(() => {
+    if (results.length <= firstCap) return [results];
+    const out = [results.slice(0, firstCap)];
+    for (let i = firstCap; i < results.length; i += PER_PAGE) out.push(results.slice(i, i + PER_PAGE));
+    return out;
+  }, [results, firstCap]);
+  const totalPages = pages.length;
+  const curPage = Math.min(page, totalPages);
+  const pageItems = pages[curPage - 1] || [];
+  const showAboutCard = aboutShown && curPage === 1;
+  const gotoPage = (n) => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+  const openPro = (p) => { setPro(p); setView('detail'); window.scrollTo(0, 0); };
+
+  return (
+    <div data-screen-label="SolidFind Web Kit">
+      {view !== 'about' && view !== 'terms' && view !== 'pro' && view !== 'article' && (
+      <Header
+        filters={filters} setFilters={setFilters}
+        onHome={reset}
+        onAccount={() => setLoginOpen(true)}
+        compact={view === 'dashboard' || view === 'edit' || view === 'freedash'}
+        onLogout={reset}
+        onBrowse={() => setView('browse')}
+        onListService={() => setSignupRole('company')}
+      />
+      )}
+
+      {view === 'browse' && (
+        <main className="sf-browse" data-screen-label="Results">
+          <Filters
+            count={results.length} total={inMain.length}
+            verifiedOnly={verifiedOnly} onVerified={setVerifiedOnly}
+            sort={sort} onSort={setSort}
+          />
+          <AdSlot variant="banner" size="970 × 120" headline={'Sponsored · top ' + filters.main.toLowerCase() + ' companies advertise here'} />
+          {results.length > 0 ? (
+            <React.Fragment>
+            <div className="sf-grid">
+              {showAboutCard && <AboutCard onOpen={() => goView('about')} />}
+              {showAboutCard && featuredArticles.map(a => (
+                <ArticleCard key={a.id} article={a} onOpen={() => openArticle(a)} />
+              ))}
+              {pageItems.map(p => (
+                <ProCard key={p.id} pro={p} onOpen={openPro} />
+              ))}
+            </div>
+            {totalPages > 1 && (
+              <nav className="sf-pagination" aria-label="Pages">
+                <button className="sf-page-arrow" disabled={curPage === 1} onClick={() => gotoPage(curPage - 1)} aria-label="Previous">←</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                  <button key={n} className={'sf-page-num' + (n === curPage ? ' active' : '')} onClick={() => gotoPage(n)}>{n}</button>
+                ))}
+                <button className="sf-page-arrow" disabled={curPage === totalPages} onClick={() => gotoPage(curPage + 1)} aria-label="Next">→</button>
+              </nav>
+            )}
+            </React.Fragment>
+          ) : (
+            <div className="sf-empty">
+              <h3>No matches</h3>
+              <p>No {filters.main.toLowerCase()} professionals fit these filters. Try widening your search.</p>
+              <button className="sf-btn sf-btn-ghost" style={{marginTop:12}} onClick={reset}>Clear filters</button>
+            </div>
+          )}
+        </main>
+      )}
+
+      {view === 'detail' && pro && (
+        <main data-screen-label="Pro detail">
+          <div style={{padding:'4px 40px 0'}}>
+            <ProDetail pro={pro} onBack={() => setView('browse')} onSeeReviews={() => setReviewsFor(pro)} account={account} onReview={(p) => setReviewPro(p)} onLogin={() => setLoginOpen(true)} />
+          </div>
+        </main>
+      )}
+
+      {view === 'dashboard' && (
+        <Dashboard
+          company={COMPANY}
+          onViewProfile={() => openPro(COMPANY)}
+          onEditProfile={() => { setView('edit'); window.scrollTo(0, 0); }}
+          onSeeReviews={() => setReviewsFor(COMPANY)}
+        />
+      )}
+
+      {view === 'freedash' && (
+        <FreeDashboard
+          company={COMPANY}
+          onViewProfile={() => openPro(COMPANY)}
+          onEditProfile={() => { setView('edit'); window.scrollTo(0, 0); }}
+          onSeeReviews={() => setReviewsFor(COMPANY)}
+          onGetPro={() => setProOpen(true)}
+        />
+      )}
+
+      {view === 'edit' && (
+        <EditProfile
+          company={COMPANY}
+          onCancel={() => { setView('dashboard'); window.scrollTo(0, 0); }}
+          onSave={() => { setView('dashboard'); window.scrollTo(0, 0); }}
+        />
+      )}
+
+      {view === 'userdash' && (
+        <UserDashboard
+          user={USER}
+          savedByCat={visibleSavedByCat}
+          pendingRemoved={pendingRemoved}
+          onRemoveSaved={removeSaved}
+          onUndoSaved={undoSaved}
+          onOpen={openPro}
+          onBrowse={reset}
+        />
+      )}
+
+      {view === 'about' && <About onBack={() => { setView(prevView); window.scrollTo(0, 0); }} onHome={reset} onAccount={() => setLoginOpen(true)} onBrowse={reset} onListService={() => setSignupRole('company')} />}
+
+      {view === 'article' && article && <ArticlePage article={article} onBack={() => { setView(prevView === 'article' ? 'browse' : prevView); window.scrollTo(0, 0); }} onHome={reset} onAccount={() => setLoginOpen(true)} onListService={() => setSignupRole('company')} />}
+
+      {view === 'terms' && <LegalPage doc={LEGAL_TERMS} onBack={() => { setView(prevView); window.scrollTo(0, 0); }} onHome={reset} onAccount={() => setLoginOpen(true)} onListService={() => setSignupRole('company')} />}
+      {view === 'pro' && <LegalPage doc={LEGAL_PRO} onBack={() => { setView(prevView); window.scrollTo(0, 0); }} onHome={reset} onAccount={() => setLoginOpen(true)} onListService={() => setSignupRole('company')} />}
+
+      <Footer
+        onHome={reset}
+        onAbout={() => goView('about')}
+        onIndividuals={() => { if (account) { setPrevView(view); setView('userdash'); window.scrollTo(0, 0); } else { setLoginOpen(true); } }}
+        onTerms={() => goView('terms')}
+        onPro={() => goView('pro')}
+        onCategory={(c) => { setFilters({ ...INITIAL, main: c }); setView('browse'); window.scrollTo(0, 0); }}
+        onListService={() => setSignupRole('company')}
+      />
+
+      <LoginModal
+        open={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onLogin={() => finishAuth('company')}
+        onSignup={() => { setLoginOpen(false); setSignupRole('individual'); }}
+      />
+      <SignUpModal
+        open={!!signupRole}
+        initialRole={signupRole}
+        onClose={() => setSignupRole(null)}
+        onLogin={() => { setSignupRole(null); setLoginOpen(true); }}
+        onEmail={(role) => { setSignupRole(null); setEmailRole(role); }}
+        onContinue={(role) => finishAuth(role)}
+      />
+      <EmailAuthModal
+        open={!!emailRole}
+        role={emailRole}
+        onClose={() => setEmailRole(null)}
+        onBack={() => { const r = emailRole; setEmailRole(null); setSignupRole(r || 'individual'); }}
+        onComplete={(role) => finishAuth(role)}
+      />
+      <ReviewsModal open={!!reviewsFor} pro={reviewsFor} onClose={() => setReviewsFor(null)} />
+      <LeaveReviewModal open={!!reviewPro} pro={reviewPro} onClose={() => setReviewPro(null)} />
+      <ShareModal open={!!sharePro} pro={sharePro} onClose={() => setSharePro(null)} />
+      <AdModal open={adOpen} onClose={() => setAdOpen(false)} />
+      <ProModal
+        open={proOpen}
+        onClose={() => setProOpen(false)}
+        onGuidelines={() => { setProOpen(false); goView('pro'); }}
+        onCheckout={(plan) => { setProOpen(false); /* redirect to the Midtrans checkout page for the selected plan */ }}
+      />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
