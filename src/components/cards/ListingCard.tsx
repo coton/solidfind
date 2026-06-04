@@ -58,7 +58,8 @@ export function ListingCard({
   onBookmark,
 }: ListingCardProps) {
   const coverUrl = "/assets/company-cover-fallback.jpg";
-  const shouldShowRating = reviewsEnabled && reviewCount > 0;
+  const showReviews = reviewsEnabled;
+  const shouldShowRating = showReviews && reviewCount > 0;
   const serviceLocations = getServiceLocations({
     category: categoryContext ?? category,
     fallbackLocation: location,
@@ -139,7 +140,7 @@ export function ListingCard({
           <p className="sf-pro-meta">{serviceLabel}</p>
           <p className="sf-pro-desc">{description}</p>
           <div className="sf-pro-foot">
-            <span className="sf-tag-mono">{shouldShowRating ? `${reviewCount} reviews` : primaryLocation || (projects > 0 ? `${projects}+ projects` : team > 0 ? `${team}+ team` : serviceLocations)}</span>
+            <span className="sf-tag-mono">{showReviews ? `${reviewCount} reviews` : primaryLocation || (projects > 0 ? `${projects}+ projects` : team > 0 ? `${team}+ team` : serviceLocations)}</span>
             <span className="sf-pri-link">View →</span>
           </div>
         </div>

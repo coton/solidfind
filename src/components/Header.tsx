@@ -614,7 +614,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         <div className="sf-shell-top">
           {/* Logo */}
           <Link href="/" className="sf-shell-brand">
-            <Image src="/images/logo-full-white.svg" alt="SolidFind.id" width={175} height={19} className="h-[19px] w-auto" />
+            <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} className="h-[18px] w-auto" />
+            <span className="sf-brand-id">.id</span>
           </Link>
 
           {/* Right Side Buttons */}
