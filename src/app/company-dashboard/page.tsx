@@ -261,6 +261,25 @@ export default function CompanyDashboardPage() {
 
   const maxViews = Math.max(1, ...data.monthlyViews.map(m => m.views));
   const showProAnalytics = isPro;
+  const profilePath = company?._id ? buildCompanyProfilePath(company) : "/";
+  const dashboardReviews = data.reviews.map((review, index) => ({
+    ...review,
+    context: `${index === 0 ? "New" : "Review"} · ${review.date}`,
+    isNew: index === 0,
+  }));
+  const viewsThisMonth = data.monthlyViews.at(-1)?.views ?? data.stats.viewsLastMonth;
+  const previousMonthViews = data.monthlyViews.length > 1 ? data.monthlyViews.at(-2)?.views ?? 0 : 0;
+  const viewsDelta = previousMonthViews > 0 ? Math.round(((viewsThisMonth - previousMonthViews) / previousMonthViews) * 100) : 0;
+  const topLocation = data.stats.mostSearchedLocation || "Bali";
+  const completionRing = {
+    background: `conic-gradient(var(--sf-peach-300) 0deg, var(--sf-orange) ${profileCompletionScore * 3.6}deg, var(--sf-stone-300) ${profileCompletionScore * 3.6}deg 360deg)`,
+  };
+  const completionItems = [
+    { label: "Company details", done: Boolean(company?.name && company?.email && company?.phone) },
+    { label: "Portfolio photos", done: companyProjectImageCount > 0 },
+    { label: "Licenses & documents", done: Boolean(company?.isReviewed) },
+    { label: "Service areas", done: companyProfileLocations.length > 0 },
+  ];
 
   const handleBuyPro = async () => {
     if (!currentUser?._id || !company?._id) {
@@ -307,213 +326,244 @@ export default function CompanyDashboardPage() {
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 pt-4 pb-8 flex-grow w-full">
-        <div className="mb-7 flex items-center justify-between gap-4">
-          <p className="min-w-0 truncate text-[10px] text-[#333]/60 tracking-[0.2px] underline underline-offset-2">
-            {clerkUser?.emailAddresses?.[0]?.emailAddress ?? ""}
-          </p>
-          {isPro && proEnabled ? (
-            <p className="shrink-0 text-[11px] font-medium tracking-[0.22px] text-[#f14110]">PRO ACCOUNT</p>
-          ) : (
-            <p className="shrink-0 text-[11px] font-medium tracking-[0.22px] text-[#333]/60">FREE ACCOUNT</p>
-          )}
-        </div>
-
-        {/* Header Row */}
-        <div className="mb-6">
-          <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
-          <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px] mb-0">
-            {company?._id ? (
-              <Link href={buildCompanyProfilePath(company)} className="hover:text-[#f14110] transition-colors">
-                {data.name}
-              </Link>
-            ) : (
-              data.name
-            )}
-          </h1>
-        </div>
-
-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-8">
-          <p className="w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
-            Your profile is live on SolidFind. As the platform grows, so does your visibility. Make sure you are showing your best profile : )
-          </p>
-          <p className="w-full max-w-none text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
-            Profil Anda sudah aktif di SolidFind. Seiring platform berkembang, begitu pula jangkauan Anda. Pastikan kamu menampilkan profil terbaikmu : )
-          </p>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-4 mb-8">
-          <Link
-            href="/company-dashboard/edit"
-            className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
-            style={{ minWidth: '140px' }}
-          >
-            Edit profile
-          </Link>
-          {isPro && proEnabled && (
-            <button
-              onClick={() => setShowAdModal(true)}
-              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors ml-auto"
-            >
-              Get AD space
-            </button>
-          )}
-          {!isPro && proEnabled && (
-            <button
-              onClick={() => setShowProModal(true)}
-              className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors ml-auto"
-            >
-              Get PRO
-            </button>
-          )}
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-6">
-          <div>
-            <div className="h-[42px]">
-              <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                Company bookmarked /
-              </p>
-              <p className="text-[10px] text-[#333]/70 tracking-[0.2px]">
-                Perusahaan favorit sebanyak
-              </p>
-            </div>
-            <p className={`text-[32px] font-bold tracking-[0.64px] leading-[38px] ${data.stats.bookmarked === 0 ? 'text-[#666]' : 'text-[#f14110]'}`}>
-              {data.stats.bookmarked}
-              <span className="text-[14px] font-normal ml-1">Times</span>
-            </p>
+      <main className="sf-dash flex-grow" data-screen-label="Company dashboard">
+        <div className="m-dashboard sm:hidden">
+          <div className="m-pad" style={{ paddingTop: 18, paddingBottom: 6 }}>
+            <span className="m-eyebrow">Company dashboard · <span style={{ color: isPro && proEnabled ? "var(--sf-orange)" : "var(--sf-stone-500)" }}>{isPro && proEnabled ? "Pro Account" : "Free account"}</span></span>
+            <h1 className="m-dash-hi">Welcome back, {data.name}.</h1>
+            <p className="m-dash-sub">{isPro && proEnabled ? "Here's how your profile is performing on SolidFind this month. Pro ranks you above free listings and unlocks the insights below." : "You're listed on SolidFind. Complete your profile and upgrade to Pro to get more visibility."}</p>
           </div>
 
-          <div className="bg-white rounded-[6px] p-4">
-            <p className="text-[9px] text-[#333]/50 tracking-[0.18px] mb-2">
-              Profile completion / Penyelesaian profil
-            </p>
-            <div className="flex items-end gap-1">
-              <span className="text-[32px] font-bold text-[#f14110] leading-none tracking-[0.64px]">{profileCompletionScore}</span>
-              <span className="pb-1 text-[14px] text-[#f14110]">%</span>
-              <span className="pb-1.5 text-[11px] font-medium text-[#333]">{profileCompletionStatus.label}</span>
-            </div>
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#333]/10">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${profileCompletionScore}%`,
-                  background: "linear-gradient(to right, #e9a28e, #f14110)",
-                }}
-              />
-            </div>
-            <p className="mt-3 text-[9px] leading-[14px] text-[#333]/50 tracking-[0.18px]">
-              {profileCompletionStatus.legend}
-            </p>
-          </div>
-        </div>
-
-        {showProAnalytics && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 mb-8">
-            <div className="order-2 sm:order-2">
-              <div className="h-[42px]">
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Most frequent location searched/
-                </p>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px]">
-                  Lokasi yang paling sering lokasi
-                </p>
+          <div className="m-pad m-dash-stack">
+            <section className="m-card">
+              <span className="m-eyebrow">Profile completion</span>
+              <div className="m-complete">
+                <div className="m-ring" style={completionRing}><div className="inner">{profileCompletionScore}%</div></div>
+                <ul>
+                  {completionItems.map((item) => (
+                    <li key={item.label} className={item.done ? "done" : ""}>{item.label}</li>
+                  ))}
+                </ul>
               </div>
-              <p className="text-[24px] font-bold text-[#f14110] tracking-[0.48px] leading-[38px]">
-                {data.stats.mostSearchedLocation}
-              </p>
-            </div>
-
-            <div className="order-1 sm:order-1">
-              <div className="h-[42px]">
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  View within the last month /
-                </p>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px]">
-                  Lihat dalam sebulan terakhir
-                </p>
+              <div className="m-dash-actions">
+                <Link className="m-btn m-btn-ghost" href={profilePath}>View profile</Link>
+                <Link className="m-btn m-btn-pri" href="/company-dashboard/edit">Edit profile →</Link>
               </div>
-              <p className="text-[32px] font-bold text-[#f14110] tracking-[0.64px] leading-[38px]">
-                {data.stats.viewsLastMonth}
-                <span className="text-[14px] font-normal ml-1">Views</span>
-              </p>
-            </div>
-          </div>
-        )}
+            </section>
 
-        {/* Monthly Views Chart */}
-        {isPro && <div className="mb-8">
-          <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] mb-1">
-            This Month views /
-          </p>
-          <p className="text-[11px] text-[#333]/70 tracking-[0.22px] mb-4">
-            Jumlah tayangan bulan ini
-          </p>
-          <div className="bg-white rounded-[6px] p-4">
-            <div className="space-y-3">
-              {data.monthlyViews.map((item) => (
-                <div key={item.month} className="flex items-center gap-4">
-                  <span className="text-[10px] text-[#333]/70 w-20 shrink-0 tracking-[0.2px]">{item.month}</span>
-                  <div className="flex-1 h-4 bg-[#f8f8f8] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${(item.views / maxViews) * 100}%`,
-                        background: "linear-gradient(to right, #e9a28e, #f14110)"
-                      }}
-                    />
-                  </div>
-                  <span className="text-[10px] text-[#333]/70 w-8 text-right tracking-[0.2px]">{item.views}</span>
+            {isPro && proEnabled && (
+              <section className="m-card">
+                <div className="m-dash-card-head">
+                  <span className="m-eyebrow">Profile views · this month</span>
+                  <span className="m-pill-pro">Pro</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>}
+                <div className="m-insight-row">
+                  <span className="m-stat-num">{viewsThisMonth.toLocaleString()}</span>
+                  <span className="m-delta">{viewsDelta >= 0 ? "▲" : "▼"} {Math.abs(viewsDelta)}%</span>
+                </div>
+                <div className="m-stat-label">vs. last month · {viewsLastMonth.toLocaleString()} all-time</div>
+                <div className="m-chart" role="img" aria-label="Monthly profile views">
+                  {data.monthlyViews.map((item, index) => (
+                    <div className="m-chart-col" key={item.month}>
+                      <div className={`m-chart-bar ${index === data.monthlyViews.length - 1 ? "last" : ""}`} style={{ height: `${Math.max(4, Math.round((item.views / maxViews) * 100))}%` }} />
+                      <span className="m-chart-m">{item.month.slice(0, 3)}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-        {/* Banner Image */}
-        {!isPro && proEnabled && (
-          <DashboardHeroMedia className="mb-8" alt="" desktopAspectRatio="900 / 160" mobileAspectRatio="5 / 2" variant="company" />
-        )}
-
-        {/* Reviews Section */}
-        {reviewsEnabled && <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div>
-                <p className="text-[11px] font-medium text-[#333] tracking-[0.22px]">
-                  Latest testimonials /
-                </p>
-                <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">
-                  Ulasan terbaru
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <svg width="16" height="15" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7.93511 0.71955C8.31202 -0.239851 9.68798 -0.23985 10.0649 0.719551L11.6204 4.67914C11.7825 5.09161 12.1742 5.37238 12.6219 5.39695L16.9196 5.63291C17.9609 5.69008 18.3861 6.98113 17.5777 7.63124L14.2414 10.3144C13.8938 10.5939 13.7442 11.0481 13.8589 11.4758L14.9595 15.5812C15.2262 16.576 14.113 17.3739 13.2364 16.8163L9.61892 14.5149C9.24208 14.2752 8.75792 14.2752 8.38108 14.5149L4.76355 16.8163C3.88703 17.3739 2.77385 16.576 3.04053 15.5812L4.14114 11.4758C4.25579 11.0481 4.10618 10.5939 3.75863 10.3144L0.422255 7.63124C-0.386142 6.98113 0.0390565 5.69008 1.08039 5.63291L5.37814 5.39695C5.82584 5.37238 6.21753 5.09161 6.37957 4.67914L7.93511 0.71955Z" fill={starColor(data.rating)}/>
-                </svg>
-                <span className="font-bam text-[18px] font-bold tracking-[-0.2em]" style={{ color: starColor(data.rating) }}>{data.rating}</span>
-                <span className="text-[10px] tracking-[0.2px]" style={{ color: starColor(data.rating) + 'B3' }}>({data.reviewCount})</span>
-              </div>
+            <div className="m-dash-two">
+              <section className="m-card">
+                <span className="m-eyebrow">Saved by clients</span>
+                <div className="m-stat-num">{data.stats.bookmarked}</div>
+                <div className="m-stat-label">times bookmarked</div>
+              </section>
+              {isPro && proEnabled && (
+                <section className="m-card">
+                  <span className="m-eyebrow">Found via</span>
+                  <div className="m-stat-num m-stat-location">{topLocation}</div>
+                  <div className="m-stat-label">top region this month</div>
+                </section>
+              )}
             </div>
-            {company?._id && data.reviewCount > 0 && (
-              <Link
-                href={buildCompanyReviewsPath(company)}
-                className="rounded-full border border-[#333] text-[11px] font-medium text-[#333] tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center"
-                style={{ width: '140px', height: '40px' }}
-              >
-                See all
-              </Link>
+
+            {proEnabled && (
+              <section className="m-card m-pro-card">
+                <span className="m-eyebrow">{isPro ? "Promote" : "Go further"}</span>
+                <h3>{isPro ? "Buy ad space" : "Get Pro"}</h3>
+                <p>{isPro ? "Sponsored slots on category pages and company profiles put your studio in front of more clients." : "Priority placement, analytics, up to 12 photos and ad placements for companies that take visibility seriously."}</p>
+                <button className="m-btn m-btn-pri m-btn-block" type="button" onClick={() => isPro ? setShowAdModal(true) : setShowProModal(true)}>
+                  {isPro ? "Purchase ad space →" : "Upgrade to Pro →"}
+                </button>
+              </section>
+            )}
+
+            {reviewsEnabled && dashboardReviews.length > 0 && (
+              <section>
+                <div className="m-dash-reviews-head">
+                  <h2 className="m-h2">Latest reviews</h2>
+                  {company?._id && data.reviewCount > 0 && <Link href={buildCompanyReviewsPath(company)}>All {data.reviewCount} →</Link>}
+                </div>
+                <div className="m-review-list">
+                  {dashboardReviews.slice(0, 3).map((review, index) => (
+                    <div className={`m-review ${review.isNew ? "new" : ""}`} key={`${review.userName}-${index}`}>
+                      <div className="m-review-top">
+                        <span className="stars">{Array.from({ length: 5 }).map((_, i) => (
+                          <Star key={i} size={12} fill={i < review.rating ? "#f14110" : "none"} color={i < review.rating ? "#f14110" : "#d8d8d8"} />
+                        ))}</span>
+                        <span className="m-review-when">{review.context}</span>
+                      </div>
+                      <p>"{review.content}"</p>
+                      <div className="m-review-by">{review.userName}</div>
+                    </div>
+                  ))}
+                </div>
+              </section>
             )}
           </div>
+        </div>
 
-          <div className="grid grid-cols-4 gap-4">
-            {data.reviews.map((review, index) => (
-              <ReviewCard key={index} {...review} />
-            ))}
+        <div className="sf-dash-desktop hidden sm:block">
+          <div className="sf-dash-intro">
+            <span className="sf-tag-mono">Company dashboard · <span className={isPro && proEnabled ? "sf-eyebrow-pro" : ""}>{isPro && proEnabled ? "Pro Account" : "Free account"}</span></span>
+            <h1 className="sf-dash-hi">Welcome back, {data.name}.</h1>
+            <p className="sf-dash-sub">{isPro && proEnabled ? "Here's how your profile is performing on SolidFind this month. Your Pro Account ranks you above free listings and unlocks the insights below." : "You're listed on SolidFind. Complete your profile to make a strong impression — upgrade to Pro to unlock visibility insights."}</p>
           </div>
-        </div>}
+
+          <div className="sf-dash-layout">
+            <div className="sf-dash-main">
+              <div className="sf-dash-cards">
+                <section className="sf-dash-card">
+                  <span className="sf-tag-mono">Profile completion</span>
+                  <div className="sf-completion">
+                    <div className="sf-ring" style={completionRing}><span>{profileCompletionScore}%</span></div>
+                    <ul className="sf-completion-list">
+                      {completionItems.map((item) => (
+                        <li key={item.label} className={item.done ? "done" : ""}>{item.label}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="sf-card-btns">
+                    <Link className="sf-btn sf-btn-lg sf-btn-ghost" href={profilePath}>View profile</Link>
+                    <Link className="sf-btn sf-btn-lg sf-btn-pri" href="/company-dashboard/edit">Edit profile →</Link>
+                  </div>
+                </section>
+
+                {isPro && proEnabled && (
+                  <section className="sf-dash-card sf-dash-card-pro">
+                    <span className="sf-tag-light">Promote</span>
+                    <h3>Buy ad space</h3>
+                    <p>Place sponsored slots on category pages and company profiles to put your studio in front of more clients.</p>
+                    <button className="sf-btn sf-btn-lg sf-dash-getpro" type="button" onClick={() => setShowAdModal(true)}>Purchase ad space →</button>
+                  </section>
+                )}
+
+                <section className="sf-dash-card sf-dash-card-stat">
+                  <span className="sf-tag-mono">Saved by clients</span>
+                  <div className="sf-stat-num">{data.stats.bookmarked}</div>
+                  <div className="sf-stat-label">times your company was bookmarked</div>
+                </section>
+
+                {!isPro && proEnabled && (
+                  <section className="sf-dash-card sf-dash-card-pro">
+                    <span className="sf-tag-light">Go further</span>
+                    <h3>Get Pro</h3>
+                    <p>Priority placement, profile analytics, up to 12 photos and ad placements across the platform.</p>
+                    <button className="sf-btn sf-btn-lg sf-dash-getpro" type="button" onClick={() => setShowProModal(true)}>Upgrade to Pro →</button>
+                  </section>
+                )}
+              </div>
+
+              {reviewsEnabled && dashboardReviews.length > 0 && (
+                <section className="sf-dash-reviews">
+                  <div className="sf-dash-reviews-head">
+                    <h2 className="sf-h2-static">Latest reviews</h2>
+                    {company?._id && data.reviewCount > 0 && <Link className="sf-btn sf-btn-lg sf-btn-ghost" href={buildCompanyReviewsPath(company)}>See all {data.reviewCount} reviews →</Link>}
+                  </div>
+                  <div className="sf-reviews-grid">
+                    {dashboardReviews.slice(0, 4).map((review, index) => (
+                      <div className={`sf-review ${review.isNew ? "is-new" : ""}`} key={`${review.userName}-${index}`}>
+                        <div className="sf-review-top">
+                          <span className="stars">{Array.from({ length: 5 }).map((_, i) => (
+                            <Star key={i} size={13} fill={i < review.rating ? "#f14110" : "none"} color={i < review.rating ? "#f14110" : "#d8d8d8"} />
+                          ))}</span>
+                          <span className="sf-review-when">{review.context}</span>
+                        </div>
+                        <p>"{review.content}"</p>
+                        <div className="sf-review-by">{review.userName}</div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+
+            {isPro && proEnabled ? (
+              <aside className="sf-dash-side">
+                <div className="sf-dash-side-head">
+                  <h2 className="sf-h2-static">Pro insights</h2>
+                  <span className="sf-pro-pill">Pro</span>
+                </div>
+                <div className="sf-insight-card">
+                  <span className="sf-tag-mono">Profile views · this month</span>
+                  <div className="sf-insight-row">
+                    <div className="sf-stat-num sf-stat-num-sm">{viewsThisMonth.toLocaleString()}</div>
+                    <span className={`sf-insight-delta ${viewsDelta >= 0 ? "up" : ""}`}>{viewsDelta >= 0 ? "▲" : "▼"} {Math.abs(viewsDelta)}%</span>
+                  </div>
+                  <div className="sf-stat-label">vs. last month · {viewsLastMonth.toLocaleString()} views all-time</div>
+                  <div className="sf-chart" role="img" aria-label="Monthly profile views">
+                    {data.monthlyViews.map((item) => (
+                      <div className="sf-chart-col" key={item.month}>
+                        <div className="sf-chart-bar" style={{ height: `${Math.max(4, Math.round((item.views / maxViews) * 100))}%` }}>
+                          <span className="sf-chart-val">{item.views}</span>
+                        </div>
+                        <span className="sf-chart-m">{item.month.slice(0, 3)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="sf-insight-card">
+                  <span className="sf-tag-mono">Found through location</span>
+                  <div className="sf-toploc-big">{topLocation}</div>
+                  <p className="sf-toploc-note">The region most clients found you through this month. Keep your service areas complete to stay visible here.</p>
+                </div>
+                <div className="sf-insight-card sf-buyad">
+                  <div>
+                    <span className="sf-tag-mono">Advertising</span>
+                    <div className="sf-buyad-head">Promote your profile</div>
+                    <p>Sponsored placements across SolidFind.</p>
+                  </div>
+                  <button className="sf-btn sf-btn-pri sf-btn-lg" type="button" onClick={() => setShowAdModal(true)}>Buy ad space →</button>
+                </div>
+              </aside>
+            ) : (
+              <aside className="sf-dash-side">
+                <div className="sf-dash-side-head">
+                  <h2 className="sf-h2-static">What's included in Pro</h2>
+                </div>
+                <div className="sf-insight-card">
+                  <div className="sf-adm-points">
+                    {[
+                      ["Priority placement in search", "Rank above free listings in your category."],
+                      ["Up to 12 portfolio photos or videos", "Show four times more work."],
+                      ["Full analytics dashboard", "See profile views, reach data and location insights."],
+                      ["Ad placement access", "Sponsor slots on category pages and profiles."],
+                      ["AI-ready profile formatting", "Optimised for AI-assisted search."],
+                    ].map(([heading, sub]) => (
+                      <div className="sf-adm-point" key={heading}>
+                        <span className="sf-adm-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                        <div><div className="sf-adm-point-h">{heading}</div><div className="sf-adm-point-s">{sub}</div></div>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="sf-btn sf-btn-pri sf-btn-lg sf-full-btn" type="button" onClick={() => setShowProModal(true)}>Get Pro →</button>
+                  <p className="sf-dash-note">Secure payment via Midtrans · cancel any time</p>
+                </div>
+              </aside>
+            )}
+          </div>
+        </div>
       </main>
 
       <Footer />

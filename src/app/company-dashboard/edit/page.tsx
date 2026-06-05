@@ -1030,48 +1030,48 @@ export default function EditProfilePage() {
         </div>
       )}
 
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
-        {/* Header Row */}
-        <div className="mb-6">
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <p className="min-w-0 truncate text-[10px] text-[#333]/60 tracking-[0.2px] underline underline-offset-2">
-              {company?.email || email || clerkUser?.primaryEmailAddress?.emailAddress || ""}
-            </p>
-            {company?.isPro && proEnabled ? (
-              <p className="shrink-0 text-[11px] text-[#f14110] font-medium tracking-[0.22px]">PRO ACCOUNT</p>
-            ) : (
-              <p className="shrink-0 text-[11px] text-[#333]/60 font-medium tracking-[0.22px]">FREE ACCOUNT</p>
-            )}
-          </div>
-          <div className="mb-5 flex items-start justify-between gap-4">
+      <main className="sf-edit flex-grow w-full" data-screen-label="Edit profile">
+        <div className="sf-edit-bar">
+          <div>
+            <span className="sf-tag-mono">Editing profile · {company?.isPro && proEnabled ? "Pro Account" : "Free account"}</span>
             {company ? (
               <button
                 type="button"
                 onClick={() => requestNavigation(buildCompanyProfilePath(company))}
-                className="block text-left text-[40px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px] leading-[42px] sm:leading-[36px] hover:text-[#f14110] transition-colors"
+                className="sf-edit-title text-left hover:text-[#f14110] transition-colors"
               >
-                <span className="block sm:inline">Company</span>
-                <span className="block sm:inline sm:ml-2">profile</span>
+                {companyName || company.name || "Company profile"}
               </button>
             ) : (
-              <h1 className="text-[40px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px] leading-[42px] sm:leading-[36px]">
-                <span className="block sm:inline">Company</span>
-                <span className="block sm:inline sm:ml-2">profile</span>
-              </h1>
+              <h1 className="sf-edit-title">{companyName || "Company profile"}</h1>
             )}
-
-            <div className="shrink-0 pt-1 text-right">
-              <div className="flex items-center gap-4 justify-end">
-                <button onClick={() => setShowDeleteModal(true)} className="text-[11px] text-[#333] underline tracking-[0.22px] hover:text-[#f14110]">
-                  DELETE PROFILE
-                </button>
-              </div>
-            </div>
+            <p className="sf-edit-topnote">{company?.email || email || clerkUser?.primaryEmailAddress?.emailAddress || ""}</p>
           </div>
+          <div className="sf-edit-actions">
+            {company && !isFirstCompanyConnection && (
+              <button
+                type="button"
+                onClick={() => requestNavigation("/company-dashboard")}
+                className="sf-btn sf-btn-lg sf-btn-ghost"
+              >
+                ← Dashboard
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving || !canSave}
+              className="sf-btn sf-btn-lg sf-btn-pri"
+            >
+              {saving ? "Saving..." : "Save changes →"}
+            </button>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
+        <section className="sf-edit-section sf-edit-panel">
+          <div className="sf-edit-2col">
             <div>
-              <div className="max-w-[360px]">
+              <div>
                 <p className="text-[10px] font-semibold text-[#333] tracking-[0.2px]">Profile completion / Penyelesaian profil</p>
                 <div className="mt-1 flex items-end gap-1">
                   <span className="text-[32px] font-bold text-[#f14110] leading-none tracking-[0.64px]">{profileCompletionScore}</span>
@@ -1094,7 +1094,7 @@ export default function EditProfilePage() {
             </div>
 
             <div>
-              <div className="max-w-[560px]">
+              <div>
                 <ProfileAccordion
                   title="What appears on your public profile:"
                   open={openProfileExplainer === "english"}
@@ -1133,28 +1133,21 @@ export default function EditProfilePage() {
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Action Buttons */}
-        <div className="mb-8 space-y-3">
+        <div className="sf-edit-section space-y-3">
           <div className="flex items-center gap-4">
-            {company && !isFirstCompanyConnection && (
-              <button
-                type="button"
-                onClick={() => requestNavigation("/company-dashboard")}
-                className="h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
-                style={{ minWidth: '140px' }}
-              >
-                ← Back
-              </button>
-            )}
+            <button onClick={() => setShowDeleteModal(true)} className="sf-edit-delete" type="button">
+              Delete profile
+            </button>
             <button
+              type="button"
               onClick={handleSave}
               disabled={saving || !canSave}
-              className={`ml-auto h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
-              style={{ width: '140px', maxWidth: '140px' }}
+              className="sf-btn sf-btn-lg sf-btn-pri ml-auto"
             >
-              {saving ? "Saving..." : "Save"}
+              {saving ? "Saving..." : "Save changes →"}
             </button>
           </div>
           {!canSave && (
@@ -1172,42 +1165,48 @@ export default function EditProfilePage() {
         </div>
 
         {/* Form Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8" onChangeCapture={() => setIsDirty(true)}>
+        <section className="sf-edit-section sf-edit-2col" onChangeCapture={() => setIsDirty(true)}>
           {/* Left Column */}
           <div className="space-y-4">
             {/* Logo Upload */}
-            <div>
-              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-                Upload Company Logo /
-                <br />
-                Unggah Logo Perusahaan
-              </label>
-              <div
-                onClick={() => logoInputRef.current?.click()}
-                className={`w-[100px] h-[100px] rounded-[6px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden relative ${!logoPreviewUrl ? 'border-2 border-dashed border-[#ccc] flex items-center justify-center bg-white' : ''}`}
-              >
-                {logoPreviewUrl ? (
-                  logoId ? (
-                    <Image src={logoPreviewUrl} alt="Company logo" fill className="object-cover" />
+            <div className="sf-edit-panel">
+              <span className="sf-tag-mono">Company logo</span>
+              <div className="sf-edit-logo-row mt-4">
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  className="sf-edit-logo"
+                  aria-label="Upload company logo"
+                >
+                  {logoPreviewUrl ? (
+                    logoId ? (
+                      <Image src={logoPreviewUrl} alt="Company logo" fill className="object-cover" />
+                    ) : (
+                      <ExternalImagePreview src={logoPreviewUrl} alt="Company logo" />
+                    )
                   ) : (
-                    <ExternalImagePreview src={logoPreviewUrl} alt="Company logo" />
-                  )
-                ) : (
-                  <Upload className="w-5 h-5 text-[#ccc]" />
-                )}
-                {logoUploading && (
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    (companyName || company?.name || "?").trim().charAt(0).toUpperCase()
+                  )}
+                  {logoUploading && (
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </button>
+                <div className="sf-edit-logo-copy">
+                  <p className="sf-edit-logo-hint">Optional — we'll use your initial if you don't upload one. Square image, min 240x240px. Shown on your profile and listing card.</p>
+                  <div className="sf-edit-logo-btns">
+                    <button type="button" className="sf-btn sf-btn-ghost" onClick={() => logoInputRef.current?.click()}>Upload logo</button>
                   </div>
-                )}
+                </div>
               </div>
-              <p className="text-[8px] text-[#333]/50 mt-1 tracking-[0.16px]">
-                Recommended: 400x400px, max 2MB
-              </p>
             </div>
 
             {/* Company Name */}
-            <div>
+            <div className="sf-edit-panel">
+              <span className="sf-tag-mono">Basics</span>
+              <div className="mt-4 space-y-4">
+            <div className="sf-edit-field">
               <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                 Company Name / Nama Perusahaan <span className="text-[#f14110]">(*)</span>
               </label>
@@ -1219,6 +1218,7 @@ export default function EditProfilePage() {
                 maxLength={50}
                 className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
               />
+            </div>
             </div>
 
             {/* Address */}
@@ -1245,7 +1245,7 @@ export default function EditProfilePage() {
             </div>
 
             {/* Phone & Email */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="sf-edit-grid2">
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                   Phone / Telepon <span className="text-[#f14110]">(*)</span>
@@ -1277,7 +1277,7 @@ export default function EditProfilePage() {
             </div>
 
             {/* Website & WhatsApp */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="sf-edit-grid2">
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                   Website
@@ -1300,7 +1300,7 @@ export default function EditProfilePage() {
                   type="tel"
                   value={whatsapp}
                   onChange={(e) => setWhatsapp(e.target.value)}
-                  placeholder="8615618711651"
+                  placeholder="6281200000000"
                   aria-invalid={invalidWhatsapp}
                   className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidWhatsapp ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
                 />
@@ -1309,7 +1309,7 @@ export default function EditProfilePage() {
             </div>
 
             {/* Facebook & LinkedIn */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="sf-edit-grid2">
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                   Facebook
@@ -1353,14 +1353,15 @@ export default function EditProfilePage() {
               />
               {invalidInstagram && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular Instagram URL or handle.</p>}
             </div>
-
+              </div>
 
           </div>
 
           {/* Right Column */}
           <div className="space-y-4">
             {/* Description */}
-            <div>
+            <div className="sf-edit-panel">
+              <span className="sf-tag-mono">Description</span>
               <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                 Company introduction as well as description of your project range / Pengenalan perusahaan serta deskripsi jangkauan proyek Anda <span className="text-[#f14110]">(*)</span>
               </label>
@@ -1368,12 +1369,15 @@ export default function EditProfilePage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={6}
-                className="w-full px-3 py-2 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors resize-none"
+                className="sf-edit-textarea"
               />
+              <div className="sf-edit-hint">{description.length} characters · appears on your public profile</div>
             </div>
 
             {/* Projects & Team */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="sf-edit-panel">
+              <span className="sf-tag-mono">Company details</span>
+            <div className="sf-edit-grid3 mt-4">
               <div>
                 <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                   Project number / Nomor proyek <span className="text-[#f14110]">(*)</span>
@@ -1396,9 +1400,6 @@ export default function EditProfilePage() {
                   className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
                 />
               </div>
-            </div>
-
-            {/* Founded Year */}
             <div>
               <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
                 Founded year / Tahun berdiri
@@ -1424,9 +1425,15 @@ export default function EditProfilePage() {
                 </p>
               )}
             </div>
+            </div>
+            </div>
 
             {/* Project Pictures Upload */}
-            <div>
+            <div className="sf-edit-panel">
+              <div className="flex items-baseline justify-between gap-4">
+                <span className="sf-tag-mono">Photos & videos</span>
+                <span className="sf-tag-mono">{totalProjectImages} / {maxImages} used</span>
+              </div>
               <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
                 {company?.isPro && proEnabled ? (
                   <>Upload project pictures or videos<br />Unggah gambar proyek atau Video</>
@@ -1434,7 +1441,7 @@ export default function EditProfilePage() {
                   <>Upload project pictures /<br />Unggah gambar proyek <span className="text-[#f14110]">(*)</span></>
                 )}
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="sf-edit-gallery">
                 {Array(totalSlots).fill(null).map((_, index) => {
                   const imgUrl = projectImageUrls[index];
                   const storageIndex = index - projectImageUrls.length;
@@ -1496,11 +1503,15 @@ export default function EditProfilePage() {
               )}
             </div>
           </div>
-        </div>
+        </section>
 
+
+        <section className="sf-edit-section sf-edit-panel">
+          <span className="sf-tag-mono">Services & coverage</span>
+          <p className="sf-edit-lead">Activate every category you work in and switch on the exact services you offer. These are the same filters visitors use to find you.</p>
 
         {/* Project Size & Location - Top Row */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div className="sf-edit-grid2 mb-8">
           {/* Project Size */}
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -1904,25 +1915,26 @@ export default function EditProfilePage() {
           </div>
         </div>
         )}
+        </section>
 
         {/* Bottom Save */}
-        <div className="grid grid-cols-2 gap-4 sm:gap-8 py-8 border-t border-[#e4e4e4] items-center">
+        <div className="sf-edit-foot">
           <div>
-            <p className={`text-[9px] tracking-[0.18px] whitespace-pre-line ${bottomHintIsWarning ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
+            <p className={`sf-edit-missing whitespace-pre-line ${bottomHintIsWarning ? '' : 'text-[#333]/50'}`}>
               {bottomHintText}
             </p>
           </div>
-          <div className="flex items-center justify-end gap-3">
+          <div className="sf-edit-foot-save">
             {saveError && (
               <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px] text-right">{saveError}</p>
             )}
             <button
+              type="button"
               onClick={handleSave}
               disabled={saving || !canSave}
-              className={`h-10 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors disabled:cursor-not-allowed flex items-center justify-center ${(!isDirty || !canSave) ? 'opacity-50' : ''}`}
-              style={{ width: '140px', maxWidth: '140px' }}
+              className="sf-btn sf-btn-lg sf-btn-pri"
             >
-              {saving ? "Saving..." : "Save"}
+              {saving ? "Saving..." : "Save changes →"}
             </button>
           </div>
         </div>
