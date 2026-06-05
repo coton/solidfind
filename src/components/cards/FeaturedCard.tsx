@@ -29,7 +29,7 @@ export function FeaturedCard({
 
   return (
     <Link href={linkHref} className="block">
-      <article className="sf-pro-card sf-feature-card">
+      <article className="sf-pro-card sf-desktop-card sf-feature-card">
         <div className="sf-pro-photo">
           {coverUrl ? (
             <Image
@@ -51,6 +51,21 @@ export function FeaturedCard({
             <span className="sf-tag-mono">Article</span>
             <span className="sf-pri-link">Read →</span>
           </div>
+        </div>
+      </article>
+      <article className="m-card-h m-card-feature sf-mobile-card">
+        <div className="m-card-h-top">
+          <div className="thumb" style={coverUrl ? { backgroundImage: `url(${coverUrl})` } : undefined}>
+            {!coverUrl && <div className="sf-feature-fallback" />}
+          </div>
+          <div className="body">
+            <h3 className="m-card-name">{articleTitle}</h3>
+            <p className="m-card-desc">{articleDescription}</p>
+          </div>
+        </div>
+        <div className="m-card-foot">
+          <span className="m-card-tag">Article</span>
+          <span className="m-card-view">Read →</span>
         </div>
       </article>
     </Link>

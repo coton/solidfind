@@ -10,6 +10,7 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
+import { useProEnabled } from "@/hooks/useProEnabled";
 import {
   HEADER_MEDIA_PLATFORM_SETTING_KEY,
   resolveMediaSetting,
@@ -275,6 +276,7 @@ export function Header(props: HeaderProps = {}) {
 function HeaderInner({ resultCount, sortControl, showResultsBar = false }: HeaderProps) {
   const { user, signOut } = useClerk();
   const reviewsEnabled = useReviewsEnabled();
+  const proEnabled = useProEnabled();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -860,13 +862,29 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       </div>
       </div>
       {showResultsBar && (
-        <div className="sf-results-bar relative z-20">
-          <span className="sf-results-count"><b>{homepageResultCount}</b></span>
-          <span className="sf-results-sub">solidfinds</span>
-          <div className="sf-results-meta">
-            {sortControl ?? (!showHomepageEmptyState && <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />)}
+        <>
+        <div className="sf-results-bar sf-results-desktop relative z-20">
+            <span className="sf-results-count"><b>{homepageResultCount}</b></span>
+            <span className="sf-results-sub">solidfinds</span>
+            <div className="sf-results-meta">
+              {sortControl ?? (!showHomepageEmptyState && <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />)}
+            </div>
           </div>
-        </div>
+          <div className="m-results sf-results-mobile">
+            <span className="m-results-count">{homepageResultCount}</span>
+            <span className="m-results-sub">solidfinds</span>
+            <span className="m-results-sp" />
+            {proEnabled && (
+              <button type="button" className="m-pill">
+                <span className="m-pill-dot" />PRO
+              </button>
+            )}
+            <button type="button" className="m-pill">
+              <span className="k">Sort by</span><span className="v">Latest</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
+        </>
       )}
     </header>
 

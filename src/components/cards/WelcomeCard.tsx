@@ -15,7 +15,7 @@ export function WelcomeCard() {
 
   return (
     <Link href="/about" className="block">
-      <article className="sf-pro-card sf-about-card">
+      <article className="sf-pro-card sf-desktop-card sf-about-card">
         <div className="sf-about-art">
           <Image src="/assets/solidfind-icon.svg" alt="" width={92} height={92} />
         </div>
@@ -26,6 +26,22 @@ export function WelcomeCard() {
             <span className="sf-tag-mono">About</span>
             <span className="sf-pri-link">About →</span>
           </div>
+        </div>
+      </article>
+      <article className="m-card-h m-card-feature sf-mobile-card">
+        <div className="m-card-h-top">
+          <div className="thumb m-feature-art" />
+          <div className="body">
+            <div className="m-card-head">
+              <h3 className="m-card-name">SolidFind<span style={{ color: "var(--sf-orange)" }}>.id</span></h3>
+            </div>
+            <div className="m-card-meta">About the platform</div>
+            <p className="m-card-desc">{description}</p>
+          </div>
+        </div>
+        <div className="m-card-foot">
+          <span className="m-card-tag">About</span>
+          <span className="m-card-view">Read →</span>
         </div>
       </article>
     </Link>

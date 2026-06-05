@@ -721,40 +721,67 @@ export default function ProfilePageClient() {
               <p>{company.description ?? `${company.name} is listed on SolidFind for construction, renovation and design projects in Bali.`}</p>
             </div>
 
-            <button
-              type="button"
-              className="sf-svc-toggle"
-              aria-expanded={servicesOpen}
-              onClick={() => setServicesOpen((open) => !open)}
-            >
-              Services &amp; coverage
-              <span aria-hidden="true">{servicesOpen ? "↑" : "↓"}</span>
-            </button>
-            <dl className={`sf-svc ${servicesOpen ? "is-open" : ""}`}>
-              <div className="sf-svc-row">
-                <dt className="sf-svc-term">Provided services</dt>
-                <dd className="sf-svc-def">
-                  {servicesForDetail.map((service) => (
-                    <div className="sf-svc-service" key={service.label}>
-                      <span className="sf-svc-name">{service.label}</span>
-                      <p className="sf-svc-desc">{service.value}</p>
+            <div className="sf-svc-desktop">
+              <h2 className="sf-h2-static">Services &amp; coverage</h2>
+              <dl className="sf-svc">
+                <div className="sf-svc-row">
+                  <dt className="sf-svc-term">Provided services</dt>
+                  <dd className="sf-svc-def">
+                    {servicesForDetail.map((service) => (
+                      <div className="sf-svc-service" key={service.label}>
+                        <span className="sf-svc-name">{service.label}</span>
+                        <p className="sf-svc-desc">{service.value}</p>
+                      </div>
+                    ))}
+                  </dd>
+                </div>
+                <div className="sf-svc-row">
+                  <dt className="sf-svc-term">Project size</dt>
+                  <dd className="sf-svc-def">
+                    <p className="sf-svc-desc sf-svc-inline">{projectSizeValue}</p>
+                  </dd>
+                </div>
+                <div className="sf-svc-row">
+                  <dt className="sf-svc-term">Locations</dt>
+                  <dd className="sf-svc-def">
+                    <p className="sf-svc-desc sf-svc-inline">{profileLocationValue}</p>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+            <div className="sf-svc-mobile">
+              <div className={`m-acc2 ${servicesOpen ? "open" : ""}`}>
+                <button className="m-acc2-head" type="button" aria-expanded={servicesOpen} onClick={() => setServicesOpen((open) => !open)}>
+                  <span className="t">Services &amp; coverage</span>
+                  <span className="chev" aria-hidden="true">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
+                  </span>
+                </button>
+                {servicesOpen && (
+                  <div className="m-acc2-body">
+                    <div className="m-svc-row">
+                      <span className="m-svc-term">Provided services</span>
+                      <div style={{ marginTop: 6 }}>
+                        {servicesForDetail.map((service) => (
+                          <div className="m-svc-svc" key={service.label}>
+                            <span className="m-svc-name">{service.label}</span>
+                            <p className="m-svc-desc">{service.value}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </dd>
+                    <div className="m-svc-row">
+                      <span className="m-svc-term">Project size</span>
+                      <p className="m-svc-desc">{projectSizeValue}</p>
+                    </div>
+                    <div className="m-svc-row">
+                      <span className="m-svc-term">Locations</span>
+                      <p className="m-svc-desc">{profileLocationValue}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="sf-svc-row">
-                <dt className="sf-svc-term">Project size</dt>
-                <dd className="sf-svc-def">
-                  <p className="sf-svc-desc sf-svc-inline">{projectSizeValue}</p>
-                </dd>
-              </div>
-              <div className="sf-svc-row">
-                <dt className="sf-svc-term">Locations</dt>
-                <dd className="sf-svc-def">
-                  <p className="sf-svc-desc sf-svc-inline">{profileLocationValue}</p>
-                </dd>
-              </div>
-            </dl>
+            </div>
 
             <div className="sf-work-head">
               <h2 className="sf-h2-static" style={{ margin: 0 }}>Recent work</h2>
