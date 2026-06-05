@@ -4013,6 +4013,10 @@
     min-width: 0;
   }
 
+  .sf-mini-brand img {
+    filter: brightness(0) invert(1);
+  }
+
   .sf-mini-actions {
     position: relative;
     display: inline-flex;
@@ -4310,6 +4314,13 @@
     padding: 0 20px 28px;
   }
 
+  .m-list > a {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .sf-home-shell {
     overflow-x: hidden;
   }
@@ -4350,8 +4361,8 @@
   .m-card-h .thumb {
     position: relative;
     flex: none;
-    width: clamp(118px, 34vw, 148px);
-    height: clamp(118px, 34vw, 148px);
+    width: clamp(116px, 30vw, 132px);
+    height: clamp(116px, 30vw, 132px);
     border-radius: 12px;
     background-size: cover;
     background-position: center;
@@ -4362,7 +4373,7 @@
     min-width: 0;
     flex: 1;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
   }
 
   .m-card-head {
@@ -4377,7 +4388,7 @@
     margin: 0;
     overflow: hidden;
     color: var(--sf-ink);
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
     line-height: 1.2;
     text-overflow: ellipsis;
@@ -4396,7 +4407,7 @@
 
   .m-card-meta {
     color: var(--sf-fg-3);
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.35;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -4408,7 +4419,7 @@
     margin: 1px 0 0;
     overflow: hidden;
     color: var(--sf-fg-2);
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.45;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
