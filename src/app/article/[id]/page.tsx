@@ -4,9 +4,9 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function ArticlePage() {
@@ -24,7 +24,6 @@ export default function ArticlePage() {
   if (article === undefined) {
     return (
       <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
-        <Header />
         <main className="flex-grow flex items-center justify-center">
           <div className="w-5 h-5 border-2 border-[#333] border-t-transparent rounded-full animate-spin" />
         </main>
@@ -36,7 +35,6 @@ export default function ArticlePage() {
   if (article === null) {
     return (
       <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
-        <Header />
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center">
             <p className="text-[14px] text-[#333]/50 mb-4">Article not found.</p>
@@ -58,57 +56,31 @@ export default function ArticlePage() {
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
-      <Header />
-
-      <main className="flex-grow">
-        <div className="max-w-[900px] mx-auto px-4 sm:px-0">
-          {/* Back row - only show when opened from a category page */}
-          {fromCategory && (
-            <div className="flex items-center py-2 border-b border-[#333]/10">
-              <Link
-                href={`/dashboard/${fromCategory}`}
-                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
-              >
-                <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-                  <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <span>BACK</span>
-              </Link>
-            </div>
-          )}
-          
-          {/* Title + Share (same row) — equal spacing above (from border) and below (to subtitle/image) */}
-          <div className="flex items-start justify-between pt-6 pb-8">
-            <h1 className="text-[20px] sm:text-[24px] font-bold text-[#333] leading-[28px] sm:leading-[32px] uppercase" style={{ fontFamily: "'Sora', sans-serif" }}>
-              {article.title.toUpperCase()}
-            </h1>
-            <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative flex-shrink-0 mt-1">
-              <span className="font-bam text-[9px]">Share</span>
-              <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
-                className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-              >
-                <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Subtitle in legend style */}
-          {article.subtitle && (
-            <p className="font-bam text-[11px] text-[#333]/70 mb-6 text-left">
-              {article.subtitle}
-            </p>
-          )}
-        </div>
-
-        {/* Cover Image */}
-        <ArticleCoverImage coverImageId={article.coverImageId} coverImageUrl={article.coverImageUrl} title={article.title} />
-
-        {/* Article Content */}
-        <div className="max-w-[900px] mx-auto px-5 sm:px-0 py-8">
-          {/* Content Blocks — skip heading blocks that duplicate the page title */}
-          <div className="space-y-8">
-            {article.contentBlocks
+      <main className="sf-about sf-article" data-screen-label="Article">
+        <ArticleHero article={article} />
+        <div className="sf-article-wrap">
+          <Link className="sf-about-back" href={fromCategory ? `/dashboard/${fromCategory}` : "/"}>← Back</Link>
+          <div className="sf-article-grid">
+            <aside className="sf-article-meta">
+              <div className="sf-article-meta-block">
+                <span className="sf-tag-mono">Filed under</span>
+                <div className="sf-article-cats">
+                  {["Journal"].map((category) => <span key={category}>{category}</span>)}
+                </div>
+              </div>
+              <div className="sf-article-meta-block">
+                <span className="sf-tag-mono">Reading time</span>
+                <p className="sf-article-meta-val">{Math.max(2, Math.ceil((article.contentBlocks?.length ?? 1) * 0.8))} min read</p>
+              </div>
+              <div className="sf-article-meta-block">
+                <span className="sf-tag-mono">Share this story</span>
+                <button type="button" className="sf-social-btn" onClick={handleShare} aria-label="Share article">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+                </button>
+              </div>
+            </aside>
+            <div className="sf-article-col">
+              {article.contentBlocks
               .filter((block) => {
                 if (block.type === "heading" && block.heading) {
                   const headingNorm = block.heading.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -125,37 +97,44 @@ export default function ArticlePage() {
               .map((block, index) => (
               <ContentBlockRenderer key={index} block={block} />
             ))}
-          </div>
-
-          {/* Bottom divider + Back to top / Share */}
-          <div className="border-t border-[#333]/10 mt-8 pt-4">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
-              >
-                Back to top
-              </button>
-              <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors">
-                <span className="font-bam text-[9px]">Share</span>
-                <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                  style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-                >
-                  <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
-                </svg>
-              </button>
+              <button className="sf-about-back sf-legal-totop" type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>↑ Back to top</button>
             </div>
           </div>
-
-          {/* Bottom Ad Space */}
-          <div className="mt-8 mb-8">
+          <div className="sf-ad sf-ad-banner">
             <AdBanner alt="Advertisement" />
           </div>
         </div>
       </main>
 
       <Footer />
+    </div>
+  );
+}
+
+function ArticleHero({ article }: { article: { title: string; subtitle?: string; coverImageId?: Id<"_storage">; coverImageUrl?: string } }) {
+  const url = useQuery(api.files.getUrl, article.coverImageId ? { storageId: article.coverImageId } : "skip");
+  const displayUrl = url ?? article.coverImageUrl ?? "/assets/company-cover-fallback.jpg";
+
+  return (
+    <div className="sf-article-hero" style={{ backgroundImage: `url(${displayUrl})` }}>
+      <div className="sf-article-hero-shade" aria-hidden="true" />
+      <div className="sf-about-hero-bar">
+        <Link className="sf-shell-brand" href="/">
+          <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} />
+          <span className="sf-brand-id sf-about-hero-id">.id</span>
+        </Link>
+        <div className="sf-shell-actions">
+          <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </Link>
+          <Link className="sf-btn sf-btn-pri" href="/register-business">List your services</Link>
+        </div>
+      </div>
+      <div className="sf-article-hero-copy">
+        <span className="sf-tag-light">Journal</span>
+        <h1>{article.title}</h1>
+        {article.subtitle && <p>{article.subtitle}</p>}
+      </div>
     </div>
   );
 }
@@ -178,7 +157,7 @@ function ArticleCoverImage({ coverImageId, coverImageUrl, title }: { coverImageI
 function ContentBlockRenderer({ block }: { block: { type: string; text?: string; heading?: string; imageId?: Id<"_storage">; imageUrl?: string; imageCaption?: string; quote?: string; quoteAuthor?: string; videoUrl?: string; videoStorageId?: Id<"_storage"> } }) {
   if (block.type === "heading") {
     return (
-      <h2 className="text-[20px] sm:text-[24px] font-bold text-[#333] leading-[28px] sm:leading-[32px]" style={{ fontFamily: "'Sora', sans-serif" }}>
+      <h2 className="sf-article-h2">
         {block.heading}
       </h2>
     );
@@ -186,7 +165,7 @@ function ContentBlockRenderer({ block }: { block: { type: string; text?: string;
 
   if (block.type === "text") {
     return (
-      <p className="text-[13px] leading-[22px] text-[#333]/80" style={{ fontFamily: "'Sora', sans-serif", whiteSpace: "pre-wrap" }}>
+      <p className="sf-article-p">
         {block.text}
       </p>
     );
@@ -198,12 +177,12 @@ function ContentBlockRenderer({ block }: { block: { type: string; text?: string;
 
   if (block.type === "quote") {
     return (
-      <blockquote className="py-2">
-        <p className="text-[18px] sm:text-[20px] leading-[26px] sm:leading-[28px] text-[#333] font-bold" style={{ fontFamily: "'Sora', sans-serif" }}>
+      <blockquote className="sf-article-quote">
+        <p>
           &ldquo;{block.quote}&rdquo;
         </p>
         {block.quoteAuthor && (
-          <p className="text-[12px] text-[#333]/50 mt-2 font-medium">
+          <p className="sf-article-caption">
             — {block.quoteAuthor}
           </p>
         )}
@@ -224,13 +203,13 @@ function BlockImage({ imageId, imageUrl, caption }: { imageId?: Id<"_storage">; 
 
   if (!displayUrl) return null;
   return (
-    <figure>
-      <div className="rounded-[8px] overflow-hidden">
+    <figure className="sf-article-fig">
+      <div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={displayUrl} alt={caption || ""} className="w-full h-auto" />
       </div>
       {caption && (
-        <figcaption className="text-[11px] text-[#333]/50 mt-2 italic">{caption}</figcaption>
+        <figcaption>{caption}</figcaption>
       )}
     </figure>
   );
@@ -242,7 +221,7 @@ function BlockVideo({ videoStorageId, videoUrl }: { videoStorageId?: Id<"_storag
 
   if (!displayUrl) return null;
   return (
-    <div className="rounded-[8px] overflow-hidden">
+    <div className="sf-article-fig">
       <video src={displayUrl} controls className="w-full" />
     </div>
   );

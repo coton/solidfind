@@ -359,6 +359,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   );
   const isArticlePage = pathname.startsWith("/article");
   const fromCategory = searchParams.get("from");
+  const hideMobileProfileHeader = isProfilePage;
   
   // Deactivate category highlighting only for:
   // - Dashboard pages
@@ -676,7 +677,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   return (
     <>
-    {!useTopBarOnlyHeader && !useMobileCompactHeader && (
+    {!useTopBarOnlyHeader && !useMobileCompactHeader && !hideMobileProfileHeader && (
       <div className="sf-mobile-webkit-head sm:hidden">
         <div className={`sf-mini-header ${showMobileMiniHeader ? "is-visible" : ""}`}>
           <Link href="/" className="sf-mini-brand" onClick={() => setMobileMenuOpen(false)}>
@@ -782,7 +783,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       </div>
     )}
 
-    <header className={`relative z-40 bg-[#f8f8f8] ${!useTopBarOnlyHeader && !useMobileCompactHeader ? "hidden sm:block" : ""}`}>
+    <header className={`relative z-40 bg-[#f8f8f8] ${!useTopBarOnlyHeader && !useMobileCompactHeader ? "hidden sm:block" : ""} ${hideMobileProfileHeader ? "hidden sm:block" : ""}`}>
       <div className={`sf-shell ${useTopBarOnlyHeader || useMobileCompactHeader ? "sf-shell-compact" : ""}`}>
       <div className="sf-shell-bg" aria-hidden="true" />
       {headerMedia.url ? (

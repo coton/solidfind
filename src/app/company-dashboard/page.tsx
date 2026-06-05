@@ -117,6 +117,11 @@ export default function CompanyDashboardPage() {
   const searchParams = useSearchParams();
   const shouldOpenProModal = searchParams.get("pro") === "1";
   const shouldShowProSuccess = searchParams.get("proSuccess") === "1";
+  const checkoutStateParam = searchParams.get("checkout");
+  const checkoutState =
+    checkoutStateParam === "pending" || checkoutStateParam === "cancelled" || checkoutStateParam === "failure"
+      ? checkoutStateParam
+      : null;
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const deleteAccount = useMutation(api.users.deleteAccount);
@@ -142,6 +147,10 @@ export default function CompanyDashboardPage() {
   };
 
   const closeProSuccess = () => {
+    router.replace("/company-dashboard");
+  };
+
+  const closeCheckoutState = () => {
     router.replace("/company-dashboard");
   };
 
@@ -876,6 +885,77 @@ export default function CompanyDashboardPage() {
           onClose={closeProSuccess}
         />
       )}
+      {checkoutState && (
+        <CheckoutStatePopup state={checkoutState} onClose={closeCheckoutState} onRetry={() => setShowProModal(true)} />
+      )}
+    </div>
+  );
+}
+
+function CheckoutStatePopup({ state, onClose, onRetry }: { state: "pending" | "cancelled" | "failure"; onClose: () => void; onRetry: () => void }) {
+  const content = {
+    pending: {
+      eyebrow: "Processing payment",
+      title: "Confirming your payment",
+      body: "We're waiting on confirmation from Midtrans. This usually takes just a few seconds. Please don't close this window.",
+      icon: "spinner",
+      primary: "Back to dashboard",
+      secondary: "Do not close or refresh",
+      tone: "neutral",
+    },
+    cancelled: {
+      eyebrow: "Payment cancelled",
+      title: "You cancelled the payment",
+      body: "No charge has been made to your account. You can try again whenever you're ready.",
+      icon: "cancel",
+      primary: "Try again →",
+      secondary: "Back to dashboard",
+      tone: "grey",
+    },
+    failure: {
+      eyebrow: "Payment failed",
+      title: "Your payment didn't go through",
+      body: "There was an issue processing your payment. Please check your card details and try again, or contact your bank.",
+      icon: "error",
+      primary: "Try again →",
+      secondary: "Contact support",
+      tone: "orange",
+    },
+  }[state];
+
+  const handlePrimary = () => {
+    if (state === "pending") {
+      onClose();
+      return;
+    }
+    onClose();
+    onRetry();
+  };
+
+  return (
+    <div className="sf-modal-scrim" onClick={state === "pending" ? undefined : onClose}>
+      <div className="sf-modal sf-modal-confirm" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+        {state !== "pending" && <button className="sf-modal-x" type="button" onClick={onClose}>×</button>}
+        <div className="sf-confirm-ico" style={{ background: state === "cancelled" ? "var(--sf-stone-200)" : state === "pending" ? "none" : "var(--sf-peach-100)", color: state === "cancelled" ? "var(--sf-stone-700)" : "var(--sf-orange)", border: state === "pending" ? "0" : undefined }}>
+          {content.icon === "spinner" && <div className="sf-spinner" />}
+          {content.icon === "cancel" && <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>}
+          {content.icon === "error" && <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>}
+        </div>
+        <span className="sf-tag-mono" style={{ display: "block", color: state === "failure" ? "var(--sf-orange)" : "var(--sf-fg-3)", marginBottom: 8 }}>{content.eyebrow}</span>
+        <h2>{content.title}</h2>
+        <p>{content.body}</p>
+        {state === "pending" && (
+          <p style={{ marginTop: 14, fontFamily: "var(--sf-font-mono)", fontSize: 11, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--sf-fg-3)" }}>{content.secondary}</p>
+        )}
+        <div className="sf-confirm-actions">
+          {state === "failure" ? (
+            <a className="sf-btn sf-btn-lg sf-btn-ghost" href="mailto:hello@solidfind.id">Contact support</a>
+          ) : state === "cancelled" ? (
+            <button className="sf-btn sf-btn-lg sf-btn-ghost" type="button" onClick={onClose}>{content.secondary}</button>
+          ) : null}
+          <button className="sf-btn sf-btn-lg sf-btn-pri" type="button" onClick={handlePrimary}>{content.primary}</button>
+        </div>
+      </div>
     </div>
   );
 }

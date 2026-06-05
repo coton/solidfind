@@ -167,7 +167,7 @@ export function ListingCard({
           </div>
         </div>
         <div className="m-card-foot">
-          <span className="m-card-tag">{shouldShowReviewCount ? reviewLabel : (projects > 0 ? `${projects}+ projects` : "")}</span>
+          <span className="m-card-tag">{shouldShowReviewCount ? reviewLabel : ""}</span>
           {isPro && proEnabled && (
             <span className="m-card-pro">
               <span />PRO

@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { DashboardHeroMedia } from "@/components/DashboardHeroMedia";
 import { ListingCard } from "@/components/cards";
@@ -55,7 +55,8 @@ function sortSavedListings(listings: SavedListingCard[], sortBy: string) {
 export default function DashboardPage() {
   const [sortByCategory, setSortByCategory] = useState<Record<string, SavedListingSort>>({});
   const [sortDropdownOpen, setSortDropdownOpen] = useState<string | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteState, setDeleteState] = useState<"confirm" | "success" | "failure" | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const router = useRouter();
   const { user: clerkUser } = useUser();
@@ -77,8 +78,17 @@ export default function DashboardPage() {
 
   const handleDeleteAccount = async () => {
     if (!clerkUser?.id) return;
-    await deleteAccount({ clerkId: clerkUser.id });
-    await handleSignOut();
+    setDeleteError("");
+    try {
+      await deleteAccount({ clerkId: clerkUser.id });
+      setDeleteState("success");
+      window.setTimeout(() => {
+        void handleSignOut();
+      }, 1200);
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : "An unexpected error occurred.");
+      setDeleteState("failure");
+    }
   };
 
   const savedListings = useQuery(
@@ -147,38 +157,45 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
-      <Header />
+      <header className="sf-userhdr">
+        <Link href="/" className="sf-shell-brand">
+          <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} className="h-[18px] w-auto" />
+          <span className="sf-brand-id sf-about-hero-id">.id</span>
+        </Link>
+        <div className="sf-shell-actions">
+          {reviewsEnabled && (
+            <Link href="/reviews" className="sf-btn sf-btn-ghost">Your testimonials</Link>
+          )}
+          <button type="button" className="sf-btn sf-btn-pri" onClick={handleSignOut}>Log out</button>
+        </div>
+      </header>
 
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">
-        {/* User Info Section */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between gap-4">
+      <main className="sf-userdash-main flex-grow w-full">
+        <div className="sf-user-intro">
             <div>
-              <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>
-              <h1 className="text-[32px] font-bold text-[#333] tracking-[0.64px]">{user.name}</h1>
+              <span className="sf-tag-mono">Hello</span>
+              <h1>{user.name}</h1>
+              <p className="sf-about-contact">
+                Find your list of saved profiles here. Add or remove profiles by clicking the bookmark icon.
+              </p>
             </div>
 
-            <div className="text-right">
-              <p className="text-[11px] text-[#333] tracking-[0.22px] mb-1">{user.email}</p>
-              {reviewsEnabled && (
-                <Link
-                  href="/reviews"
-                  className="h-10 px-6 rounded-full border border-[#f14110] text-[#f14110] text-[11px] font-medium tracking-[0.22px] hover:bg-[#f14110] hover:text-white transition-colors flex items-center justify-center"
-                >
-                  Your testimonials
-                </Link>
-              )}
+            <div className="sf-user-email">
+              <p>{user.email}</p>
+              <button type="button" className="sf-user-delete" onClick={() => setDeleteState("confirm")}>
+                Delete account
+              </button>
             </div>
-          </div>
-
-          <p className="font-bam text-[10px] text-[#333]/70 leading-[14px] tracking-[0.2px] mt-2 w-full max-w-none sm:max-w-[440px]">
-            Find your list of saved profiles here. Add-remove profiles by clicking bookmark icon.
-            <br />
-            Temukan daftar profil yang Anda simpan di sini. Tambah-hapus profil dengan mengklik ikon bookmark.
-          </p>
         </div>
 
         <DashboardHeroMedia className="mb-8" priority />
+
+        <div className="sf-saved-head">
+          <div className="sf-saved-count">
+            <b>{visibleCategories.reduce((sum, cat) => sum + cat.listings.length, 0)}</b>
+            <span>Saved listings</span>
+          </div>
+        </div>
 
         {/* Bookmark sections — dynamic per category */}
         {visibleCategories.map((cat) => {
@@ -187,13 +204,16 @@ export default function DashboardPage() {
           const desktopListings = sortedListings.slice(0, DASHBOARD_CATEGORY_PAGE_SIZE);
 
           return (
-            <section key={cat.id} className="mb-10">
-              <div className="mb-4">
-                <h2 className="mb-2 text-[24px] font-bold text-[#333] tracking-[0.48px]">{cat.label}</h2>
-                <div className="flex items-center justify-between gap-4">
-                  <span className={`text-[11px] tracking-[0.22px] ${cat.listings.length > 0 ? 'text-[#f14110]' : 'text-[#333]/50'}`}>
+            <section key={cat.id} className="sf-saved-group">
+              <div className="sf-saved-group-head">
+                <div>
+                  <h2>{cat.label}</h2>
+                  <span className="sf-saved-count">
+                    <span>
                     {cat.listings.length.toString().padStart(2, '0')} Listings Saved
                   </span>
+                  </span>
+                </div>
                   {cat.listings.length > 0 && (
                     <div className="relative">
                       <button
@@ -223,7 +243,6 @@ export default function DashboardPage() {
                       )}
                     </div>
                   )}
-                </div>
               </div>
 
               {cat.listings.length > 0 ? (
@@ -238,7 +257,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="hidden sm:grid grid-cols-4 gap-5" style={{ gridTemplateColumns: 'repeat(4, 210px)' }}>
+                  <div className="hidden sm:grid sf-saved-grid">
                     {desktopListings.map((listing) => (
                       <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} categoryContext={cat.id} returnToDashboard />
                     ))}
@@ -255,41 +274,96 @@ export default function DashboardPage() {
                   )}
                 </>
               ) : (
-                <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">No saved {cat.label.toLowerCase()} listings yet. Start bookmarking company profiles you would be interested to work with.</p>
+                <p className="sf-saved-empty">No saved {cat.label.toLowerCase()} listings yet. Start bookmarking company profiles you would be interested to work with.</p>
               )}
             </section>
           );
         })}
+        {visibleCategories.length === 0 && (
+          <div className="sf-saved-empty">
+            No saved listings yet. Start bookmarking company profiles you would be interested to work with.
+          </div>
+        )}
       </main>
 
       <Footer />
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowDeleteModal(false)} />
-          <div className="relative bg-white w-full max-w-[440px] rounded-[6px] p-8 text-center">
-            <h3 className="text-[20px] font-bold text-[#333] mb-4">Delete Profile</h3>
-            <p className="text-[12px] text-[#333]/70 mb-6">
-              Are you sure you want to delete your profile? This action cannot be undone.
-            </p>
-            <div className="flex gap-4 justify-center">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="h-10 px-6 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:bg-[#333] hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteAccount}
-                className="h-10 px-6 rounded-full bg-[#f14110] text-white text-[11px] font-medium tracking-[0.22px] hover:bg-[#d93a0e] transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+      {deleteState === "confirm" && (
+        <DeleteAccountWebKitModal
+          email={user.email}
+          onClose={() => setDeleteState(null)}
+          onDelete={handleDeleteAccount}
+        />
       )}
+      {deleteState === "success" && (
+        <DeleteStatusModal
+          tone="success"
+          title="Your account has been removed"
+          eyebrow="Account deleted"
+          body="All your data, saved listings and reviews have been permanently deleted. We're sorry to see you go."
+          actionLabel="Back to SolidFind →"
+          onAction={handleSignOut}
+        />
+      )}
+      {deleteState === "failure" && (
+        <DeleteStatusModal
+          tone="error"
+          title="We couldn't delete your account"
+          eyebrow="Something went wrong"
+          body={`Your account has not been deleted. ${deleteError || "Please try again or get in touch if the issue continues."}`}
+          actionLabel="Try again →"
+          onClose={() => setDeleteState(null)}
+          onAction={() => setDeleteState("confirm")}
+        />
+      )}
+    </div>
+  );
+}
+
+function DeleteAccountWebKitModal({ email, onClose, onDelete }: { email: string; onClose: () => void; onDelete: () => void }) {
+  return (
+    <div className="sf-modal-scrim" onClick={onClose}>
+      <div className="sf-modal sf-modal-confirm" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+        <div className="sf-confirm-ico" style={{ color: "var(--sf-danger)" }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>
+        </div>
+        <h2>Delete your account?</h2>
+        <p>This permanently removes <b>{email}</b>, your saved companies and the reviews you've written. This cannot be undone.</p>
+        <div className="sf-del-reason">
+          <span className="sf-tag-mono">Mind sharing why? (optional)</span>
+          <div className="sf-del-chips">
+            {["Found what I needed", "Not useful enough", "Too many emails", "Privacy concerns", "Other"].map((reason) => (
+              <button className="sf-del-chip" type="button" key={reason}>{reason}</button>
+            ))}
+          </div>
+          <textarea className="sf-edit-textarea" rows={3} placeholder="Tell us what we could have done better..." />
+        </div>
+        <div className="sf-confirm-actions">
+          <button className="sf-btn sf-btn-lg sf-btn-ghost" type="button" onClick={onClose}>Keep account</button>
+          <button className="sf-btn sf-btn-lg sf-btn-danger" type="button" onClick={onDelete}>Delete permanently</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DeleteStatusModal({ tone, title, eyebrow, body, actionLabel, onClose, onAction }: { tone: "success" | "error"; title: string; eyebrow: string; body: string; actionLabel: string; onClose?: () => void; onAction: () => void }) {
+  return (
+    <div className="sf-modal-scrim" onClick={onClose ?? ((event) => event.stopPropagation())}>
+      <div className="sf-modal sf-modal-confirm" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+        {onClose && <button className="sf-modal-x" type="button" onClick={onClose}>×</button>}
+        <div className="sf-confirm-ico" style={{ background: tone === "success" ? "var(--sf-stone-200)" : "var(--sf-peach-100)", color: tone === "success" ? "var(--sf-ink)" : "var(--sf-orange)" }}>
+          {tone === "success" ? (
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><polyline points="20 6 9 17 4 12"/></svg>
+          ) : (
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          )}
+        </div>
+        <span className="sf-tag-mono" style={{ display: "block", color: tone === "success" ? "var(--sf-fg-3)" : "var(--sf-orange)", marginBottom: 8 }}>{eyebrow}</span>
+        <h2>{title}</h2>
+        <p>{body}</p>
+        <button className="sf-btn sf-btn-lg sf-btn-pri" type="button" style={{ width: "100%", justifyContent: "center", marginTop: 22 }} onClick={onAction}>{actionLabel}</button>
+      </div>
     </div>
   );
 }

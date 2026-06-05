@@ -168,155 +168,96 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
-      <Header />
-
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 pt-0 pb-6 sm:pb-8 flex-grow w-full">
-        {/* Back row */}
-        <div className="flex items-center mb-3 pb-2 border-b border-[#333]/10">
-          <Link
-            href={backHref}
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#333] tracking-[0.22px] hover:text-[#f14110] transition-colors"
-          >
-            <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-              <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>BACK</span>
-          </Link>
-        </div>
-
-        {/* Title + Share (same row) */}
-        <div className="flex items-start justify-between mb-6 sm:mb-8">
-          <h1 className="text-[24px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px]">SOLIDFIND.ID</h1>
-          <div className="flex flex-col items-end gap-2">
-            <button onClick={handleShare} className="group flex items-center gap-2 text-[#333]/35 transition-colors relative flex-shrink-0 mt-1">
-              <span className="font-bam text-[9px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">Share</span>
-              <svg width="15" height="20" viewBox="0 0 15.2353 20" fill="none" xmlns="http://www.w3.org/2000/svg"
-                className="stroke-[#D8D8D8] group-hover:stroke-[#f14110] transition-colors"
-                style={{ strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }}
-              >
-                <path d="M11.3071 8H12.7712C13.1595 8 13.5319 8.15444 13.8065 8.42936C14.081 8.70427 14.2353 9.07713 14.2353 9.46592V17.5341C14.2353 17.9229 14.081 18.2957 13.8065 18.5706C13.5319 18.8456 13.1595 19 12.7712 19H2.46408C2.07578 19 1.70339 18.8456 1.42882 18.5706C1.15425 18.2957 1 17.9229 1 17.5341V9.46592C1 9.07713 1.15425 8.70427 1.42882 8.42936C1.70339 8.15444 2.07578 8 2.46408 8H3.92816M10.5458 3.93183L7.61765 1M7.61765 1L4.68948 3.93183M7.61765 1V13.4682" />
-              </svg>
-            </button>
-            <div className="flex h-7 overflow-hidden rounded-full border border-[#333]/15 text-[10px] font-semibold tracking-[0.2px] text-[#333]/50">
-              {(["en", "id"] as AboutLanguage[]).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setLanguage(option)}
-                  className={`px-3 transition-colors ${language === option ? "bg-[#333] text-white" : "hover:text-[#333]"}`}
-                >
-                  {option.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* About Content - Mobile: stack, Desktop: side by side */}
-        <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8 lg:gap-12 mb-8 sm:mb-12">
-          {/* Left Column */}
-          <div className="flex flex-col items-center lg:items-start">
-            {/* Logo */}
-            <div className="w-[180px] sm:w-[200px] h-[180px] sm:h-[200px] relative rounded-[6px] mb-4 bg-[#f8f8f8] flex items-center justify-center p-6 sm:p-8 overflow-hidden">
-              {aboutProfileMedia.url ? (
-                aboutProfileMedia.type === "video" ? (
-                  <video src={aboutProfileMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
-                ) : (
-                  <Image
-                    src={aboutProfileMedia.url}
-                    alt="SOLIDFIND.ID Logo"
-                    fill
-                    className="object-cover"
-                    unoptimized={aboutProfileMedia.url.startsWith("data:")}
-                  />
-                )
-              ) : aboutProfileMediaState.isLoading ? (
-                <div className="w-full h-full bg-[#e4e4e4]" />
-              ) : (
-                <Image 
-                  src="/images/logo-full.svg" 
-                  alt="SOLIDFIND.ID Logo" 
-                  width={175} 
-                  height={19}
-                  className="w-full h-auto"
-                />
-              )}
-            </div>
-
-            {/* Social Links */}
-            <div className="flex w-[180px] justify-start gap-4 sm:w-[200px]">
-              {/* IG icon - same as header (20×20, stroke 1.5) */}
-              <a href={igUrlState.value || "#"} target="_blank" rel="noopener noreferrer" className="text-[#333] hover:opacity-70 transition-opacity">
-                <Image src="/images/icon-ig.svg" alt="Instagram" width={20} height={20} />
-              </a>
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div>
-            {/* Tagline */}
-            <p className="text-[14px] font-semibold text-[#333] mb-4">
-              {localized.tagline}
-            </p>
-
-            {/* About Description */}
-            <div className="space-y-2 text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]">
-              {renderFormattedParagraphs(localized.description, "text-[11px] text-[#333]/70 leading-[16px] tracking-[0.22px]")}
-            </div>
-
-            {/* Account Types */}
-            <div className="mt-8 space-y-4">
-              <h3 className="text-[12px] font-semibold text-[#333] tracking-[0.24px] mb-2">
-                {localized.howItWorks}
-              </h3>
-
-              <div className="p-3 bg-white rounded-[6px]">
-                <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
-                  {localized.individualHeading}
-                </h4>
-                <p className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]">
-                  {localized.individual}
-                </p>
+      <main className="sf-about" data-screen-label="About">
+        <div className="sf-about-hero">
+          <div className="sf-about-hero-bg" aria-hidden="true" />
+          <div className="sf-about-hero-bar">
+            <Link className="sf-shell-brand" href="/">
+              <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} />
+              <span className="sf-brand-id sf-about-hero-id">.id</span>
+            </Link>
+            <div className="sf-shell-actions">
+              <div className="sf-lang" role="group" aria-label="Language">
+                {(["en", "id"] as AboutLanguage[]).map((option) => (
+                  <button key={option} type="button" onClick={() => setLanguage(option)} className={language === option ? "on" : ""}>
+                    {option.toUpperCase()}
+                  </button>
+                ))}
               </div>
+              <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              </Link>
+              <Link className="sf-btn sf-btn-pri" href="/register-business">List your services</Link>
+            </div>
+          </div>
+          <div className="sf-about-hero-copy">
+            <span className="sf-tag-light">About</span>
+            <h1>{localized.tagline}</h1>
+            <p>{localized.description.split(/\n+/)[0]}</p>
+          </div>
+        </div>
 
-              <div className="p-3 bg-white rounded-[6px]">
-                <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
-                  {localized.companyHeading}
-                </h4>
-                <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px] space-y-0.5">
-                  {renderFormattedParagraphs(localized.freeCompany, "text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]")}
+        <Link className="sf-about-back" href={backHref}>← Back</Link>
+
+        <div className="sf-about-body">
+          <section className="sf-about-main">
+            <h2 className="sf-h2-static">Why we exist</h2>
+            <div className="sf-about-prose">
+              {renderFormattedParagraphs(localized.description, "sf-about-p")}
+            </div>
+
+            <h2 className="sf-h2-static">{localized.howItWorks}</h2>
+            <div className="sf-about-cards">
+              <div className="sf-about-card">
+                <span className="sf-about-card-n">01</span>
+                <div>
+                  <span className="sf-tag-mono">{localized.individualHeading}</span>
+                  <p>{localized.individual}</p>
                 </div>
               </div>
-
+              <div className="sf-about-card">
+                <span className="sf-about-card-n">02</span>
+                <div>
+                  <span className="sf-tag-mono">{localized.companyHeading}</span>
+                  <div>{renderFormattedParagraphs(localized.freeCompany, "sf-about-p")}</div>
+                </div>
+              </div>
               {showProCompany && (
-                <div className="p-3 bg-white rounded-[6px]">
-                  <h4 className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.22px] mb-1">
-                    {localized.proCompanyHeading}
-                  </h4>
-                  <div className="text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px] space-y-0.5">
-                    {renderFormattedParagraphs(localized.proCompany, "text-[10px] text-[#333]/70 tracking-[0.2px] leading-[16px]")}
+                <div className="sf-about-card">
+                  <span className="sf-about-card-n">03</span>
+                  <div>
+                    <span className="sf-tag-mono">{localized.proCompanyHeading}</span>
+                    <div>{renderFormattedParagraphs(localized.proCompany, "sf-about-p")}</div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Contact */}
-            <div className="mt-8 pt-4 border-t border-[#e4e4e4]">
-              <h3 className="text-[12px] font-semibold text-[#333] tracking-[0.24px] mb-2">
-                {localized.contactHeading}
-              </h3>
-              <p className="text-[11px] text-[#333]/70 tracking-[0.22px] leading-[18px]">
-                {localized.contact}
-                <br />
-                {localized.reachUsAt}{" "}
-                <a href={mailHref} className="text-[#f14110] hover:underline">
-                  {emailState.value}
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
+            <button className="sf-about-back sf-legal-totop" type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>↑ Back to top</button>
+          </section>
 
+          <aside className="sf-about-side">
+            <div className="sf-detail-card">
+              <span className="sf-tag-mono">{localized.contactHeading}</span>
+              <p className="sf-about-contact">{localized.contact}</p>
+              <a className="sf-btn sf-btn-pri sf-btn-lg" href={mailHref}>{emailState.value}</a>
+            </div>
+            <div className="sf-about-jump">
+              <Link className="sf-about-jump-btn" href="/">
+                <b>Start browsing listings</b>
+                <span>Find professionals across Bali →</span>
+              </Link>
+              <Link className="sf-about-jump-btn" href="/register-business">
+                <b>List your services</b>
+                <span>Create a company profile →</span>
+              </Link>
+              <button className="sf-about-jump-btn" type="button" onClick={handleShare}>
+                <b>Share SolidFind</b>
+                <span>Copy or send this page →</span>
+              </button>
+            </div>
+          </aside>
+        </div>
       </main>
 
       <Footer />
