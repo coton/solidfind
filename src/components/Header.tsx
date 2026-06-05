@@ -341,6 +341,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   const [dropdownCloseSignal, setDropdownCloseSignal] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileOpenSegment, setMobileOpenSegment] = useState<"Size" | "Type" | "Location" | null>(null);
+  const [mobileDrawerSection, setMobileDrawerSection] = useState<"cat" | "build" | "solid">("cat");
+  const [mobileSortOpen, setMobileSortOpen] = useState(false);
   const [showMobileMiniHeader, setShowMobileMiniHeader] = useState(false);
 
   const openAuthModal = (accountType: "company" | "individual" = "individual", mode: "login" | "register" = "register") => {
@@ -374,6 +376,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   const useMobileCompactHeader = isDashboardPage;
   const useTopBarOnlyHeader = isCompanyDashboardPage;
   const homepageSubcategories = getEffectiveSubcategoryFilters(parseSubcategoryParam(searchParams.get("subcategory") || undefined));
+  const proOnly = searchParams.get("pro") === "1";
+  const sortParam = searchParams.get("sort") || "latest";
   const homepageCompanies = useQuery(
     api.companies.list,
     showResultsBar
@@ -391,6 +395,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     if (!homepageCompanies) return resultCount ?? 0;
     return homepageCompanies
       .filter((company) => !visibleCategoryIds || visibleCategoryIds.includes(company.category))
+      .filter((company) => !proOnly || company.isPro === true)
       .filter((company) => {
         if (homepageSubcategories.length === 0) return true;
         const companyTypes = getCompanyCategoryTypes(company, activeCategory ?? "construction").map((type: string) => type.toLowerCase());
@@ -401,7 +406,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         );
       })
       .length;
-  }, [activeCategory, homepageCompanies, homepageSubcategories, resultCount, showResultsBar, visibleCategoryIds]);
+  }, [activeCategory, homepageCompanies, homepageSubcategories, proOnly, resultCount, showResultsBar, visibleCategoryIds]);
   const showHomepageEmptyState = showResultsBar && homepageCompanies !== undefined && homepageResultCount === 0 && Boolean(
     searchParams.get("location") ||
     searchParams.get("search") ||
@@ -464,6 +469,20 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     router.push(`/?${params.toString()}`);
   }, [searchParams, router]);
 
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "id" : "en");
+  };
+
+  const toggleProOnly = () => {
+    updateParams({ pro: proOnly ? null : "1" });
+  };
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+    setMobileSortOpen(false);
+    updateParams({ sort: value === "latest" ? null : value });
+  };
+
   const handleCategoryTab = (catId: string) => {
     setMobileMenuOpen(false);
     setMobileOpenSegment(null);
@@ -492,6 +511,35 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       params.set("category", activeCategory);
     }
     router.push(params.toString() ? `/?${params.toString()}` : "/");
+  };
+
+  const handleIndividualsLink = () => {
+    setMobileMenuOpen(false);
+    if (!user) {
+      openAuthModal("individual", "register");
+      return;
+    }
+    if (userType !== "company") router.push("/dashboard");
+  };
+
+  const handleProfessionalsLink = () => {
+    setMobileMenuOpen(false);
+    if (!user) {
+      openAuthModal("company", "register");
+      return;
+    }
+    if (userType === "company") router.push("/company-dashboard");
+    else openAuthModal("company", "register");
+  };
+
+  const handleListServicesLink = () => {
+    setMobileMenuOpen(false);
+    if (!user) {
+      openAuthModal("company", "register");
+      return;
+    }
+    if (userType === "company") router.push("/company-dashboard/edit");
+    else openAuthModal("company", "register");
   };
 
   // Get dynamic filter options for current category
@@ -677,6 +725,86 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     );
   };
 
+  const renderMobileDrawer = () => {
+    if (!mobileMenuOpen) return null;
+    const toggleSection = (section: "cat" | "build" | "solid") => {
+      setMobileDrawerSection((current) => current === section ? "solid" : section);
+    };
+
+    return (
+      <div className="m-overlay">
+        <div className="m-scrim" onClick={() => setMobileMenuOpen(false)} />
+        <div className="m-drawer" role="dialog" aria-modal="true" aria-label="Menu">
+          <div className="m-drawer-top">
+            <div className="m-drawer-head">
+              <span className="m-drawer-mark" aria-hidden="true">
+                <svg viewBox="0 0 83.88 83.88" width="36" height="36" fill="currentColor"><path d="M65.19,0H18.69c-2.4,0-4.69.95-6.39,2.65L2.65,12.3c-1.69,1.69-2.65,3.99-2.65,6.39v46.5c0,2.4.95,4.69,2.65,6.39l9.66,9.66c1.69,1.69,3.99,2.65,6.39,2.65h48.61c1.04,0,2.04-.41,2.78-1.15h0c1.53-1.53,1.53-4.02,0-5.55l-8.98-8.98c-1.23-1.23-3.14-1.54-4.65-.68-5.01,2.85-10.79,4.19-16.77,3.74-6.16-.46-12.06-2.89-16.76-6.9-13.2-11.25-13.78-31.18-1.76-43.2,5.55-5.55,12.93-8.61,20.79-8.61s15.23,3.06,20.79,8.61h0c9.58,9.58,11.15,24.17,4.71,35.4-.87,1.52-.59,3.44.65,4.69l8.96,8.96c1.53,1.53,4.02,1.53,5.55,0l.12-.12c.74-.74,1.15-1.74,1.15-2.78V18.69c0-2.4-.95-4.69-2.65-6.39l-9.66-9.66c-1.69-1.69-3.99-2.65-6.39-2.65Z"/><path d="M41.94,23.25c-4.79,0-9.58,1.82-13.22,5.47-7.29,7.29-7.29,19.15,0,26.44,7.29,7.29,19.15,7.29,26.44,0,7.29-7.29,7.29-19.15,0-26.44-3.64-3.65-8.43-5.47-13.22-5.47Z"/></svg>
+              </span>
+              <span className="m-topbar-sp" />
+              <button type="button" className="sf-lang m-drawer-lang" onClick={toggleLanguage} aria-label={`Switch language to ${language === "en" ? "Indonesian" : "English"}`}>
+                <span className={language === "en" ? "on" : ""}>EN</span>
+                <span className={language === "id" ? "on" : ""}>ID</span>
+              </button>
+              <button className="m-iconbtn m-drawer-close" aria-label="Close menu" onClick={() => setMobileMenuOpen(false)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div className="m-drawer-nav">
+            <div className={`m-acc ${mobileDrawerSection === "cat" ? "open" : ""}`}>
+              <button className="m-acc-head" type="button" onClick={() => toggleSection("cat")}><span className="lbl">Categories</span><span>⌄</span></button>
+              {mobileDrawerSection === "cat" && (
+                <div className="m-acc-body">
+                  {dynamicCategories.map((cat, index) => (
+                    <button key={cat.id} type="button" onClick={() => handleCategoryTab(cat.id)}>
+                      {String(index + 1).padStart(2, "0")} · {cat.label.replace(/^\d+\.\s*/, "")}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className={`m-acc ${mobileDrawerSection === "build" ? "open" : ""}`}>
+              <button className="m-acc-head" type="button" onClick={() => toggleSection("build")}><span className="lbl">Build</span><span>⌄</span></button>
+              {mobileDrawerSection === "build" && (
+                <div className="m-acc-body">
+                  <button type="button" onClick={handleIndividualsLink}>For individuals</button>
+                  <button type="button" onClick={handleProfessionalsLink}>For professionals</button>
+                  <button type="button" onClick={handleListServicesLink}>List your services</button>
+                  <Link href="/upgrade" onClick={() => setMobileMenuOpen(false)}>Pro guidelines</Link>
+                </div>
+              )}
+            </div>
+            <div className={`m-acc ${mobileDrawerSection === "solid" ? "open" : ""}`}>
+              <button className="m-acc-head" type="button" onClick={() => toggleSection("solid")}><span className="lbl">Solid</span><span>⌄</span></button>
+              {mobileDrawerSection === "solid" && (
+                <div className="m-acc-body">
+                  <Link href="/about" onClick={() => setMobileMenuOpen(false)}>About</Link>
+                  <Link href="/terms" onClick={() => setMobileMenuOpen(false)}>Terms and Conditions</Link>
+                  <a href="mailto:hello@solidfind.id" onClick={() => setMobileMenuOpen(false)}>Contact</a>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="m-drawer-foot">
+            <button className="m-btn m-btn-pri m-btn-block" type="button" onClick={handleListServicesLink}>List your services</button>
+            {user ? (
+              <button className="m-btn m-btn-ghost m-btn-block" type="button" onClick={handleSignOut}>Log out</button>
+            ) : (
+              <button className="m-btn m-btn-ghost m-btn-block" type="button" onClick={() => openAuthModal("individual", "login")}>Log in</button>
+            )}
+          </div>
+          <div className="m-drawer-divide" />
+          <div className="m-drawer-legal">
+            <span className="cc">© 2026 SolidFind.id</span>
+            <a href="https://instagram.com/solidfind.id" target="_blank" rel="noopener noreferrer">Instagram</a>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
     {!useTopBarOnlyHeader && !useMobileCompactHeader && !hideMobileProfileHeader && (
@@ -719,13 +847,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             <button type="button" className="m-iconbtn" aria-label="Menu" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
             </button>
-            {mobileMenuOpen && (
-              <div className="sf-mobile-menu" role="menu">
-                <Link href="/about" role="menuitem" onClick={() => setMobileMenuOpen(false)}>About</Link>
-                <button type="button" role="menuitem" onClick={() => openAuthModal("company", "register")}>List your services</button>
-                <Link href="/terms" role="menuitem" onClick={() => setMobileMenuOpen(false)}>Terms</Link>
-              </div>
-            )}
           </div>
           <h1 className="m-head-lead">{activeSubtitle}</h1>
           <div className="m-cats">
@@ -772,14 +893,25 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             <span className="m-results-sub">solidfinds</span>
             <span className="m-results-sp" />
             {proEnabled && (
-              <button type="button" className="m-pill">
+              <button type="button" className={`m-pill ${proOnly ? "on" : ""}`} onClick={toggleProOnly} aria-pressed={proOnly}>
                 <span className="m-pill-dot" />PRO
               </button>
             )}
-            <button type="button" className="m-pill">
-              <span className="k">Sort by</span><span className="v">Latest</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
+            <div className="m-sort-wrap">
+              <button type="button" className="m-pill" onClick={() => setMobileSortOpen((open) => !open)}>
+                <span className="k">Sort by</span><span className="v">{sortParam === "latest" ? "Latest" : sortParam.replace(/-/g, " ")}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              {mobileSortOpen && (
+                <div className="m-sort-menu">
+                  {["latest", ...(reviewsEnabled ? ["ranking"] : []), "team-smallest", "team-largest", "projects-few", "projects-more"].map((option) => (
+                    <button key={option} type="button" className={sortParam === option ? "on" : ""} onClick={() => handleSortChange(option)}>
+                      {option === "latest" ? "Latest" : option.replace(/-/g, " ")}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -822,10 +954,10 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
           {/* Right Side Buttons */}
           <div className="sf-shell-actions">
-            <div className="sf-lang" role="group" aria-label="Language">
-              <button type="button" className={language === "en" ? "on" : ""} onClick={() => setLanguage("en")}>EN</button>
-              <button type="button" className={language === "id" ? "on" : ""} onClick={() => setLanguage("id")}>ID</button>
-            </div>
+            <button type="button" className="sf-lang" onClick={toggleLanguage} aria-label={`Switch language to ${language === "en" ? "Indonesian" : "English"}`}>
+              <span className={language === "en" ? "on" : ""}>EN</span>
+              <span className={language === "id" ? "on" : ""}>ID</span>
+            </button>
             <SignedIn>
               {/* Account icon (mobile + desktop) */}
               <Link
@@ -882,13 +1014,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               <span />
               <span />
             </button>
-            {mobileMenuOpen && (
-              <div className="sf-mobile-menu" role="menu">
-                <Link href="/about" role="menuitem" onClick={() => setMobileMenuOpen(false)}>About</Link>
-                <button type="button" role="menuitem" onClick={() => openAuthModal("company", "register")}>List your services</button>
-                <Link href="/terms" role="menuitem" onClick={() => setMobileMenuOpen(false)}>Terms</Link>
-              </div>
-            )}
           </div>
         </div>
 
@@ -1006,26 +1131,18 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             <span className="sf-results-count"><b>{homepageResultCount}</b></span>
             <span className="sf-results-sub">solidfinds</span>
             <div className="sf-results-meta">
-              {sortControl ?? (!showHomepageEmptyState && <SortDropdown value={sortBy} onChange={setSortBy} reviewsEnabled={reviewsEnabled} />)}
+              {proEnabled && !showHomepageEmptyState && (
+                <button type="button" className={`sf-pro-filter ${proOnly ? "on" : ""}`} onClick={toggleProOnly} aria-pressed={proOnly}>
+                  <span className="m-pill-dot" />Pro Account only
+                </button>
+              )}
+              {sortControl ?? (!showHomepageEmptyState && <SortDropdown value={sortParam || sortBy} onChange={handleSortChange} reviewsEnabled={reviewsEnabled} />)}
             </div>
-          </div>
-          <div className="m-results sf-results-mobile">
-            <span className="m-results-count">{homepageResultCount}</span>
-            <span className="m-results-sub">solidfinds</span>
-            <span className="m-results-sp" />
-            {proEnabled && (
-              <button type="button" className="m-pill">
-                <span className="m-pill-dot" />PRO
-              </button>
-            )}
-            <button type="button" className="m-pill">
-              <span className="k">Sort by</span><span className="v">Latest</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
           </div>
         </>
       )}
     </header>
+    {renderMobileDrawer()}
 
     {/* Auth modal — rendered outside header so it can overlay everything */}
     <AuthModal

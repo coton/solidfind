@@ -165,6 +165,7 @@ export default function AboutPage() {
       await navigator.clipboard.writeText(window.location.href);
     }
   };
+  const toggleLanguage = () => setLanguage((current) => current === "en" ? "id" : "en");
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -177,13 +178,10 @@ export default function AboutPage() {
               <span className="sf-brand-id sf-about-hero-id">.id</span>
             </Link>
             <div className="sf-shell-actions">
-              <div className="sf-lang" role="group" aria-label="Language">
-                {(["en", "id"] as AboutLanguage[]).map((option) => (
-                  <button key={option} type="button" onClick={() => setLanguage(option)} className={language === option ? "on" : ""}>
-                    {option.toUpperCase()}
-                  </button>
-                ))}
-              </div>
+              <button type="button" className="sf-lang" onClick={toggleLanguage} aria-label={`Switch language to ${language === "en" ? "Indonesian" : "English"}`}>
+                <span className={language === "en" ? "on" : ""}>EN</span>
+                <span className={language === "id" ? "on" : ""}>ID</span>
+              </button>
               <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
               </Link>

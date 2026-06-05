@@ -107,6 +107,7 @@ export default function TermsPage() {
           en: `/terms?view=pro-en${fromSuffix}`,
           id: `/terms?view=pro-id${fromSuffix}`,
         };
+  const nextLanguage: TermsLanguage = language === "en" ? "id" : "en";
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -119,11 +120,10 @@ export default function TermsPage() {
               <span className="sf-brand-id sf-about-hero-id">.id</span>
             </Link>
             <div className="sf-shell-actions">
-              <div className="sf-lang" role="group" aria-label="Language">
-                {(["en", "id"] as TermsLanguage[]).map((option) => (
-                  <Link key={option} href={languageLinks[option]} className={language === option ? "on" : ""}>{option.toUpperCase()}</Link>
-                ))}
-              </div>
+              <Link className="sf-lang" aria-label={`Switch language to ${nextLanguage.toUpperCase()}`} href={languageLinks[nextLanguage]}>
+                <span className={language === "en" ? "on" : ""}>EN</span>
+                <span className={language === "id" ? "on" : ""}>ID</span>
+              </Link>
               <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
               </Link>

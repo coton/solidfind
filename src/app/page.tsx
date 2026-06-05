@@ -33,6 +33,36 @@ function getCategoryLabel(category: string) {
   return labels[category] ?? category.replace(/-/g, " ");
 }
 
+type ListingResult = {
+  id: string;
+  name: string;
+  rating: number;
+  reviewCount: number;
+  projects: number;
+  team: number;
+  isPro: boolean;
+};
+
+function sortListings<T extends ListingResult>(listings: T[], sort: string) {
+  const nextListings = [...listings];
+  switch (sort) {
+    case "ranking":
+      return nextListings.sort((a, b) => (b.rating - a.rating) || (b.reviewCount - a.reviewCount));
+    case "favorites":
+      return nextListings.sort((a, b) => b.reviewCount - a.reviewCount);
+    case "team-smallest":
+      return nextListings.sort((a, b) => (a.team || 0) - (b.team || 0));
+    case "team-largest":
+      return nextListings.sort((a, b) => (b.team || 0) - (a.team || 0));
+    case "projects-few":
+      return nextListings.sort((a, b) => (a.projects || 0) - (b.projects || 0));
+    case "projects-more":
+      return nextListings.sort((a, b) => (b.projects || 0) - (a.projects || 0));
+    default:
+      return nextListings;
+  }
+}
+
 export default function Home() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#f8f8f8]" />}>
@@ -57,6 +87,8 @@ function HomeContent() {
   const locationParam = searchParams.get("location") || undefined;
   const searchParam = searchParams.get("search") || undefined;
   const projectSizeParam = searchParams.get("projectSize") || undefined;
+  const proOnlyParam = searchParams.get("pro") === "1";
+  const sortParam = searchParams.get("sort") || "latest";
 
   const hasFilters = !!(locationParam || searchParam || projectSizeParam || effectiveSubcategories.length);
 
@@ -82,7 +114,8 @@ function HomeContent() {
         companyTypes.includes("every") ||
         effectiveSubcategories.some((subcategory) => companyTypes.includes(subcategory))
       );
-    });
+    })
+    ?.filter((c) => !proOnlyParam || c.isPro === true);
 
   const allLatestCompanies = useQuery(api.companies.latest);
   const latestCompanies = allLatestCompanies && visibleCategoryIds
@@ -146,7 +179,7 @@ function HomeContent() {
   );
 
   // Map Convex companies to the format ListingCard expects
-  const listings = (companies ?? []).map((c) => ({
+  const listings = sortListings((companies ?? []).map((c) => ({
     id: c._id,
     name: c.name,
     description: c.description ?? "",
@@ -168,7 +201,7 @@ function HomeContent() {
     imageUrl: c.imageUrl,
     logoId: c.logoId,
     projectImageIds: c.projectImageIds ?? [],
-  }));
+  })), sortParam);
 
   const latestListings = (latestCompanies ?? []).map((c) => ({
     id: c._id,
@@ -211,7 +244,12 @@ function HomeContent() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [categoryParam, subcategoryParam, locationParam, searchParam, projectSizeParam]);
+  }, [categoryParam, subcategoryParam, locationParam, searchParam, projectSizeParam, proOnlyParam, sortParam]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   useEffect(() => {
     const updateResultsLayout = () => {
@@ -273,7 +311,7 @@ function HomeContent() {
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  onPageChange={setCurrentPage}
+                  onPageChange={handlePageChange}
                 />
               </div>
             </div>
@@ -325,7 +363,7 @@ function HomeContent() {
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  onPageChange={setCurrentPage}
+                  onPageChange={handlePageChange}
                 />
               </div>
             </div>

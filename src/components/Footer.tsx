@@ -57,6 +57,10 @@ export function Footer() {
     setIsAuthModalOpen(true);
   };
 
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "id" : "en");
+  };
+
   return (
     <footer className="sf-footer">
       {/* AuthModal */}
@@ -74,22 +78,10 @@ export function Footer() {
               <span className="sf-brand-id">.id</span>
             </Link>
             <div className="sf-footer-mobile-actions" aria-label="Footer controls">
-              <span className="sf-footer-lang" aria-label="Language">
-                <button
-                  type="button"
-                  className={language === "en" ? "on" : ""}
-                  onClick={() => setLanguage("en")}
-                >
-                  EN
-                </button>
-                <button
-                  type="button"
-                  className={language === "id" ? "on" : ""}
-                  onClick={() => setLanguage("id")}
-                >
-                  ID
-                </button>
-              </span>
+              <button type="button" className="sf-footer-lang" onClick={toggleLanguage} aria-label={`Switch language to ${language === "en" ? "Indonesian" : "English"}`}>
+                <span className={language === "en" ? "on" : ""}>EN</span>
+                <span className={language === "id" ? "on" : ""}>ID</span>
+              </button>
               <button
                 type="button"
                 className="sf-footer-toggle"
