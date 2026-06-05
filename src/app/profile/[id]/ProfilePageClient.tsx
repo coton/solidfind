@@ -17,10 +17,17 @@ import { starFillColor, starColor } from "@/lib/starColors";
 import { buildCompanyProfilePath, buildCompanyReviewsPath } from '@/lib/company-profile-url.mjs';
 import { buildCategoryOptionLabelMap, expandProfileProjectSizes, formatProfileCategoryValues } from "@/lib/category-display.mjs";
 
-/** Profile service values use the same full-caps treatment as category values. */
-function uppercaseJoin(arr: string[]): string {
+function toCapitalizedCase(value: string): string {
+  return value
+    .replace(/[-_]/g, " ")
+    .trim()
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function capitalizedJoin(arr: string[]): string {
   return arr
-    .map((s) => s.replace(/-/g, " ").trim().toUpperCase())
+    .map(toCapitalizedCase)
     .join(", ");
 }
 
@@ -603,29 +610,29 @@ export default function ProfilePageClient() {
     ...(company.realEstateLocations ?? []),
   ]);
   const profileLocationValue = profileLocations.length > 0
-    ? uppercaseJoin(profileLocations)
-    : uppercaseJoin([company.location ?? "bali"]);
+    ? capitalizedJoin(profileLocations)
+    : capitalizedJoin([company.location ?? "bali"]);
   const profileMetaServices = [
     (company.projectSizes?.length ?? 0) > 0
-      ? { label: "PROJECT SIZE", value: uppercaseJoin(expandProfileProjectSizes(company.projectSizes!)) }
+      ? { label: "PROJECT SIZE", value: capitalizedJoin(expandProfileProjectSizes(company.projectSizes!)) }
       : null,
     { label: "LOCATION", value: profileLocationValue },
   ].filter(Boolean) as Array<{ label: string; value: string }>;
   const workCategoryServices = [
     (company.constructionTypes?.length ?? 0) > 0
-      ? { label: "CONSTRUCTION", value: formatProfileCategoryValues(company.constructionTypes!, categoryLabelMap, "construction") }
+      ? { label: "Construction", value: formatProfileCategoryValues(company.constructionTypes!, categoryLabelMap, "construction") }
       : null,
     (company.renovationTypes?.length ?? 0) > 0
-      ? { label: "RENOVATION", value: formatProfileCategoryValues(company.renovationTypes!, categoryLabelMap, "renovation") }
+      ? { label: "Renovation", value: formatProfileCategoryValues(company.renovationTypes!, categoryLabelMap, "renovation") }
       : null,
     (company.architectureTypes?.length ?? 0) > 0
-      ? { label: "ARCHITECTURE", value: formatProfileCategoryValues(company.architectureTypes!, categoryLabelMap, "architecture") }
+      ? { label: "Architecture", value: formatProfileCategoryValues(company.architectureTypes!, categoryLabelMap, "architecture") }
       : null,
     (company.interiorTypes?.length ?? 0) > 0
-      ? { label: "INTERIOR", value: formatProfileCategoryValues(company.interiorTypes!, categoryLabelMap, "interior") }
+      ? { label: "Interior", value: formatProfileCategoryValues(company.interiorTypes!, categoryLabelMap, "interior") }
       : null,
     (company.realEstateTypes?.length ?? 0) > 0
-      ? { label: "REAL ESTATE", value: formatProfileCategoryValues(company.realEstateTypes!, categoryLabelMap, "real-estate") }
+      ? { label: "Real Estate", value: formatProfileCategoryValues(company.realEstateTypes!, categoryLabelMap, "real-estate") }
       : null,
   ].filter(Boolean) as Array<{ label: string; value: string }>;
 
@@ -641,7 +648,7 @@ export default function ProfilePageClient() {
   const foundedYear = company.since ?? new Date(company.createdAt).getFullYear();
   const servicesForDetail = workCategoryServices.length > 0
     ? workCategoryServices
-    : [{ label: company.category?.replace(/-/g, " ").toUpperCase() || "SERVICES", value: company.subcategory?.replace(/-/g, " ").toUpperCase() || "GENERAL" }];
+    : [{ label: toCapitalizedCase(company.category || "services"), value: toCapitalizedCase(company.subcategory || "general") }];
   const projectSizeValue = profileMetaServices.find((item) => item.label === "PROJECT SIZE")?.value || "-";
   const socialLinks = [
     company.email ? { key: "email" as const, label: "Email", href: `mailto:${company.email}` } : null,
@@ -817,6 +824,28 @@ export default function ProfilePageClient() {
                 </button>
               </div>
               {showCopiedToast && <p className="sf-tag-mono" style={{ marginTop: 12, color: "var(--sf-orange)" }}>Link copied</p>}
+            </div>
+            <p className="sf-profile-note">
+              *SolidFind lists this company based on publicly available information and has not independently verified their work quality or operating status.
+              <br />
+              **This listing has not been confirmed by the company.
+            </p>
+            <div className="sf-ad sf-ad-box" role="complementary" aria-label="Advertisement">
+              <span className="sf-ad-tag">Sponsored</span>
+              <div className="sf-ad-body">
+                <span className="sf-ad-ico" aria-hidden="true">
+                  <svg viewBox="0 0 26 21" width="26" height="21" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="1" y="1.1" width="18" height="18.8" rx="1.8" />
+                    <path d="M1 4h18" />
+                    <path d="M21 11v8M17 15h8" />
+                  </svg>
+                </span>
+                <div className="sf-ad-copy">
+                  <div className="sf-ad-head">Reach clients in Bali</div>
+                  <div className="sf-ad-size">300 x 250</div>
+                </div>
+                <a className="sf-btn sf-btn-ghost sf-ad-cta" href="mailto:hello@solidfind.id?subject=Ad%20space%20enquiry">Advertise →</a>
+              </div>
             </div>
           </aside>
         </div>

@@ -361,8 +361,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     : isProfilePage
       ? (fromCategory || null)
       : (searchParams.get("category") ?? "construction");
-  const useMobileCompactHeader = isProfilePage || isDashboardPage;
-  const useTopBarOnlyHeader = isCompanyDashboardPage || isProfilePage;
+  const useMobileCompactHeader = isDashboardPage;
+  const useTopBarOnlyHeader = isCompanyDashboardPage;
   const homepageSubcategories = getEffectiveSubcategoryFilters(parseSubcategoryParam(searchParams.get("subcategory") || undefined));
   const homepageCompanies = useQuery(
     api.companies.list,
@@ -431,9 +431,9 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         params.delete(key);
       }
     }
-    const target = pathname === "/" ? "/" : "/";
+    const target = isProfilePage ? pathname : "/";
     router.push(`${target}?${params.toString()}`);
-  }, [searchParams, pathname, router]);
+  }, [isProfilePage, searchParams, pathname, router]);
 
   const handleCategoryTab = (catId: string) => {
     updateParams({ category: catId, subcategory: null });

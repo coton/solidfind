@@ -4,6 +4,7 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "../../../../convex/_generated/api";
 import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 import ProfilePageClient from "./ProfilePageClient";
+import ProfileLoading from "../loading";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -53,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function ProfilePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#ececec]" />}>
+    <Suspense fallback={<ProfileLoading />}>
       <ProfilePageClient />
     </Suspense>
   );
