@@ -34,6 +34,8 @@ export function Footer() {
   const mailHref = normalizeContactHref(contactUrlState.value);
   const { user } = useUser();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [mobileFooterOpen, setMobileFooterOpen] = useState(false);
+  const [footerLanguage, setFooterLanguage] = useState<"EN" | "ID">("EN");
   const [aboutHref, setAboutHref] = useState("/about");
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
   const accountDashboardHref = userType === "company" ? "/company-dashboard" : "/dashboard";
@@ -62,13 +64,42 @@ export function Footer() {
       />
       <div className="sf-footer-inner">
         <div className="sf-footer-brand">
-          <Link href="/" className="sf-footer-lockup">
-            <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} />
-            <span className="sf-brand-id">.id</span>
-          </Link>
+          <div className="sf-footer-topline">
+            <Link href="/" className="sf-footer-lockup">
+              <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} />
+              <span className="sf-brand-id">.id</span>
+            </Link>
+            <div className="sf-footer-mobile-actions" aria-label="Footer controls">
+              <span className="sf-footer-lang" aria-label="Language">
+                <button
+                  type="button"
+                  className={footerLanguage === "EN" ? "on" : ""}
+                  onClick={() => setFooterLanguage("EN")}
+                >
+                  EN
+                </button>
+                <button
+                  type="button"
+                  className={footerLanguage === "ID" ? "on" : ""}
+                  onClick={() => setFooterLanguage("ID")}
+                >
+                  ID
+                </button>
+              </span>
+              <button
+                type="button"
+                className="sf-footer-toggle"
+                onClick={() => setMobileFooterOpen((open) => !open)}
+                aria-expanded={mobileFooterOpen}
+                aria-label={mobileFooterOpen ? "Close footer links" : "Open footer links"}
+              >
+                {mobileFooterOpen ? "↑" : "↓"}
+              </button>
+            </div>
+          </div>
           <p>An independent platform for the places we live in.</p>
         </div>
-        <div className="sf-footer-cols">
+        <div className={`sf-footer-cols sf-footer-collapsible ${mobileFooterOpen ? "is-open" : ""}`}>
           <div>
             <span className="sf-tag-mono">Categories</span>
             {categories.map((category, index) => (

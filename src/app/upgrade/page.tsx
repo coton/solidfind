@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useQuery } from "convex/react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ArrowLeft, Star, Check, X } from "lucide-react";
-import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
 const PRICE_DEFAULTS = {
@@ -13,229 +12,176 @@ const PRICE_DEFAULTS = {
   standard: { monthly: "650000", yearly: "7000000" },
 };
 
-function formatIdrPrice(value: string | null | undefined) {
-  const amount = Number.parseInt(value ?? "0", 10);
-  if (!Number.isFinite(amount) || amount <= 0) return "0";
-  return new Intl.NumberFormat("id-ID").format(amount);
-}
+const proBenefits = [
+  {
+    title: "Priority placement in search",
+    description: "Your listing ranks above non-Pro companies within your category, so clients see you sooner when searching your area.",
+  },
+  {
+    title: "Visibility analytics",
+    description: "A dashboard of profile views, where viewers found you, and the regions driving the most interest.",
+  },
+  {
+    title: "Up to 12 photos or videos",
+    description: "Show four times more work than a free account: full projects, walkthroughs, and detail shots.",
+  },
+  {
+    title: "Ad placements across the platform",
+    description: "Eligible for sponsored slots on category pages and search results, subject to available inventory.",
+  },
+  {
+    title: "AI-ready profile formatting",
+    description: "Structured fields optimized for AI-assisted search, so your studio surfaces in the right results.",
+  },
+];
 
-const proFeatures = [
+const guidelines = [
   {
-    icon: "star",
-    title: "Priority positioning in search results",
-    subtitle: "Penempatan prioritas dalam hasil pencarian",
-    description: "Your company appears first in search results, maximizing your visibility to potential clients.",
+    title: "Profile accuracy",
+    body: "Keep your public details, service coverage, photos, and contact links accurate. SolidFind may pause visibility for profiles that contain misleading or outdated information.",
   },
   {
-    icon: "ai",
-    title: "Structured for AI-assisted search",
-    subtitle: "Terstruktur untuk pencarian yang dibantu AI",
-    description: "Your profile is optimized for AI-powered search, helping clients find you through natural language queries.",
+    title: "Portfolio quality",
+    body: "Use real project references, clear captions, and relevant imagery. Logos stay as profile pictures; project or placeholder imagery should be used for covers.",
   },
   {
-    icon: "stats",
-    title: "Visibility analytics — who's interested and when",
-    subtitle: "Analisis visibilitas — siapa yang tertarik dan kapan",
-    description: "Track your profile views, bookmark count, and most-searched locations to understand your audience.",
+    title: "Reviews",
+    body: "Testimonials must come from real client experiences. Companies may not create, buy, or pressure users into inaccurate reviews.",
   },
   {
-    icon: "photos",
-    title: "Up to 12 project photos or videos",
-    subtitle: "Hingga 12 foto atau video proyek",
-    description: "Showcase up to 12 project photos instead of 3 — let your work speak for itself.",
+    title: "Sponsored placements",
+    body: "Ads and sponsored positions remain subject to availability, relevance, and platform moderation.",
   },
   {
-    icon: "ad",
-    title: "Ad placements across the website",
-    subtitle: "Penempatan iklan di seluruh situs web",
-    description: "Access premium ad placements across the site for maximum brand exposure.",
+    title: "Billing",
+    body: "Pro subscriptions use Indonesian rupiah pricing and are processed securely via Midtrans. Changes apply to the next billing cycle unless otherwise stated.",
   },
 ];
 
 export default function UpgradePage() {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
-  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [showProModal, setShowProModal] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
   const platformSettings = useQuery(api.platformSettings.getAll);
-  const platformMap = new Map((platformSettings ?? []).map((setting) => [setting.key, setting.value]));
+  const platformMap = useMemo(() => new Map((platformSettings ?? []).map((setting) => [setting.key, setting.value])), [platformSettings]);
   const pricingPhase = platformMap.get("pricing_phase") === "standard" ? "standard" : "launch";
   const monthlyPrice = platformMap.get(`monthly_price_${pricingPhase}`) ?? PRICE_DEFAULTS[pricingPhase].monthly;
   const yearlyPrice = platformMap.get(`yearly_price_${pricingPhase}`) ?? PRICE_DEFAULTS[pricingPhase].yearly;
+  const monthlyAmount = parseRupiah(monthlyPrice);
+  const yearlyAmount = parseRupiah(yearlyPrice);
+  const yearlySavings = Math.max(0, monthlyAmount * 12 - yearlyAmount);
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
-      <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-6 sm:py-8 flex-grow w-full">
-        {/* Back Button */}
-        <div className="mb-4 sm:mb-6">
-          <Link
-            href="/company-dashboard"
-            className="inline-flex items-center gap-2 text-[11px] text-[#333]/50 hover:text-[#333] transition-colors tracking-[0.22px]"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            BACK TO DASHBOARD
-          </Link>
-        </div>
+      <main className="sf-pro-guidelines">
+        <Link className="sf-about-back" href="/company-dashboard">← Back to dashboard</Link>
 
-        {/* Title */}
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-[28px] sm:text-[32px] font-bold text-[#333] tracking-[0.64px] mb-2">
-            Upgrade to PRO
-          </h1>
-          <p className="text-[12px] sm:text-[14px] text-[#333]/70 max-w-[500px] mx-auto">
-            Stand out from the competition with premium features designed to grow your business in Bali.
+        <section className="sf-pro-guide-hero">
+          <span className="sf-tag-mono">Pro guidelines</span>
+          <h1>Use Pro as a visibility layer, not a shortcut around trust.</h1>
+          <p>
+            Pro helps verified professionals present richer profiles and appear in stronger discovery positions. The same listing standards still apply to every account.
           </p>
-        </div>
-
-        {/* Pricing Cards */}
-        <div className="flex items-center justify-center gap-6 sm:gap-8 mb-10">
-          {/* Monthly */}
-          <button
-            onClick={() => setBillingCycle("monthly")}
-            className={`relative rounded-[6px] p-6 sm:p-8 text-center transition-all w-[200px] ${
-              billingCycle === "monthly"
-                ? "bg-white shadow-lg ring-2 ring-[#f14110]"
-                : "bg-white/60 hover:bg-white"
-            }`}
-          >
-            {billingCycle === "monthly" && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#f14110] text-white text-[8px] font-bold tracking-[0.16px] px-3 py-1 rounded-full">
-                SELECTED
-              </div>
-            )}
-            <p className="text-[32px] font-bold text-[#333]">
-              $29
-            </p>
-            <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">per month</p>
-            <p className="text-[9px] text-[#333]/40 mt-1">{formatIdrPrice(monthlyPrice)} rp / Bulan</p>
+          <button type="button" className="sf-btn sf-btn-pri sf-pro-guide-cta" onClick={() => setShowProModal(true)}>
+            Get Pro →
           </button>
+        </section>
 
-          {/* Yearly */}
-          <button
-            onClick={() => setBillingCycle("yearly")}
-            className={`relative rounded-[6px] p-6 sm:p-8 text-center transition-all w-[200px] ${
-              billingCycle === "yearly"
-                ? "bg-white shadow-lg ring-2 ring-[#f14110]"
-                : "bg-white/60 hover:bg-white"
-            }`}
-          >
-            {billingCycle === "yearly" && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#f14110] text-white text-[8px] font-bold tracking-[0.16px] px-3 py-1 rounded-full">
-                SELECTED
+        <section className="sf-pro-guide-grid" aria-label="Pro guidelines">
+          {guidelines.map((item, index) => (
+            <article className="sf-about-card" key={item.title}>
+              <span className="sf-about-card-n">{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <span className="sf-tag-mono">{item.title}</span>
+                <p>{item.body}</p>
               </div>
-            )}
-            <div className="absolute -top-3 -right-2 bg-[#333] text-white text-[7px] font-bold tracking-[0.14px] px-2 py-0.5 rounded-full">
-              SAVE 43%
-            </div>
-            <p className="text-[32px] font-bold text-[#333]">
-              $199
-            </p>
-            <p className="text-[11px] text-[#333]/50 tracking-[0.22px]">per year</p>
-            <p className="text-[9px] text-[#333]/40 mt-1">{formatIdrPrice(yearlyPrice)} rp / Tahun</p>
-          </button>
-        </div>
-
-        {/* Features List */}
-        <div className="max-w-[600px] mx-auto mb-10">
-          <h2 className="text-[14px] font-semibold text-[#333] tracking-[0.28px] mb-6 text-center">
-            Everything included with PRO
-          </h2>
-
-          <div className="space-y-4">
-            {proFeatures.map((feature, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-4 p-4 bg-white rounded-[6px]"
-              >
-                <div className="w-8 h-8 rounded-full bg-[#f14110]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  {feature.icon === "star" && <Star className="w-4 h-4 text-[#f14110]" />}
-                  {feature.icon === "ai" && (
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="#f14110">
-                      <path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6L8 0Z"/>
-                    </svg>
-                  )}
-                  {feature.icon === "stats" && (
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="#f14110">
-                      <rect x="1" y="8" width="3" height="7"/>
-                      <rect x="6" y="4" width="3" height="11"/>
-                      <rect x="11" y="1" width="3" height="14"/>
-                    </svg>
-                  )}
-                  {feature.icon === "photos" && (
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="#f14110">
-                      <rect x="1" y="3" width="14" height="10" rx="1"/>
-                      <circle cx="5" cy="7" r="1.5"/>
-                      <path d="M4 11L7 8L9 10L12 7L14 9V12H2V11H4Z"/>
-                    </svg>
-                  )}
-                  {feature.icon === "ad" && (
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#f14110" strokeWidth="1.5">
-                      <rect x="1" y="1" width="14" height="14" rx="1"/>
-                      <path d="M5 10L8 6L11 10" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </div>
-                <div>
-                  <p className="text-[12px] font-semibold text-[#333]">{feature.title}</p>
-                  <p className="text-[10px] text-[#333]/50 mb-1">{feature.subtitle}</p>
-                  <p className="text-[10px] text-[#333]/70 leading-[16px]">{feature.description}</p>
-                </div>
-                <Check className="w-4 h-4 text-[#f14110] flex-shrink-0 mt-1" />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="text-center pb-8">
-          <button
-            onClick={() => setShowComingSoon(true)}
-            className="h-12 px-12 rounded-full bg-[#f14110] text-white text-[13px] font-medium tracking-[0.26px] hover:bg-[#d93a0e] transition-colors shadow-lg"
-          >
-            Upgrade to PRO — {billingCycle === "monthly" ? `${formatIdrPrice(monthlyPrice)}rp/mo` : `${formatIdrPrice(yearlyPrice)}rp/yr`}
-          </button>
-          <p className="text-[9px] text-[#333]/40 mt-3">
-            Secure payment via Midtrans. Cancel anytime.
-          </p>
-        </div>
+            </article>
+          ))}
+        </section>
       </main>
 
       <Footer />
 
-      {/* Coming Soon Modal */}
-      {showComingSoon && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowComingSoon(false)} />
-          <div className="relative bg-white w-full max-w-[440px] rounded-[6px] p-8 text-center">
-            <button
-              onClick={() => setShowComingSoon(false)}
-              className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"
-            >
-              <X className="w-4 h-4" />
-            </button>
+      {showProModal && (
+        <div className="sf-modal-scrim open" onClick={() => setShowProModal(false)}>
+          <div className="sf-modal sf-pro-sub-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="sf-modal-x" onClick={() => setShowProModal(false)} aria-label="Close">×</button>
+            <span className="sf-tag-mono sf-pro-sub-k">Pro subscription</span>
+            <h2>Get Pro</h2>
+            <p className="sf-pro-sub-lead">Everything in a free profile, plus the visibility tools companies use to be found and chosen.</p>
 
-            <div className="w-12 h-12 rounded-full bg-[#f14110]/10 flex items-center justify-center mx-auto mb-4">
-              <Star className="w-6 h-6 text-[#f14110]" />
+            <div className="sf-pro-sub-list">
+              {proBenefits.map((feature) => (
+                <div className="sf-pro-sub-benefit" key={feature.title}>
+                  <span className="sf-pro-sub-check">✓</span>
+                  <div>
+                    <h3>{feature.title}</h3>
+                    <p>{feature.description}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            <h3 className="text-[20px] font-bold text-[#333] mb-2">Coming Soon!</h3>
-            <p className="text-[12px] text-[#333]/70 mb-1">
-              Online payment will be available shortly.
+
+            <span className="sf-tag-mono sf-pro-sub-plan-k">Choose your plan</span>
+            <div className="sf-pro-plan-grid">
+              <button
+                type="button"
+                className={`sf-pro-plan ${billingCycle === "monthly" ? "on" : ""}`}
+                onClick={() => setBillingCycle("monthly")}
+              >
+                <span className="sf-pro-plan-top">
+                  <b>Monthly</b>
+                  <span className="sf-pro-switch" aria-hidden="true"><i /></span>
+                </span>
+                <strong>{formatRupiah(monthlyAmount)}</strong>
+                <span>per month</span>
+                <small>Billed every month</small>
+              </button>
+              <button
+                type="button"
+                className={`sf-pro-plan ${billingCycle === "yearly" ? "on" : ""}`}
+                onClick={() => setBillingCycle("yearly")}
+              >
+                <span className="sf-pro-plan-top">
+                  <b>Yearly</b>
+                  <span className="sf-pro-switch" aria-hidden="true"><i /></span>
+                </span>
+                <strong>{formatRupiahCompact(yearlyAmount)}</strong>
+                <span>per year</span>
+                {yearlySavings > 0 && <small className="save">Save {formatRupiah(yearlySavings)} a year</small>}
+              </button>
+            </div>
+
+            <button type="button" className="sf-btn sf-btn-pri sf-pro-buy">
+              Buy now →
+            </button>
+            <p className="sf-pro-sub-note">
+              Secure payment via Midtrans. By subscribing you agree to the <Link href="/terms?doc=pro">Pro Terms of Service</Link>.
             </p>
-            <p className="text-[12px] text-[#333]/70 mb-6">
-              Pembayaran online akan segera tersedia.
-            </p>
-            <p className="text-[11px] text-[#333]/50 mb-4">
-              In the meantime, contact us to upgrade:
-            </p>
-            <a
-              href="mailto:hello@solidfind.id"
-              className="inline-flex items-center h-10 px-8 rounded-full border-2 border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors"
-            >
-              hello@solidfind.id
-            </a>
           </div>
         </div>
       )}
     </div>
   );
+}
+
+function parseRupiah(value: string | null | undefined) {
+  const amount = Number.parseInt(String(value ?? "0").replace(/[^\d]/g, ""), 10);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function formatRupiah(amount: number) {
+  return `Rp ${new Intl.NumberFormat("id-ID").format(amount)}`;
+}
+
+function formatRupiahCompact(amount: number) {
+  if (amount >= 1_000_000) {
+    const millions = amount / 1_000_000;
+    const formatted = Number.isInteger(millions)
+      ? String(millions)
+      : millions.toLocaleString("id-ID", { maximumFractionDigits: 1 });
+    return `Rp ${formatted}jt`;
+  }
+  return formatRupiah(amount);
 }

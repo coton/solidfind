@@ -2,16 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { createPortal } from "react-dom";
 import { useSignIn, useSignUp } from "@clerk/nextjs";
-import { useConvex, useQuery } from "convex/react";
+import { useConvex } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { OAuthStrategy } from "@clerk/types";
-import {
-  AD_VERTICAL_PLATFORM_SETTING_KEY,
-  resolveMediaSetting,
-} from "@/lib/platform-settings.mjs";
 import {
   getAuthStatusMessage,
   getVerificationErrorMessage,
@@ -114,6 +109,22 @@ function GoogleIcon() {
   );
 }
 
+function getPrimaryClerkMessage(err: unknown, fallback: string) {
+  const clerkError = err as { errors?: Array<{ message?: string }> };
+  return clerkError.errors?.[0]?.message || fallback;
+}
+
+function shouldOfferPasswordReset(message: string) {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("data breach") ||
+    normalized.includes("breach") ||
+    normalized.includes("reset your password") ||
+    normalized.includes("reset password") ||
+    normalized.includes("password has been found")
+  );
+}
+
 export function AuthModal({
   isOpen,
   onClose,
@@ -125,14 +136,10 @@ export function AuthModal({
   const { signIn, setActive: setSignInActive, isLoaded: isSignInLoaded } = useSignIn();
   const { signUp, setActive: setSignUpActive, isLoaded: isSignUpLoaded } = useSignUp();
   const convex = useConvex();
-  const verticalAdValue = useQuery(api.platformSettings.get, { key: AD_VERTICAL_PLATFORM_SETTING_KEY });
-  const verticalAdState = resolveMediaSetting(verticalAdValue, { url: "", type: "image" });
-  const verticalAdMedia = verticalAdState.media;
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [accountType, setAccountType] = useState<AccountType>(initialAccountType);
   const [step, setStep] = useState<AuthStep>("method");
-  const [closeHovered, setCloseHovered] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -148,6 +155,7 @@ export function AuthModal({
   const [pendingReset, setPendingReset] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [needsSecureSignIn, setNeedsSecureSignIn] = useState(false);
+  const [needsPasswordReset, setNeedsPasswordReset] = useState(false);
   const portalElement = typeof document !== "undefined" ? document.body : null;
 
   // Sync when props change (e.g. re-opening with different defaults)
@@ -163,6 +171,7 @@ export function AuthModal({
       setVerificationCode("");
       setNewPassword("");
       setNeedsSecureSignIn(false);
+      setNeedsPasswordReset(false);
       setIsLoading(false);
       setStep("method");
     }
@@ -175,6 +184,7 @@ export function AuthModal({
     setVerificationCode("");
     setNewPassword("");
     setNeedsSecureSignIn(false);
+    setNeedsPasswordReset(false);
     setStep("method");
   }, [mode]);
 
@@ -252,8 +262,9 @@ export function AuthModal({
         })
       );
     } catch (err: unknown) {
-      const clerkError = err as { errors?: Array<{ message: string }> };
-      setError(clerkError.errors?.[0]?.message || "Login failed. Please try again.");
+      const message = getPrimaryClerkMessage(err, "Login failed. Please try again.");
+      setNeedsPasswordReset(shouldOfferPasswordReset(message));
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -399,8 +410,8 @@ export function AuthModal({
       });
       setPendingReset(true);
     } catch (err: unknown) {
-      const clerkError = err as { errors?: Array<{ message: string }> };
-      setError(clerkError.errors?.[0]?.message || "Failed to send reset code.");
+      const message = getPrimaryClerkMessage(err, "Failed to send reset code.");
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -473,87 +484,25 @@ export function AuthModal({
   const modalShell = (content: React.ReactNode) => {
     const shell = (
       <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 2000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'rgba(51, 51, 51, 0.85)',
-        }}
+        className="sf-modal-scrim open"
         onClick={onClose}
       >
         <div
-          style={{
-            position: 'relative',
-            display: 'flex',
-            width: '100%',
-            maxWidth: '500px',
-            height: '500px',
-            borderRadius: '6px',
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-            margin: '0 16px',
-          }}
+          className={`sf-modal sf-auth-modal ${mode === "register" ? "sf-modal-signup" : "sf-modal-login"}`}
+          role="dialog"
+          aria-modal="true"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* ── LEFT: Ad space — hidden on mobile ── */}
-          <div className="hidden sm:flex" style={{
-            width: '150px',
-            flexShrink: 0,
-            backgroundColor: '#D9D9D9',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            {verticalAdMedia.url ? (
-              verticalAdMedia.type === 'video' ? (
-                <video src={verticalAdMedia.url} className="w-full h-full object-cover" muted autoPlay loop playsInline />
-              ) : (
-                <Image
-                  src={verticalAdMedia.url}
-                  alt="Advertisement"
-                  fill
-                  className="object-cover"
-                  unoptimized={verticalAdMedia.url.startsWith('data:')}
-                />
-              )
-            ) : verticalAdState.isLoading ? (
-              <div className="w-full h-full bg-[#e4e4e4]" />
-            ) : (
-              <span style={{ color: '#999', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
-                AD SPACE
-              </span>
-            )}
-          </div>
-
-          {/* ── RIGHT: Content ── */}
-          <div style={{
-            flex: 1,
-            backgroundColor: '#F8F8F8',
-            padding: '20px 28px',
-            position: 'relative',
-            overflowY: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-          }}>
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              onMouseEnter={() => setCloseHovered(true)}
-              onMouseLeave={() => setCloseHovered(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: closeHovered ? '#F14110' : '#999', lineHeight: 1, transition: 'color 0.15s ease', zIndex: 1 }}
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="sf-modal-x"
+            aria-label="Close"
+          >
+            ×
+          </button>
 
           {content}
-          </div>
         </div>
       </div>
     );
@@ -932,7 +881,7 @@ export function AuthModal({
           <input
             type="email"
             value={email}
-            onChange={(e) => { setEmail(e.target.value); setNeedsSecureSignIn(false); }}
+            onChange={(e) => { setEmail(e.target.value); setNeedsSecureSignIn(false); setNeedsPasswordReset(false); }}
             required
             style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
           />
@@ -993,7 +942,7 @@ export function AuthModal({
           <input
             type="password"
             value={password}
-            onChange={(e) => { setPassword(e.target.value); setNeedsSecureSignIn(false); }}
+            onChange={(e) => { setPassword(e.target.value); setNeedsSecureSignIn(false); setNeedsPasswordReset(false); }}
             required
             style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
           />
@@ -1044,6 +993,31 @@ export function AuthModal({
         {error && (
           <div style={{ textAlign: 'center', marginBottom: '8px' }}>
             <p style={{ color: '#F14110', fontSize: '11px', fontWeight: 500, margin: '4px 0' }}>*{error}</p>
+          </div>
+        )}
+
+        {mode === "login" && needsPasswordReset && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={isLoading}
+              style={{
+                minWidth: '170px',
+                height: '38px',
+                borderRadius: '19px',
+                border: '1px solid #F14110',
+                background: 'transparent',
+                color: '#F14110',
+                fontSize: '12px',
+                fontWeight: 600,
+                letterSpacing: '0.24px',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: isLoading ? 0.6 : 1,
+              }}
+            >
+              Reset password
+            </button>
           </div>
         )}
 

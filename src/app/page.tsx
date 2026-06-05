@@ -102,10 +102,11 @@ function HomeContent() {
   // five rows of company listings and remove the About/featured cards.
   const DEFAULT_GRID_CARD_COUNT = 15;
   const FILTERED_LISTING_CARD_COUNT = 20;
-  const MOBILE_LISTING_CARD_COUNT = 15;
+  const MOBILE_TOTAL_CARD_COUNT = 5;
   const specialCardCount = hasFilters ? 0 : 1 + (visibleArticles?.length ?? 1); // 1 for WelcomeCard + featured articles (default 1 while loading)
   const desktopItemsPerPage = hasFilters ? FILTERED_LISTING_CARD_COUNT : Math.max(1, DEFAULT_GRID_CARD_COUNT - specialCardCount);
-  const itemsPerPage = isMobileResults ? MOBILE_LISTING_CARD_COUNT : desktopItemsPerPage;
+  const mobileItemsPerPage = Math.max(1, MOBILE_TOTAL_CARD_COUNT - specialCardCount);
+  const itemsPerPage = isMobileResults ? mobileItemsPerPage : desktopItemsPerPage;
 
   // Get current user for bookmarks
   const currentUser = useQuery(
@@ -158,7 +159,7 @@ function HomeContent() {
     architectureLocations: c.architectureLocations ?? [],
     interiorLocations: c.interiorLocations ?? [],
     realEstateLocations: c.realEstateLocations ?? [],
-    isPro: c.isPro,
+    isPro: c.isPro === true,
     isFeatured: false,
     isSaved: savedIdSet.has(`${c._id}:${categoryParam}`),
     imageUrl: c.imageUrl,
@@ -182,7 +183,7 @@ function HomeContent() {
     architectureLocations: c.architectureLocations ?? [],
     interiorLocations: c.interiorLocations ?? [],
     realEstateLocations: c.realEstateLocations ?? [],
-    isPro: c.isPro,
+    isPro: c.isPro === true,
     isFeatured: false,
     isSaved: savedIdSet.has(`${c._id}:${categoryParam}`),
     imageUrl: c.imageUrl,
@@ -265,7 +266,7 @@ function HomeContent() {
                   ))
                 }
               </div>
-              <div className="flex justify-start mt-4">
+              <div className="mt-1">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
