@@ -136,15 +136,21 @@
 .sf-about-body,
 .sf-legal-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 42px;
-  max-width: 1180px;
-  margin: 20px auto 56px;
+  align-items: start;
+  max-width: none;
+  margin: 20px 0 56px;
   padding: 0 var(--sf-gutter);
 }
 
+.sf-about-body {
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 40px;
+}
+
 .sf-legal-body {
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 48px;
+  margin-top: 22px;
 }
 
 .sf-about-main,
@@ -152,6 +158,10 @@
 .sf-legal-content,
 .sf-article-col {
   min-width: 0;
+}
+
+.sf-legal-content {
+  max-width: 760px;
 }
 
 .sf-about-main .sf-h2-static,
@@ -298,9 +308,20 @@
 }
 
 .sf-legal-toc a {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
   color: var(--sf-fg-2);
   font-size: 13px;
+  line-height: 1.35;
   text-decoration: none;
+}
+
+.sf-legal-toc a span {
+  flex: none;
+  color: var(--sf-fg-3);
+  font-family: var(--sf-font-mono), JetBrainsMono, monospace;
+  font-size: 11px;
 }
 
 .sf-legal-toc a:hover {
@@ -333,17 +354,18 @@
 }
 
 .sf-article-wrap {
-  max-width: 1180px;
+  max-width: 1240px;
   margin: 0 auto 56px;
-  padding: 22px max(40px, calc((100% - 1680px) / 2)) 0;
+  padding: 22px 40px 0;
 }
 
 .sf-article-grid {
   display: grid;
-  grid-template-columns: 240px minmax(0, 720px);
-  gap: 52px;
+  grid-template-columns: 220px minmax(0, 1fr);
+  column-gap: 80px;
   align-items: start;
-  margin-top: 28px;
+  padding-top: 8px;
+  margin-top: 0;
 }
 
 .sf-article-meta {
@@ -5663,5 +5685,207 @@
     border-radius: 50%;
     background: #fff;
     color: var(--sf-ink);
+  }
+}
+
+/* Final WebKit fidelity fixes: these intentionally win over older hybrid blocks above. */
+.sf-auth-oauth,
+.sf-auth-email-btn {
+  min-height: 54px;
+}
+
+.sf-auth-modal .sf-modal-foot {
+  margin: 0 0 8px;
+  padding-top: 24px;
+}
+
+.sf-pro-sub-modal {
+  width: min(100%, 520px);
+  max-height: min(82vh, 920px);
+  overflow-y: auto;
+  padding: 28px;
+}
+
+.sf-pro-sub-modal h2 {
+  font-size: var(--sf-fs-h2, 32px);
+  line-height: 1.08;
+}
+
+.sf-pro-sub-lead {
+  max-width: 44ch;
+  font-size: 15px;
+}
+
+.sf-pro-sub-list {
+  gap: 16px;
+  margin: 22px 0;
+}
+
+.sf-pro-sub-benefit {
+  grid-template-columns: 34px 1fr;
+  gap: 14px;
+}
+
+.sf-pro-sub-check {
+  width: 30px;
+  height: 30px;
+  border-width: 1.5px;
+  font-size: 18px;
+}
+
+.sf-pro-sub-benefit h3 {
+  font-size: 16px;
+}
+
+.sf-pro-sub-benefit p {
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.sf-pro-plan {
+  min-height: 126px;
+  padding: 16px;
+}
+
+.sf-pro-plan b {
+  font-size: 18px;
+}
+
+.sf-pro-plan strong {
+  margin-top: 14px;
+  font-size: 24px;
+}
+
+.sf-pro-buy {
+  min-height: 50px;
+  font-size: 15px;
+}
+
+.sf-about-body {
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 40px;
+  max-width: none;
+  margin: 20px 0 56px;
+  padding: 0 var(--sf-gutter);
+}
+
+.sf-legal-body {
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 48px;
+  max-width: none;
+  margin: 22px 0 56px;
+  padding: 0 var(--sf-gutter);
+}
+
+.sf-legal-content {
+  min-width: 0;
+  max-width: 760px;
+}
+
+.sf-article-wrap {
+  max-width: 1240px;
+  padding: 22px 40px 0;
+}
+
+.sf-article-grid {
+  grid-template-columns: 220px minmax(0, 1fr);
+  column-gap: 80px;
+  margin-top: 0;
+  padding-top: 8px;
+}
+
+.sf-article-col {
+  min-width: 0;
+  max-width: 860px;
+}
+
+@media (max-width: 1000px) {
+  .sf-about-body,
+  .sf-legal-body {
+    grid-template-columns: 1fr;
+  }
+
+  .sf-about-side {
+    position: static;
+  }
+
+  .sf-legal-toc {
+    display: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .sf-home-shell {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .m-list {
+    width: 100%;
+    padding: 0 24px 28px;
+    gap: 12px;
+  }
+
+  .m-list > a {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .sf-mobile-card {
+    display: flex;
+  }
+
+  .m-card-h {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    box-sizing: border-box;
+    border-radius: 14px;
+    padding: 12px;
+  }
+
+  .m-card-h-top {
+    gap: 14px;
+  }
+
+  .m-card-h .thumb {
+    width: 88px;
+    height: 88px;
+    border-radius: 10px;
+  }
+
+  .m-card-name {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .m-card-meta {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .m-card-desc {
+    font-size: 12px;
+    line-height: 1.45;
+    -webkit-line-clamp: 3;
+  }
+
+  .m-card-h .m-card-foot {
+    margin-top: 10px;
+    padding: 9px 0 3px;
+  }
+
+  .m-card-tag {
+    min-width: 88px;
+    font-size: 10px;
+  }
+
+  .m-card-pro {
+    margin-left: auto;
+    margin-right: auto;
   }
 }

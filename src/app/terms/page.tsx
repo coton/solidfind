@@ -146,15 +146,6 @@ export default function TermsPage() {
         <Link className="sf-about-back" href={backHref}>← Back</Link>
 
         <div className="sf-legal-body">
-          <aside className="sf-legal-toc">
-            <span className="sf-tag-mono">Contents</span>
-            <nav>
-              {sections.slice(0, 12).map((section, index) => (
-                <a href={`#legal-${index + 1}`} key={`${section.title}-toc`}>{section.title}</a>
-              ))}
-            </nav>
-          </aside>
-
           <div className="sf-legal-content">
             <div className="sf-doc-panel on">
               {sections.map((section, sectionIndex) => {
@@ -196,6 +187,17 @@ export default function TermsPage() {
             </div>
             <button className="sf-about-back sf-legal-totop" type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>↑ Back to top</button>
           </div>
+
+          <aside className="sf-legal-toc">
+            <span className="sf-tag-mono">On this page</span>
+            <nav>
+              {sections.slice(0, 12).map((section, index) => (
+                <a href={`#legal-${index + 1}`} key={`${section.title}-toc`}>
+                  <span>{index + 1}</span>{section.title}
+                </a>
+              ))}
+            </nav>
+          </aside>
         </div>
       </main>
 
