@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { DeletionBannerWrapper } from "@/components/DeletionBannerWrapper";
+import { LanguageProvider } from "@/components/LanguageProvider";
 import { SiteChrome } from "@/components/SiteChrome";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
@@ -90,8 +91,10 @@ export default function RootLayout({
         >
           <NextTopLoader color="var(--sf-orange)" showSpinner={false} height={3} />
           <ConvexClientProvider>
-            <DeletionBannerWrapper />
-            <SiteChrome>{children}</SiteChrome>
+            <LanguageProvider>
+              <DeletionBannerWrapper />
+              <SiteChrome>{children}</SiteChrome>
+            </LanguageProvider>
           </ConvexClientProvider>
         </body>
       </html>

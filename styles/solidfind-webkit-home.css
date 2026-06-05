@@ -127,6 +127,12 @@
   color: var(--sf-orange);
 }
 
+.sf-about > .sf-about-back,
+.sf-legal > .sf-about-back {
+  margin: 12px auto 0;
+  width: min(calc(100% - (var(--sf-gutter) * 2)), var(--sf-content-max));
+}
+
 .sf-about-body,
 .sf-legal-body {
   display: grid;
@@ -569,7 +575,73 @@
 
 .sf-auth-modal {
   width: min(100%, 440px);
-  padding: 34px 32px;
+  padding: 30px 30px 22px;
+}
+
+.sf-auth-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 20px;
+}
+
+.sf-auth-oauth,
+.sf-auth-email-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.sf-auth-oauth {
+  gap: 10px;
+  background: #fff;
+  color: var(--sf-ink);
+  border-color: var(--sf-border-2);
+}
+
+.sf-auth-note {
+  margin: 12px 0 0;
+  color: var(--sf-orange);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.sf-link-button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  text-decoration: underline;
+}
+
+.sf-switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 16px;
+  flex: none;
+  border-radius: 999px;
+  background: rgba(51,51,51,.22);
+}
+
+.sf-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(35,31,32,.18);
+  transition: left var(--sf-dur-fast) var(--sf-ease-out);
+}
+
+.sf-switch.on {
+  background: var(--sf-orange);
+}
+
+.sf-switch.on .sf-switch-knob {
+  left: 16px;
 }
 
 .sf-modal-confirm {
@@ -617,6 +689,197 @@
   color: var(--sf-fg-2);
   font-size: 15px;
   line-height: 1.55;
+}
+
+.sf-modal-head .sf-tag-mono {
+  display: block;
+  color: var(--sf-orange);
+  margin-bottom: 8px;
+}
+
+.sf-modal-head h2 {
+  margin: 0;
+  color: var(--sf-ink);
+  font-family: var(--sf-font-display), var(--font-sora), Sora, sans-serif;
+  font-size: var(--sf-fs-h2, 32px);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.sf-modal-head p {
+  margin: 8px 0 0;
+  color: var(--sf-fg-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.sf-su-opts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 8px 0 18px;
+  align-items: stretch;
+}
+
+.sf-su-opt {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--sf-border-1);
+  border-radius: 12px;
+  padding: 14px 15px;
+  transition: border-color var(--sf-dur-fast) var(--sf-ease-out), background var(--sf-dur-fast) var(--sf-ease-out);
+}
+
+.sf-su-opt.on {
+  border-color: var(--sf-orange);
+  background: var(--sf-peach-100);
+}
+
+.sf-su-opt.on,
+.sf-su-opt.on * {
+  color: var(--sf-ink);
+}
+
+.sf-su-opt.on .sf-switch {
+  background: var(--sf-orange);
+}
+
+.sf-su-opt-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.sf-su-opt-title {
+  color: var(--sf-stone-600);
+  font-family: var(--sf-font-display), var(--font-sora), Sora, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sf-su-opt.on .sf-su-opt-title {
+  color: var(--sf-ink);
+}
+
+.sf-su-opt-sub {
+  display: block;
+  color: var(--sf-fg-2);
+  font-size: 12.5px;
+  line-height: 1.4;
+  margin-top: auto;
+}
+
+.sf-su-news {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 2px auto 18px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: var(--sf-ink-soft);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  text-align: center;
+}
+
+.sf-su-or {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0;
+  color: var(--sf-fg-3);
+  font-family: var(--sf-font-mono), JetBrainsMono, monospace;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.sf-su-or::before,
+.sf-su-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--sf-border-1);
+}
+
+.sf-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 22px 0 18px;
+}
+
+.sf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sf-field span {
+  color: var(--sf-fg-3);
+  font-family: var(--sf-font-mono), JetBrainsMono, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.sf-field input {
+  border: 1px solid var(--sf-border-1);
+  border-radius: 8px;
+  background: var(--sf-stone-200);
+  color: var(--sf-ink);
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+  padding: 11px 14px;
+}
+
+.sf-field input:focus {
+  border-color: var(--sf-orange);
+}
+
+.sf-modal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.sf-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--sf-fg-2);
+  cursor: pointer;
+}
+
+.sf-check input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--sf-orange);
+}
+
+.sf-modal-link {
+  color: var(--sf-orange);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sf-modal-foot {
+  margin: 18px 0 12px;
+  color: var(--sf-fg-2);
+  font-size: 13px;
+  text-align: center;
 }
 
 .sf-confirm-actions {
@@ -1300,6 +1563,46 @@
   align-items: center;
   gap: 12px;
   position: relative;
+}
+
+.sf-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.4);
+}
+
+.sf-lang button,
+.sf-lang a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 22px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.82);
+  cursor: pointer;
+  font-family: var(--sf-font-mono), JetBrainsMono, monospace;
+  font-size: 10px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.sf-lang button.on,
+.sf-lang a.on {
+  background: #fff;
+  color: var(--sf-orange);
+}
+
+.sf-footer-link-disabled {
+  opacity: .38;
+  cursor: default;
 }
 
 .sf-icon-btn {
@@ -3746,6 +4049,10 @@
 .sf-svc {
   margin: 0 0 8px;
   border-top: 1px solid var(--sf-border-1);
+}
+
+.sf-svc-desktop {
+  margin-top: 32px;
 }
 
 .sf-svc-row {

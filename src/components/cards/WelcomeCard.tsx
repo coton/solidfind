@@ -15,8 +15,8 @@ export function WelcomeCard() {
 
   return (
     <Link href="/about" className="block">
-      <article className="sf-pro-card sf-desktop-card sf-about-card">
-        <div className="sf-about-art">
+      <article className="sf-pro-card sf-desktop-card sf-welcome-card">
+        <div className="sf-pro-photo sf-about-art">
           <Image src="/assets/solidfind-icon.svg" alt="" width={92} height={92} />
         </div>
         <div className="sf-pro-body">

@@ -569,6 +569,9 @@ export default function ProfilePageClient() {
       }
       return;
     }
+    if (currentUser.accountType === "company") {
+      return;
+    }
     setIsSaved(!isBookmarked);
     await toggleSave({
       userId: currentUser._id,
@@ -869,9 +872,11 @@ export default function ProfilePageClient() {
 
         <section className="m-pf-section">
           <div className="m-pf-actions">
-            <button className={`m-btn ${isBookmarked ? "m-btn-pri" : "m-btn-ghost"} m-btn-block`} type="button" onClick={handleToggleSave}>
-              {isBookmarked ? "Saved to shortlist ✓" : "Save to shortlist"}
-            </button>
+            {currentUser?.accountType !== "company" && (
+              <button className={`m-btn ${isBookmarked ? "m-btn-pri" : "m-btn-ghost"} m-btn-block`} type="button" onClick={handleToggleSave}>
+                {isBookmarked ? "Saved to shortlist ✓" : "Save to shortlist"}
+              </button>
+            )}
             {reviewsEnabled && currentUser?.accountType === "individual" && canWriteReview && (
               <button className="m-btn m-btn-ghost m-btn-block" type="button" onClick={() => setShowReviewModal(true)}>
                 Write a review <Star size={15} />
@@ -1072,9 +1077,11 @@ export default function ProfilePageClient() {
                 <dt>Languages</dt><dd>Bahasa, English</dd>
               </dl>
               <hr />
-              <button className={`sf-btn ${isBookmarked ? "sf-btn-pri" : "sf-btn-ghost"}`} style={{ width: "100%" }} onClick={handleToggleSave}>
-                {isBookmarked ? "Saved to shortlist ✓" : "Save to shortlist"}
-              </button>
+              {currentUser?.accountType !== "company" && (
+                <button className={`sf-btn ${isBookmarked ? "sf-btn-pri" : "sf-btn-ghost"}`} style={{ width: "100%" }} onClick={handleToggleSave}>
+                  {isBookmarked ? "Saved to shortlist ✓" : "Save to shortlist"}
+                </button>
+              )}
               {reviewsEnabled && currentUser?.accountType === "individual" && canWriteReview && (
                 <button className="sf-btn sf-btn-ghost" style={{ width: "100%", marginTop: 8 }} onClick={() => setShowReviewModal(true)}>
                   Write a review

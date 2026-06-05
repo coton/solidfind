@@ -127,6 +127,9 @@ function HomeContent() {
         router.push("/sign-in");
         return;
       }
+      if (currentUser.accountType === "company") {
+        return;
+      }
       await toggleSave({
         userId: currentUser._id,
         companyId: companyId as Id<"companies">,

@@ -8,6 +8,7 @@ import { useQuery } from "convex/react";
 import { usePathname, useRouter } from "next/navigation";
 import { api } from "../../convex/_generated/api";
 import { AuthModal } from "./AuthModal";
+import { useSiteLanguage } from "./LanguageProvider";
 import {
   normalizeContactHref,
   resolveTextSetting,
@@ -34,11 +35,13 @@ export function Footer() {
   const mailHref = normalizeContactHref(contactUrlState.value);
   const { user } = useUser();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<"login" | "register">("register");
+  const [authModalAccountType, setAuthModalAccountType] = useState<"company" | "individual">("individual");
   const [mobileFooterOpen, setMobileFooterOpen] = useState(false);
-  const [footerLanguage, setFooterLanguage] = useState<"EN" | "ID">("EN");
   const [aboutHref, setAboutHref] = useState("/about");
+  const { language, setLanguage, t } = useSiteLanguage();
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
-  const accountDashboardHref = userType === "company" ? "/company-dashboard" : "/dashboard";
+  const isCompanyUser = userType === "company";
   const categories = pageConfigs?.length
     ? pageConfigs.map((category) => ({ id: category.categoryId, label: category.label.replace(/^\d+\.\s*/, "") }))
     : fallbackCategories;
@@ -48,10 +51,11 @@ export function Footer() {
     setAboutHref(window.location.pathname === "/about" ? currentPath : `/about?from=${encodeURIComponent(currentPath)}`);
   }, [pathname]);
 
-  // Footer Account button behavior (same as Header):
-  // - If logged in as individual: link to /dashboard
-  // - If logged in as company: link to /company-dashboard
-  // - If not logged in: open AuthModal
+  const openAuthModal = (accountType: "company" | "individual", mode: "login" | "register" = "register") => {
+    setAuthModalAccountType(accountType);
+    setAuthModalMode(mode);
+    setIsAuthModalOpen(true);
+  };
 
   return (
     <footer className="sf-footer">
@@ -59,8 +63,8 @@ export function Footer() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        initialMode="login"
-        initialAccountType="individual"
+        initialMode={authModalMode}
+        initialAccountType={authModalAccountType}
       />
       <div className="sf-footer-inner">
         <div className="sf-footer-brand">
@@ -73,15 +77,15 @@ export function Footer() {
               <span className="sf-footer-lang" aria-label="Language">
                 <button
                   type="button"
-                  className={footerLanguage === "EN" ? "on" : ""}
-                  onClick={() => setFooterLanguage("EN")}
+                  className={language === "en" ? "on" : ""}
+                  onClick={() => setLanguage("en")}
                 >
                   EN
                 </button>
                 <button
                   type="button"
-                  className={footerLanguage === "ID" ? "on" : ""}
-                  onClick={() => setFooterLanguage("ID")}
+                  className={language === "id" ? "on" : ""}
+                  onClick={() => setLanguage("id")}
                 >
                   ID
                 </button>
@@ -113,15 +117,35 @@ export function Footer() {
             ))}
           </div>
           <div>
-            <span className="sf-tag-mono">Build</span>
+            <span className="sf-tag-mono">{t("Build", "Bangun")}</span>
             {user ? (
-              <Link href={accountDashboardHref}>For individuals</Link>
+              isCompanyUser ? (
+                <button type="button" className="sf-footer-link-disabled" disabled>{t("For individuals", "Untuk individu")}</button>
+              ) : (
+                <Link href="/dashboard">{t("For individuals", "Untuk individu")}</Link>
+              )
             ) : (
-              <button type="button" onClick={() => setIsAuthModalOpen(true)}>For individuals</button>
+              <button type="button" onClick={() => openAuthModal("individual", "register")}>{t("For individuals", "Untuk individu")}</button>
             )}
-            <Link href="/register-business">For professionals</Link>
-            <Link href="/register-business">List your services</Link>
-            <Link href="/upgrade">Pro guidelines</Link>
+            {user ? (
+              isCompanyUser ? (
+                <Link href="/company-dashboard">{t("For professionals", "Untuk profesional")}</Link>
+              ) : (
+                <button type="button" onClick={() => openAuthModal("company", "register")}>{t("For professionals", "Untuk profesional")}</button>
+              )
+            ) : (
+              <button type="button" onClick={() => openAuthModal("company", "register")}>{t("For professionals", "Untuk profesional")}</button>
+            )}
+            {user ? (
+              isCompanyUser ? (
+                <Link href="/company-dashboard/edit">{t("List your services", "Daftarkan layanan")}</Link>
+              ) : (
+                <button type="button" onClick={() => openAuthModal("company", "register")}>{t("List your services", "Daftarkan layanan")}</button>
+              )
+            ) : (
+              <button type="button" onClick={() => openAuthModal("company", "register")}>{t("List your services", "Daftarkan layanan")}</button>
+            )}
+            <Link href="/upgrade">{t("Pro guidelines", "Panduan Pro")}</Link>
           </div>
           <div>
             <span className="sf-tag-mono">Solid</span>

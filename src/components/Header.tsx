@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { SignedIn, SignedOut, useClerk } from "@clerk/nextjs";
 import { AuthModal } from "@/components/AuthModal";
+import { useSiteLanguage } from "@/components/LanguageProvider";
 import { SortDropdown } from "@/components/SortDropdown";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -275,6 +276,7 @@ export function Header(props: HeaderProps = {}) {
 
 function HeaderInner({ resultCount, sortControl, showResultsBar = false }: HeaderProps) {
   const { user, signOut } = useClerk();
+  const { language, setLanguage, t } = useSiteLanguage();
   const reviewsEnabled = useReviewsEnabled();
   const proEnabled = useProEnabled();
   const router = useRouter();
@@ -820,6 +822,10 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
           {/* Right Side Buttons */}
           <div className="sf-shell-actions">
+            <div className="sf-lang" role="group" aria-label="Language">
+              <button type="button" className={language === "en" ? "on" : ""} onClick={() => setLanguage("en")}>EN</button>
+              <button type="button" className={language === "id" ? "on" : ""} onClick={() => setLanguage("id")}>ID</button>
+            </div>
             <SignedIn>
               {/* Account icon (mobile + desktop) */}
               <Link
@@ -835,14 +841,14 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                   onClick={handleSignOut}
                   className="sf-btn sf-btn-pri sf-signout-btn"
                 >
-                  Log out
+                  {t("Log out", "Keluar")}
                 </button>
               ) : (
                 <button
                   onClick={handleSignOut}
                   className="sf-btn sf-btn-pri sf-signout-btn"
                 >
-                  Log out
+                  {t("Log out", "Keluar")}
                 </button>
               )}
             </SignedIn>
@@ -862,7 +868,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                 onClick={() => openAuthModal("company", "register")}
                 className="sf-btn sf-btn-pri sf-list-services-btn"
               >
-                List your services
+                {t("List your services", "Daftarkan layanan")}
               </button>
             </SignedOut>
             <button

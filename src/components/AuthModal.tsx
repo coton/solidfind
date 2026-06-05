@@ -721,116 +721,70 @@ export function AuthModal({
   if (step === "method") {
     return modalShell(
       <>
-        <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
-          {mode === "login" ? "LOGIN" : "CREATE AN ACCOUNT"}
-        </h2>
-
-        <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', lineHeight: 1.5, marginBottom: '16px', marginTop: 0 }}>
-          {mode === "register" ? (
-            <>Welcome to the best Bali Directory.<br />Selamat datang di direktori Bali terbaik.</>
-          ) : (
-            <>Welcome back!<br />Selamat Datang kembali!</>
-          )}
-        </p>
+        <div className="sf-modal-head">
+          <span className="sf-tag-mono">{mode === "login" ? "Welcome back" : "Get started"}</span>
+          <h2>{mode === "login" ? "Log in" : "Create an account"}</h2>
+          <p>
+            {mode === "login"
+              ? "Find the right people. Build something solid."
+              : "Welcome to the best Bali directory — for the people who build, and the people building."}
+          </p>
+        </div>
 
         {/* Account type toggle (register only) */}
         {mode === "register" && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 500, color: '#333', letterSpacing: '0.22px', fontFamily: 'var(--font-sora), sans-serif' }}>COMPANY</span>
-                <Toggle
-                  checked={accountType === "company"}
-                  onChange={() => setAccountType("company")}
-                />
+          <div className="sf-su-opts" style={{ marginTop: 16 }}>
+            <button type="button" className={`sf-su-opt ${accountType === "company" ? "on" : ""}`} onClick={() => setAccountType("company")}>
+              <div className="sf-su-opt-top">
+                <span className="sf-su-opt-title">Company</span>
+                <span className={`sf-switch ${accountType === "company" ? "on" : ""}`} aria-hidden="true"><span className="sf-switch-knob" /></span>
               </div>
-              <p style={{ fontSize: '10px', color: '#999', margin: 0, lineHeight: 1.4 }}>
-                Create a profile page/<br />Buat halaman
-              </p>
-            </div>
-
-            <div style={{ textAlign: 'left', marginLeft: 'auto' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 500, color: '#333', letterSpacing: '0.22px', fontFamily: 'var(--font-sora), sans-serif' }}>INDIVIDUAL</span>
-                <Toggle
-                  checked={accountType === "individual"}
-                  onChange={() => setAccountType("individual")}
-                />
+              <span className="sf-su-opt-sub">Create a profile page & get discovered</span>
+            </button>
+            <button type="button" className={`sf-su-opt ${accountType === "individual" ? "on" : ""}`} onClick={() => setAccountType("individual")}>
+              <div className="sf-su-opt-top">
+                <span className="sf-su-opt-title">Individual</span>
+                <span className={`sf-switch ${accountType === "individual" ? "on" : ""}`} aria-hidden="true"><span className="sf-switch-knob" /></span>
               </div>
-              <p style={{ fontSize: '10px', color: '#999', margin: 0, lineHeight: 1.4 }}>
-                Save listings/<br />Simpan listing
-              </p>
-            </div>
+              <span className="sf-su-opt-sub">Save listings & review companies</span>
+            </button>
           </div>
         )}
 
-        {/* Social auth buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-          <SocialButton
-            label="Continue with Google"
-            icon={<GoogleIcon />}
-            onClick={() => handleSocialAuth("oauth_google")}
-            disabled={isLoading}
-          />
-        </div>
+        {mode === "register" && (
+          <button type="button" className={`sf-su-news ${subscribeNewsletter ? "on" : ""}`} onClick={() => setSubscribeNewsletter((value) => !value)}>
+            <span>Subscribe to the SolidFind newsletter</span>
+            <span className={`sf-switch ${subscribeNewsletter ? "on" : ""}`} aria-hidden="true"><span className="sf-switch-knob" /></span>
+          </button>
+        )}
 
-        {/* OR divider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <div style={{ flex: 1, height: '1px', backgroundColor: '#E4E4E4' }} />
-          <span style={{ fontSize: '10px', color: '#999', fontWeight: 500, letterSpacing: '0.5px' }}>OR</span>
-          <div style={{ flex: 1, height: '1px', backgroundColor: '#E4E4E4' }} />
-        </div>
-
-        {/* Continue with email button */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-          <button
-            type="button"
-            onClick={() => { setStep("email"); setError(""); }}
-            onMouseEnter={() => setSubmitHovered(true)}
-            onMouseLeave={() => setSubmitHovered(false)}
-            style={{
-              width: '100%',
-              height: '40px',
-              borderRadius: '20px',
-              border: submitHovered ? 'none' : '1px solid #F14110',
-              background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
-              color: submitHovered ? 'white' : '#F14110',
-              fontSize: '13px',
-              fontWeight: 600,
-              letterSpacing: '0.5px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
+        <div className="sf-auth-options">
+          <button type="button" className="sf-btn sf-btn-ghost sf-auth-oauth" onClick={() => handleSocialAuth("oauth_google")} disabled={isLoading}>
+            <GoogleIcon /> Continue with Google
+          </button>
+          <div className="sf-su-or"><span>or</span></div>
+          <button type="button" className="sf-btn sf-btn-pri sf-btn-lg sf-auth-email-btn" onClick={() => { setStep("email"); setError(""); }}>
             Continue with email
           </button>
         </div>
 
         {error && (
-          <div style={{ textAlign: 'center', marginBottom: '8px' }}>
-            <p style={{ color: '#F14110', fontSize: '11px', fontWeight: 500, margin: '4px 0' }}>*{error}</p>
-          </div>
+          <p className="sf-auth-note">{error}</p>
         )}
 
         {/* Switch mode */}
-        <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: 0 }}>
+        <p className="sf-modal-foot">
           {mode === "login" ? (
             <>
-              Don&apos;t have an account?
-              <br />
-              Tidak punya akun?
-              <br />
-              <button onClick={() => { setMode("register"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'underline' }}>
+              New here?{" "}
+              <button type="button" onClick={() => { setMode("register"); setError(""); }} className="sf-modal-link sf-link-button">
                 Sign up!
               </button>
             </>
           ) : (
             <>
-              Already have an account?
-              <br />
-              Sudah punya akun?
-              <br />
-              <button onClick={() => { setMode("login"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'underline' }}>
+              Already have an account?{" "}
+              <button type="button" onClick={() => { setMode("login"); setError(""); }} className="sf-modal-link sf-link-button">
                 Log in
               </button>
             </>
