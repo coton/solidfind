@@ -338,11 +338,13 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   const [authModalMode, setAuthModalMode] = useState<"login" | "register">("register");
   const [dropdownCloseSignal, setDropdownCloseSignal] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpenSegment, setMobileOpenSegment] = useState<"Size" | "Type" | "Location" | null>(null);
   const [showMobileMiniHeader, setShowMobileMiniHeader] = useState(false);
 
   const openAuthModal = (accountType: "company" | "individual" = "individual", mode: "login" | "register" = "register") => {
     setDropdownCloseSignal((current) => current + 1);
     setMobileMenuOpen(false);
+    setMobileOpenSegment(null);
     setAuthModalAccountType(accountType);
     setAuthModalMode(mode);
     setAuthModalOpen(true);
@@ -461,12 +463,14 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   const handleCategoryTab = (catId: string) => {
     setMobileMenuOpen(false);
+    setMobileOpenSegment(null);
     updateParams({ category: catId, subcategory: null });
     setSelectedCategories([]);
   };
 
   const handleSearch = () => {
     setMobileMenuOpen(false);
+    setMobileOpenSegment(null);
     updateParams({ search: keywords || null });
   };
 
@@ -538,13 +542,13 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   };
 
   const getProjectSizeDisplayText = () => {
-    if (projectSizes.length === 0) return "PROJECT SIZE";
+    if (projectSizes.length === 0) return "Any size";
     if (projectSizes.includes("any")) return "ANY SIZE";
     if (projectSizes.length === 1) {
       const label = currentProjectSizeOptions.find((option) => option.id === projectSizes[0])?.label;
-      return label ? label.replace(/\s*\([^)]*\)/, '') : "PROJECT SIZE";
+      return label ? label.replace(/\s*\([^)]*\)/, '') : "Any size";
     }
-    return "PROJECT SIZE";
+    return `${projectSizes.length} sizes`;
   };
 
   // Handle location multi-select
@@ -580,7 +584,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   // Get location display text
   const getLocationDisplayText = () => {
-    if (locations.length === 0) return "LOCATION";
+    if (locations.length === 0) return "Anywhere";
 
     // Check if all regions are selected (BALI mode)
     const allRegions = currentLocationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
@@ -588,7 +592,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
     if (locations.includes("bali") || hasAllRegions) return "BALI";
     if (locations.length === 1) return locations[0].toUpperCase();
-    return "LOCATION"; // Multiple locations selected
+    return `${locations.length} areas`;
   };
 
   const isLocationActive = locations.length > 0;
@@ -605,52 +609,180 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     updateParams({ subcategory: encodeSubcategoryParam(nextCategories, categoryOptions) });
   };
 
+  const activeCategoryName = activeCategory
+    ? (dynamicCategories.find((cat) => cat.id === activeCategory)?.label.replace(/^\d+\.\s*/, "") ?? activeCategory)
+    : "Construction";
+  const activeSubtitle = (activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction;
+  const mobileTypeDisplayText = isSubcategoryFilterActive(selectedCategories, categoryOptions)
+    ? getSubcategoryDisplayText(selectedCategories, categoryOptions)
+    : "All types";
+  const mobileLocationOptions = currentLocationOptions.filter((option) => option.id !== "bali");
+
+  const renderMobileFilterMenu = () => {
+    if (!mobileOpenSegment) return null;
+
+    if (mobileOpenSegment === "Size") {
+      return (
+        <div className="m-ddmenu m-ddmenu-size">
+          {currentProjectSizeOptions.map((option, index) => {
+            const selected = option.id === "any"
+              ? projectSizes.length === 0 || projectSizes.includes("any")
+              : !projectSizes.includes("any") && projectSizes.includes(option.id);
+            return (
+              <button key={option.id} type="button" className={`m-ddopt ${index === 0 ? "all" : ""}`} onClick={() => handleProjectSizeChange(option.id)}>
+                <span className="lbl">{option.label.replace(/\s*\([^)]*\)/, "")}</span>
+                <span className={`m-switch ${selected ? "on" : ""}`}><span className="knob" /></span>
+              </button>
+            );
+          })}
+        </div>
+      );
+    }
+
+    if (mobileOpenSegment === "Type") {
+      return (
+        <div className="m-ddmenu m-ddmenu-type">
+          {categoryOptions.map((option, index) => {
+            const selected = isSubcategoryOptionSelected(selectedCategories, option.id, categoryOptions);
+            return (
+              <button key={option.id} type="button" className={`m-ddopt ${index === 0 ? "all" : ""}`} onClick={() => handleCategoryChange(option.id)}>
+                <span className="lbl">{option.label}</span>
+                <span className={`m-switch ${selected ? "on" : ""}`}><span className="knob" /></span>
+              </button>
+            );
+          })}
+        </div>
+      );
+    }
+
+    return (
+      <div className="m-ddmenu m-ddmenu-location">
+        <button type="button" className="m-ddopt all" onClick={() => handleLocationChange("bali")}>
+          <span className="lbl">Bali - all regions</span>
+          <span className={`m-switch ${isBaliActive() ? "on" : ""}`}><span className="knob" /></span>
+        </button>
+        {mobileLocationOptions.map((option) => {
+          const selected = locations.includes(option.id);
+          return (
+            <button key={option.id} type="button" className="m-ddopt" onClick={() => handleLocationChange(option.id)}>
+              <span className="lbl">{option.label}</span>
+              <span className={`m-switch ${selected ? "on" : ""}`}><span className="knob" /></span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <>
-    {showResultsBar && (
-      <div className={`sf-mini-header ${showMobileMiniHeader ? "is-visible" : ""}`}>
-        <Link href="/" className="sf-mini-brand" onClick={() => setMobileMenuOpen(false)}>
-          <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} className="h-[20px] w-auto" />
-        </Link>
-        <div className="sf-mini-actions">
-          <button
-            type="button"
-            className="sf-icon-btn"
-            aria-label="Search"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          >
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          </button>
-          <button
-            type="button"
-            className="sf-mini-filter-btn"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 7h10"/><path d="M18 7h2"/><circle cx="16" cy="7" r="2"/><path d="M4 17h2"/><path d="M10 17h10"/><circle cx="8" cy="17" r="2"/></svg>
-            Filters
-          </button>
-          <button
-            type="button"
-            className="sf-icon-btn sf-mobile-menu-btn"
-            aria-label="Menu"
-            aria-expanded={mobileMenuOpen}
-            onClick={() => setMobileMenuOpen((open) => !open)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-          {mobileMenuOpen && (
-            <div className="sf-mobile-menu sf-mini-menu" role="menu">
-              <Link href="/about" role="menuitem" onClick={() => setMobileMenuOpen(false)}>About</Link>
-              <button type="button" role="menuitem" onClick={() => openAuthModal("company", "register")}>List your services</button>
-              <Link href="/terms" role="menuitem" onClick={() => setMobileMenuOpen(false)}>Terms</Link>
-            </div>
-          )}
+    {!useTopBarOnlyHeader && !useMobileCompactHeader && (
+      <div className="sf-mobile-webkit-head sm:hidden">
+        <div className={`sf-mini-header ${showMobileMiniHeader ? "is-visible" : ""}`}>
+          <Link href="/" className="sf-mini-brand" onClick={() => setMobileMenuOpen(false)}>
+            <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} className="h-[20px] w-auto" />
+          </Link>
+          <div className="sf-mini-actions">
+            <button type="button" className="sf-icon-btn" aria-label="Search" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </button>
+            <button type="button" className="sf-mini-filter-btn" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 7h10"/><path d="M18 7h2"/><circle cx="16" cy="7" r="2"/><path d="M4 17h2"/><path d="M10 17h10"/><circle cx="8" cy="17" r="2"/></svg>
+              Filters
+            </button>
+            <button type="button" className="sf-icon-btn sf-mobile-menu-btn" aria-label="Menu" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)}>
+              <span /><span /><span />
+            </button>
+          </div>
         </div>
+
+        <div className="m-head">
+          <div className="m-topbar">
+            <Link href="/" className="m-brand">
+              <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={158} height={24} />
+              <span className="id">.id</span>
+            </Link>
+            <span className="m-topbar-sp" />
+            <SignedIn>
+              <Link href={userType === "company" ? "/company-dashboard" : "/dashboard"} className="m-iconbtn" aria-label="Dashboard">
+                <Image src="/images/icon-account.svg" alt="" width={20} height={20} />
+              </Link>
+            </SignedIn>
+            <SignedOut>
+              <button type="button" className="m-iconbtn" aria-label="Account" onClick={() => openAuthModal("individual", "login")}>
+                <Image src="/images/icon-account.svg" alt="" width={20} height={20} />
+              </button>
+            </SignedOut>
+            <button type="button" className="m-iconbtn" aria-label="Menu" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+            </button>
+            {mobileMenuOpen && (
+              <div className="sf-mobile-menu" role="menu">
+                <Link href="/about" role="menuitem" onClick={() => setMobileMenuOpen(false)}>About</Link>
+                <button type="button" role="menuitem" onClick={() => openAuthModal("company", "register")}>List your services</button>
+                <Link href="/terms" role="menuitem" onClick={() => setMobileMenuOpen(false)}>Terms</Link>
+              </div>
+            )}
+          </div>
+          <h1 className="m-head-lead">{activeSubtitle}</h1>
+          <div className="m-cats">
+            {dynamicCategories.map((cat) => {
+              const label = cat.label.replace(/^\d+\.\s*/, "");
+              const num = cat.label.split(".")[0].padStart(2, "0");
+              return (
+                <button key={cat.id} type="button" className={`m-cat ${activeCategory === cat.id ? "on" : ""}`} onClick={() => handleCategoryTab(cat.id)}>
+                  <span className="n">{num}</span>{label}
+                </button>
+              );
+            })}
+          </div>
+          <form className="m-search" onSubmit={(event) => { event.preventDefault(); handleSearch(); }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input
+              value={keywords}
+              onChange={(event) => setKeywords(event.target.value)}
+              placeholder={`Search ${activeCategoryName.toLowerCase()} pros...`}
+            />
+            <button type="submit" className="m-search-btn">Search</button>
+          </form>
+          <div className="m-filterblock">
+            <button type="button" className={`m-filterseg ${mobileOpenSegment === "Size" ? "open" : ""}`} onClick={() => setMobileOpenSegment(mobileOpenSegment === "Size" ? null : "Size")}>
+              <span className="k">Project size</span>
+              <span className={`v ${projectSizes.length === 0 ? "ph" : ""}`}>{getProjectSizeDisplayText()} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
+            </button>
+            <button type="button" className={`m-filterseg ${mobileOpenSegment === "Type" ? "open" : ""}`} onClick={() => setMobileOpenSegment(mobileOpenSegment === "Type" ? null : "Type")}>
+              <span className="k">Categories</span>
+              <span className={`v ${!isSubcategoryFilterActive(selectedCategories, categoryOptions) ? "ph" : ""}`}>{mobileTypeDisplayText} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
+            </button>
+            <button type="button" className={`m-filterseg ${mobileOpenSegment === "Location" ? "open" : ""}`} onClick={() => setMobileOpenSegment(mobileOpenSegment === "Location" ? null : "Location")}>
+              <span className="k">Location</span>
+              <span className={`v ${!isLocationActive ? "ph" : ""}`}>{getLocationDisplayText()} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
+            </button>
+          </div>
+        </div>
+        <div className="sf-mobile-filter-layer">
+          {renderMobileFilterMenu()}
+        </div>
+        {showResultsBar && (
+          <div className="m-results sf-results-mobile">
+            <span className="m-results-count">{homepageResultCount}</span>
+            <span className="m-results-sub">solidfinds</span>
+            <span className="m-results-sp" />
+            {proEnabled && (
+              <button type="button" className="m-pill">
+                <span className="m-pill-dot" />PRO
+              </button>
+            )}
+            <button type="button" className="m-pill">
+              <span className="k">Sort by</span><span className="v">Latest</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
+        )}
       </div>
     )}
-    <header className="relative z-40 bg-[#f8f8f8]">
+
+    <header className={`relative z-40 bg-[#f8f8f8] ${!useTopBarOnlyHeader && !useMobileCompactHeader ? "hidden sm:block" : ""}`}>
       <div className={`sf-shell ${useTopBarOnlyHeader || useMobileCompactHeader ? "sf-shell-compact" : ""}`}>
       <div className="sf-shell-bg" aria-hidden="true" />
       {headerMedia.url ? (

@@ -255,6 +255,29 @@ function DetailGalleryThumb({
   );
 }
 
+function MobileProfileThumb({
+  image,
+  index,
+  onImageClick,
+}: {
+  image: ProjectImageItem;
+  index: number;
+  onImageClick: (index: number) => void;
+}) {
+  const storageUrl = useStorageUrl(image.kind === "storage" ? image.storageId : undefined);
+  const src = image.kind === "external" ? image.src : storageUrl;
+
+  return (
+    <button
+      type="button"
+      className="m-thumb"
+      style={src ? { backgroundImage: `url(${src})` } : undefined}
+      onClick={() => src && onImageClick(index)}
+      aria-label={`Open reference image ${index + 1}`}
+    />
+  );
+}
+
 function DetailGallery({
   items,
   onImageClick,
@@ -675,7 +698,198 @@ export default function ProfilePageClient() {
 
   return (
     <>
-      <main className="sf-detail">
+      <main className="m-profile-page sm:hidden">
+        <section className="m-pf-hero" style={{ backgroundImage: `url(${heroImage})` }}>
+          <div className="shade" />
+          <button className="m-pf-back" type="button" onClick={handleBackToResults}>← Back</button>
+          <div className="m-pf-hero-acts">
+            <button type="button" aria-label={`Share ${company.name}`} onClick={handleShare}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+            </button>
+            <button type="button" aria-label={isBookmarked ? `Remove ${company.name} from shortlist` : `Save ${company.name}`} onClick={handleToggleSave}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </button>
+          </div>
+          <div className="m-pf-lockup">
+            <span className="m-pf-logo" aria-hidden="true">
+              {logoUrl || company.imageUrl ? (
+                <img src={logoUrl || company.imageUrl} alt="" />
+              ) : (
+                getCompanyInitials(company.name)
+              )}
+            </span>
+            <div className="m-pf-lockup-text">
+              <h1>{company.name}</h1>
+              <div className="m-pf-meta">
+                <span>{profileLocationValue}</span>
+                {showProfileReviews && (
+                  <>
+                    <span className="dotsep" />
+                    <span className="score">
+                      <Star size={12} fill={starColor(company.rating ?? 0)} color={starColor(company.rating ?? 0)} />
+                      {company.rating ?? 0} · {company.reviewCount ?? 0} reviews
+                    </span>
+                  </>
+                )}
+                {accountLabel && (
+                  <>
+                    <span className="dotsep" />
+                    <span>{accountLabel}</span>
+                  </>
+                )}
+                <span className="cat">{company.category?.replace(/-/g, " ") || "Company"}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="m-pf-section">
+          <div className="m-pf-h2row">
+            <h2 className="m-h2">About</h2>
+            <a className="m-pf-detailbtn" href="#m-company-details">Company details ↓</a>
+          </div>
+          <div className="m-pf-prose">
+            <p>{company.description ?? `${company.name} is listed on SolidFind for construction, renovation and design projects in Bali.`}</p>
+          </div>
+        </section>
+
+        <section className="m-pf-section">
+          <div className={`m-acc2 ${servicesOpen ? "open" : ""}`}>
+            <button className="m-acc2-head" type="button" aria-expanded={servicesOpen} onClick={() => setServicesOpen((open) => !open)}>
+              <span className="t">Services &amp; coverage</span>
+              <span className="chev" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </button>
+            {servicesOpen && (
+              <div className="m-acc2-body">
+                <div className="m-svc-row">
+                  <span className="m-svc-term">Provided services</span>
+                  <div>
+                    {servicesForDetail.map((service) => (
+                      <div className="m-svc-svc" key={service.label}>
+                        <span className="m-svc-name">{service.label}</span>
+                        <p className="m-svc-desc">{service.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="m-svc-row">
+                  <span className="m-svc-term">Project size</span>
+                  <p className="m-svc-desc">{projectSizeValue}</p>
+                </div>
+                <div className="m-svc-row">
+                  <span className="m-svc-term">Locations</span>
+                  <p className="m-svc-desc">{profileLocationValue}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="m-pf-section">
+          <div className="m-pf-h2row">
+            <h2 className="m-h2">Recent work</h2>
+            <span className="m-eyebrow">{projectImages.length > 0 ? `${projectImages.length} ${projectImages.length === 1 ? "Reference" : "References"}` : "References"}</span>
+          </div>
+          {projectImages.length > 0 && (
+            <div className="m-hscroll">
+              {projectImages.map((image, index) => (
+                <MobileProfileThumb
+                  key={image.kind === "external" ? `m-url-${image.src}-${index}` : `m-storage-${image.storageId}`}
+                  image={image}
+                  index={index}
+                  onImageClick={handleImageClick}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="m-pf-section" id="m-company-details">
+          <h2 className="m-h2">Company details</h2>
+          <div className="m-pf-social">
+            {socialLinks.map((social) => (
+              <a
+                key={social.key}
+                href={social.href}
+                target={social.key === "email" ? undefined : "_blank"}
+                rel={social.key === "email" ? undefined : "noopener noreferrer"}
+                aria-label={social.label}
+                title={social.label}
+              >
+                {socialGlyphs[social.key]}
+              </a>
+            ))}
+          </div>
+          <dl className="m-pf-kv">
+            <dt>Region</dt><dd>{profileLocationValue}</dd>
+            <dt>Projects</dt><dd>{company.projects != null ? `${company.projects}+ completed` : "—"}</dd>
+            <dt>Team size</dt><dd>{company.teamSize != null ? `${company.teamSize}+ people` : "—"}</dd>
+            <dt>Founded</dt><dd>{foundedYear}</dd>
+            <dt>Avg. project</dt><dd>IDR 250–600 jt</dd>
+            <dt>Languages</dt><dd>Bahasa, English</dd>
+          </dl>
+        </section>
+
+        {reviewsEnabled && reviewsList.length > 0 && (
+          <section className="m-pf-section">
+            <div className="m-pf-h2row">
+              <h2 className="m-h2">Reviews</h2>
+              <Link className="m-pf-detailbtn" href={buildCompanyReviewsPath(company)}>All {company.reviewCount ?? reviewsList.length} →</Link>
+            </div>
+            <div className="m-review-list">
+              {reviewsList.slice(0, 2).map((review, index) => (
+                <div className="m-review" key={`${review.name}-mobile-${index}`}>
+                  <div className="m-review-top">
+                    <span className="stars">{Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} size={12} fill={starFillColor(i, review.rating)} color={starFillColor(i, review.rating)} />
+                    ))}</span>
+                    <span className="m-review-when">{review.date}</span>
+                  </div>
+                  <p>"{review.text}"</p>
+                  <div className="m-review-by">{review.name}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="m-pf-section">
+          <p className="sf-profile-note">
+            *SolidFind lists this company based on publicly available information and has not independently verified their work quality or operating status.
+            {company.isReviewed === false && (
+              <>
+                <br />
+                **This listing has not been confirmed by the company.
+              </>
+            )}
+          </p>
+        </section>
+
+        <section className="m-pf-section">
+          <div className="m-pf-actions">
+            <button className={`m-btn ${isBookmarked ? "m-btn-pri" : "m-btn-ghost"} m-btn-block`} type="button" onClick={handleToggleSave}>
+              {isBookmarked ? "Saved to shortlist ✓" : "Save to shortlist"}
+            </button>
+            {reviewsEnabled && currentUser?.accountType === "individual" && canWriteReview && (
+              <button className="m-btn m-btn-ghost m-btn-block" type="button" onClick={() => setShowReviewModal(true)}>
+                Write a review <Star size={15} />
+              </button>
+            )}
+            <div className="m-pf-actions-row">
+              <button className="m-iconbtn-o" type="button" aria-label={`Share ${company.name}`} onClick={handleShare}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+              </button>
+              <button className="m-iconbtn-o" type="button" aria-label={`Report ${company.name}`} onClick={() => setShowReportModal(true)}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <main className="sf-detail sf-detail-desktop">
         <button className="sf-back" onClick={handleBackToResults}>← Back to results</button>
         <section className="sf-detail-hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="sf-detail-hero-shade" />
