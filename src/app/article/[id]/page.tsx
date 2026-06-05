@@ -6,6 +6,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
+import { MobileMenuButton } from "@/components/MobileMenuDrawer";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -95,7 +96,7 @@ export default function ArticlePage() {
                 return true;
               })
               .map((block, index) => (
-              <ContentBlockRenderer key={index} block={block} />
+              <ContentBlockRenderer key={index} block={block} isIntro={index === 0 && block.type === "text"} />
             ))}
               <button className="sf-about-back sf-legal-totop" type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>↑ Back to top</button>
             </div>
@@ -127,7 +128,8 @@ function ArticleHero({ article }: { article: { title: string; subtitle?: string;
           <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
           </Link>
-          <Link className="sf-btn sf-btn-pri" href="/register-business">List your services</Link>
+          <Link className="sf-btn sf-btn-pri sf-static-list-btn" href="/register-business">List your services</Link>
+          <MobileMenuButton />
         </div>
       </div>
       <div className="sf-article-hero-copy">
@@ -154,7 +156,7 @@ function ArticleCoverImage({ coverImageId, coverImageUrl, title }: { coverImageI
   );
 }
 
-function ContentBlockRenderer({ block }: { block: { type: string; text?: string; heading?: string; imageId?: Id<"_storage">; imageUrl?: string; imageCaption?: string; quote?: string; quoteAuthor?: string; videoUrl?: string; videoStorageId?: Id<"_storage"> } }) {
+function ContentBlockRenderer({ block, isIntro = false }: { block: { type: string; text?: string; heading?: string; imageId?: Id<"_storage">; imageUrl?: string; imageCaption?: string; quote?: string; quoteAuthor?: string; videoUrl?: string; videoStorageId?: Id<"_storage"> }; isIntro?: boolean }) {
   if (block.type === "heading") {
     return (
       <h2 className="sf-article-h2">
@@ -165,7 +167,7 @@ function ContentBlockRenderer({ block }: { block: { type: string; text?: string;
 
   if (block.type === "text") {
     return (
-      <p className="sf-article-p">
+      <p className={`sf-article-p ${isIntro ? "sf-article-intro" : ""}`}>
         {block.text}
       </p>
     );

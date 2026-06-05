@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { Footer } from "@/components/Footer";
+import { MobileMenuButton } from "@/components/MobileMenuDrawer";
 import { api } from "../../../convex/_generated/api";
 import {
   DEFAULT_PRO_TERMS_EN_TEXT,
@@ -127,7 +128,8 @@ export default function TermsPage() {
               <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
               </Link>
-              <Link className="sf-btn sf-btn-pri" href="/register-business">List your services</Link>
+              <Link className="sf-btn sf-btn-pri sf-static-list-btn" href="/register-business">List your services</Link>
+              <MobileMenuButton />
             </div>
           </div>
           <div className="sf-about-hero-copy">
