@@ -1707,30 +1707,6 @@
   border-top: 1px solid var(--sf-border-1);
 }
 
-.sf-svc-toggle {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 32px 0 14px;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  color: var(--sf-ink);
-  font-family: var(--font-sora), Sora, sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.12;
-  text-align: left;
-  cursor: pointer;
-}
-
-.sf-svc-toggle span {
-  color: var(--sf-orange);
-  font-size: 18px;
-}
-
 .sf-svc-row {
   display: grid;
   grid-template-columns: 170px 1fr;
@@ -2256,6 +2232,17 @@
     gap: 14px;
   }
 
+  .sf-home-shell {
+    overflow-x: hidden;
+  }
+
+  .sf-home-shell .sf-grid > a {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .sf-desktop-card {
     display: none;
   }
@@ -2265,6 +2252,9 @@
   }
 
   .m-card-h {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     flex-direction: column;
     border: 1px solid var(--sf-border-1);
     border-radius: 14px;

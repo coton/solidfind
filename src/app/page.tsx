@@ -251,35 +251,33 @@ function HomeContent() {
           </div>
         ) : (
           <>
-            {/* Mobile: Horizontal Scroll */}
+            {/* Mobile: WebKit vertical list */}
             <div className="sm:hidden mb-8">
-              <div className="overflow-x-auto scrollbar-hide">
-                <div className="sf-grid pb-2">
-                  {!hasFilters && (
-                    <>
-                      <WelcomeCard />
-                      {visibleArticles === undefined
-                        ? <HomeFeaturedCard loading />
-                        : visibleArticles.map((article) => (
-                          <HomeFeaturedCard key={article._id} article={article} />
-                        ))
-                      }
-                    </>
-                  )}
-                  {companies === undefined
-                    ? Array.from({ length: itemsPerPage }).map((_, i) => <ListingCardSkeleton key={i} />)
-                    : paginatedListings.map((listing) => (
-                      <ListingCard
-                        key={listing.id}
-                        {...listing}
-                        proEnabled={proEnabled}
-                        reviewsEnabled={reviewsEnabled}
-                        categoryContext={categoryParam}
-                        onBookmark={() => handleBookmark(listing.id)}
-                      />
-                    ))
-                  }
-                </div>
+              <div className="sf-grid pb-2">
+                {!hasFilters && (
+                  <>
+                    <WelcomeCard />
+                    {visibleArticles === undefined
+                      ? <HomeFeaturedCard loading />
+                      : visibleArticles.map((article) => (
+                        <HomeFeaturedCard key={article._id} article={article} />
+                      ))
+                    }
+                  </>
+                )}
+                {companies === undefined
+                  ? Array.from({ length: itemsPerPage }).map((_, i) => <ListingCardSkeleton key={i} />)
+                  : paginatedListings.map((listing) => (
+                    <ListingCard
+                      key={listing.id}
+                      {...listing}
+                      proEnabled={proEnabled}
+                      reviewsEnabled={reviewsEnabled}
+                      categoryContext={categoryParam}
+                      onBookmark={() => handleBookmark(listing.id)}
+                    />
+                  ))
+                }
               </div>
               <div className="flex justify-start mt-4">
                 <Pagination
