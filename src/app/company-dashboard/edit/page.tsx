@@ -1242,7 +1242,7 @@ export default function EditProfilePage() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+86 156 1871 1651"
+                  placeholder="+62 812 0000 0000"
                   aria-invalid={invalidPhone}
                   className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidPhone ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
                 />
