@@ -238,7 +238,7 @@ function Dropdown({
                       fontFamily: 'var(--font-sora), sans-serif', 
                       fontWeight: 500,
                       letterSpacing: '0.22px',
-                      borderBottom: index < options.length - 1 ? '1px solid #e4e4e4' : 'none'
+                      borderBottom: index === 0 ? '1px solid #e4e4e4' : 'none'
                     }}
                   >
                     <span className="min-w-0 flex-1 inline-flex items-center min-h-3 leading-[14px]">{option.label}</span>
@@ -431,9 +431,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         params.delete(key);
       }
     }
-    const target = isProfilePage ? pathname : "/";
-    router.push(`${target}?${params.toString()}`);
-  }, [isProfilePage, searchParams, pathname, router]);
+    router.push(`/?${params.toString()}`);
+  }, [searchParams, router]);
 
   const handleCategoryTab = (catId: string) => {
     updateParams({ category: catId, subcategory: null });
@@ -697,7 +696,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         {/* Search Bar */}
         <div className={`${useTopBarOnlyHeader ? "hidden" : ""}`}>
           {/* Desktop: Flex with Clear button positioned right */}
-          <form className="sf-searchrow hidden sm:flex" onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
+          <form className="sf-searchrow" onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
             {/* Left side: Keywords + Filters */}
             <div className="sf-search-textbox">
               {/* Keywords Input - extended width on desktop */}
@@ -768,95 +767,6 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             </div>
 
           </form>
-
-          {/* Mobile: Stack vertically with equal-width filters */}
-          <div className={`${useMobileCompactHeader ? "hidden" : "flex"} sm:hidden flex-col gap-[2px]`}>
-            {/* Keywords Input with Search Button */}
-            <div className="flex items-center gap-[2px] mb-[2px]">
-              <div className="flex-1 h-10 bg-[#f8f8f8] rounded-[6px] flex items-center px-3">
-                <input
-                  type="text"
-                  placeholder="Enter Keywords"
-                  value={keywords}
-                  onChange={(e) => setKeywords(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="w-full bg-transparent text-[11px] text-[#333] placeholder:text-[#333]/55 outline-none font-medium"
-                />
-              </div>
-              {/* Search Button */}
-              <button onClick={handleSearch} className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[#f8f8f8] rounded-[6px]">
-                <Image src="/images/btn-search.svg" alt="Search" width={34} height={34} className="w-[34px] h-[34px]" />
-              </button>
-            </div>
-
-            {/* Filters Row */}
-            <div className="flex items-center gap-[2px]">
-              {/* Filters Row - Equal width with 2px gap */}
-              <div className="flex-1 flex items-center gap-[2px]">
-                {/* Project Size Dropdown */}
-                <div className="flex-1">
-                  <Dropdown
-                    label="PROJECT SIZE"
-                    options={currentProjectSizeOptions}
-                    value=""
-                    onChange={handleProjectSizeChange}
-                    width="w-full"
-                    isProjectSize={true}
-                    multiSelect={true}
-                    selectedValues={projectSizes}
-                    displayText={getProjectSizeDisplayText()}
-                    isActive={projectSizes.length > 0}
-                    isOptionSelected={(optionId) => {
-                      if (optionId === "any") return projectSizes.includes("any");
-                      return !projectSizes.includes("any") && projectSizes.includes(optionId);
-                    }}
-                    closeSignal={dropdownCloseSignal}
-                  />
-                </div>
-
-                {/* Categories Dropdown */}
-                <div className="flex-1">
-                  <Dropdown
-                    label="CATEGORIES"
-                    options={categoryOptions}
-                    value=""
-                    onChange={handleCategoryChange}
-                    width="w-full"
-                    multiSelect={true}
-                    selectedValues={selectedCategories}
-                    displayText={getSubcategoryDisplayText(selectedCategories, categoryOptions)}
-                    isActive={isSubcategoryFilterActive(selectedCategories, categoryOptions)}
-                    isOptionSelected={(optionId) => isSubcategoryOptionSelected(selectedCategories, optionId, categoryOptions)}
-                    alignRight={true}
-                    menuClassName={'min-w-[calc(200%+2px)] max-w-none'}
-                    isMobileCategoryDropdown={true}
-                    closeSignal={dropdownCloseSignal}
-                  />
-                </div>
-
-                {/* Location Dropdown */}
-                <div className="flex-1">
-                  <Dropdown
-                    label="LOCATION"
-                    options={currentLocationOptions}
-                    value="" // Not used in multi-select mode
-                    onChange={handleLocationChange}
-                    width="w-full"
-                    multiSelect={true}
-                    selectedValues={locations}
-                    displayText={getLocationDisplayText()}
-                    isActive={isLocationActive}
-                    isOptionSelected={(optionId) => {
-                      if (optionId === "bali") return isBaliActive();
-                      return locations.includes(optionId);
-                    }}
-                    alignRight={true}
-                    closeSignal={dropdownCloseSignal}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       </div>

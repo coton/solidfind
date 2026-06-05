@@ -430,6 +430,7 @@ export default function ProfilePageClient() {
     api.featuredArticles.listByCompany,
     validId ? { companyId: validId } : "skip"
   );
+  const logoUrl = useStorageUrl(company?.logoId ?? undefined);
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
   const categoryLabelMap = useMemo(() => buildCategoryOptionLabelMap(pageConfigs ?? []), [pageConfigs]);
 
@@ -467,7 +468,6 @@ export default function ProfilePageClient() {
   const currentImage = currentImageIndex !== null ? projectImages[currentImageIndex] ?? null : null;
   const isFirstImage = currentImageIndex === 0;
   const isLastImage = currentImageIndex === projectImages.length - 1;
-  const profileAddress = formatProfileAddress(company?.address);
   const hasReviewedThisCompany = Boolean(
     currentUser && reviews?.some((review) => review.userId === currentUser._id)
   );
@@ -551,6 +551,20 @@ export default function ProfilePageClient() {
       companyId: validId,
       category: categoryContext,
     });
+  };
+
+  const handleBackToResults = () => {
+    if (window.history.length > 1) {
+      router.back();
+      return;
+    }
+
+    const params = new URLSearchParams();
+    const backCategory = fromCategory || company?.category;
+    if (backCategory) {
+      params.set("category", backCategory);
+    }
+    router.push(params.toString() ? `/?${params.toString()}` : "/");
   };
 
   if (company === undefined) {
@@ -642,7 +656,7 @@ export default function ProfilePageClient() {
     text: r.content,
     date: new Date(r.createdAt).toLocaleDateString("en-CA").replace(/-/g, "/"),
   }));
-  const heroImage = externalProjectImages[0] || company.imageUrl || "/assets/company-cover-fallback.jpg";
+  const heroImage = externalProjectImages[0] || "/assets/company-cover-fallback.jpg";
   const showProfileReviews = reviewsEnabled && (company.reviewCount ?? 0) > 0;
   const accountLabel = proEnabled ? (company.isPro ? "Pro Account" : "Free account") : null;
   const foundedYear = company.since ?? new Date(company.createdAt).getFullYear();
@@ -661,12 +675,18 @@ export default function ProfilePageClient() {
   return (
     <>
       <main className="sf-detail">
-        <button className="sf-back" onClick={() => router.back()}>← Back to results</button>
+        <button className="sf-back" onClick={handleBackToResults}>← Back to results</button>
         <section className="sf-detail-hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="sf-detail-hero-shade" />
           <div className="sf-detail-hero-copy">
             <div className="sf-detail-lockup">
-              <span className="sf-detail-logo" aria-hidden="true">{getCompanyInitials(company.name)}</span>
+              <span className="sf-detail-logo" aria-hidden="true">
+                {logoUrl || company.imageUrl ? (
+                  <img src={logoUrl || company.imageUrl} alt="" />
+                ) : (
+                  getCompanyInitials(company.name)
+                )}
+              </span>
               <div className="sf-detail-lockup-text">
                 <h1>{company.name}<span className="dot" /></h1>
                 <div className="sf-detail-meta">
@@ -698,10 +718,6 @@ export default function ProfilePageClient() {
             <h2 className="sf-h2-static" style={{ marginTop: 0 }}>About</h2>
             <div className="sf-detail-p">
               <p>{company.description ?? `${company.name} is listed on SolidFind for construction, renovation and design projects in Bali.`}</p>
-              <p>SolidFind keeps company profiles connected to public details, contact links, service coverage and review activity so visitors can compare professionals with more clarity.</p>
-              {company.isReviewed === false && (
-                <p>This listing has not yet been confirmed by the company.</p>
-              )}
             </div>
 
             <h2 className="sf-h2-static">Services &amp; coverage</h2>
@@ -733,7 +749,9 @@ export default function ProfilePageClient() {
 
             <div className="sf-work-head">
               <h2 className="sf-h2-static" style={{ margin: 0 }}>Recent work</h2>
-              {projectImages.length > 0 && <span className="sf-tag-mono">{projectImages.length} {projectImages.length === 1 ? "project" : "projects"}</span>}
+              <span className="sf-tag-mono">
+                {projectImages.length > 0 ? `${projectImages.length} ${projectImages.length === 1 ? "Reference" : "References"}` : "References"}
+              </span>
             </div>
             <DetailGallery items={projectImages} onImageClick={handleImageClick} />
 
@@ -827,8 +845,12 @@ export default function ProfilePageClient() {
             </div>
             <p className="sf-profile-note">
               *SolidFind lists this company based on publicly available information and has not independently verified their work quality or operating status.
-              <br />
-              **This listing has not been confirmed by the company.
+              {company.isReviewed === false && (
+                <>
+                  <br />
+                  **This listing has not been confirmed by the company.
+                </>
+              )}
             </p>
             <div className="sf-ad sf-ad-box" role="complementary" aria-label="Advertisement">
               <span className="sf-ad-tag">Sponsored</span>

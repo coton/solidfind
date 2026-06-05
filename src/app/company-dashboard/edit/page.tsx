@@ -757,6 +757,7 @@ export default function EditProfilePage() {
           logoId: logoId ?? undefined,
           projectImageIds,
           projectImageUrls,
+          isReviewed: true,
           since: foundedYear ? parseInt(foundedYear) : undefined,
         });
       } else {
@@ -788,6 +789,7 @@ export default function EditProfilePage() {
           logoId: logoId ?? undefined,
           projectImageIds,
           projectImageUrls,
+          isReviewed: true,
           since: foundedYear ? parseInt(foundedYear) : undefined,
         });
       }
