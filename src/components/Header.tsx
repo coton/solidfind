@@ -335,9 +335,12 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   const [authModalAccountType, setAuthModalAccountType] = useState<"company" | "individual">("individual");
   const [authModalMode, setAuthModalMode] = useState<"login" | "register">("register");
   const [dropdownCloseSignal, setDropdownCloseSignal] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showMobileMiniHeader, setShowMobileMiniHeader] = useState(false);
 
   const openAuthModal = (accountType: "company" | "individual" = "individual", mode: "login" | "register" = "register") => {
     setDropdownCloseSignal((current) => current + 1);
+    setMobileMenuOpen(false);
     setAuthModalAccountType(accountType);
     setAuthModalMode(mode);
     setAuthModalOpen(true);
@@ -419,6 +422,26 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     return () => window.removeEventListener("resize", updateMobileCategoryEndSpacer);
   }, [dynamicCategories]);
 
+  useEffect(() => {
+    if (!showResultsBar || typeof window === "undefined") {
+      setShowMobileMiniHeader(false);
+      return;
+    }
+
+    const updateMiniHeader = () => {
+      setShowMobileMiniHeader(window.innerWidth < 640 && window.scrollY > 280);
+    };
+
+    updateMiniHeader();
+    window.addEventListener("scroll", updateMiniHeader, { passive: true });
+    window.addEventListener("resize", updateMiniHeader);
+
+    return () => {
+      window.removeEventListener("scroll", updateMiniHeader);
+      window.removeEventListener("resize", updateMiniHeader);
+    };
+  }, [showResultsBar]);
+
   // Determine user type from Clerk metadata (default to "individual")
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
 
@@ -435,11 +458,13 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   }, [searchParams, router]);
 
   const handleCategoryTab = (catId: string) => {
+    setMobileMenuOpen(false);
     updateParams({ category: catId, subcategory: null });
     setSelectedCategories([]);
   };
 
   const handleSearch = () => {
+    setMobileMenuOpen(false);
     updateParams({ search: keywords || null });
   };
 
@@ -580,6 +605,49 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   return (
     <>
+    {showResultsBar && (
+      <div className={`sf-mini-header ${showMobileMiniHeader ? "is-visible" : ""}`}>
+        <Link href="/" className="sf-mini-brand" onClick={() => setMobileMenuOpen(false)}>
+          <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} className="h-[20px] w-auto" />
+        </Link>
+        <div className="sf-mini-actions">
+          <button
+            type="button"
+            className="sf-icon-btn"
+            aria-label="Search"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </button>
+          <button
+            type="button"
+            className="sf-mini-filter-btn"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 7h10"/><path d="M18 7h2"/><circle cx="16" cy="7" r="2"/><path d="M4 17h2"/><path d="M10 17h10"/><circle cx="8" cy="17" r="2"/></svg>
+            Filters
+          </button>
+          <button
+            type="button"
+            className="sf-icon-btn sf-mobile-menu-btn"
+            aria-label="Menu"
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          {mobileMenuOpen && (
+            <div className="sf-mobile-menu sf-mini-menu" role="menu">
+              <Link href="/about" role="menuitem" onClick={() => setMobileMenuOpen(false)}>About</Link>
+              <button type="button" role="menuitem" onClick={() => openAuthModal("company", "register")}>List your services</button>
+              <Link href="/terms" role="menuitem" onClick={() => setMobileMenuOpen(false)}>Terms</Link>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
     <header className="relative z-40 bg-[#ececec]">
       <div className={`sf-shell ${useTopBarOnlyHeader || useMobileCompactHeader ? "sf-shell-compact" : ""}`}>
       <div className="sf-shell-bg" aria-hidden="true" />
@@ -630,14 +698,14 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               {userType === "company" ? (
                 <button
                   onClick={handleSignOut}
-                  className="sf-btn sf-btn-pri"
+                  className="sf-btn sf-btn-pri sf-signout-btn"
                 >
                   Log out
                 </button>
               ) : (
                 <button
                   onClick={handleSignOut}
-                  className="sf-btn sf-btn-pri"
+                  className="sf-btn sf-btn-pri sf-signout-btn"
                 >
                   Log out
                 </button>
@@ -645,21 +713,41 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             </SignedIn>
 
             <SignedOut>
-              {/* Desktop: Account icon → opens LOGIN modal */}
+              {/* Account icon → opens LOGIN modal */}
               <button
+                type="button"
                 onClick={() => openAuthModal("individual", "login")}
-                className="sf-icon-btn hidden sm:inline-flex"
+                className="sf-icon-btn sf-account-btn"
               >
                 <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
               </button>
               {/* List your business → opens REGISTER modal, company pre-selected */}
               <button
+                type="button"
                 onClick={() => openAuthModal("company", "register")}
-                className="sf-btn sf-btn-pri"
+                className="sf-btn sf-btn-pri sf-list-services-btn"
               >
                 List your services
               </button>
             </SignedOut>
+            <button
+              type="button"
+              className="sf-icon-btn sf-mobile-menu-btn"
+              aria-label="Menu"
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen((open) => !open)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+            {mobileMenuOpen && (
+              <div className="sf-mobile-menu" role="menu">
+                <Link href="/about" role="menuitem" onClick={() => setMobileMenuOpen(false)}>About</Link>
+                <button type="button" role="menuitem" onClick={() => openAuthModal("company", "register")}>List your services</button>
+                <Link href="/terms" role="menuitem" onClick={() => setMobileMenuOpen(false)}>Terms</Link>
+              </div>
+            )}
           </div>
         </div>
 

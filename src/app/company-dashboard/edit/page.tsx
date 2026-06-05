@@ -302,6 +302,7 @@ export default function EditProfilePage() {
   const [isDirty, setIsDirty] = useState(true);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const projectInputRef = useRef<HTMLInputElement>(null);
+  const hydratedCompanyIdRef = useRef<string | null>(null);
 
   const currentUser = useQuery(
     api.users.getCurrentUser,
@@ -546,6 +547,10 @@ export default function EditProfilePage() {
   // Populate form when company data loads
   useEffect(() => {
     if (company) {
+      const companyKey = String(company._id);
+      if (hydratedCompanyIdRef.current === companyKey) return;
+      hydratedCompanyIdRef.current = companyKey;
+
       setCompanyName(company.name ?? "");
       setAddress(company.address ?? "");
       setPhone(company.phone ?? "");
@@ -640,7 +645,7 @@ export default function EditProfilePage() {
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !company) return;
+    if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
       setUploadError("Logo file must be under 2MB");
       return;
@@ -650,7 +655,7 @@ export default function EditProfilePage() {
     try {
       const id = await uploadFile(file);
       setLogoId(id);
-      await updateCompany({ id: company._id, logoId: id });
+      setIsDirty(true);
     } catch {
       setUploadError("Failed to upload logo. Please try again.");
     } finally {
@@ -661,12 +666,12 @@ export default function EditProfilePage() {
 
   const handleProjectImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !company) return;
+    if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
       setUploadError("Image file must be under 2MB");
       return;
     }
-    const max = company.isPro ? 12 : 4;
+    const max = company?.isPro ? 12 : 4;
     if (totalProjectImages >= max) return;
     setUploadError(null);
     const slotIndex = totalProjectImages;
@@ -675,7 +680,7 @@ export default function EditProfilePage() {
       const id = await uploadFile(file);
       const newIds = [...projectImageIds, id];
       setProjectImageIds(newIds);
-      await updateCompany({ id: company._id, projectImageIds: newIds, projectImageUrls });
+      setIsDirty(true);
     } catch {
       setUploadError("Failed to upload image. Please try again.");
     } finally {
@@ -685,19 +690,17 @@ export default function EditProfilePage() {
   };
 
   const handleRemoveProjectImage = async (index: number) => {
-    if (!company) return;
-
     if (index < projectImageUrls.length) {
       const nextExternalUrls = projectImageUrls.filter((_, i) => i !== index);
       setProjectImageUrls(nextExternalUrls);
-      await updateCompany({ id: company._id, projectImageIds, projectImageUrls: nextExternalUrls });
+      setIsDirty(true);
       return;
     }
 
     const storageIndex = index - projectImageUrls.length;
     const nextStorageIds = projectImageIds.filter((_, i) => i !== storageIndex);
     setProjectImageIds(nextStorageIds);
-    await updateCompany({ id: company._id, projectImageIds: nextStorageIds, projectImageUrls: projectImageUrls });
+    setIsDirty(true);
   };
 
   const createCompany = useMutation(api.companies.create);
@@ -1251,7 +1254,7 @@ export default function EditProfilePage() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+86 156 1871 1651"
+                  placeholder="+62 812 0000 0000"
                   aria-invalid={invalidPhone}
                   className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidPhone ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
                 />
