@@ -22,6 +22,17 @@ function getCompanyCategoryTypes(company: any, category: string) {
   return company.constructionTypes ?? (company.subcategory ? [company.subcategory] : []);
 }
 
+function getCategoryLabel(category: string) {
+  const labels: Record<string, string> = {
+    construction: "Construction",
+    renovation: "Renovation",
+    architecture: "Architecture",
+    interior: "Interior",
+    "real-estate": "Real Estate",
+  };
+  return labels[category] ?? category.replace(/-/g, " ");
+}
+
 export default function Home() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#f8f8f8]" />}>
@@ -180,6 +191,12 @@ function HomeContent() {
   }));
 
   const showEmptyState = hasFilters && companies !== undefined && companies.length === 0;
+  const searchEcho = [
+    searchParam,
+    projectSizeParam ? "Project size" : null,
+    effectiveSubcategories.length ? `${effectiveSubcategories.length} type${effectiveSubcategories.length === 1 ? "" : "s"}` : null,
+    locationParam,
+  ].filter(Boolean).join(" · ") || getCategoryLabel(categoryParam);
 
   // Calculate pagination
   const totalPages = Math.max(1, Math.ceil(listings.length / itemsPerPage));
@@ -207,48 +224,17 @@ function HomeContent() {
     <>
       <main className="sf-home-shell pt-0 flex-grow flex flex-col">
         {showEmptyState ? (
-          /* Empty State — flex column filling remaining height */
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-            {/* Orange message — vertically centered in available space */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <p className="text-[11px] font-medium text-[#333]/50 tracking-[0.22px] leading-[14px]" style={{ marginBottom: '16px' }}>No results</p>
-              <h3 style={{ fontSize: '26px', fontWeight: 600, color: '#f14110', lineHeight: '30px' }}>
-                We are still finding some solid profiles for your search. Come back soon ; )
-              </h3>
-            </div>
-
-            {/* Suggested profiles — pinned to bottom above footer */}
-            <div style={{ paddingBottom: '32px' }}>
-              <p className="text-[11px] font-medium text-[#333] tracking-[0.22px] leading-[14px]" style={{ marginBottom: '20px' }}>
-                In the meantime, here are the latest added profiles:
-              </p>
-
-              {/* Mobile: 2-column grid with WelcomeCard + FeaturedCards */}
-              <div className="sm:hidden grid grid-cols-2 gap-5">
-                <WelcomeCard />
-                {visibleArticles === undefined
-                  ? <HomeFeaturedCard loading />
-                  : visibleArticles.map((article) => (
-                    <HomeFeaturedCard key={article._id} article={article} />
-                  ))
-                }
-              </div>
-
-              {/* Desktop: 4-column grid of latest profiles */}
-              <div className="hidden sm:grid sf-grid">
-                {latestListings.map((listing) => (
-                  <ListingCard
-                    key={listing.id}
-                    {...listing}
-                    proEnabled={proEnabled}
-                    reviewsEnabled={reviewsEnabled}
-                    categoryContext={categoryParam}
-                    onBookmark={() => handleBookmark(listing.id)}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+          <NoResultsState
+            query={searchEcho}
+            onClearFilters={() => router.push(`/?category=${categoryParam}`)}
+            onBroadenArea={() => {
+              const params = new URLSearchParams(searchParams.toString());
+              params.delete("location");
+              router.push(`/?${params.toString()}`);
+            }}
+            onBrowseAll={() => router.push("/")}
+            onNewSearch={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          />
         ) : (
           <>
             {/* Mobile: WebKit vertical list */}
@@ -346,6 +332,63 @@ function HomeContent() {
       </main>
 
     </>
+  );
+}
+
+function NoResultsState({
+  query,
+  onClearFilters,
+  onBroadenArea,
+  onBrowseAll,
+  onNewSearch,
+}: {
+  query: string;
+  onClearFilters: () => void;
+  onBroadenArea: () => void;
+  onBrowseAll: () => void;
+  onNewSearch: () => void;
+}) {
+  return (
+    <div className="flex flex-1 items-start justify-center px-5 py-16 sm:py-20">
+      <section className="w-full max-w-[480px] rounded-2xl bg-white px-6 py-10 text-center shadow-[0_12px_32px_rgba(35,31,32,0.12),0_4px_8px_rgba(35,31,32,0.06)] sm:px-10 sm:pb-10 sm:pt-12" role="status" aria-live="polite">
+        <div className="relative mb-6 inline-flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[#fbe6de] text-[#f14110] before:absolute before:inset-[-7px] before:rounded-full before:border before:border-dashed before:border-[#f0c5b9]">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[30px] w-[30px]" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="17" y1="17" x2="22" y2="22" />
+          </svg>
+        </div>
+
+        <div className="mb-[22px] inline-flex max-w-full items-center gap-[7px] rounded-full border border-[#e4e4e4] bg-[#f8f8f8] py-[5px] pl-2.5 pr-3.5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-[13px] w-[13px] flex-none text-[#8c8c8c]" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="17" y1="17" x2="22" y2="22" />
+          </svg>
+          <span className="max-w-[240px] truncate font-mono text-[11px] font-medium tracking-[0.04em] text-[#333]">&quot;{query}&quot;</span>
+        </div>
+
+        <h2 className="mb-3.5 text-[22px] font-light leading-[1.2] tracking-[-0.02em] text-[#231f20] sm:text-[26px]">
+          No <strong className="font-bold text-[#f14110]">solid finds</strong> yet for you.
+        </h2>
+        <p className="mb-7 text-[14px] leading-[1.65] text-[#333]">
+          We looked, but nothing matched this search. Try widening your area, picking a broader trade, or removing a filter - the right pro might just be one tweak away.
+        </p>
+
+        <div className="mb-6 flex flex-wrap justify-center gap-2">
+          <button type="button" onClick={onClearFilters} className="rounded-full border border-[#d8d8d8] bg-white px-3.5 py-[7px] text-[13px] font-medium text-[#333] transition hover:border-[#231f20]">Clear all filters</button>
+          <button type="button" onClick={onBroadenArea} className="rounded-full border border-[#d8d8d8] bg-white px-3.5 py-[7px] text-[13px] font-medium text-[#333] transition hover:border-[#231f20]">Broaden area</button>
+          <button type="button" onClick={onBrowseAll} className="rounded-full border border-[#d8d8d8] bg-white px-3.5 py-[7px] text-[13px] font-medium text-[#333] transition hover:border-[#231f20]">Browse all pros</button>
+        </div>
+
+        <button type="button" onClick={onNewSearch} className="inline-flex items-center rounded-[6px] bg-[#f14110] px-6 py-[11px] text-[14px] font-semibold tracking-[0.01em] text-white transition hover:bg-[#ec3300]">
+          Try a new search
+        </button>
+
+        <div className="mt-6 h-px w-full bg-[#e4e4e4]" aria-hidden="true" />
+        <p className="mt-[18px] text-[13px] leading-[1.55] text-[#8c8c8c]">
+          Not sure what to search for? <button type="button" onClick={onNewSearch} className="font-semibold text-[#f14110] hover:underline">Tell us what you&apos;re building</button>.
+        </p>
+      </section>
+    </div>
   );
 }
 

@@ -30,32 +30,37 @@ Use WebKit component structure and CSS as the visual source of truth. Existing a
 | Login | modal + Clerk routes | `LoginModal.jsx` | `PopupLogin` in `mobile-popups.jsx` | Existing auth logic present; needs visual shell port |
 | Sign up | modal + Clerk routes | `SignUpModal.jsx` | `PopupSignup` in `mobile-popups.jsx` | Existing auth logic present; needs visual shell port |
 | Write review | modal/profile action | `LeaveReviewModal.jsx` | `PopupWriteReview` in `mobile-popups.jsx` | Existing logic partial; needs visual shell port |
-| Reviews modal/list | profile actions, `/reviews`, profile review pages | `ReviewsModal.jsx` | profile review section in `mobile-profile.jsx` | Modal designed; full review pages need design decision |
+| Reviews modal/list | profile "All reviews" action; legacy `/reviews` and profile review routes | `ReviewsModal.jsx` | profile review section in `mobile-profile.jsx` | Treat as popup-first; no new full-page design needed unless SEO/back-compat routes stay public |
 | Share modal | profile/card action | `ShareModal.jsx` | icon/action exists; no full mobile share modal beyond popup system | Needs visual shell port |
 | Ad purchase modal | ad slot action | `AdModal.jsx` | `PopupGetAds` in `mobile-popups.jsx` | Needs visual shell port |
-| Pro subscription | `/upgrade`, modal action | `ProModal.jsx`, `Legal.jsx` for pro terms | `PopupGetPro`, `mobile-pro-guidelines.jsx` | Needs visual shell port |
+| Pro subscription | `/upgrade`, modal action, `/company-dashboard?pro=1`, `/company-dashboard?proSuccess=1` | `ProModal.jsx`, `Legal.jsx` for pro terms, supplied purchase confirmation HTML | `PopupGetPro`, `mobile-pro-guidelines.jsx` | Buy popup needs WebKit port; purchase confirmation preview is wired |
+| No results | empty search state on `/` | supplied `No Results.html` | supplied responsive HTML | Wired from supplied HTML; needs visual QA |
+| 404 | `/_not-found` / app not found | supplied `404 Error Page.html` | supplied responsive HTML | Wired from supplied HTML; needs visual QA |
 
 ## Back Office To Keep
 
 - Convex schema, queries, mutations, and admin data operations.
 - Clerk auth, magic-link, secure sign-in, SSO callback, and account onboarding logic.
 - Image upload/storage logic and the edit-profile no-refresh persistence behavior.
-- Admin pages under `/admin/*` unless a new admin design is supplied.
+- Admin pages under `/admin/*`; no new admin/back-office UI is requested. Keep existing admin UI and make sure content/data links are accurate.
 - Feature flags/settings for Pro, reviews, visible categories, legal content, featured articles, and page visibility.
 
 ## Visual Gaps To Design
 
-- Admin/back-office UI for companies, users, reviews, reports, settings, pages, legal, waitlist, and audit log.
-- Full-page `/reviews` design and profile-specific reviews page design. The kit includes modal/review sections, but not a dedicated reviews route.
-- Secure sign-in, auth-complete, SSO callback, loading, error, and expired-link states.
+- Secure sign-in, auth-complete, SSO callback, loading, error, and expired-link states. Reuse popup templates where possible.
 - Coming-soon page and any domain/maintenance fallback page.
-- Empty states beyond the simple WebKit "No matches" result state.
-- Payment checkout success, failure, pending, and renewal/cancel states for Pro.
+- Payment checkout failure, pending, renewal, and cancel states for Pro. Purchase confirmation is now covered by supplied HTML.
 - Ad purchase checkout success, failure, pending, and inventory-unavailable states.
-- Report-listing confirmation and moderation outcome states.
+- Report-listing public confirmation should use a popup-style state; moderation itself is existing admin flow at `/admin/reports`.
 - Delete-account confirmation success/failure states beyond the mobile popup.
-- Email templates and transactional notification visuals.
-- 404/global error pages in final WebKit styling.
+- Email templates and transactional notification visuals only if we send branded emails outside Clerk/Midtrans defaults.
+- Global runtime error page in final WebKit styling. 404 is now covered by supplied HTML.
+
+## Direct Review Links
+
+- Buy Pro popup: `/company-dashboard?pro=1`
+- Pro purchase confirmation popup: `/company-dashboard?proSuccess=1`
+- Secure sign-in state: `/secure-sign-in?next=/company-dashboard/edit`
 
 ## Implementation Order
 

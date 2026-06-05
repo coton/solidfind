@@ -116,6 +116,7 @@ export default function CompanyDashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const shouldOpenProModal = searchParams.get("pro") === "1";
+  const shouldShowProSuccess = searchParams.get("proSuccess") === "1";
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const deleteAccount = useMutation(api.users.deleteAccount);
@@ -138,6 +139,10 @@ export default function CompanyDashboardPage() {
     if (shouldOpenProModal) {
       router.replace("/company-dashboard");
     }
+  };
+
+  const closeProSuccess = () => {
+    router.replace("/company-dashboard");
   };
 
   // Check if user has a company and redirect if needed
@@ -812,6 +817,122 @@ export default function CompanyDashboardPage() {
           </div>
         </div>
       )}
+
+      {shouldShowProSuccess && (
+        <ProPurchaseConfirmationPopup
+          plan={billingPlan}
+          yearlyPrice={yearlyPrice}
+          monthlyPrice={monthlyPrice}
+          onClose={closeProSuccess}
+        />
+      )}
+    </div>
+  );
+}
+
+function ProPurchaseConfirmationPopup({
+  plan,
+  yearlyPrice,
+  monthlyPrice,
+  onClose,
+}: {
+  plan: "monthly" | "yearly";
+  yearlyPrice: string | null | undefined;
+  monthlyPrice: string | null | undefined;
+  onClose: () => void;
+}) {
+  const planLabel = plan === "monthly"
+    ? `Monthly plan · Rp ${formatIdrPrice(monthlyPrice)} / month`
+    : `Yearly plan · Rp ${formatIdrPrice(yearlyPrice)} / year`;
+  const features = [
+    "Priority placement in search results",
+    "Visibility analytics dashboard",
+    "Up to 12 project photos or videos",
+    "Ad placements across the platform",
+    "AI-ready profile formatting",
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-[#f8f8f8]/85 px-4 py-12 backdrop-blur-sm">
+      <section className="relative w-full max-w-[560px] overflow-hidden rounded-xl border border-[#e4e4e4] bg-white shadow-[0_12px_32px_rgba(35,31,32,0.12),0_4px_8px_rgba(35,31,32,0.06)]" role="dialog" aria-modal="true" aria-labelledby="proSuccessTitle">
+        <div className="relative overflow-hidden bg-[#f14110] px-6 py-6 text-white sm:px-9 sm:pb-7 sm:pt-8">
+          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.75) 1px, transparent 1px)", backgroundSize: "18px 18px" }} aria-hidden="true" />
+          <button type="button" onClick={onClose} className="absolute right-3.5 top-3.5 z-10 grid h-8 w-8 place-items-center rounded-full bg-white/15 text-white/80 transition hover:bg-white/25 hover:text-white" aria-label="Close">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="h-3.5 w-3.5">
+              <path d="M3 3l10 10M13 3L3 13" />
+            </svg>
+          </button>
+
+          <div className="relative flex items-start gap-[18px]">
+            <div className="mt-0.5 grid h-12 w-12 flex-none place-items-center rounded-full border border-white/35 bg-white/20">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-[22px] w-[22px]" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="mb-2 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-white/70">Purchase confirmed</p>
+              <h2 id="proSuccessTitle" className="mb-1 text-[24px] font-light leading-[1.15] tracking-[-0.02em] text-white sm:text-[28px]">
+                Welcome to <strong className="font-bold">Pro.</strong>
+              </h2>
+              <p className="m-0 text-[13px] leading-[1.5] text-white/70">Your profile is now upgraded - everything below is live.</p>
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 py-1.5 pl-2 pr-3.5">
+                <span className="h-2 w-2 rounded-full bg-white/90" aria-hidden="true" />
+                <span className="font-mono text-[11px] font-medium tracking-[0.06em] text-white/90">{planLabel}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 pt-7 sm:px-9">
+          <p className="mb-4 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8c8c8c]">Now active on your profile</p>
+          <ul className="mb-7">
+            {features.map((feature) => (
+              <li key={feature} className="flex items-center gap-3.5 border-b border-[#e4e4e4] py-[11px] last:border-b-0">
+                <span className="grid h-[22px] w-[22px] flex-none place-items-center rounded-full bg-[#eaf4ee] text-[#2e7d55]">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
+                <span className="flex-1 text-[14px] font-medium leading-[1.35] text-[#231f20]">{feature}</span>
+                <span className="rounded-full bg-[#fbe6de] px-2 py-[3px] font-mono text-[9px] font-semibold uppercase tracking-[0.08em] text-[#f14110]">Active</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mb-7 rounded-lg bg-[#f8f8f8] px-[18px] py-4">
+            <p className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8c8c8c]">Make the most of Pro</p>
+            <ol className="space-y-2.5">
+              {[
+                ["Complete your profile", "add photos, services, and a project description to rank higher."],
+                ["Check your analytics", "visibility data updates within 24 hours of going live."],
+                ["Review ad placement guidelines", "keep your content compliant so your ads stay active."],
+              ].map(([title, copy], index) => (
+                <li key={title} className="flex items-start gap-3">
+                  <span className="mt-px grid h-5 w-5 flex-none place-items-center rounded-full border border-[#d8d8d8] font-mono text-[10px] font-semibold text-[#8c8c8c]">{index + 1}</span>
+                  <span className="text-[13px] leading-[1.45] text-[#333]"><strong className="font-semibold text-[#231f20]">{title}</strong> - {copy}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2.5 px-6 pb-8 sm:px-9">
+          <button type="button" onClick={onClose} className="rounded-[6px] bg-[#f14110] px-[22px] py-[13px] text-center text-[14px] font-semibold tracking-[0.01em] text-white transition hover:bg-[#ec3300]">
+            Go to your dashboard →
+          </button>
+          <button type="button" onClick={onClose} className="rounded-[6px] border border-[#d8d8d8] bg-transparent px-[22px] py-[13px] text-center text-[14px] font-semibold tracking-[0.01em] text-[#333] transition hover:bg-[#f8f8f8]">
+            Close
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-1.5 border-t border-[#e4e4e4] px-6 py-4 text-[12px] text-[#8c8c8c] sm:px-9">
+          <span>A receipt has been sent to your email.</span>
+          <span className="text-[#d8d8d8]" aria-hidden="true">·</span>
+          <Link href="/company-dashboard" className="font-medium text-[#f14110] hover:underline">View subscription</Link>
+          <span className="text-[#d8d8d8]" aria-hidden="true">·</span>
+          <Link href="/terms?view=pro-en&from=%2Fcompany-dashboard%3FproSuccess%3D1" className="font-medium text-[#f14110] hover:underline">Terms</Link>
+        </div>
+      </section>
     </div>
   );
 }
