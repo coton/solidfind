@@ -33,7 +33,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   if (!usesPersistentChrome(pathname)) return <>{children}</>;
 
   return (
-    <div className="min-h-screen bg-[#ececec] flex flex-col">
+    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header showResultsBar={pathname === "/"} />
       {children}
       <Footer />

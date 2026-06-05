@@ -68,7 +68,7 @@ export function AccountTypeSelectionCard({
 
   return (
     <div className="relative">
-      <div className="absolute inset-0 bg-[#ececec]/55 backdrop-blur-[3px] rounded-[6px]" />
+      <div className="absolute inset-0 bg-[#f8f8f8]/55 backdrop-blur-[3px] rounded-[6px]" />
 
       <div className="relative bg-[#f8f8f8] border border-white/70 rounded-[6px] px-7 py-6 shadow-[0_20px_60px_rgba(0,0,0,0.12)] max-w-[440px] w-full ml-auto mr-auto">
         <p className="text-[11px] text-[#333]/70 tracking-[0.22px]">Hello</p>

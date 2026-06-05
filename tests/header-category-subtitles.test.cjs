@@ -20,13 +20,13 @@ test('shared header scrolls with the page inside a side-only workspace gutter', 
 
   assert.match(
     source,
-    /<header className="relative z-40 bg-\[#ececec\] px-\[10px\]">[\s\S]*<div className="relative z-30 rounded-\[6px\]">/,
-    'expected the shared header to sit in normal page flow with side padding only'
+    /<header className="relative z-40 bg-\[#f8f8f8\]">[\s\S]*<div className=\{`sf-shell \$\{useTopBarOnlyHeader \|\| useMobileCompactHeader \? "sf-shell-compact" : ""\}`\}>/,
+    'expected the shared header to sit in normal page flow with the WebKit shell wrapper'
   );
 
   assert.doesNotMatch(
     source,
-    /fixed top-0 left-0 right-0|<div[\s\S]{0,160}aria-hidden="true"[\s\S]{0,160}\/>[\s\S]{0,80}<header|bg-gradient-to-b from-\[#ececec\] to-transparent|contentBarVisible/,
+    /fixed top-0 left-0 right-0|<div[\s\S]{0,160}aria-hidden="true"[\s\S]{0,160}\/>[\s\S]{0,80}<header|bg-gradient-to-b from-\[#f8f8f8\] to-transparent|contentBarVisible/,
     'expected the moving header to avoid fixed positioning, spacer reservation, and the grey bottom fade'
   );
 });

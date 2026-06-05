@@ -152,7 +152,7 @@ export default function DashboardCategoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#ececec] flex flex-col">
+    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-0 py-8 flex-grow w-full">

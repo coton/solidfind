@@ -24,7 +24,7 @@ function getCompanyCategoryTypes(company: any, category: string) {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#ececec]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#f8f8f8]" />}>
       <HomeContent />
     </Suspense>
   );
@@ -253,7 +253,7 @@ function HomeContent() {
           <>
             {/* Mobile: WebKit vertical list */}
             <div className="sm:hidden mb-8">
-              <div className="sf-grid pb-2">
+              <div className="m-list">
                 {!hasFilters && (
                   <>
                     <WelcomeCard />

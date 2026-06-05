@@ -18,7 +18,7 @@ export default function GlobalError({
       <head>
         <title>Error - SolidFind</title>
       </head>
-      <body style={{ margin: 0, fontFamily: "Sora, system-ui, sans-serif", backgroundColor: "#ececec" }}>
+      <body style={{ margin: 0, fontFamily: "Sora, system-ui, sans-serif", backgroundColor: "#f8f8f8" }}>
         <div
           style={{
             minHeight: "100vh",

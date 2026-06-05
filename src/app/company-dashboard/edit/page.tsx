@@ -1013,7 +1013,7 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#ececec] flex flex-col">
+    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
       {/* Hidden file inputs */}

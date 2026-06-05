@@ -23,7 +23,7 @@ export default function ArticlePage() {
 
   if (article === undefined) {
     return (
-      <div className="min-h-screen bg-[#ececec] flex flex-col">
+      <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
         <Header />
         <main className="flex-grow flex items-center justify-center">
           <div className="w-5 h-5 border-2 border-[#333] border-t-transparent rounded-full animate-spin" />
@@ -35,7 +35,7 @@ export default function ArticlePage() {
 
   if (article === null) {
     return (
-      <div className="min-h-screen bg-[#ececec] flex flex-col">
+      <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
         <Header />
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center">
@@ -57,7 +57,7 @@ export default function ArticlePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#ececec] flex flex-col">
+    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
       <main className="flex-grow">

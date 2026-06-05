@@ -650,7 +650,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         </div>
       </div>
     )}
-    <header className="relative z-40 bg-[#ececec]">
+    <header className="relative z-40 bg-[#f8f8f8]">
       <div className={`sf-shell ${useTopBarOnlyHeader || useMobileCompactHeader ? "sf-shell-compact" : ""}`}>
       <div className="sf-shell-bg" aria-hidden="true" />
       {headerMedia.url ? (

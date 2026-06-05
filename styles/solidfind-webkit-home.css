@@ -2232,6 +2232,13 @@
     gap: 14px;
   }
 
+  .m-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 20px 28px;
+  }
+
   .sf-home-shell {
     overflow-x: hidden;
   }
