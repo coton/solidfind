@@ -429,7 +429,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     }
 
     const updateMiniHeader = () => {
-      setShowMobileMiniHeader(window.innerWidth < 640 && window.scrollY > 280);
+      setShowMobileMiniHeader(window.innerWidth < 640 && window.scrollY > 520);
     };
 
     updateMiniHeader();
@@ -846,6 +846,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                 selectedValues={locations}
                 displayText={getLocationDisplayText()}
                 isActive={isLocationActive}
+                alignRight={true}
                 isOptionSelected={(optionId) => {
                   if (optionId === "bali") return isBaliActive();
                   return locations.includes(optionId);

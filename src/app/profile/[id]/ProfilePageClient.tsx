@@ -375,6 +375,7 @@ export default function ProfilePageClient() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCopiedToast, setShowCopiedToast] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(null);
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
@@ -720,8 +721,16 @@ export default function ProfilePageClient() {
               <p>{company.description ?? `${company.name} is listed on SolidFind for construction, renovation and design projects in Bali.`}</p>
             </div>
 
-            <h2 className="sf-h2-static">Services &amp; coverage</h2>
-            <dl className="sf-svc">
+            <button
+              type="button"
+              className="sf-svc-toggle"
+              aria-expanded={servicesOpen}
+              onClick={() => setServicesOpen((open) => !open)}
+            >
+              Services &amp; coverage
+              <span aria-hidden="true">{servicesOpen ? "↑" : "↓"}</span>
+            </button>
+            <dl className={`sf-svc ${servicesOpen ? "is-open" : ""}`}>
               <div className="sf-svc-row">
                 <dt className="sf-svc-term">Provided services</dt>
                 <dd className="sf-svc-def">
