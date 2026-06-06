@@ -127,18 +127,6 @@ const proFeatures = [
   { icon: "ad", title: "Ad placements across the website", subtitle: "Penempatan iklan di seluruh situs web" },
 ];
 
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-gradient-to-r from-[#e9a28e] to-[#f14110]' : 'bg-[#d1d1d1]'}`}
-    >
-      <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${checked ? 'left-[22px]' : 'left-0.5'}`} />
-    </button>
-  );
-}
-
 function useStorageUrl(storageId: Id<"_storage"> | undefined) {
   return useQuery(api.files.getUrl, storageId ? { storageId } : "skip");
 }
@@ -370,7 +358,7 @@ export default function EditProfilePage() {
 
   // Toggles
   const [selectedProjectSizes, setSelectedProjectSizes] = useState<string[]>([]);
-  const [projectSizeEnabled, setProjectSizeEnabled] = useState(true);
+  const [, setProjectSizeEnabled] = useState(true);
   const [selectedConstruction, setSelectedConstruction] = useState<string[]>([]);
   const [constructionEnabled, setConstructionEnabled] = useState(false);
   const [selectedRenovation, setSelectedRenovation] = useState<string[]>([]);
@@ -382,7 +370,7 @@ export default function EditProfilePage() {
   const [selectedRealEstate, setSelectedRealEstate] = useState<string[]>([]);
   const [realEstateEnabled, setRealEstateEnabled] = useState(false);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [locationEnabled, setLocationEnabled] = useState(true);
+  const [, setLocationEnabled] = useState(true);
 
   // Image state
   const [logoId, setLogoId] = useState<Id<"_storage"> | undefined>();
@@ -628,13 +616,153 @@ export default function EditProfilePage() {
     }
   }, [hasSetupAccountQuery, setupLoginEmail, storedCompanyEmail]);
 
-  const toggleService = (list: string[], setList: (val: string[]) => void, id: string) => {
+  const renderMatrixSwitch = (active: boolean) => (
+    <span className={`sf-switch ${active ? "on" : ""}`} aria-hidden="true">
+      <span className="sf-switch-knob" />
+    </span>
+  );
+
+  const toggleProjectSizeMatrix = (id: string) => {
     setIsDirty(true);
-    if (list.includes(id)) {
-      setList(list.filter(item => item !== id));
-    } else {
-      setList([...list, id]);
+    if (id === "any") {
+      setSelectedProjectSizes(selectedProjectSizes.includes("any") ? [] : ["any"]);
+      return;
     }
+
+    const next = selectedProjectSizes.includes(id)
+      ? selectedProjectSizes.filter((size) => size !== id)
+      : [...selectedProjectSizes.filter((size) => size !== "any"), id];
+    const hasAllConcreteSizes = concreteProjectSizeIds.every((sizeId) => next.includes(sizeId));
+    setSelectedProjectSizes(hasAllConcreteSizes ? ["any"] : next);
+  };
+
+  const toggleLocationMatrix = (id: string) => {
+    setIsDirty(true);
+    if (id === "bali") {
+      setSelectedLocations(selectedLocations.includes("bali") ? [] : ["bali"]);
+      return;
+    }
+
+    let next = selectedLocations.includes(id)
+      ? selectedLocations.filter((location) => location !== id)
+      : [...selectedLocations.filter((location) => location !== "bali"), id];
+    const allIndividual = locationOptions.filter((location) => location.id !== "bali").map((location) => location.id);
+    if (allIndividual.every((locationId) => next.includes(locationId))) {
+      next = ["bali"];
+    }
+    setSelectedLocations(next);
+  };
+
+  const toggleCategoryServiceMatrix = (
+    options: ServiceOption[],
+    selected: string[],
+    setSelected: (next: string[]) => void,
+    id: string
+  ) => {
+    const allId = getAllOptionId(options);
+    const normalizedSelected = normalizeAllSelection(selected, options);
+    setIsDirty(true);
+
+    if (id === allId && allId) {
+      setSelected(normalizedSelected.includes(allId) ? normalizedSelected.filter((item) => item !== allId) : [allId]);
+      return;
+    }
+
+    if (id === "complete") {
+      setSelected(normalizedSelected.includes("complete") ? [] : ["complete"]);
+      return;
+    }
+
+    let next = normalizedSelected.includes(id)
+      ? normalizedSelected.filter((item) => item !== id)
+      : [...normalizedSelected.filter((item) => item !== allId), id];
+    const allIndividual = options.filter((option) => option.id !== allId).map((option) => option.id);
+    if (allId && allIndividual.every((optionId) => next.includes(optionId))) {
+      next = [allId];
+    }
+    setSelected(next);
+  };
+
+  const renderMatrixRow = ({
+    id,
+    label,
+    active,
+    disabled = false,
+    master = false,
+    onClick,
+  }: {
+    id: string;
+    label: string;
+    active: boolean;
+    disabled?: boolean;
+    master?: boolean;
+    onClick: () => void;
+  }) => (
+    <button
+      key={id}
+      type="button"
+      className={`sf-mx-row ${master ? "master" : ""} ${active ? "on" : ""} ${disabled ? "is-disabled" : ""}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      <span className="sf-mx-row-label">{label}</span>
+      {renderMatrixSwitch(active)}
+    </button>
+  );
+
+  const renderCategoryMatrix = ({
+    id,
+    title,
+    enabled,
+    setEnabled,
+    selected,
+    setSelected,
+    options,
+  }: {
+    id: string;
+    title: string;
+    enabled: boolean;
+    setEnabled: (enabled: boolean) => void;
+    selected: string[];
+    setSelected: (next: string[]) => void;
+    options: ServiceOption[];
+  }) => {
+    const normalizedSelected = normalizeAllSelection(selected, options);
+    const allId = getAllOptionId(options);
+    const allActive = Boolean(allId && normalizedSelected.includes(allId));
+    const completeActive = normalizedSelected.includes("complete");
+
+    return (
+      <article className={`sf-mx-block sf-mx-cat ${enabled ? "on" : ""}`} key={id}>
+        <button
+          type="button"
+          className="sf-mx-cathead"
+          onClick={() => {
+            setIsDirty(true);
+            setEnabled(!enabled);
+            if (enabled) setSelected([]);
+          }}
+        >
+          <h4>{title}</h4>
+          {renderMatrixSwitch(enabled)}
+        </button>
+        <div className={`sf-mx-catbody ${enabled ? "" : "is-off"}`}>
+          {options.map((service) => {
+            const isAll = service.id === allId;
+            const isCompleteChild = id === "renovation" && completeHouseChildren.includes(service.id);
+            const disabled = !enabled || (allActive && !isAll) || (completeActive && isCompleteChild);
+            return renderMatrixRow({
+              id: service.id,
+              label: service.label,
+              active: normalizedSelected.includes(service.id),
+              disabled,
+              master: isAll,
+              onClick: () => toggleCategoryServiceMatrix(options, selected, setSelected, service.id),
+            });
+          })}
+        </div>
+      </article>
+    );
   };
 
   const uploadFile = async (file: File): Promise<Id<"_storage">> => {
@@ -1562,415 +1690,98 @@ export default function EditProfilePage() {
         </section>
 
 
-        <section className="sf-edit-section sf-edit-panel">
-          <span className="sf-tag-mono">Services & coverage</span>
-          <p className="sf-edit-lead">Activate every category you work in and switch on the exact services you offer. These are the same filters visitors use to find you.</p>
-
-        {/* Project Size & Location - Top Row */}
-        <div className="sf-edit-grid2 mb-8">
-          {/* Project Size */}
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Project Size <span className="text-[#f14110]">(*)</span></h2>
+        <section className="sf-edit-section sf-edit-panel sf-matrix">
+          <div className="sf-matrix-head">
+            <div>
+              <span className="sf-tag-mono">Services & coverage <RequiredStar /></span>
+              <p className="sf-edit-lead">Activate every category you work in and switch on the exact services you offer — at least one main category is required. These are the same filters visitors use to find you.</p>
             </div>
-              <div className="space-y-1">
+            <div className="sf-matrix-top">
+              <article className="sf-mx-block sf-mx-block-static">
+                <div className="sf-mx-blockhead">
+                  <h4>Project size <RequiredStar /></h4>
+                </div>
                 {projectSizeOptions.map((size) => {
                   const anyActive = selectedProjectSizes.includes("any");
                   const isAny = size.id === "any";
-                  const isDisabled = anyActive && !isAny;
-                  return (
-                    <div key={size.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <span className={`text-[10px] tracking-[0.2px] ${selectedProjectSizes.includes(size.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                        {size.label}
-                      </span>
-                      <Toggle
-                        checked={selectedProjectSizes.includes(size.id)}
-                        onChange={() => {
-                          setIsDirty(true);
-                          if (isAny) {
-                            if (selectedProjectSizes.includes("any")) {
-                              setSelectedProjectSizes(selectedProjectSizes.filter(s => s !== "any"));
-                            } else {
-                              setSelectedProjectSizes(["any"]);
-                            }
-                          } else {
-                            const next = selectedProjectSizes.includes(size.id)
-                              ? selectedProjectSizes.filter(s => s !== size.id)
-                              : [...selectedProjectSizes.filter(s => s !== "any"), size.id];
-                            const hasAllConcreteSizes = concreteProjectSizeIds.every((id) => next.includes(id));
-                            setSelectedProjectSizes(hasAllConcreteSizes ? ["any"] : next);
-                          }
-                        }}
-                      />
-                    </div>
-                  );
+                  return renderMatrixRow({
+                    id: size.id,
+                    label: size.label,
+                    active: selectedProjectSizes.includes(size.id),
+                    disabled: anyActive && !isAny,
+                    master: isAny,
+                    onClick: () => toggleProjectSizeMatrix(size.id),
+                  });
                 })}
-              </div>
-          </div>
+              </article>
 
-          {/* Location (single global) */}
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Location <span className="text-[#f14110]">(*)</span></h2>
-            </div>
-              <div className="space-y-1">
-                {locationOptions.map((loc) => {
+              <article className="sf-mx-block sf-mx-block-static">
+                <div className="sf-mx-blockhead">
+                  <h4>Location <RequiredStar /></h4>
+                </div>
+                {locationOptions.map((location) => {
                   const baliActive = selectedLocations.includes("bali");
-                  const isBali = loc.id === "bali";
-                  const isDisabled = baliActive && !isBali;
-                  return (
-                    <div key={loc.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <span className={`text-[10px] tracking-[0.2px] ${selectedLocations.includes(loc.id) ? 'text-[#f14110] font-medium' : 'text-[#333]/50'}`}>
-                        {loc.label}
-                      </span>
-                      <Toggle
-                        checked={selectedLocations.includes(loc.id)}
-                        onChange={() => {
-                          setIsDirty(true);
-                          if (isBali) {
-                            if (selectedLocations.includes("bali")) {
-                              setSelectedLocations(selectedLocations.filter(s => s !== "bali"));
-                            } else {
-                              setSelectedLocations(["bali"]);
-                            }
-                          } else {
-                            let next = selectedLocations.includes(loc.id)
-                              ? selectedLocations.filter(s => s !== loc.id)
-                              : [...selectedLocations.filter(s => s !== "bali"), loc.id];
-                            const allIndividual = locationOptions.filter(s => s.id !== "bali").map(s => s.id);
-                            if (allIndividual.every(id => next.includes(id))) {
-                              next = ["bali"];
-                            }
-                            setSelectedLocations(next);
-                          }
-                        }}
-                      />
-                    </div>
-                  );
+                  const isBali = location.id === "bali";
+                  return renderMatrixRow({
+                    id: location.id,
+                    label: location.label,
+                    active: selectedLocations.includes(location.id),
+                    disabled: baliActive && !isBali,
+                    master: isBali,
+                    onClick: () => toggleLocationMatrix(location.id),
+                  });
                 })}
-              </div>
-          </div>
-        </div>
-
-        {/* Construction / Renovation / Architecture / Interior - 4 Categories */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
-          {/* Construction */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Construction</h2>
-              <Toggle
-                checked={constructionEnabled}
-                onChange={(val) => {
-                  setConstructionEnabled(val);
-                  if (!val) setSelectedConstruction([]);
-                }}
-              />
+              </article>
             </div>
-            {constructionEnabled && (
-              <div>
-                <div className="mb-2">
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
-                    Services Provided /
-                    <br />
-                    Layanan yang Disediakan
-                  </p>
-                </div>
-                {constructionServiceOptions.map((service) => {
-                  const allId = getAllOptionId(constructionServiceOptions);
-                  const normalizedSelected = normalizeAllSelection(selectedConstruction, constructionServiceOptions);
-                  const allActive = !!allId && normalizedSelected.includes(allId);
-                  const isAll = service.id === allId;
-                  const isDisabled = allActive && !isAll;
-                  return (
-                    <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                        {service.label}
-                      </span>
-                      <Toggle
-                        checked={normalizedSelected.includes(service.id)}
-                        onChange={() => {
-                          setIsDirty(true);
-                          if (isAll && allId) {
-                            if (normalizedSelected.includes(allId)) {
-                              setSelectedConstruction(normalizedSelected.filter(s => s !== allId));
-                            } else {
-                              setSelectedConstruction([allId]);
-                            }
-                          } else {
-                            let next = normalizedSelected.includes(service.id)
-                              ? normalizedSelected.filter(s => s !== service.id)
-                              : [...normalizedSelected.filter(s => s !== allId), service.id];
-                            const allIndividual = constructionServiceOptions.filter(s => s.id !== allId).map(s => s.id);
-                            if (allIndividual.every(id => next.includes(id))) {
-                              next = allId ? [allId] : next;
-                            }
-                            setSelectedConstruction(next);
-                          }
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
 
-          {/* Renovation */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Renovation</h2>
-              <Toggle
-                checked={renovationEnabled}
-                onChange={(val) => {
-                  setRenovationEnabled(val);
-                  if (!val) setSelectedRenovation([]);
-                }}
-              />
-            </div>
-            {renovationEnabled && (
-              <div>
-                <div className="mb-2">
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
-                    Services Provided /
-                    <br />
-                    Layanan yang Disediakan
-                  </p>
-                </div>
-                {renovationServiceOptions.map((service) => {
-                  const allId = getAllOptionId(renovationServiceOptions);
-                  const normalizedSelected = normalizeAllSelection(selectedRenovation, renovationServiceOptions);
-                  const allActive = !!allId && normalizedSelected.includes(allId);
-                  const completeActive = normalizedSelected.includes("complete");
-                  const isCompleteChild = completeHouseChildren.includes(service.id);
-                  const isAll = service.id === allId;
-                  const isDisabled = (allActive && !isAll) || (completeActive && isCompleteChild);
-                  return (
-                    <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                        {service.label}
-                      </span>
-                      <Toggle
-                        checked={normalizedSelected.includes(service.id)}
-                        onChange={() => {
-                          setIsDirty(true);
-                          if (isAll && allId) {
-                            if (normalizedSelected.includes(allId)) {
-                              setSelectedRenovation(normalizedSelected.filter(s => s !== allId));
-                            } else {
-                              setSelectedRenovation([allId]);
-                            }
-                          } else if (service.id === "complete") {
-                            setSelectedRenovation(normalizedSelected.includes("complete") ? [] : ["complete"]);
-                          } else {
-                            let next = normalizedSelected.includes(service.id)
-                              ? normalizedSelected.filter(s => s !== service.id)
-                              : [...normalizedSelected.filter(s => s !== allId), service.id];
-                            const allIndividual = renovationServiceOptions.filter(s => s.id !== allId).map(s => s.id);
-                            if (allIndividual.every(id => next.includes(id))) {
-                              next = allId ? [allId] : next;
-                            }
-                            setSelectedRenovation(next);
-                          }
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+          <div className="sf-matrix-cats">
+            {renderCategoryMatrix({
+              id: "construction",
+              title: "Construction",
+              enabled: constructionEnabled,
+              setEnabled: setConstructionEnabled,
+              selected: selectedConstruction,
+              setSelected: setSelectedConstruction,
+              options: constructionServiceOptions,
+            })}
+            {renderCategoryMatrix({
+              id: "renovation",
+              title: "Renovation",
+              enabled: renovationEnabled,
+              setEnabled: setRenovationEnabled,
+              selected: selectedRenovation,
+              setSelected: setSelectedRenovation,
+              options: renovationServiceOptions,
+            })}
+            {isCategoryVisible("architecture") && renderCategoryMatrix({
+              id: "architecture",
+              title: "Architecture",
+              enabled: architectureEnabled,
+              setEnabled: setArchitectureEnabled,
+              selected: selectedArchitecture,
+              setSelected: setSelectedArchitecture,
+              options: architectureServiceOptions,
+            })}
+            {isCategoryVisible("interior") && renderCategoryMatrix({
+              id: "interior",
+              title: "Interior",
+              enabled: interiorEnabled,
+              setEnabled: setInteriorEnabled,
+              selected: selectedInterior,
+              setSelected: setSelectedInterior,
+              options: interiorServiceOptions,
+            })}
+            {isCategoryVisible("real-estate") && renderCategoryMatrix({
+              id: "real-estate",
+              title: "Real Estate",
+              enabled: realEstateEnabled,
+              setEnabled: setRealEstateEnabled,
+              selected: selectedRealEstate,
+              setSelected: setSelectedRealEstate,
+              options: realEstateServiceOptions,
+            })}
           </div>
-
-          {/* Architecture */}
-          {isCategoryVisible("architecture") && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Architecture</h2>
-              <Toggle
-                checked={architectureEnabled}
-                onChange={(val) => {
-                  setArchitectureEnabled(val);
-                  if (!val) setSelectedArchitecture([]);
-                }}
-              />
-            </div>
-            {architectureEnabled && (
-              <div>
-                <div className="mb-2">
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
-                    Services Provided /
-                    <br />
-                    Layanan yang Disediakan
-                  </p>
-                </div>
-                {architectureServiceOptions.map((service) => {
-                  const allId = getAllOptionId(architectureServiceOptions);
-                  const normalizedSelected = normalizeAllSelection(selectedArchitecture, architectureServiceOptions);
-                  const allActive = !!allId && normalizedSelected.includes(allId);
-                  const isAll = service.id === allId;
-                  const isDisabled = allActive && !isAll;
-                  return (
-                    <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                        {service.label}
-                      </span>
-                      <Toggle
-                        checked={normalizedSelected.includes(service.id)}
-                        onChange={() => {
-                          setIsDirty(true);
-                          if (isAll && allId) {
-                            if (normalizedSelected.includes(allId)) {
-                              setSelectedArchitecture(normalizedSelected.filter(s => s !== allId));
-                            } else {
-                              setSelectedArchitecture([allId]);
-                            }
-                          } else {
-                            let next = normalizedSelected.includes(service.id)
-                              ? normalizedSelected.filter(s => s !== service.id)
-                              : [...normalizedSelected.filter(s => s !== allId), service.id];
-                            const allIndividual = architectureServiceOptions.filter(s => s.id !== allId).map(s => s.id);
-                            if (allIndividual.every(id => next.includes(id))) {
-                              next = allId ? [allId] : next;
-                            }
-                            setSelectedArchitecture(next);
-                          }
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-          )}
-
-          {/* Interior Design */}
-          {isCategoryVisible("interior") && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Interior</h2>
-              <Toggle
-                checked={interiorEnabled}
-                onChange={(val) => {
-                  setInteriorEnabled(val);
-                  if (!val) setSelectedInterior([]);
-                }}
-              />
-            </div>
-            {interiorEnabled && (
-              <div>
-                <div className="mb-2">
-                  <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
-                    Services Provided /
-                    <br />
-                    Layanan yang Disediakan
-                  </p>
-                </div>
-                {interiorServiceOptions.map((service) => {
-                  const allId = getAllOptionId(interiorServiceOptions);
-                  const normalizedSelected = normalizeAllSelection(selectedInterior, interiorServiceOptions);
-                  const allActive = !!allId && normalizedSelected.includes(allId);
-                  const isAll = service.id === allId;
-                  const isDisabled = allActive && !isAll;
-                  return (
-                    <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                        {service.label}
-                      </span>
-                      <Toggle
-                        checked={normalizedSelected.includes(service.id)}
-                        onChange={() => {
-                          setIsDirty(true);
-                          if (isAll && allId) {
-                            if (normalizedSelected.includes(allId)) {
-                              setSelectedInterior(normalizedSelected.filter(s => s !== allId));
-                            } else {
-                              setSelectedInterior([allId]);
-                            }
-                          } else {
-                            let next = normalizedSelected.includes(service.id)
-                              ? normalizedSelected.filter(s => s !== service.id)
-                              : [...normalizedSelected.filter(s => s !== allId), service.id];
-                            const allIndividual = interiorServiceOptions.filter(s => s.id !== allId).map(s => s.id);
-                            if (allIndividual.every(id => next.includes(id))) {
-                              next = allId ? [allId] : next;
-                            }
-                            setSelectedInterior(next);
-                          }
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-          )}
-        </div>
-
-        {/* Real Estate - Bottom Row */}
-        {isCategoryVisible("real-estate") && (
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
-          <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[18px] font-bold text-[#333] tracking-[0.4px]">Real Estate</h2>
-            <Toggle
-              checked={realEstateEnabled}
-              onChange={(val) => {
-                setRealEstateEnabled(val);
-                if (!val) setSelectedRealEstate([]);
-              }}
-            />
-          </div>
-          {realEstateEnabled && (
-            <div>
-              <div className="mb-2">
-                <p className="text-[9px] text-[#333]/50 tracking-[0.18px]">
-                  Services Provided /
-                  <br />
-                  Layanan yang Disediakan
-                </p>
-              </div>
-              {realEstateServiceOptions.map((service) => {
-                const allId = getAllOptionId(realEstateServiceOptions);
-                const normalizedSelected = normalizeAllSelection(selectedRealEstate, realEstateServiceOptions);
-                const allActive = !!allId && normalizedSelected.includes(allId);
-                const isAll = service.id === allId;
-                const isDisabled = allActive && !isAll;
-                return (
-                  <div key={service.id} className={`flex items-center justify-between py-1 max-w-[300px] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <span className={`text-[10px] tracking-[0.2px] ${normalizedSelected.includes(service.id) ? 'text-[#f14110] font-medium' : 'text-[#333]'}`}>
-                      {service.label}
-                    </span>
-                    <Toggle
-                      checked={normalizedSelected.includes(service.id)}
-                      onChange={() => {
-                        setIsDirty(true);
-                        if (isAll && allId) {
-                          if (normalizedSelected.includes(allId)) {
-                            setSelectedRealEstate(normalizedSelected.filter(s => s !== allId));
-                          } else {
-                            setSelectedRealEstate([allId]);
-                          }
-                        } else {
-                          let next = normalizedSelected.includes(service.id)
-                            ? normalizedSelected.filter(s => s !== service.id)
-                            : [...normalizedSelected.filter(s => s !== allId), service.id];
-                          const allIndividual = realEstateServiceOptions.filter(s => s.id !== allId).map(s => s.id);
-                          if (allIndividual.every(id => next.includes(id))) {
-                            next = allId ? [allId] : next;
-                          }
-                          setSelectedRealEstate(next);
-                        }
-                      }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          </div>
-        </div>
-        )}
         </section>
 
         {/* Bottom Save */}

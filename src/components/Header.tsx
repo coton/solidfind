@@ -928,7 +928,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
       </div>
     )}
 
-    <header className={`relative z-40 bg-[#f8f8f8] ${!useTopBarOnlyHeader && !useMobileCompactHeader ? "hidden sm:block" : ""} ${hideMobileProfileHeader ? "hidden sm:block" : ""}`}>
+    <header className={`${useTopBarOnlyHeader ? "sticky top-0" : "relative"} z-40 bg-[#f8f8f8] ${!useTopBarOnlyHeader && !useMobileCompactHeader ? "hidden sm:block" : ""} ${hideMobileProfileHeader ? "hidden sm:block" : ""}`}>
       <div className={`sf-shell ${useTopBarOnlyHeader || useMobileCompactHeader ? "sf-shell-compact" : ""}`}>
       <div className="sf-shell-bg" aria-hidden="true" />
       {headerMedia.url ? (

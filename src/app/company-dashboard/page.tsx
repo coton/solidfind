@@ -442,7 +442,7 @@ export default function CompanyDashboardPage() {
             <p className="sf-dash-sub">{isPro && proEnabled ? t("Here's how your profile is performing on SolidFind this month. Your Pro Account ranks you above free listings and unlocks the insights below.") : t("You're listed on SolidFind. Complete your profile to make a strong impression — upgrade to Pro to unlock visibility insights.")}</p>
           </div>
 
-          <div className="sf-dash-layout">
+          <div className={`sf-dash-layout ${!isPro && proEnabled ? "sf-dash-layout-free" : ""}`}>
             <div className="sf-dash-main">
               <div className="sf-dash-cards">
                 <section className="sf-dash-card">
@@ -486,6 +486,32 @@ export default function CompanyDashboardPage() {
                 )}
               </div>
 
+              {!isPro && proEnabled && (
+                <section className="sf-dash-pro-included">
+                  <div className="sf-dash-side-head">
+                    <h2 className="sf-h2-static">{t("What's included in Pro")}</h2>
+                  </div>
+                  <div className="sf-insight-card">
+                    <div className="sf-adm-points">
+                      {[
+                        ["Priority placement in search", "Rank above free listings in your category."],
+                        ["Up to 12 portfolio photos or videos", "Show four times more work."],
+                        ["Full analytics dashboard", "See profile views, reach data and location insights."],
+                        ["Ad placement access", "Sponsor slots on category pages and profiles."],
+                        ["AI-ready profile formatting", "Optimised for AI-assisted search."],
+                      ].map(([heading, sub]) => (
+                        <div className="sf-adm-point" key={heading}>
+                          <span className="sf-adm-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                          <div><div className="sf-adm-point-h">{t(heading)}</div><div className="sf-adm-point-s">{t(sub)}</div></div>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="sf-btn sf-btn-pri sf-btn-lg sf-full-btn" type="button" onClick={() => setShowProModal(true)}>{t("Get Pro →")}</button>
+                    <p className="sf-dash-note">{t("Secure payment via Midtrans · cancel any time")}</p>
+                  </div>
+                </section>
+              )}
+
               {reviewsEnabled && dashboardReviews.length > 0 && (
                 <section className="sf-dash-reviews">
                   <div className="sf-dash-reviews-head">
@@ -510,7 +536,7 @@ export default function CompanyDashboardPage() {
               )}
             </div>
 
-            {isPro && proEnabled ? (
+            {isPro && proEnabled && (
               <aside className="sf-dash-side">
                 <div className="sf-dash-side-head">
                   <h2 className="sf-h2-static">{t("Pro insights")}</h2>
@@ -546,30 +572,6 @@ export default function CompanyDashboardPage() {
                     <p>{t("Sponsored placements across SolidFind.")}</p>
                   </div>
                   <button className="sf-btn sf-btn-pri sf-btn-lg" type="button" onClick={() => setShowAdModal(true)}>{t("Buy ad space →")}</button>
-                </div>
-              </aside>
-            ) : (
-              <aside className="sf-dash-side">
-                <div className="sf-dash-side-head">
-                  <h2 className="sf-h2-static">{t("What's included in Pro")}</h2>
-                </div>
-                <div className="sf-insight-card">
-                  <div className="sf-adm-points">
-                    {[
-                      ["Priority placement in search", "Rank above free listings in your category."],
-                      ["Up to 12 portfolio photos or videos", "Show four times more work."],
-                      ["Full analytics dashboard", "See profile views, reach data and location insights."],
-                      ["Ad placement access", "Sponsor slots on category pages and profiles."],
-                      ["AI-ready profile formatting", "Optimised for AI-assisted search."],
-                    ].map(([heading, sub]) => (
-                      <div className="sf-adm-point" key={heading}>
-                        <span className="sf-adm-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                        <div><div className="sf-adm-point-h">{heading}</div><div className="sf-adm-point-s">{sub}</div></div>
-                      </div>
-                    ))}
-                  </div>
-                  <button className="sf-btn sf-btn-pri sf-btn-lg sf-full-btn" type="button" onClick={() => setShowProModal(true)}>{t("Get Pro →")}</button>
-                  <p className="sf-dash-note">{t("Secure payment via Midtrans · cancel any time")}</p>
                 </div>
               </aside>
             )}
