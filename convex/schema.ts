@@ -230,15 +230,19 @@ export default defineSchema({
   pageConfigs: defineTable({
     categoryId: v.string(),
     label: v.string(),
+    labelId: v.optional(v.string()),
     subtitle: v.string(),
+    subtitleId: v.optional(v.string()),
     visible: v.boolean(),
     sortOrder: v.number(),
     filters: v.array(v.object({
       id: v.string(),
       title: v.string(),
+      titleId: v.optional(v.string()),
       options: v.array(v.object({
         id: v.string(),
         label: v.string(),
+        labelId: v.optional(v.string()),
       })),
     })),
     updatedAt: v.number(),

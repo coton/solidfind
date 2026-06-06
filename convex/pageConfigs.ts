@@ -31,15 +31,19 @@ export const upsert = mutation({
   args: {
     categoryId: v.string(),
     label: v.string(),
+    labelId: v.optional(v.string()),
     subtitle: v.string(),
+    subtitleId: v.optional(v.string()),
     visible: v.boolean(),
     sortOrder: v.number(),
     filters: v.array(v.object({
       id: v.string(),
       title: v.string(),
+      titleId: v.optional(v.string()),
       options: v.array(v.object({
         id: v.string(),
         label: v.string(),
+        labelId: v.optional(v.string()),
       })),
     })),
   },
@@ -72,7 +76,9 @@ export const addPage = mutation({
   args: {
     categoryId: v.string(),
     label: v.string(),
+    labelId: v.optional(v.string()),
     subtitle: v.string(),
+    subtitleId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const all = await ctx.db.query("pageConfigs").collect();
@@ -81,7 +87,9 @@ export const addPage = mutation({
     return await ctx.db.insert("pageConfigs", {
       categoryId: args.categoryId,
       label: args.label,
+      labelId: args.labelId,
       subtitle: args.subtitle,
+      subtitleId: args.subtitleId,
       visible: false,
       sortOrder: maxSort + 1,
       filters: [],

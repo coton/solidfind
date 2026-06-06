@@ -294,32 +294,43 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   // pageConfigs is undefined while loading, [] if loaded but empty
   const pageConfigsLoaded = pageConfigs !== undefined;
+  const pickLocalized = (english?: string, indonesian?: string) =>
+    language === "id" && indonesian?.trim() ? indonesian : (english ?? "");
+  const localizeFilterOptions = (filters: typeof pageConfigs extends undefined ? never : NonNullable<typeof pageConfigs>[number]["filters"]) =>
+    filters.map((filter) => ({
+      ...filter,
+      title: pickLocalized(filter.title, (filter as any).titleId),
+      options: filter.options.map((option) => ({
+        ...option,
+        label: pickLocalized(option.label, (option as any).labelId),
+      })),
+    }));
 
   // Build dynamic categories from pageConfigs, falling back to hardcoded only when loaded empty
   const dynamicCategories = useMemo(() => {
     if (!pageConfigsLoaded) return mainCategories; // still loading — use hardcoded as initial render
     if (pageConfigs.length === 0) return mainCategories; // loaded but empty — fallback
-    return pageConfigs.map((p) => ({ id: p.categoryId, label: p.label }));
-  }, [pageConfigs, pageConfigsLoaded]);
+    return pageConfigs.map((p) => ({ id: p.categoryId, label: pickLocalized(p.label, (p as any).labelId) }));
+  }, [language, pageConfigs, pageConfigsLoaded]);
 
   const dynamicSubtitles = useMemo(() => {
     if (!pageConfigsLoaded || pageConfigs.length === 0) return categorySubtitles;
     const subs: Record<string, string> = {};
     for (const p of pageConfigs) {
-      subs[p.categoryId] = p.subtitle;
+      subs[p.categoryId] = pickLocalized(p.subtitle, (p as any).subtitleId);
     }
     return subs;
-  }, [pageConfigs, pageConfigsLoaded]);
+  }, [language, pageConfigs, pageConfigsLoaded]);
 
   // Build a lookup for filters by categoryId
   const configFiltersMap = useMemo(() => {
     if (!pageConfigsLoaded || pageConfigs.length === 0) return null;
     const map: Record<string, typeof pageConfigs[0]["filters"]> = {};
     for (const p of pageConfigs) {
-      map[p.categoryId] = p.filters;
+      map[p.categoryId] = localizeFilterOptions(p.filters);
     }
     return map;
-  }, [pageConfigs, pageConfigsLoaded]);
+  }, [language, pageConfigs, pageConfigsLoaded]);
 
   const [keywords, setKeywords] = useState(searchParams.get("search") ?? "");
   const [projectSizes, setProjectSizes] = useState<string[]>(

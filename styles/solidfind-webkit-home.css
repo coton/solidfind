@@ -3199,23 +3199,24 @@
 
 /* WebKit company edit profile. */
 .sf-edit {
-  width: auto;
-  margin: 0 var(--sf-gutter);
-  padding: 12px 0 48px;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 48px;
 }
 
 .sf-edit-bar {
   position: sticky;
-  top: 0;
+  top: 68px;
   z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 16px 0;
-  margin-bottom: 24px;
+  padding: 14px max(40px, calc((100% - 1680px) / 2));
+  margin-bottom: 0;
   border-bottom: 1px solid var(--sf-border-1);
-  background: #f8f8f8;
+  background: rgba(248,248,248,.96);
+  backdrop-filter: blur(12px);
 }
 
 .sf-edit-bar .sf-tag-mono {
@@ -3250,8 +3251,8 @@
 }
 
 .sf-edit-section {
-  margin-bottom: 26px;
-  padding-bottom: 26px;
+  margin-bottom: 0;
+  padding: 28px max(40px, calc((100% - 1680px) / 2));
   border-bottom: 1px solid var(--sf-border-1);
 }
 
@@ -3262,16 +3263,16 @@
 }
 
 .sf-edit-cover-strip {
-  margin-bottom: 26px;
-  padding-bottom: 26px;
+  margin-bottom: 0;
+  padding: 22px max(40px, calc((100% - 1680px) / 2)) 28px;
   border-bottom: 1px solid var(--sf-border-1);
 }
 
 .sf-edit-cover {
   position: relative;
-  min-height: 220px;
+  min-height: 280px;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 8px;
   background-color: var(--sf-stone-300);
   background-image: url("/assets/company-cover-fallback.jpg");
   background-position: center;
@@ -3282,7 +3283,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,.18);
+  background: rgba(35,31,32,.22);
   pointer-events: none;
 }
 
@@ -3300,7 +3301,7 @@
 }
 
 .sf-edit-logo-strip {
-  margin-top: 24px;
+  margin-top: 28px;
 }
 
 .sf-edit-logo-strip > .sf-tag-mono {
@@ -3322,17 +3323,17 @@
 }
 
 .sf-edit-panel {
-  border: 1px solid var(--sf-border-1);
-  border-radius: 14px;
-  background: #fff;
-  padding: 22px;
-  box-shadow: var(--sf-shadow-1);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
 }
 
 .sf-edit-2col {
   display: grid;
-  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
-  gap: 32px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 44px;
   align-items: start;
 }
 
@@ -3363,19 +3364,19 @@
 .sf-edit-logo {
   position: relative;
   display: flex;
-  width: 76px;
-  height: 76px;
+  width: 68px;
+  height: 68px;
   flex: none;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   border: 1px solid var(--sf-border-1);
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--sf-peach-100);
   color: var(--sf-ink);
   cursor: pointer;
   font-family: var(--sf-font-display), var(--font-sora), Sora, sans-serif;
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 600;
 }
 
@@ -3548,7 +3549,8 @@
 
 .sf-edit-gallery {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 86px));
+  justify-content: start;
   gap: 10px;
 }
 

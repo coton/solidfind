@@ -42,8 +42,10 @@ export function Footer() {
   const { language, setLanguage, t } = useSiteLanguage();
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
   const isCompanyUser = userType === "company";
+  const labelFor = (english?: string, indonesian?: string) =>
+    language === "id" && indonesian?.trim() ? indonesian : (english ?? "");
   const categories = pageConfigs?.length
-    ? pageConfigs.map((category) => ({ id: category.categoryId, label: category.label.replace(/^\d+\.\s*/, "") }))
+    ? pageConfigs.map((category) => ({ id: category.categoryId, label: labelFor(category.label, (category as any).labelId).replace(/^\d+\.\s*/, "") }))
     : fallbackCategories;
 
   useEffect(() => {

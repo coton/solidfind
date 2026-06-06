@@ -5,13 +5,15 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 
-type FilterOption = { id: string; label: string };
-type Filter = { id: string; title: string; options: FilterOption[] };
+type FilterOption = { id: string; label: string; labelId?: string };
+type Filter = { id: string; title: string; titleId?: string; options: FilterOption[] };
 type PageConfig = {
   _id: Id<"pageConfigs">;
   categoryId: string;
   label: string;
+  labelId?: string;
   subtitle: string;
+  subtitleId?: string;
   visible: boolean;
   sortOrder: number;
   filters: Filter[];
@@ -31,7 +33,9 @@ export default function AdminPagesPage() {
   const [selectedId, setSelectedId] = useState<Id<"pageConfigs"> | null>(null);
   const [selectedGlobal, setSelectedGlobal] = useState(false);
   const [editLabel, setEditLabel] = useState("");
+  const [editLabelId, setEditLabelId] = useState("");
   const [editSubtitle, setEditSubtitle] = useState("");
+  const [editSubtitleId, setEditSubtitleId] = useState("");
   const [editFilters, setEditFilters] = useState<Filter[]>([]);
   const [globalEditFilters, setGlobalEditFilters] = useState<Filter[]>([]);
   const [dirty, setDirty] = useState(false);
@@ -41,7 +45,9 @@ export default function AdminPagesPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCategoryId, setNewCategoryId] = useState("");
   const [newLabel, setNewLabel] = useState("");
+  const [newLabelId, setNewLabelId] = useState("");
   const [newSubtitle, setNewSubtitle] = useState("");
+  const [newSubtitleId, setNewSubtitleId] = useState("");
 
   // Delete confirmation
   const [deleteConfirmId, setDeleteConfirmId] = useState<Id<"pageConfigs"> | null>(null);
@@ -66,7 +72,9 @@ export default function AdminPagesPage() {
     setSelectedGlobal(false);
     setSelectedId(page._id);
     setEditLabel(page.label);
+    setEditLabelId(page.labelId ?? "");
     setEditSubtitle(page.subtitle);
+    setEditSubtitleId(page.subtitleId ?? "");
     setEditFilters(JSON.parse(JSON.stringify(page.filters)));
     setDirty(false);
   };
@@ -79,7 +87,9 @@ export default function AdminPagesPage() {
         return upsert({
           categoryId: page.categoryId,
           label: page.label,
+          labelId: page.labelId,
           subtitle: page.subtitle,
+          subtitleId: page.subtitleId,
           visible: page.visible,
           sortOrder: page.sortOrder,
           filters: [...globalEditFilters, ...categoryFilters],
@@ -95,7 +105,9 @@ export default function AdminPagesPage() {
     await upsert({
       categoryId: selectedPage.categoryId,
       label: editLabel,
+      labelId: editLabelId,
       subtitle: editSubtitle,
+      subtitleId: editSubtitleId,
       visible: selectedPage.visible,
       sortOrder: selectedPage.sortOrder,
       filters: editFilters,
@@ -109,12 +121,16 @@ export default function AdminPagesPage() {
     await addPageMut({
       categoryId: newCategoryId.trim(),
       label: newLabel.trim(),
+      labelId: newLabelId.trim(),
       subtitle: newSubtitle.trim(),
+      subtitleId: newSubtitleId.trim(),
     });
     setShowAddModal(false);
     setNewCategoryId("");
     setNewLabel("");
+    setNewLabelId("");
     setNewSubtitle("");
+    setNewSubtitleId("");
   };
 
   const handleDelete = async (id: Id<"pageConfigs">) => {
@@ -146,12 +162,31 @@ export default function AdminPagesPage() {
     setDirty(true);
   };
 
+  const updateFilterTitleId = (filterIndex: number, titleId: string) => {
+    const updated = [...currentFilters];
+    updated[filterIndex] = { ...updated[filterIndex], titleId };
+    setCurrentFilters(updated);
+    setDirty(true);
+  };
+
   const updateOptionLabel = (filterIndex: number, optionIndex: number, label: string) => {
     const updated = [...currentFilters];
     updated[filterIndex] = {
       ...updated[filterIndex],
       options: updated[filterIndex].options.map((o, i) =>
         i === optionIndex ? { ...o, label } : o
+      ),
+    };
+    setCurrentFilters(updated);
+    setDirty(true);
+  };
+
+  const updateOptionLabelId = (filterIndex: number, optionIndex: number, labelId: string) => {
+    const updated = [...currentFilters];
+    updated[filterIndex] = {
+      ...updated[filterIndex],
+      options: updated[filterIndex].options.map((o, i) =>
+        i === optionIndex ? { ...o, labelId } : o
       ),
     };
     setCurrentFilters(updated);
@@ -202,7 +237,7 @@ export default function AdminPagesPage() {
   };
 
   const addFilter = () => {
-    setCurrentFilters([...currentFilters, { id: "", title: "", options: [] }]);
+    setCurrentFilters([...currentFilters, { id: "", title: "", titleId: "", options: [] }]);
     setDirty(true);
   };
 
@@ -328,27 +363,53 @@ export default function AdminPagesPage() {
             </div>
           ) : (
             <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-6">
-              {/* Label */}
-              {!selectedGlobal && <div className="mb-4">
-                <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Label</label>
-                <input
-                  type="text"
-                  value={editLabel}
-                  onChange={(e) => { setEditLabel(e.target.value); setDirty(true); }}
-                  className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333] transition-colors"
-                />
-              </div>}
+              {!selectedGlobal && (
+                <>
+                  <div className="mb-4 grid grid-cols-1 gap-3 xl:grid-cols-2">
+                    <div>
+                      <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Label EN</label>
+                      <input
+                        type="text"
+                        value={editLabel}
+                        onChange={(e) => { setEditLabel(e.target.value); setDirty(true); }}
+                        className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333] transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Label ID</label>
+                      <input
+                        type="text"
+                        value={editLabelId}
+                        onChange={(e) => { setEditLabelId(e.target.value); setDirty(true); }}
+                        placeholder="Falls back to English if empty"
+                        className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333] transition-colors"
+                      />
+                    </div>
+                  </div>
 
-              {/* Subtitle */}
-              {!selectedGlobal && <div className="mb-6">
-                <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Subtitle</label>
-                <textarea
-                  value={editSubtitle}
-                  onChange={(e) => { setEditSubtitle(e.target.value); setDirty(true); }}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333] transition-colors resize-none"
-                />
-              </div>}
+                  <div className="mb-6 grid grid-cols-1 gap-3 xl:grid-cols-2">
+                    <div>
+                      <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Subtitle EN</label>
+                      <textarea
+                        value={editSubtitle}
+                        onChange={(e) => { setEditSubtitle(e.target.value); setDirty(true); }}
+                        rows={2}
+                        className="w-full px-3 py-2 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333] transition-colors resize-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Subtitle ID</label>
+                      <textarea
+                        value={editSubtitleId}
+                        onChange={(e) => { setEditSubtitleId(e.target.value); setDirty(true); }}
+                        rows={2}
+                        placeholder="Falls back to English if empty"
+                        className="w-full px-3 py-2 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333] transition-colors resize-none"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Filters */}
               <div className="mb-4">
@@ -383,13 +444,22 @@ export default function AdminPagesPage() {
                         placeholder="Filter ID"
                         className="w-[140px] h-8 px-2 border border-[#e4e4e4] rounded-[4px] text-[11px] text-[#333]/60 outline-none focus:border-[#333]"
                       />
-                      <input
-                        type="text"
-                        value={filter.title}
-                        onChange={(e) => updateFilterTitle(fi, e.target.value)}
-                        placeholder="Filter Title"
-                        className="flex-1 h-8 px-2 border border-[#e4e4e4] rounded-[4px] text-[12px] font-medium text-[#333] outline-none focus:border-[#333]"
-                      />
+                      <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 xl:grid-cols-2">
+                        <input
+                          type="text"
+                          value={filter.title}
+                          onChange={(e) => updateFilterTitle(fi, e.target.value)}
+                          placeholder="Filter title EN"
+                          className="h-8 px-2 border border-[#e4e4e4] rounded-[4px] text-[12px] font-medium text-[#333] outline-none focus:border-[#333]"
+                        />
+                        <input
+                          type="text"
+                          value={filter.titleId ?? ""}
+                          onChange={(e) => updateFilterTitleId(fi, e.target.value)}
+                          placeholder="Filter title ID"
+                          className="h-8 px-2 border border-[#e4e4e4] rounded-[4px] text-[12px] font-medium text-[#333] outline-none focus:border-[#333]"
+                        />
+                      </div>
                       <button
                         onClick={() => removeFilter(fi)}
                         className="text-[#333]/30 hover:text-red-500 transition-colors"
@@ -410,13 +480,22 @@ export default function AdminPagesPage() {
                           placeholder="id"
                           className="w-[120px] h-7 px-2 border border-[#e4e4e4] rounded-[4px] text-[11px] text-[#333]/60 outline-none focus:border-[#333]"
                         />
-                        <input
-                          type="text"
-                          value={opt.label}
-                          onChange={(e) => updateOptionLabel(fi, oi, e.target.value)}
-                          placeholder="Label"
-                          className="flex-1 h-7 px-2 border border-[#e4e4e4] rounded-[4px] text-[11px] text-[#333] outline-none focus:border-[#333]"
-                        />
+                        <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 xl:grid-cols-2">
+                          <input
+                            type="text"
+                            value={opt.label}
+                            onChange={(e) => updateOptionLabel(fi, oi, e.target.value)}
+                            placeholder="Label EN"
+                            className="h-7 px-2 border border-[#e4e4e4] rounded-[4px] text-[11px] text-[#333] outline-none focus:border-[#333]"
+                          />
+                          <input
+                            type="text"
+                            value={opt.labelId ?? ""}
+                            onChange={(e) => updateOptionLabelId(fi, oi, e.target.value)}
+                            placeholder="Label ID"
+                            className="h-7 px-2 border border-[#e4e4e4] rounded-[4px] text-[11px] text-[#333] outline-none focus:border-[#333]"
+                          />
+                        </div>
                         <button
                           onClick={() => moveOption(fi, oi, "up")}
                           disabled={oi === 0}
@@ -489,7 +568,7 @@ export default function AdminPagesPage() {
               />
             </div>
             <div className="mb-3">
-              <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Label</label>
+              <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Label EN</label>
               <input
                 type="text"
                 value={newLabel}
@@ -498,12 +577,32 @@ export default function AdminPagesPage() {
                 className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333]"
               />
             </div>
+            <div className="mb-3">
+              <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Label ID</label>
+              <input
+                type="text"
+                value={newLabelId}
+                onChange={(e) => setNewLabelId(e.target.value)}
+                placeholder="Fallbacks to English if empty"
+                className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333]"
+              />
+            </div>
             <div className="mb-4">
-              <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Subtitle</label>
+              <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Subtitle EN</label>
               <textarea
                 value={newSubtitle}
                 onChange={(e) => setNewSubtitle(e.target.value)}
                 placeholder="Description text..."
+                rows={2}
+                className="w-full px-3 py-2 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333] resize-none"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-[11px] font-medium text-[#333]/60 mb-1">Subtitle ID</label>
+              <textarea
+                value={newSubtitleId}
+                onChange={(e) => setNewSubtitleId(e.target.value)}
+                placeholder="Fallbacks to English if empty"
                 rows={2}
                 className="w-full px-3 py-2 border border-[#e4e4e4] rounded-[6px] text-[13px] text-[#333] outline-none focus:border-[#333] resize-none"
               />

@@ -15,6 +15,41 @@ import {
   TERMS_TEXT_PLATFORM_SETTING_KEY,
 } from "@/lib/terms-content.mjs";
 
+type LegalDocument = "terms" | "proTerms";
+type LegalLanguage = "en" | "id";
+
+const LEGAL_DOCUMENTS: Record<LegalDocument, {
+  label: string;
+  description: string;
+  keys: Record<LegalLanguage, string>;
+  defaults: Record<LegalLanguage, string>;
+}> = {
+  terms: {
+    label: "Terms & Conditions",
+    description: "Public platform terms, privacy notes and service conditions.",
+    keys: {
+      en: TERMS_TEXT_PLATFORM_SETTING_KEY,
+      id: TERMS_ID_TEXT_PLATFORM_SETTING_KEY,
+    },
+    defaults: {
+      en: DEFAULT_TERMS_TEXT,
+      id: DEFAULT_TERMS_ID_TEXT,
+    },
+  },
+  proTerms: {
+    label: "Pro Terms of Service",
+    description: "Terms shown for Pro subscriptions and paid visibility services.",
+    keys: {
+      en: PRO_TERMS_EN_PLATFORM_SETTING_KEY,
+      id: PRO_TERMS_ID_PLATFORM_SETTING_KEY,
+    },
+    defaults: {
+      en: DEFAULT_PRO_TERMS_EN_TEXT,
+      id: DEFAULT_PRO_TERMS_ID_TEXT,
+    },
+  },
+};
+
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-6 mb-4">
@@ -40,15 +75,11 @@ function parseTermsPreview(text: string) {
   });
 }
 
-function LegalUploader({
-  title,
-  settingKey,
-  defaultText,
-}: {
-  title: string;
-  settingKey: string;
-  defaultText: string;
-}) {
+function LegalUploader({ documentId, language }: { documentId: LegalDocument; language: LegalLanguage }) {
+  const config = LEGAL_DOCUMENTS[documentId];
+  const title = `${config.label} ${language.toUpperCase()}`;
+  const settingKey = config.keys[language];
+  const defaultText = config.defaults[language];
   const savedValue = useQuery(api.platformSettings.get, { key: settingKey });
   const setPlatformSetting = useMutation(api.platformSettings.set);
   const [draft, setDraft] = useState("");
@@ -58,11 +89,15 @@ function LegalUploader({
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    hydrated.current = false;
+  }, [settingKey]);
+
+  useEffect(() => {
     if (hydrated.current || savedValue === undefined) return;
     hydrated.current = true;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDraft(savedValue ?? defaultText);
-  }, [defaultText, savedValue]);
+  }, [defaultText, savedValue, settingKey]);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -133,6 +168,10 @@ function LegalUploader({
 }
 
 export default function AdminLegalPage() {
+  const [documentId, setDocumentId] = useState<LegalDocument>("terms");
+  const [language, setLanguage] = useState<LegalLanguage>("en");
+  const activeDocument = LEGAL_DOCUMENTS[documentId];
+
   return (
     <div>
       <div className="mb-6">
@@ -140,26 +179,35 @@ export default function AdminLegalPage() {
         <p className="text-[11px] text-[#333]/50 mt-1">Manage public Terms & Conditions and PRO Terms of Services.</p>
       </div>
 
-      <LegalUploader
-        title="Terms & Conditions English"
-        settingKey={TERMS_TEXT_PLATFORM_SETTING_KEY}
-        defaultText={DEFAULT_TERMS_TEXT}
-      />
-      <LegalUploader
-        title="Terms & Conditions Indonesian"
-        settingKey={TERMS_ID_TEXT_PLATFORM_SETTING_KEY}
-        defaultText={DEFAULT_TERMS_ID_TEXT}
-      />
-      <LegalUploader
-        title="Pro Terms of Services English"
-        settingKey={PRO_TERMS_EN_PLATFORM_SETTING_KEY}
-        defaultText={DEFAULT_PRO_TERMS_EN_TEXT}
-      />
-      <LegalUploader
-        title="Pro Terms of Services Indonesian"
-        settingKey={PRO_TERMS_ID_PLATFORM_SETTING_KEY}
-        defaultText={DEFAULT_PRO_TERMS_ID_TEXT}
-      />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="flex overflow-hidden rounded-full border border-[#333]/15 text-[11px] font-semibold tracking-[0.22px] text-[#333]/50">
+          {(Object.keys(LEGAL_DOCUMENTS) as LegalDocument[]).map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setDocumentId(item)}
+              className={`px-4 py-2 transition-colors ${documentId === item ? "bg-[#333] text-white" : "hover:text-[#333]"}`}
+            >
+              {LEGAL_DOCUMENTS[item].label}
+            </button>
+          ))}
+        </div>
+        <div className="flex overflow-hidden rounded-full border border-[#333]/15 text-[11px] font-semibold tracking-[0.22px] text-[#333]/50">
+          {(["en", "id"] as LegalLanguage[]).map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setLanguage(item)}
+              className={`px-4 py-2 transition-colors ${language === item ? "bg-[#333] text-white" : "hover:text-[#333]"}`}
+            >
+              {item.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p className="mb-4 text-[11px] text-[#333]/50">{activeDocument.description}</p>
+      <LegalUploader documentId={documentId} language={language} />
     </div>
   );
 }
