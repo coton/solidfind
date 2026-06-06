@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Id } from "../../../convex/_generated/dataModel";
+import { useSiteLanguage } from "@/components/LanguageProvider";
 
 interface FeaturedCardProps {
   id?: string;
@@ -9,7 +10,7 @@ interface FeaturedCardProps {
   title?: string;
   description?: string;
   fromCategory?: string;
-  article?: { _id: Id<"featuredArticles">; title: string; subtitle?: string; coverImageId?: Id<"_storage">; coverImageUrl?: string; category?: string };
+  article?: { _id: Id<"featuredArticles">; title: string; titleId?: string; subtitle?: string; subtitleId?: string; coverImageId?: Id<"_storage">; coverImageUrl?: string; category?: string };
 }
 
 export function FeaturedCard({
@@ -21,9 +22,10 @@ export function FeaturedCard({
   fromCategory,
   article,
 }: FeaturedCardProps) {
+  const { language } = useSiteLanguage();
   const articleId = article?._id || id;
-  const articleTitle = article?.title || title || "FEATURED ARTICLE";
-  const articleDescription = article?.subtitle || description;
+  const articleTitle = (language === "id" && article?.titleId?.trim() ? article.titleId : article?.title) || title || "FEATURED ARTICLE";
+  const articleDescription = (language === "id" && article?.subtitleId?.trim() ? article.subtitleId : article?.subtitle) || description;
   const linkHref = href ?? (articleId ? `/article/${articleId}${fromCategory ? `?from=${fromCategory}` : ''}` : "/about");
   const coverUrl = article?.coverImageUrl || image;
 

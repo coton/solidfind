@@ -11,6 +11,7 @@ import { Pagination } from "@/components/Pagination";
 import { ListingCardSkeleton } from "@/components/ui/ListingCardSkeleton";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
+import { useSiteLanguage } from "@/components/LanguageProvider";
 import { getEffectiveSubcategoryFilters, parseSubcategoryParam } from "@/lib/category-filter.mjs";
 import { expandRenovationTypes } from "@/lib/category-display.mjs";
 
@@ -434,7 +435,8 @@ function NoResultsState({
   );
 }
 
-function HomeFeaturedCard({ article, loading }: { article?: { _id: Id<"featuredArticles">; title: string; subtitle?: string; coverImageId?: Id<"_storage">; coverImageUrl?: string }; loading?: boolean }) {
+function HomeFeaturedCard({ article, loading }: { article?: { _id: Id<"featuredArticles">; title: string; titleId?: string; subtitle?: string; subtitleId?: string; coverImageId?: Id<"_storage">; coverImageUrl?: string }; loading?: boolean }) {
+  const { language } = useSiteLanguage();
   const coverUrl = useQuery(
     api.files.getUrl,
     article?.coverImageId ? { storageId: article.coverImageId } : "skip"
@@ -448,8 +450,8 @@ function HomeFeaturedCard({ article, loading }: { article?: { _id: Id<"featuredA
   }
 
   const image = coverUrl ?? article?.coverImageUrl ?? "/images/featured-bg.png";
-  const title = article?.title ?? "FEATURED ARTICLE";
-  const description = article?.subtitle ?? "";
+  const title = (language === "id" && article?.titleId?.trim() ? article.titleId : article?.title) ?? "FEATURED ARTICLE";
+  const description = (language === "id" && article?.subtitleId?.trim() ? article.subtitleId : article?.subtitle) ?? "";
   const href = article ? `/article/${article._id}` : "/about";
 
   return (

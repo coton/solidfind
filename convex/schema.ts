@@ -169,7 +169,9 @@ export default defineSchema({
 
   featuredArticles: defineTable({
     title: v.string(),
+    titleId: v.optional(v.string()),
     subtitle: v.optional(v.string()),
+    subtitleId: v.optional(v.string()),
     category: v.optional(v.string()), // DEPRECATED: old single category, kept for migration
     categories: v.optional(v.array(v.string())), // Multiple categories (new)
     coverImageId: v.optional(v.id("_storage")),
@@ -179,12 +181,17 @@ export default defineSchema({
     contentBlocks: v.array(v.object({
       type: v.union(v.literal("text"), v.literal("image"), v.literal("quote"), v.literal("heading"), v.literal("video")),
       text: v.optional(v.string()),
+      textId: v.optional(v.string()),
       heading: v.optional(v.string()),
+      headingId: v.optional(v.string()),
       imageId: v.optional(v.id("_storage")),
       imageUrl: v.optional(v.string()),
       imageCaption: v.optional(v.string()),
+      imageCaptionId: v.optional(v.string()),
       quote: v.optional(v.string()),
+      quoteId: v.optional(v.string()),
       quoteAuthor: v.optional(v.string()),
+      quoteAuthorId: v.optional(v.string()),
       videoUrl: v.optional(v.string()),
       videoStorageId: v.optional(v.id("_storage")),
     })),

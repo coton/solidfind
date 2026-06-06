@@ -34,6 +34,13 @@ export default function FeaturedArticlesAdmin() {
     await removeArticle({ id });
   };
 
+  const hasIndonesianCopy = (article: any) => {
+    if (article.titleId || article.subtitleId) return true;
+    return (article.contentBlocks ?? []).some((block: any) => (
+      block.textId || block.headingId || block.imageCaptionId || block.quoteId || block.quoteAuthorId
+    ));
+  };
+
   if (articles === undefined) {
     return (
       <div className="flex justify-center py-12">
@@ -88,6 +95,10 @@ export default function FeaturedArticlesAdmin() {
                 <p className="text-[13px] font-medium text-[#333] truncate">{article.title}</p>
                 <p className="text-[10px] text-[#333]/50 truncate">{article.subtitle || "No subtitle"}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="inline-block text-[9px] bg-[#333] text-white px-2 py-0.5 rounded-full">EN</span>
+                  {hasIndonesianCopy(article) && (
+                    <span className="inline-block text-[9px] bg-[#f14110] text-white px-2 py-0.5 rounded-full">ID</span>
+                  )}
                   {(article.categories ?? (article.category ? [article.category] : [])).map((cat) => (
                     <span key={cat} className="inline-block text-[9px] bg-[#f5f5f5] text-[#333]/60 px-2 py-0.5 rounded-full">
                       {cat}

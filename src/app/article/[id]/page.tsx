@@ -7,13 +7,51 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
 import { MobileMenuButton } from "@/components/MobileMenuDrawer";
+import { useSiteLanguage } from "@/components/LanguageProvider";
 import Image from "next/image";
 import Link from "next/link";
+
+type ArticleLanguage = "en" | "id";
+
+type ArticleBlock = {
+  type: string;
+  text?: string;
+  textId?: string;
+  heading?: string;
+  headingId?: string;
+  imageId?: Id<"_storage">;
+  imageUrl?: string;
+  imageCaption?: string;
+  imageCaptionId?: string;
+  quote?: string;
+  quoteId?: string;
+  quoteAuthor?: string;
+  quoteAuthorId?: string;
+  videoUrl?: string;
+  videoStorageId?: Id<"_storage">;
+};
+
+function localizedText(language: ArticleLanguage, enValue?: string, idValue?: string) {
+  if (language === "id" && idValue?.trim()) return idValue;
+  return enValue ?? "";
+}
+
+function localizedBlock(block: ArticleBlock, language: ArticleLanguage): ArticleBlock {
+  return {
+    ...block,
+    text: localizedText(language, block.text, block.textId),
+    heading: localizedText(language, block.heading, block.headingId),
+    imageCaption: localizedText(language, block.imageCaption, block.imageCaptionId),
+    quote: localizedText(language, block.quote, block.quoteId),
+    quoteAuthor: localizedText(language, block.quoteAuthor, block.quoteAuthorId),
+  };
+}
 
 export default function ArticlePage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { language } = useSiteLanguage();
   const id = params?.id as string;
   const fromCategory = searchParams?.get("from");
 
@@ -48,17 +86,26 @@ export default function ArticlePage() {
   }
 
   const handleShare = async () => {
+    const shareTitle = localizedText(language, article.title, (article as any).titleId);
     if (navigator.share) {
-      await navigator.share({ title: article.title, url: window.location.href });
+      await navigator.share({ title: shareTitle, url: window.location.href });
     } else {
       await navigator.clipboard.writeText(window.location.href);
     }
   };
 
+  const displayArticle = {
+    title: localizedText(language, article.title, (article as any).titleId),
+    subtitle: localizedText(language, article.subtitle, (article as any).subtitleId),
+    coverImageId: article.coverImageId,
+    coverImageUrl: article.coverImageUrl,
+  };
+  const localizedBlocks = (article.contentBlocks as ArticleBlock[]).map((block) => localizedBlock(block, language));
+
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <main className="sf-about sf-article" data-screen-label="Article">
-        <ArticleHero article={article} />
+        <ArticleHero article={displayArticle} />
         <div className="sf-article-wrap">
           <Link className="sf-about-back" href={fromCategory ? `/dashboard/${fromCategory}` : "/"}>← Back</Link>
           <div className="sf-article-grid">
@@ -71,7 +118,7 @@ export default function ArticlePage() {
               </div>
               <div className="sf-article-meta-block">
                 <span className="sf-tag-mono">Reading time</span>
-                <p className="sf-article-meta-val">{Math.max(2, Math.ceil((article.contentBlocks?.length ?? 1) * 0.8))} min read</p>
+                <p className="sf-article-meta-val">{Math.max(2, Math.ceil((localizedBlocks.length || 1) * 0.8))} min read</p>
               </div>
               <div className="sf-article-meta-block">
                 <span className="sf-tag-mono">Share this story</span>
@@ -81,11 +128,11 @@ export default function ArticlePage() {
               </div>
             </aside>
             <div className="sf-article-col">
-              {article.contentBlocks
+              {localizedBlocks
               .filter((block) => {
                 if (block.type === "heading" && block.heading) {
                   const headingNorm = block.heading.toLowerCase().replace(/[^a-z0-9]/g, "");
-                  const titleNorm = article.title.toLowerCase().replace(/[^a-z0-9]/g, "");
+                  const titleNorm = displayArticle.title.toLowerCase().replace(/[^a-z0-9]/g, "");
                   // Also check with "focus on:" prefix removed
                   const headingClean = headingNorm.replace(/^focuson/, "");
                   const titleClean = titleNorm.replace(/^focuson/, "");
@@ -156,7 +203,7 @@ function ArticleCoverImage({ coverImageId, coverImageUrl, title }: { coverImageI
   );
 }
 
-function ContentBlockRenderer({ block, isIntro = false }: { block: { type: string; text?: string; heading?: string; imageId?: Id<"_storage">; imageUrl?: string; imageCaption?: string; quote?: string; quoteAuthor?: string; videoUrl?: string; videoStorageId?: Id<"_storage"> }; isIntro?: boolean }) {
+function ContentBlockRenderer({ block, isIntro = false }: { block: ArticleBlock; isIntro?: boolean }) {
   if (block.type === "heading") {
     return (
       <h2 className="sf-article-h2">
