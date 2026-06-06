@@ -6,6 +6,7 @@ import { useQuery } from "convex/react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { api } from "../../../convex/_generated/api";
+import { useSiteLanguage } from "@/components/LanguageProvider";
 
 const PRICE_DEFAULTS = {
   launch: { monthly: "450000", yearly: "5000000" },
@@ -61,6 +62,7 @@ const guidelines = [
 export default function UpgradePage() {
   const [showProModal, setShowProModal] = useState(false);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
+  const { language } = useSiteLanguage();
   const platformSettings = useQuery(api.platformSettings.getAll);
   const platformMap = useMemo(() => new Map((platformSettings ?? []).map((setting) => [setting.key, setting.value])), [platformSettings]);
   const pricingPhase = platformMap.get("pricing_phase") === "standard" ? "standard" : "launch";
@@ -69,6 +71,11 @@ export default function UpgradePage() {
   const monthlyAmount = parseRupiah(monthlyPrice);
   const yearlyAmount = parseRupiah(yearlyPrice);
   const yearlySavings = Math.max(0, monthlyAmount * 12 - yearlyAmount);
+  const suffix = language === "id" ? "Id" : "";
+  const proTitle = platformMap.get(`proGuidelinesTitle${suffix}`)?.trim() || "More visibility.\nSame standards.";
+  const proIntro = platformMap.get(`proGuidelinesIntro${suffix}`)?.trim()
+    || "Pro helps verified professionals present richer profiles and appear in stronger discovery positions. The same listing standards still apply to every account.";
+  const localizedGuidelines = parseGuidelines(platformMap.get(`proGuidelinesItems${suffix}`), guidelines);
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -79,17 +86,15 @@ export default function UpgradePage() {
 
         <section className="sf-pro-guide-hero">
           <span className="sf-tag-mono">Pro guidelines</span>
-          <h1>More visibility.<br />Same standards.</h1>
-          <p>
-            Pro helps verified professionals present richer profiles and appear in stronger discovery positions. The same listing standards still apply to every account.
-          </p>
+          <h1>{proTitle.split(/\n+/).map((line, index) => <span key={`${line}-${index}`}>{index > 0 && <br />}{line}</span>)}</h1>
+          <p>{proIntro}</p>
           <button type="button" className="sf-btn sf-btn-pri sf-pro-guide-cta" onClick={() => setShowProModal(true)}>
             Get Pro →
           </button>
         </section>
 
         <section className="sf-pro-guide-grid" aria-label="Pro guidelines">
-          {guidelines.map((item, index) => (
+          {localizedGuidelines.map((item, index) => (
             <article className="sf-about-card" key={item.title}>
               <span className="sf-about-card-n">{String(index + 1).padStart(2, "0")}</span>
               <div>
@@ -184,4 +189,21 @@ function formatRupiahCompact(amount: number) {
     return `Rp ${formatted}jt`;
   }
   return formatRupiah(amount);
+}
+
+function parseGuidelines(value: string | undefined, fallback: typeof guidelines) {
+  if (!value?.trim()) return fallback;
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return fallback;
+    const normalized = parsed
+      .map((item) => ({
+        title: String(item?.title ?? "").trim(),
+        body: String(item?.body ?? "").trim(),
+      }))
+      .filter((item) => item.title && item.body);
+    return normalized.length ? normalized : fallback;
+  } catch {
+    return fallback;
+  }
 }

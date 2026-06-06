@@ -167,6 +167,85 @@ function LegalUploader({ documentId, language }: { documentId: LegalDocument; la
   );
 }
 
+function ProGuidelinesEditor({ language }: { language: LegalLanguage }) {
+  const suffix = language === "id" ? "Id" : "";
+  const titleKey = `proGuidelinesTitle${suffix}`;
+  const introKey = `proGuidelinesIntro${suffix}`;
+  const itemsKey = `proGuidelinesItems${suffix}`;
+  const titleValue = useQuery(api.platformSettings.get, { key: titleKey });
+  const introValue = useQuery(api.platformSettings.get, { key: introKey });
+  const itemsValue = useQuery(api.platformSettings.get, { key: itemsKey });
+  const setPlatformSetting = useMutation(api.platformSettings.set);
+  const [title, setTitle] = useState("");
+  const [intro, setIntro] = useState("");
+  const [items, setItems] = useState("");
+  const [saved, setSaved] = useState(false);
+  const hydrated = useRef(false);
+
+  useEffect(() => {
+    hydrated.current = false;
+  }, [language]);
+
+  useEffect(() => {
+    if (hydrated.current || titleValue === undefined || introValue === undefined || itemsValue === undefined) return;
+    hydrated.current = true;
+    setTitle(titleValue ?? "");
+    setIntro(introValue ?? "");
+    setItems(itemsValue ?? "");
+  }, [introValue, itemsValue, language, titleValue]);
+
+  const save = async () => {
+    await Promise.all([
+      setPlatformSetting({ key: titleKey, value: title, updatedBy: "admin" }),
+      setPlatformSetting({ key: introKey, value: intro, updatedBy: "admin" }),
+      setPlatformSetting({ key: itemsKey, value: items, updatedBy: "admin" }),
+    ]);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  return (
+    <SectionCard title={`Pro Guidelines visible copy ${language.toUpperCase()}`}>
+      <p className="mb-3 text-[10px] text-[#333]/50">
+        These fields control the public Pro Guidelines page. Leave fields empty to use the built-in WebKit defaults.
+      </p>
+      <label className="mb-3 block">
+        <span className="mb-1 block text-[11px] font-medium text-[#333]/70">Hero title</span>
+        <input
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="More visibility.\nSame standards."
+          className="h-9 w-full max-w-[700px] rounded-[6px] border border-[#e4e4e4] bg-white px-3 text-[12px] text-[#333] outline-none transition-colors focus:border-[#333]"
+        />
+      </label>
+      <label className="mb-3 block">
+        <span className="mb-1 block text-[11px] font-medium text-[#333]/70">Intro copy</span>
+        <textarea
+          value={intro}
+          onChange={(event) => setIntro(event.target.value)}
+          rows={3}
+          className="w-full max-w-[700px] resize-y rounded-[6px] border border-[#e4e4e4] bg-white px-3 py-2 text-[12px] text-[#333] outline-none transition-colors focus:border-[#333]"
+        />
+      </label>
+      <label className="mb-3 block">
+        <span className="mb-1 block text-[11px] font-medium text-[#333]/70">Guideline items JSON</span>
+        <p className="mb-1 text-[10px] text-[#333]/40">
+          Format: [{`{"title":"Profile accuracy","body":"Keep your public details accurate."}`}]
+        </p>
+        <textarea
+          value={items}
+          onChange={(event) => setItems(event.target.value)}
+          rows={8}
+          className="w-full max-w-[700px] resize-y rounded-[6px] border border-[#e4e4e4] bg-white px-3 py-2 font-mono text-[11px] text-[#333] outline-none transition-colors focus:border-[#333]"
+        />
+      </label>
+      <button type="button" onClick={save} className="h-9 rounded-[6px] bg-[#333] px-4 text-[11px] font-medium text-white hover:bg-[#111]">
+        {saved ? "✓ Saved!" : "Save Pro Guidelines"}
+      </button>
+    </SectionCard>
+  );
+}
+
 export default function AdminLegalPage() {
   const [documentId, setDocumentId] = useState<LegalDocument>("terms");
   const [language, setLanguage] = useState<LegalLanguage>("en");
@@ -208,6 +287,7 @@ export default function AdminLegalPage() {
 
       <p className="mb-4 text-[11px] text-[#333]/50">{activeDocument.description}</p>
       <LegalUploader documentId={documentId} language={language} />
+      <ProGuidelinesEditor language={language} />
     </div>
   );
 }
