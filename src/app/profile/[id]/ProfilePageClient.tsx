@@ -11,6 +11,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { AuthModal } from "@/components/AuthModal";
 import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
+import { useSiteLanguage } from "@/components/LanguageProvider";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { Star } from "lucide-react";
@@ -142,10 +143,12 @@ const socialGlyphs = {
     </svg>
   ),
   linkedin: (
-    <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
-      <rect x="1" y="1" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2" />
-      <path fillRule="evenodd" clipRule="evenodd" d="M4 11.1942H6.31836V19H4V11.1942ZM11.4785 13.1344C10.2734 13.1344 10.0879 14.1199 10.0879 15.138V19H7.77148V11.1942H9.99609V12.2614H10.0273C10.3379 11.6481 11.0938 11 12.2207 11C14.5664 11 15 12.6172 15 14.7189V19H12.6836V15.2034C12.6836 14.2977 12.666 13.1344 11.4785 13.1344Z" fill="currentColor" />
-      <circle cx="5" cy="9" r="1" fill="currentColor" />
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="3.5" />
+      <path d="M8 11v6" />
+      <path d="M8 8.2v.1" />
+      <path d="M12 17v-6" />
+      <path d="M12 13.8c0-1.7 1-2.9 2.5-2.9 1.6 0 2.5 1.1 2.5 3V17" />
     </svg>
   ),
 };
@@ -391,6 +394,7 @@ export default function ProfilePageClient() {
   const companyIdentifier = (params.companySlug ?? params.id) as string;
   const fromCategory = searchParams.get("from");
   const { user: clerkUser } = useUser();
+  const { t } = useSiteLanguage();
   const [isSaved, setIsSaved] = useState(false);
   const proEnabled = useProEnabled();
   const reviewsEnabled = useReviewsEnabled();
@@ -687,7 +691,7 @@ export default function ProfilePageClient() {
   }));
   const heroImage = externalProjectImages[0] || "/assets/company-cover-fallback.jpg";
   const showProfileReviews = reviewsEnabled && (company.reviewCount ?? 0) > 0;
-  const accountLabel = proEnabled ? (company.isPro ? "Pro Account" : "Free account") : null;
+  const accountLabel = proEnabled ? (company.isPro ? t("Pro Account") : t("Free account")) : null;
   const foundedYear = company.since ?? new Date(company.createdAt).getFullYear();
   const servicesForDetail = workCategoryServices.length > 0
     ? workCategoryServices
@@ -706,7 +710,7 @@ export default function ProfilePageClient() {
       <main className="m-profile-page sm:hidden">
         <section className="m-pf-hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="shade" />
-          <button className="m-pf-back" type="button" onClick={handleBackToResults}>← Back</button>
+          <button className="m-pf-back" type="button" onClick={handleBackToResults}>{t("← Back")}</button>
           <div className="m-pf-hero-acts">
             <button type="button" aria-label={`Share ${company.name}`} onClick={handleShare}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
@@ -742,7 +746,7 @@ export default function ProfilePageClient() {
                     <span>{accountLabel}</span>
                   </>
                 )}
-                <span className="cat">{company.category?.replace(/-/g, " ") || "Company"}</span>
+                  <span className="cat">{company.category?.replace(/-/g, " ") || t("Company")}</span>
               </div>
             </div>
           </div>
@@ -750,8 +754,8 @@ export default function ProfilePageClient() {
 
         <section className="m-pf-section">
           <div className="m-pf-h2row">
-            <h2 className="m-h2">About</h2>
-            <a className="m-pf-detailbtn" href="#m-company-details">Company details ↓</a>
+            <h2 className="m-h2">{t("About")}</h2>
+            <a className="m-pf-detailbtn" href="#m-company-details">{t("Company details")} ↓</a>
           </div>
           <div className="m-pf-prose">
             <p>{company.description ?? `${company.name} is listed on SolidFind for construction, renovation and design projects in Bali.`}</p>
@@ -761,7 +765,7 @@ export default function ProfilePageClient() {
         <section className="m-pf-section">
           <div className={`m-acc2 ${servicesOpen ? "open" : ""}`}>
             <button className="m-acc2-head" type="button" aria-expanded={servicesOpen} onClick={() => setServicesOpen((open) => !open)}>
-              <span className="t">Services &amp; coverage</span>
+              <span className="t">{t("Services & coverage")}</span>
               <span className="chev" aria-hidden="true">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
               </span>
@@ -769,7 +773,7 @@ export default function ProfilePageClient() {
             {servicesOpen && (
               <div className="m-acc2-body">
                 <div className="m-svc-row">
-                  <span className="m-svc-term">Provided services</span>
+                  <span className="m-svc-term">{t("Provided services")}</span>
                   <div>
                     {servicesForDetail.map((service) => (
                       <div className="m-svc-svc" key={service.label}>
@@ -780,11 +784,11 @@ export default function ProfilePageClient() {
                   </div>
                 </div>
                 <div className="m-svc-row">
-                  <span className="m-svc-term">Project size</span>
+                  <span className="m-svc-term">{t("Project size")}</span>
                   <p className="m-svc-desc">{projectSizeValue}</p>
                 </div>
                 <div className="m-svc-row">
-                  <span className="m-svc-term">Locations</span>
+                  <span className="m-svc-term">{t("Locations")}</span>
                   <p className="m-svc-desc">{profileLocationValue}</p>
                 </div>
               </div>
@@ -794,8 +798,8 @@ export default function ProfilePageClient() {
 
         <section className="m-pf-section">
           <div className="m-pf-h2row">
-            <h2 className="m-h2">Recent work</h2>
-            <span className="m-eyebrow">{projectImages.length > 0 ? `${projectImages.length} ${projectImages.length === 1 ? "Reference" : "References"}` : "References"}</span>
+            <h2 className="m-h2">{t("Recent work")}</h2>
+            <span className="m-eyebrow">{projectImages.length > 0 ? `${projectImages.length} ${projectImages.length === 1 ? t("Reference", "Referensi") : t("References", "Referensi")}` : t("References", "Referensi")}</span>
           </div>
           {projectImages.length > 0 && (
             <div className="m-hscroll">
@@ -812,7 +816,7 @@ export default function ProfilePageClient() {
         </section>
 
         <section className="m-pf-section" id="m-company-details">
-          <h2 className="m-h2">Company details</h2>
+          <h2 className="m-h2">{t("Company details")}</h2>
           <div className="m-pf-social">
             {socialLinks.map((social) => (
               <a
@@ -828,19 +832,19 @@ export default function ProfilePageClient() {
             ))}
           </div>
           <dl className="m-pf-kv">
-            <dt>Region</dt><dd>{profileLocationValue}</dd>
-            <dt>Projects</dt><dd>{company.projects != null ? `${company.projects}+ completed` : "—"}</dd>
-            <dt>Team size</dt><dd>{company.teamSize != null ? `${company.teamSize}+ people` : "—"}</dd>
-            <dt>Founded</dt><dd>{foundedYear}</dd>
-            <dt>Avg. project</dt><dd>IDR 250–600 jt</dd>
-            <dt>Languages</dt><dd>Bahasa, English</dd>
+            <dt>{t("Region")}</dt><dd>{profileLocationValue}</dd>
+            <dt>{t("Projects")}</dt><dd>{company.projects != null ? `${company.projects}+ ${t("completed", "selesai")}` : "—"}</dd>
+            <dt>{t("Team size")}</dt><dd>{company.teamSize != null ? `${company.teamSize}+ ${t("people", "orang")}` : "—"}</dd>
+            <dt>{t("Founded")}</dt><dd>{foundedYear}</dd>
+            <dt>{t("Avg. project")}</dt><dd>IDR 250–600 jt</dd>
+            <dt>{t("Languages")}</dt><dd>Bahasa, English</dd>
           </dl>
         </section>
 
         {reviewsEnabled && reviewsList.length > 0 && (
           <section className="m-pf-section">
             <div className="m-pf-h2row">
-              <h2 className="m-h2">Reviews</h2>
+              <h2 className="m-h2">{t("Reviews")}</h2>
               <Link className="m-pf-detailbtn" href={buildCompanyReviewsPath(company)}>All {company.reviewCount ?? reviewsList.length} →</Link>
             </div>
             <div className="m-review-list">
@@ -876,7 +880,7 @@ export default function ProfilePageClient() {
           <div className="m-pf-actions">
             {currentUser?.accountType !== "company" && (
               <button className={`m-btn ${isBookmarked ? "m-btn-pri" : "m-btn-ghost"} m-btn-block`} type="button" onClick={handleToggleSave}>
-                {isBookmarked ? "Saved to shortlist ✓" : "Save to shortlist"}
+                {isBookmarked ? t("Saved to shortlist ✓") : t("Save to shortlist")}
               </button>
             )}
             {reviewsEnabled && currentUser?.accountType === "individual" && canWriteReview && (
@@ -937,16 +941,16 @@ export default function ProfilePageClient() {
 
         <div className="sf-detail-body">
           <section className="sf-detail-main">
-            <h2 className="sf-h2-static" style={{ marginTop: 0 }}>About</h2>
+            <h2 className="sf-h2-static" style={{ marginTop: 0 }}>{t("About")}</h2>
             <div className="sf-detail-p">
               <p>{company.description ?? `${company.name} is listed on SolidFind for construction, renovation and design projects in Bali.`}</p>
             </div>
 
             <div className="sf-svc-desktop">
-              <h2 className="sf-h2-static">Services &amp; coverage</h2>
+              <h2 className="sf-h2-static">{t("Services & coverage")}</h2>
               <dl className="sf-svc">
                 <div className="sf-svc-row">
-                  <dt className="sf-svc-term">Provided services</dt>
+                  <dt className="sf-svc-term">{t("Provided services")}</dt>
                   <dd className="sf-svc-def">
                     {servicesForDetail.map((service) => (
                       <div className="sf-svc-service" key={service.label}>
@@ -957,13 +961,13 @@ export default function ProfilePageClient() {
                   </dd>
                 </div>
                 <div className="sf-svc-row">
-                  <dt className="sf-svc-term">Project size</dt>
+                  <dt className="sf-svc-term">{t("Project size")}</dt>
                   <dd className="sf-svc-def">
                     <p className="sf-svc-desc sf-svc-inline">{projectSizeValue}</p>
                   </dd>
                 </div>
                 <div className="sf-svc-row">
-                  <dt className="sf-svc-term">Locations</dt>
+                  <dt className="sf-svc-term">{t("Locations")}</dt>
                   <dd className="sf-svc-def">
                     <p className="sf-svc-desc sf-svc-inline">{profileLocationValue}</p>
                   </dd>
@@ -973,7 +977,7 @@ export default function ProfilePageClient() {
             <div className="sf-svc-mobile">
               <div className={`m-acc2 ${servicesOpen ? "open" : ""}`}>
                 <button className="m-acc2-head" type="button" aria-expanded={servicesOpen} onClick={() => setServicesOpen((open) => !open)}>
-                  <span className="t">Services &amp; coverage</span>
+                  <span className="t">{t("Services & coverage")}</span>
                   <span className="chev" aria-hidden="true">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
                   </span>
@@ -981,7 +985,7 @@ export default function ProfilePageClient() {
                 {servicesOpen && (
                   <div className="m-acc2-body">
                     <div className="m-svc-row">
-                      <span className="m-svc-term">Provided services</span>
+                      <span className="m-svc-term">{t("Provided services")}</span>
                       <div style={{ marginTop: 6 }}>
                         {servicesForDetail.map((service) => (
                           <div className="m-svc-svc" key={service.label}>
@@ -992,11 +996,11 @@ export default function ProfilePageClient() {
                       </div>
                     </div>
                     <div className="m-svc-row">
-                      <span className="m-svc-term">Project size</span>
+                      <span className="m-svc-term">{t("Project size")}</span>
                       <p className="m-svc-desc">{projectSizeValue}</p>
                     </div>
                     <div className="m-svc-row">
-                      <span className="m-svc-term">Locations</span>
+                      <span className="m-svc-term">{t("Locations")}</span>
                       <p className="m-svc-desc">{profileLocationValue}</p>
                     </div>
                   </div>
@@ -1005,9 +1009,9 @@ export default function ProfilePageClient() {
             </div>
 
             <div className="sf-work-head">
-              <h2 className="sf-h2-static" style={{ margin: 0 }}>Recent work</h2>
+              <h2 className="sf-h2-static" style={{ margin: 0 }}>{t("Recent work")}</h2>
               <span className="sf-tag-mono">
-                {projectImages.length > 0 ? `${projectImages.length} ${projectImages.length === 1 ? "Reference" : "References"}` : "References"}
+                {projectImages.length > 0 ? `${projectImages.length} ${projectImages.length === 1 ? t("Reference", "Referensi") : t("References", "Referensi")}` : t("References", "Referensi")}
               </span>
             </div>
             <DetailGallery items={projectImages} onImageClick={handleImageClick} />
@@ -1015,7 +1019,7 @@ export default function ProfilePageClient() {
             {reviewsEnabled && reviewsList.length > 0 && (
               <>
                 <div className="sf-reviews-head">
-                  <h2 className="sf-h2-static" style={{ margin: 0 }}>Reviews</h2>
+                  <h2 className="sf-h2-static" style={{ margin: 0 }}>{t("Reviews")}</h2>
                   <Link className="sf-btn sf-btn-ghost" href={buildCompanyReviewsPath(company)}>See all {company.reviewCount ?? reviewsList.length} reviews →</Link>
                 </div>
                 <div className="sf-reviews">
@@ -1032,7 +1036,7 @@ export default function ProfilePageClient() {
             {companyArticles && companyArticles.length > 0 && (
               <>
                 <div className="sf-work-head">
-                  <h2 className="sf-h2-static" style={{ margin: 0 }}>Featured articles</h2>
+                  <h2 className="sf-h2-static" style={{ margin: 0 }}>{t("Featured articles")}</h2>
                   <span className="sf-tag-mono">{companyArticles.length} articles</span>
                 </div>
                 <div className="sf-gallery">
@@ -1053,7 +1057,7 @@ export default function ProfilePageClient() {
 
           <aside className="sf-detail-side">
             <div className="sf-detail-card">
-              <span className="sf-tag-mono">Company details</span>
+              <span className="sf-tag-mono">{t("Company details")}</span>
               <div className="sf-social">
                 {socialLinks.map((social) => (
                   <a
@@ -1071,17 +1075,17 @@ export default function ProfilePageClient() {
               </div>
               <hr />
               <dl className="sf-kv">
-                <dt>Region</dt><dd>{profileLocationValue}</dd>
-                <dt>Projects</dt><dd>{company.projects != null ? `${company.projects}+ completed` : "—"}</dd>
-                <dt>Team size</dt><dd>{company.teamSize != null ? `${company.teamSize}+ people` : "—"}</dd>
-                <dt>Founded</dt><dd>{foundedYear}</dd>
-                <dt>Avg. project</dt><dd>IDR 250–600 jt</dd>
-                <dt>Languages</dt><dd>Bahasa, English</dd>
+                <dt>{t("Region")}</dt><dd>{profileLocationValue}</dd>
+                <dt>{t("Projects")}</dt><dd>{company.projects != null ? `${company.projects}+ ${t("completed", "selesai")}` : "—"}</dd>
+                <dt>{t("Team size")}</dt><dd>{company.teamSize != null ? `${company.teamSize}+ ${t("people", "orang")}` : "—"}</dd>
+                <dt>{t("Founded")}</dt><dd>{foundedYear}</dd>
+                <dt>{t("Avg. project")}</dt><dd>IDR 250–600 jt</dd>
+                <dt>{t("Languages")}</dt><dd>Bahasa, English</dd>
               </dl>
               <hr />
               {currentUser?.accountType !== "company" && (
                 <button className={`sf-btn ${isBookmarked ? "sf-btn-pri" : "sf-btn-ghost"}`} style={{ width: "100%" }} onClick={handleToggleSave}>
-                  {isBookmarked ? "Saved to shortlist ✓" : "Save to shortlist"}
+                  {isBookmarked ? t("Saved to shortlist ✓") : t("Save to shortlist")}
                 </button>
               )}
               {reviewsEnabled && currentUser?.accountType === "individual" && canWriteReview && (
@@ -1100,7 +1104,7 @@ export default function ProfilePageClient() {
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg>
                 </button>
               </div>
-              {showCopiedToast && <p className="sf-tag-mono" style={{ marginTop: 12, color: "var(--sf-orange)" }}>Link copied</p>}
+              {showCopiedToast && <p className="sf-tag-mono" style={{ marginTop: 12, color: "var(--sf-orange)" }}>{t("Link copied")}</p>}
             </div>
             <p className="sf-profile-note">
               *SolidFind lists this company based on publicly available information and has not independently verified their work quality or operating status.
@@ -1112,7 +1116,7 @@ export default function ProfilePageClient() {
               )}
             </p>
             <div className="sf-ad sf-ad-box" role="complementary" aria-label="Advertisement">
-              <span className="sf-ad-tag">Sponsored</span>
+              <span className="sf-ad-tag">{t("Sponsored")}</span>
               <div className="sf-ad-body">
                 <span className="sf-ad-ico" aria-hidden="true">
                   <svg viewBox="0 0 26 21" width="26" height="21" fill="none" stroke="currentColor" strokeWidth="1.2">
@@ -1122,10 +1126,10 @@ export default function ProfilePageClient() {
                   </svg>
                 </span>
                 <div className="sf-ad-copy">
-                  <div className="sf-ad-head">Reach clients in Bali</div>
+                  <div className="sf-ad-head">{t("Reach clients in Bali")}</div>
                   <div className="sf-ad-size">300 x 250</div>
                 </div>
-                <a className="sf-btn sf-btn-ghost sf-ad-cta" href="mailto:hello@solidfind.id?subject=Ad%20space%20enquiry">Advertise →</a>
+                <a className="sf-btn sf-btn-ghost sf-ad-cta" href="mailto:hello@solidfind.id?subject=Ad%20space%20enquiry">{t("Advertise")} →</a>
               </div>
             </div>
           </aside>
@@ -1214,7 +1218,7 @@ export default function ProfilePageClient() {
                   <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
                     <path d="M1 5H15M1 5L5 1M1 5L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <span>Previous</span>
+                  <span>{t("Previous")}</span>
                 </button>
 
                 <button
@@ -1223,7 +1227,7 @@ export default function ProfilePageClient() {
                   disabled={isLastImage}
                   className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.22px] text-white transition-colors hover:text-[#f14110] disabled:text-white/25 disabled:hover:text-white/25"
                 >
-                  <span>Next</span>
+                  <span>{t("Next")}</span>
                   <svg width="8" height="5" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
                     <path d="M15 5H1M15 5L11 1M15 5L11 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>

@@ -79,7 +79,7 @@ export default function UpgradePage() {
 
         <section className="sf-pro-guide-hero">
           <span className="sf-tag-mono">Pro guidelines</span>
-          <h1>Use Pro as a visibility layer, not a shortcut around trust.</h1>
+          <h1>More visibility.<br />Same standards.</h1>
           <p>
             Pro helps verified professionals present richer profiles and appear in stronger discovery positions. The same listing standards still apply to every account.
           </p>

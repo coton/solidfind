@@ -9,6 +9,7 @@ import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { DashboardHeroMedia } from "@/components/DashboardHeroMedia";
+import { useSiteLanguage } from "@/components/LanguageProvider";
 import { buildCompanyProfilePath, buildCompanyReviewsPath } from "@/lib/company-profile-url.mjs";
 import { starColor } from "@/lib/starColors";
 import { ArrowLeft, Star } from "lucide-react";
@@ -103,6 +104,7 @@ function ReviewCard({ userName, rating, content, date }: {
 }
 
 export default function CompanyDashboardPage() {
+  const { t } = useSiteLanguage();
   const proEnabled = useProEnabled();
   const reviewsEnabled = useReviewsEnabled();
   const [showAdModal, setShowAdModal] = useState(false);
@@ -284,10 +286,10 @@ export default function CompanyDashboardPage() {
     background: `conic-gradient(var(--sf-peach-300) 0deg, var(--sf-orange) ${profileCompletionScore * 3.6}deg, var(--sf-stone-300) ${profileCompletionScore * 3.6}deg 360deg)`,
   };
   const completionItems = [
-    { label: "Company details", done: Boolean(company?.name && company?.email && company?.phone) },
-    { label: "Portfolio photos", done: companyProjectImageCount > 0 },
-    { label: "Licenses & documents", done: Boolean(company?.isReviewed) },
-    { label: "Service areas", done: companyProfileLocations.length > 0 },
+    { label: t("Company details"), done: Boolean(company?.name && company?.email && company?.phone) },
+    { label: t("Portfolio photos"), done: companyProjectImageCount > 0 },
+    { label: t("Licenses & documents"), done: Boolean(company?.isReviewed) },
+    { label: t("Service areas"), done: companyProfileLocations.length > 0 },
   ];
 
   const handleBuyPro = async () => {
@@ -338,14 +340,14 @@ export default function CompanyDashboardPage() {
       <main className="sf-dash flex-grow" data-screen-label="Company dashboard">
         <div className="m-dashboard sm:hidden">
           <div className="m-pad" style={{ paddingTop: 18, paddingBottom: 6 }}>
-            <span className="m-eyebrow">Company dashboard · <span style={{ color: isPro && proEnabled ? "var(--sf-orange)" : "var(--sf-stone-500)" }}>{isPro && proEnabled ? "Pro Account" : "Free account"}</span></span>
-            <h1 className="m-dash-hi">Welcome back, {data.name}.</h1>
-            <p className="m-dash-sub">{isPro && proEnabled ? "Here's how your profile is performing on SolidFind this month. Pro ranks you above free listings and unlocks the insights below." : "You're listed on SolidFind. Complete your profile and upgrade to Pro to get more visibility."}</p>
+            <span className="m-eyebrow">{t("Company dashboard")} · <span style={{ color: isPro && proEnabled ? "var(--sf-orange)" : "var(--sf-stone-500)" }}>{isPro && proEnabled ? t("Pro Account") : t("Free account")}</span></span>
+            <h1 className="m-dash-hi">{t("Welcome back, [name].").replace("[name]", data.name)}</h1>
+            <p className="m-dash-sub">{isPro && proEnabled ? t("Here's how your profile is performing on SolidFind this month. Your Pro Account ranks you above free listings and unlocks the insights below.") : t("You're listed on SolidFind. Complete your profile and upgrade to Pro to get more visibility.")}</p>
           </div>
 
           <div className="m-pad m-dash-stack">
             <section className="m-card">
-              <span className="m-eyebrow">Profile completion</span>
+              <span className="m-eyebrow">{t("Profile completion")}</span>
               <div className="m-complete">
                 <div className="m-ring" style={completionRing}><div className="inner">{profileCompletionScore}%</div></div>
                 <ul>
@@ -355,22 +357,22 @@ export default function CompanyDashboardPage() {
                 </ul>
               </div>
               <div className="m-dash-actions">
-                <Link className="m-btn m-btn-ghost" href={profilePath}>View profile</Link>
-                <Link className="m-btn m-btn-pri" href="/company-dashboard/edit">Edit profile →</Link>
+                <Link className="m-btn m-btn-ghost" href={profilePath}>{t("View profile")}</Link>
+                <Link className="m-btn m-btn-pri" href="/company-dashboard/edit">{t("Edit profile →")}</Link>
               </div>
             </section>
 
             {isPro && proEnabled && (
               <section className="m-card">
                 <div className="m-dash-card-head">
-                  <span className="m-eyebrow">Profile views · this month</span>
-                  <span className="m-pill-pro">Pro</span>
+                  <span className="m-eyebrow">{t("Profile views · this month")}</span>
+                  <span className="m-pill-pro">{t("Pro")}</span>
                 </div>
                 <div className="m-insight-row">
                   <span className="m-stat-num">{viewsThisMonth.toLocaleString()}</span>
                   <span className="m-delta">{viewsDelta >= 0 ? "▲" : "▼"} {Math.abs(viewsDelta)}%</span>
                 </div>
-                <div className="m-stat-label">vs. last month · {viewsLastMonth.toLocaleString()} all-time</div>
+                <div className="m-stat-label">{t("vs. last month")} · {viewsLastMonth.toLocaleString()} {t("all-time")}</div>
                 <div className="m-chart" role="img" aria-label="Monthly profile views">
                   {data.monthlyViews.map((item, index) => (
                     <div className="m-chart-col" key={item.month}>
@@ -384,26 +386,26 @@ export default function CompanyDashboardPage() {
 
             <div className="m-dash-two">
               <section className="m-card">
-                <span className="m-eyebrow">Saved by clients</span>
+                <span className="m-eyebrow">{t("Saved by clients")}</span>
                 <div className="m-stat-num">{data.stats.bookmarked}</div>
-                <div className="m-stat-label">times bookmarked</div>
+                <div className="m-stat-label">{t("times bookmarked")}</div>
               </section>
               {isPro && proEnabled && (
                 <section className="m-card">
-                  <span className="m-eyebrow">Found via</span>
+                  <span className="m-eyebrow">{t("Found via")}</span>
                   <div className="m-stat-num m-stat-location">{topLocation}</div>
-                  <div className="m-stat-label">top region this month</div>
+                  <div className="m-stat-label">{t("top region this month")}</div>
                 </section>
               )}
             </div>
 
             {proEnabled && (
               <section className="m-card m-pro-card">
-                <span className="m-eyebrow">{isPro ? "Promote" : "Go further"}</span>
-                <h3>{isPro ? "Buy ad space" : "Get Pro"}</h3>
-                <p>{isPro ? "Sponsored slots on category pages and company profiles put your studio in front of more clients." : "Priority placement, analytics, up to 12 photos and ad placements for companies that take visibility seriously."}</p>
+                <span className="m-eyebrow">{isPro ? t("Promote") : t("Go further")}</span>
+                <h3>{isPro ? t("Buy ad space") : t("Get Pro")}</h3>
+                <p>{isPro ? t("Sponsored slots on category pages and company profiles put your studio in front of more clients.") : t("Priority placement, analytics, up to 12 photos and ad placements for companies that take visibility seriously.")}</p>
                 <button className="m-btn m-btn-pri m-btn-block" type="button" onClick={() => isPro ? setShowAdModal(true) : setShowProModal(true)}>
-                  {isPro ? "Purchase ad space →" : "Upgrade to Pro →"}
+                  {isPro ? t("Purchase ad space →") : t("Upgrade to Pro →")}
                 </button>
               </section>
             )}
@@ -411,8 +413,8 @@ export default function CompanyDashboardPage() {
             {reviewsEnabled && dashboardReviews.length > 0 && (
               <section>
                 <div className="m-dash-reviews-head">
-                  <h2 className="m-h2">Latest reviews</h2>
-                  {company?._id && data.reviewCount > 0 && <Link href={buildCompanyReviewsPath(company)}>All {data.reviewCount} →</Link>}
+                  <h2 className="m-h2">{t("Latest reviews")}</h2>
+                  {company?._id && data.reviewCount > 0 && <Link href={buildCompanyReviewsPath(company)}>{t("All")} {data.reviewCount} →</Link>}
                 </div>
                 <div className="m-review-list">
                   {dashboardReviews.slice(0, 3).map((review, index) => (
@@ -435,16 +437,16 @@ export default function CompanyDashboardPage() {
 
         <div className="sf-dash-desktop hidden sm:block">
           <div className="sf-dash-intro">
-            <span className="sf-tag-mono">Company dashboard · <span className={isPro && proEnabled ? "sf-eyebrow-pro" : ""}>{isPro && proEnabled ? "Pro Account" : "Free account"}</span></span>
-            <h1 className="sf-dash-hi">Welcome back, {data.name}.</h1>
-            <p className="sf-dash-sub">{isPro && proEnabled ? "Here's how your profile is performing on SolidFind this month. Your Pro Account ranks you above free listings and unlocks the insights below." : "You're listed on SolidFind. Complete your profile to make a strong impression — upgrade to Pro to unlock visibility insights."}</p>
+            <span className="sf-tag-mono">{t("Company dashboard")} · <span className={isPro && proEnabled ? "sf-eyebrow-pro" : ""}>{isPro && proEnabled ? t("Pro Account") : t("Free account")}</span></span>
+            <h1 className="sf-dash-hi">{t("Welcome back, [name].").replace("[name]", data.name)}</h1>
+            <p className="sf-dash-sub">{isPro && proEnabled ? t("Here's how your profile is performing on SolidFind this month. Your Pro Account ranks you above free listings and unlocks the insights below.") : t("You're listed on SolidFind. Complete your profile to make a strong impression — upgrade to Pro to unlock visibility insights.")}</p>
           </div>
 
           <div className="sf-dash-layout">
             <div className="sf-dash-main">
               <div className="sf-dash-cards">
                 <section className="sf-dash-card">
-                  <span className="sf-tag-mono">Profile completion</span>
+                  <span className="sf-tag-mono">{t("Profile completion")}</span>
                   <div className="sf-completion">
                     <div className="sf-ring" style={completionRing}><span>{profileCompletionScore}%</span></div>
                     <ul className="sf-completion-list">
@@ -454,32 +456,32 @@ export default function CompanyDashboardPage() {
                     </ul>
                   </div>
                   <div className="sf-card-btns">
-                    <Link className="sf-btn sf-btn-lg sf-btn-ghost" href={profilePath}>View profile</Link>
-                    <Link className="sf-btn sf-btn-lg sf-btn-pri" href="/company-dashboard/edit">Edit profile →</Link>
+                    <Link className="sf-btn sf-btn-lg sf-btn-ghost" href={profilePath}>{t("View profile")}</Link>
+                    <Link className="sf-btn sf-btn-lg sf-btn-pri" href="/company-dashboard/edit">{t("Edit profile →")}</Link>
                   </div>
                 </section>
 
                 {isPro && proEnabled && (
                   <section className="sf-dash-card sf-dash-card-pro">
-                    <span className="sf-tag-light">Promote</span>
-                    <h3>Buy ad space</h3>
-                    <p>Place sponsored slots on category pages and company profiles to put your studio in front of more clients.</p>
-                    <button className="sf-btn sf-btn-lg sf-dash-getpro" type="button" onClick={() => setShowAdModal(true)}>Purchase ad space →</button>
+                    <span className="sf-tag-light">{t("Promote")}</span>
+                    <h3>{t("Buy ad space")}</h3>
+                    <p>{t("Place sponsored slots on category pages and company profiles to put your studio in front of more clients.")}</p>
+                    <button className="sf-btn sf-btn-lg sf-dash-getpro" type="button" onClick={() => setShowAdModal(true)}>{t("Purchase ad space →")}</button>
                   </section>
                 )}
 
                 <section className="sf-dash-card sf-dash-card-stat">
-                  <span className="sf-tag-mono">Saved by clients</span>
+                  <span className="sf-tag-mono">{t("Saved by clients")}</span>
                   <div className="sf-stat-num">{data.stats.bookmarked}</div>
-                  <div className="sf-stat-label">times your company was bookmarked</div>
+                  <div className="sf-stat-label">{t("times your company was bookmarked")}</div>
                 </section>
 
                 {!isPro && proEnabled && (
                   <section className="sf-dash-card sf-dash-card-pro">
-                    <span className="sf-tag-light">Go further</span>
-                    <h3>Get Pro</h3>
-                    <p>Priority placement, profile analytics, up to 12 photos and ad placements across the platform.</p>
-                    <button className="sf-btn sf-btn-lg sf-dash-getpro" type="button" onClick={() => setShowProModal(true)}>Upgrade to Pro →</button>
+                    <span className="sf-tag-light">{t("Go further")}</span>
+                    <h3>{t("Get Pro")}</h3>
+                    <p>{t("Priority placement, profile analytics, up to 12 photos and ad placements across the platform.")}</p>
+                    <button className="sf-btn sf-btn-lg sf-dash-getpro" type="button" onClick={() => setShowProModal(true)}>{t("Upgrade to Pro →")}</button>
                   </section>
                 )}
               </div>
@@ -487,8 +489,8 @@ export default function CompanyDashboardPage() {
               {reviewsEnabled && dashboardReviews.length > 0 && (
                 <section className="sf-dash-reviews">
                   <div className="sf-dash-reviews-head">
-                    <h2 className="sf-h2-static">Latest reviews</h2>
-                    {company?._id && data.reviewCount > 0 && <Link className="sf-btn sf-btn-lg sf-btn-ghost" href={buildCompanyReviewsPath(company)}>See all {data.reviewCount} reviews →</Link>}
+                    <h2 className="sf-h2-static">{t("Latest reviews")}</h2>
+                    {company?._id && data.reviewCount > 0 && <Link className="sf-btn sf-btn-lg sf-btn-ghost" href={buildCompanyReviewsPath(company)}>{t("See all")} {data.reviewCount} {t("reviews")} →</Link>}
                   </div>
                   <div className="sf-reviews-grid">
                     {dashboardReviews.slice(0, 4).map((review, index) => (
@@ -511,16 +513,16 @@ export default function CompanyDashboardPage() {
             {isPro && proEnabled ? (
               <aside className="sf-dash-side">
                 <div className="sf-dash-side-head">
-                  <h2 className="sf-h2-static">Pro insights</h2>
-                  <span className="sf-pro-pill">Pro</span>
+                  <h2 className="sf-h2-static">{t("Pro insights")}</h2>
+                  <span className="sf-pro-pill">{t("Pro")}</span>
                 </div>
                 <div className="sf-insight-card">
-                  <span className="sf-tag-mono">Profile views · this month</span>
+                  <span className="sf-tag-mono">{t("Profile views · this month")}</span>
                   <div className="sf-insight-row">
                     <div className="sf-stat-num sf-stat-num-sm">{viewsThisMonth.toLocaleString()}</div>
                     <span className={`sf-insight-delta ${viewsDelta >= 0 ? "up" : ""}`}>{viewsDelta >= 0 ? "▲" : "▼"} {Math.abs(viewsDelta)}%</span>
                   </div>
-                  <div className="sf-stat-label">vs. last month · {viewsLastMonth.toLocaleString()} views all-time</div>
+                  <div className="sf-stat-label">{t("vs. last month")} · {viewsLastMonth.toLocaleString()} {t("views all-time")}</div>
                   <div className="sf-chart" role="img" aria-label="Monthly profile views">
                     {data.monthlyViews.map((item) => (
                       <div className="sf-chart-col" key={item.month}>
@@ -533,23 +535,23 @@ export default function CompanyDashboardPage() {
                   </div>
                 </div>
                 <div className="sf-insight-card">
-                  <span className="sf-tag-mono">Found through location</span>
+                  <span className="sf-tag-mono">{t("Found through location")}</span>
                   <div className="sf-toploc-big">{topLocation}</div>
-                  <p className="sf-toploc-note">The region most clients found you through this month. Keep your service areas complete to stay visible here.</p>
+                  <p className="sf-toploc-note">{t("The region most clients found you through this month. Keep your service areas complete to stay visible here.")}</p>
                 </div>
                 <div className="sf-insight-card sf-buyad">
                   <div>
-                    <span className="sf-tag-mono">Advertising</span>
-                    <div className="sf-buyad-head">Promote your profile</div>
-                    <p>Sponsored placements across SolidFind.</p>
+                    <span className="sf-tag-mono">{t("Advertising")}</span>
+                    <div className="sf-buyad-head">{t("Promote your profile")}</div>
+                    <p>{t("Sponsored placements across SolidFind.")}</p>
                   </div>
-                  <button className="sf-btn sf-btn-pri sf-btn-lg" type="button" onClick={() => setShowAdModal(true)}>Buy ad space →</button>
+                  <button className="sf-btn sf-btn-pri sf-btn-lg" type="button" onClick={() => setShowAdModal(true)}>{t("Buy ad space →")}</button>
                 </div>
               </aside>
             ) : (
               <aside className="sf-dash-side">
                 <div className="sf-dash-side-head">
-                  <h2 className="sf-h2-static">What's included in Pro</h2>
+                  <h2 className="sf-h2-static">{t("What's included in Pro")}</h2>
                 </div>
                 <div className="sf-insight-card">
                   <div className="sf-adm-points">
@@ -566,8 +568,8 @@ export default function CompanyDashboardPage() {
                       </div>
                     ))}
                   </div>
-                  <button className="sf-btn sf-btn-pri sf-btn-lg sf-full-btn" type="button" onClick={() => setShowProModal(true)}>Get Pro →</button>
-                  <p className="sf-dash-note">Secure payment via Midtrans · cancel any time</p>
+                  <button className="sf-btn sf-btn-pri sf-btn-lg sf-full-btn" type="button" onClick={() => setShowProModal(true)}>{t("Get Pro →")}</button>
+                  <p className="sf-dash-note">{t("Secure payment via Midtrans · cancel any time")}</p>
                 </div>
               </aside>
             )}

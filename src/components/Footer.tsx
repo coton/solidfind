@@ -104,7 +104,7 @@ export function Footer() {
                 type="button"
                 onClick={() => router.push(`/?category=${category.id}`)}
               >
-                {String(index + 1).padStart(2, "0")} · {category.label}
+                {String(index + 1).padStart(2, "0")} · {t(category.label)}
               </button>
             ))}
           </div>
@@ -141,9 +141,9 @@ export function Footer() {
           </div>
           <div>
             <span className="sf-tag-mono">Solid</span>
-            <Link href={aboutHref}>About</Link>
-            <Link href="/terms">Terms & Conditions</Link>
-            <a href={mailHref}>Contact</a>
+            <Link href={aboutHref}>{t("About", "Tentang")}</Link>
+            <Link href="/terms">{t("Terms & Conditions", "Syarat & Ketentuan")}</Link>
+            <a href={mailHref}>{t("Contact", "Kontak")}</a>
           </div>
         </div>
       </div>

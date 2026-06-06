@@ -753,7 +753,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
           <div className="m-drawer-nav">
             <div className={`m-acc ${mobileDrawerSection === "cat" ? "open" : ""}`}>
-              <button className="m-acc-head" type="button" onClick={() => toggleSection("cat")}><span className="lbl">Categories</span><span>⌄</span></button>
+              <button className="m-acc-head" type="button" onClick={() => toggleSection("cat")}><span className="lbl">{t("Categories")}</span><span>⌄</span></button>
               {mobileDrawerSection === "cat" && (
                 <div className="m-acc-body">
                   {dynamicCategories.map((cat, index) => (
@@ -765,13 +765,13 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               )}
             </div>
             <div className={`m-acc ${mobileDrawerSection === "build" ? "open" : ""}`}>
-              <button className="m-acc-head" type="button" onClick={() => toggleSection("build")}><span className="lbl">Build</span><span>⌄</span></button>
+              <button className="m-acc-head" type="button" onClick={() => toggleSection("build")}><span className="lbl">{t("Build")}</span><span>⌄</span></button>
               {mobileDrawerSection === "build" && (
                 <div className="m-acc-body">
-                  <button type="button" onClick={handleIndividualsLink}>For individuals</button>
-                  <button type="button" onClick={handleProfessionalsLink}>For professionals</button>
-                  <button type="button" onClick={handleListServicesLink}>List your services</button>
-                  <Link href="/upgrade" onClick={() => setMobileMenuOpen(false)}>Pro guidelines</Link>
+                  <button type="button" onClick={handleIndividualsLink}>{t("For individuals")}</button>
+                  <button type="button" onClick={handleProfessionalsLink}>{t("For professionals")}</button>
+                  <button type="button" onClick={handleListServicesLink}>{t("List your services")}</button>
+                  <Link href="/upgrade" onClick={() => setMobileMenuOpen(false)}>{t("Pro guidelines")}</Link>
                 </div>
               )}
             </div>
@@ -779,20 +779,20 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
               <button className="m-acc-head" type="button" onClick={() => toggleSection("solid")}><span className="lbl">Solid</span><span>⌄</span></button>
               {mobileDrawerSection === "solid" && (
                 <div className="m-acc-body">
-                  <Link href="/about" onClick={() => setMobileMenuOpen(false)}>About</Link>
-                  <Link href="/terms" onClick={() => setMobileMenuOpen(false)}>Terms and Conditions</Link>
-                  <a href="mailto:hello@solidfind.id" onClick={() => setMobileMenuOpen(false)}>Contact</a>
+                  <Link href="/about" onClick={() => setMobileMenuOpen(false)}>{t("About")}</Link>
+                  <Link href="/terms" onClick={() => setMobileMenuOpen(false)}>{t("Terms and Conditions")}</Link>
+                  <a href="mailto:hello@solidfind.id" onClick={() => setMobileMenuOpen(false)}>{t("Contact")}</a>
                 </div>
               )}
             </div>
           </div>
 
           <div className="m-drawer-foot">
-            <button className="m-btn m-btn-pri m-btn-block" type="button" onClick={handleListServicesLink}>List your services</button>
+            <button className="m-btn m-btn-pri m-btn-block" type="button" onClick={handleListServicesLink}>{t("List your services")}</button>
             {user ? (
-              <button className="m-btn m-btn-ghost m-btn-block" type="button" onClick={handleSignOut}>Log out</button>
+              <button className="m-btn m-btn-ghost m-btn-block" type="button" onClick={handleSignOut}>{t("Log out")}</button>
             ) : (
-              <button className="m-btn m-btn-ghost m-btn-block" type="button" onClick={() => openAuthModal("individual", "login")}>Log in</button>
+              <button className="m-btn m-btn-ghost m-btn-block" type="button" onClick={() => openAuthModal("individual", "login")}>{t("Log in")}</button>
             )}
           </div>
           <div className="m-drawer-divide" />

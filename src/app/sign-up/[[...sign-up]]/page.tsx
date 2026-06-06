@@ -9,6 +9,10 @@ export default function SignUpPage() {
   const [isOpen, setIsOpen] = useState(true);
   const { user } = useUser();
   const router = useRouter();
+  const handleClose = () => {
+    setIsOpen(false);
+    router.replace("/?category=construction");
+  };
 
   useEffect(() => {
     if (user) {
@@ -20,7 +24,7 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center">
       <AuthModal
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={handleClose}
         initialMode="register"
         initialAccountType="individual"
       />

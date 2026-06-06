@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSiteLanguage } from "@/components/LanguageProvider";
 import { starColor } from "@/lib/starColors";
 import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
@@ -57,11 +58,12 @@ export function ListingCard({
   returnToDashboard = false,
   onBookmark,
 }: ListingCardProps) {
+  const { t } = useSiteLanguage();
   const coverUrl = "/assets/company-cover-fallback.jpg";
   const showReviews = reviewsEnabled;
   const shouldShowRating = showReviews && reviewCount > 0;
   const shouldShowReviewCount = reviewCount > 0;
-  const reviewLabel = reviewCount === 1 ? "1 review" : `${reviewCount} reviews`;
+  const reviewLabel = reviewCount === 1 ? `1 ${t("review", "ulasan")}` : `${reviewCount} ${t("reviews", "ulasan")}`;
   const serviceLocations = getServiceLocations({
     category: categoryContext ?? category,
     fallbackLocation: location,
@@ -73,7 +75,7 @@ export function ListingCard({
   });
   const primaryLocation = getPrimaryLocation(serviceLocations, location);
   const serviceLabel = [
-    getCategoryLabel(categoryContext ?? category),
+    t(getCategoryLabel(categoryContext ?? category)),
     primaryLocation,
   ].filter(Boolean).join(" · ");
 
@@ -93,7 +95,7 @@ export function ListingCard({
           {isPro && proEnabled && (
             <span className="sf-pro-badge">
               <span className="d" />
-              Pro Account
+              {t("Pro Account")}
             </span>
           )}
           <div className="sf-pro-actions">
@@ -143,7 +145,7 @@ export function ListingCard({
           <p className="sf-pro-desc">{description}</p>
           <div className="sf-pro-foot">
             <span className="sf-tag-mono">{shouldShowReviewCount ? reviewLabel : ""}</span>
-            <span className="sf-pri-link">View →</span>
+            <span className="sf-pri-link">{t("View →")}</span>
           </div>
         </div>
       </article>
@@ -173,7 +175,7 @@ export function ListingCard({
               <span />PRO
             </span>
           )}
-          <span className="m-card-view">View →</span>
+          <span className="m-card-view">{t("View →")}</span>
         </div>
       </article>
     </Link>

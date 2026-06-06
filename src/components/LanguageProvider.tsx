@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { uiTranslationsId } from "@/lib/ui-translations";
 
 export type SiteLanguage = "en" | "id";
 
@@ -32,7 +33,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     () => ({
       language,
       setLanguage,
-      t: (english, indonesian) => (language === "id" && indonesian ? indonesian : english),
+      t: (english, indonesian) => (language === "id" ? (indonesian || uiTranslationsId[english] || english) : english),
     }),
     [language]
   );

@@ -13,6 +13,7 @@ import {
   isVerificationCodeComplete,
   sanitizeVerificationCode,
 } from "@/lib/auth-verification.mjs";
+import { useSiteLanguage } from "./LanguageProvider";
 
 type AuthMode = "login" | "register";
 type AccountType = "company" | "individual";
@@ -133,6 +134,7 @@ export function AuthModal({
   onAuthSuccess,
 }: AuthModalProps) {
   const router = useRouter();
+  const { t } = useSiteLanguage();
   const { signIn, setActive: setSignInActive, isLoaded: isSignInLoaded } = useSignIn();
   const { signUp, setActive: setSignUpActive, isLoaded: isSignUpLoaded } = useSignUp();
   const convex = useConvex();
@@ -722,12 +724,12 @@ export function AuthModal({
     return modalShell(
       <>
         <div className="sf-modal-head">
-          <span className="sf-tag-mono">{mode === "login" ? "Welcome back" : "Get started"}</span>
-          <h2>{mode === "login" ? "Log in" : "Create an account"}</h2>
+          <span className="sf-tag-mono">{mode === "login" ? t("Welcome back") : t("Get started")}</span>
+          <h2>{mode === "login" ? t("Log in") : t("Create an account")}</h2>
           <p>
             {mode === "login"
-              ? "Find the right people. Build something solid."
-              : "Welcome to the best Bali directory — for the people who build, and the people building."}
+              ? t("Find the right people. Build something solid.")
+              : t("Welcome to the best Bali directory — for the people who build, and the people building.")}
           </p>
         </div>
 
@@ -736,35 +738,35 @@ export function AuthModal({
           <div className="sf-su-opts" style={{ marginTop: 16 }}>
             <button type="button" className={`sf-su-opt ${accountType === "company" ? "on" : ""}`} onClick={() => setAccountType("company")}>
               <div className="sf-su-opt-top">
-                <span className="sf-su-opt-title">Company</span>
+                <span className="sf-su-opt-title">{t("Company")}</span>
                 <span className={`sf-switch ${accountType === "company" ? "on" : ""}`} aria-hidden="true"><span className="sf-switch-knob" /></span>
               </div>
-              <span className="sf-su-opt-sub">Create a profile page & get discovered</span>
+              <span className="sf-su-opt-sub">{t("Create a profile page & get discovered")}</span>
             </button>
             <button type="button" className={`sf-su-opt ${accountType === "individual" ? "on" : ""}`} onClick={() => setAccountType("individual")}>
               <div className="sf-su-opt-top">
-                <span className="sf-su-opt-title">Individual</span>
+                <span className="sf-su-opt-title">{t("Individual")}</span>
                 <span className={`sf-switch ${accountType === "individual" ? "on" : ""}`} aria-hidden="true"><span className="sf-switch-knob" /></span>
               </div>
-              <span className="sf-su-opt-sub">Save listings & review companies</span>
+              <span className="sf-su-opt-sub">{t("Save listings & review companies")}</span>
             </button>
           </div>
         )}
 
         {mode === "register" && (
           <button type="button" className={`sf-su-news ${subscribeNewsletter ? "on" : ""}`} onClick={() => setSubscribeNewsletter((value) => !value)}>
-            <span>Subscribe to the SolidFind newsletter</span>
+            <span>{t("Subscribe to the SolidFind newsletter")}</span>
             <span className={`sf-switch ${subscribeNewsletter ? "on" : ""}`} aria-hidden="true"><span className="sf-switch-knob" /></span>
           </button>
         )}
 
         <div className="sf-auth-options">
           <button type="button" className="sf-btn sf-btn-ghost sf-auth-oauth" onClick={() => handleSocialAuth("oauth_google")} disabled={isLoading}>
-            <GoogleIcon /> Continue with Google
+            <GoogleIcon /> {t("Continue with Google")}
           </button>
-          <div className="sf-su-or"><span>or</span></div>
+          <div className="sf-su-or"><span>{t("or")}</span></div>
           <button type="button" className="sf-btn sf-btn-pri sf-btn-lg sf-auth-email-btn" onClick={() => { setStep("email"); setError(""); }}>
-            Continue with email
+            {t("Continue with email")}
           </button>
         </div>
 
@@ -776,16 +778,16 @@ export function AuthModal({
         <p className="sf-modal-foot">
           {mode === "login" ? (
             <>
-              New here?{" "}
+              {t("New here?")}{" "}
               <button type="button" onClick={() => { setMode("register"); setError(""); }} className="sf-modal-link sf-link-button">
-                Sign up!
+                {t("Sign up!")}
               </button>
             </>
           ) : (
             <>
-              Already have an account?{" "}
+              {t("Already have an account?")}{" "}
               <button type="button" onClick={() => { setMode("login"); setError(""); }} className="sf-modal-link sf-link-button">
-                Log in
+                {t("Log in")}
               </button>
             </>
           )}
@@ -811,7 +813,7 @@ export function AuthModal({
 
       <div style={{ width: '100%', maxWidth: '320px', margin: '0 auto', paddingTop: '28px' }}>
         <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
-          {mode === "login" ? "LOGIN" : "CREATE AN ACCOUNT"}
+          {mode === "login" ? t("LOGIN", "MASUK") : t("CREATE AN ACCOUNT", "BUAT AKUN")}
         </h2>
 
         <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
@@ -936,8 +938,8 @@ export function AuthModal({
               }}
             >
               {isLoading
-                ? "Loading..."
-                : mode === "login" ? "Login" : "Register"
+                ? t("Loading...", "Memuat...")
+                : mode === "login" ? t("Login", "Masuk") : t("Register", "Daftar")
               }
             </button>
           </div>

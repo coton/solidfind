@@ -1068,7 +1068,63 @@ export default function EditProfilePage() {
           </div>
         </div>
 
-        <section className="sf-edit-section sf-edit-panel">
+        <section className="sf-edit-cover-strip" onChangeCapture={() => setIsDirty(true)}>
+          <div className="sf-edit-cover">
+            {projectImageUrls[0] ? (
+              <ExternalImagePreview src={projectImageUrls[0]} alt="Company cover photo" />
+            ) : projectImageIds[0] ? (
+              <ProjectImage storageId={projectImageIds[0]} />
+            ) : null}
+            <button
+              type="button"
+              className="sf-btn sf-btn-ghost sf-edit-cover-btn"
+              onClick={() => projectInputRef.current?.click()}
+              disabled={totalProjectImages >= maxImages || uploadingSlot !== null}
+            >
+              <Upload className="h-4 w-4" />
+              {uploadingSlot !== null ? "Uploading..." : "Replace cover photo"}
+            </button>
+          </div>
+          <div className="sf-edit-logo-strip">
+            <span className="sf-tag-mono">Company logo</span>
+            <div className="sf-edit-logo-row">
+              <button
+                type="button"
+                onClick={() => logoInputRef.current?.click()}
+                className="sf-edit-logo"
+                aria-label="Upload company logo"
+              >
+                {logoPreviewUrl ? (
+                  logoId ? (
+                    <Image src={logoPreviewUrl} alt="Company logo" fill className="object-cover" />
+                  ) : (
+                    <ExternalImagePreview src={logoPreviewUrl} alt="Company logo" />
+                  )
+                ) : (
+                  (companyName || company?.name || "?").trim().charAt(0).toUpperCase()
+                )}
+                {logoUploading && (
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </button>
+              <div className="sf-edit-logo-copy">
+                <p className="sf-edit-logo-hint">Optional — we'll use your initial if you don't upload one. Square image, min 240x240px. Shown on your profile and listing card.</p>
+                <div className="sf-edit-logo-btns">
+                  <button type="button" className="sf-btn sf-btn-ghost" onClick={() => logoInputRef.current?.click()}>Upload logo</button>
+                  {logoPreviewUrl && (
+                    <button type="button" className="sf-edit-logo-remove" onClick={() => { setLogoId(undefined); setIsDirty(true); }}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="sf-edit-section sf-edit-panel sf-edit-completion-panel">
           <div className="sf-edit-2col">
             <div>
               <div>
@@ -1136,7 +1192,7 @@ export default function EditProfilePage() {
         </section>
 
         {/* Action Buttons */}
-        <div className="sf-edit-section space-y-3">
+        <div className="sf-edit-section sf-edit-inline-actions space-y-3">
           <div className="flex items-center gap-4">
             <button onClick={() => setShowDeleteModal(true)} className="sf-edit-delete" type="button">
               Delete profile
@@ -1169,7 +1225,7 @@ export default function EditProfilePage() {
           {/* Left Column */}
           <div className="space-y-4">
             {/* Logo Upload */}
-            <div className="sf-edit-panel">
+            <div className="sf-edit-panel sf-edit-logo-panel">
               <span className="sf-tag-mono">Company logo</span>
               <div className="sf-edit-logo-row mt-4">
                 <button

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useSiteLanguage } from "@/components/LanguageProvider";
 
 const allSortOptions = [
   { value: "latest", label: "Sort by: Latest" },
@@ -20,6 +21,7 @@ interface SortDropdownProps {
 }
 
 export function SortDropdown({ value, onChange, reviewsEnabled = false, options = allSortOptions }: SortDropdownProps) {
+  const { t } = useSiteLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const sortOptions = options.filter((opt) => !opt.requiresReviews || reviewsEnabled);
@@ -50,7 +52,7 @@ export function SortDropdown({ value, onChange, reviewsEnabled = false, options 
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-[6px] text-[11px] font-medium text-[#333] tracking-[0.22px] leading-[14px] text-right hover:opacity-70 transition-opacity cursor-pointer"
       >
-        {selectedOption.label}
+        {t(selectedOption.label)}
         {/* Down arrow from Figma — 6x4 */}
         <svg 
           width="6" 
@@ -84,7 +86,7 @@ export function SortDropdown({ value, onChange, reviewsEnabled = false, options 
                   value === option.value ? 'text-[#f14110]' : 'text-[#333]'
                 } hover:text-[#f14110]`}
               >
-                {option.label}
+                {t(option.label)}
               </button>
               {idx < sortOptions.length - 1 && (
                 <div className="w-full h-[1px] bg-[#e4e4e4] mt-[10px]" />

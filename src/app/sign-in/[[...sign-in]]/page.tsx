@@ -20,6 +20,10 @@ export default function SignInPage() {
   const ticket = searchParams.get("__clerk_ticket");
   const safeNextPath = useMemo(() => sanitizeNextPath(searchParams.get("next")), [searchParams]);
   const initialAccountType = safeNextPath?.startsWith("/company-dashboard") ? "company" : "individual";
+  const handleClose = () => {
+    setIsOpen(false);
+    router.replace("/?category=construction");
+  };
   const companySetupPath = useMemo(() => {
     if (!safeNextPath || !safeNextPath.startsWith("/company-dashboard/edit")) {
       return null;
@@ -148,7 +152,7 @@ export default function SignInPage() {
       <div className="w-full">
         <AuthModal
           isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
+          onClose={handleClose}
           initialMode="login"
           initialAccountType={initialAccountType}
         />
