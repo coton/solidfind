@@ -114,16 +114,21 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 0;
-  background: none;
-  color: var(--sf-fg-2);
+  border: 1px solid var(--sf-border-1);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--sf-ink);
   cursor: pointer;
   font: inherit;
   font-size: 13px;
+  font-weight: 500;
+  padding: 9px 15px;
   text-decoration: none;
+  box-shadow: 0 1px 4px rgba(35,31,32,.04);
 }
 
 .sf-about-back:hover {
+  border-color: var(--sf-orange);
   color: var(--sf-orange);
 }
 
@@ -350,7 +355,7 @@
 }
 
 .sf-legal-totop {
-  margin-top: 10px;
+  margin-top: 34px;
 }
 
 .sf-article-wrap {
@@ -361,11 +366,12 @@
 
 .sf-article-grid {
   display: grid;
+  width: min(100%, 1028px);
   grid-template-columns: 220px minmax(0, 760px);
   column-gap: 48px;
   align-items: start;
   padding-top: 8px;
-  margin-top: 0;
+  margin: 0 auto;
 }
 
 .sf-article-meta {
@@ -461,6 +467,13 @@
   padding-top: 8px;
   color: var(--sf-fg-3);
   font-size: 12px;
+}
+
+.sf-ad-banner {
+  width: min(100%, 700px);
+  margin: 34px auto 0;
+  border: 0;
+  background: transparent;
 }
 
 .sf-userhdr {
@@ -3641,16 +3654,20 @@
 
 .sf-back {
   margin: 0 0 14px;
-  border: 0;
-  background: none;
-  padding: 0;
-  color: var(--sf-fg-2);
+  border: 1px solid var(--sf-border-1);
+  border-radius: 999px;
+  background: #fff;
+  padding: 9px 15px;
+  color: var(--sf-ink);
   cursor: pointer;
   font: inherit;
   font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(35,31,32,.04);
 }
 
 .sf-back:hover {
+  border-color: var(--sf-orange);
   color: var(--sf-orange);
 }
 
@@ -4889,9 +4906,9 @@
 
   .m-pill {
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     gap: 6px;
-    align-self: baseline;
+    align-self: center;
     border: 1px solid var(--sf-border-1);
     border-radius: 999px;
     background: #fff;
@@ -4922,6 +4939,7 @@
 
   .m-pill-dot {
     display: inline-block;
+    align-self: center;
     flex-shrink: 0;
     width: 5px;
     height: 5px;
@@ -5379,7 +5397,7 @@
     z-index: 2;
     display: inline-flex;
     align-items: center;
-    border: 0;
+    border: 1px solid rgba(255,255,255,.72);
     border-radius: 999px;
     background: rgba(255,255,255,.92);
     color: var(--sf-ink);
@@ -5798,9 +5816,10 @@
 }
 
 .sf-article-grid {
+  width: min(100%, 1028px);
   grid-template-columns: 220px minmax(0, 760px);
   column-gap: 48px;
-  margin-top: 0;
+  margin: 0 auto;
   padding-top: 8px;
 }
 
@@ -5947,18 +5966,18 @@
 
 .sf-about > .sf-about-back,
 .sf-legal > .sf-about-back {
-  display: block;
+  display: inline-flex;
   width: auto;
   margin: 12px var(--sf-gutter) 0;
 }
 
 .sf-article-wrap > .sf-about-back {
   display: inline-flex;
-  margin: 0 0 18px;
+  margin: 0 0 18px calc((100% - min(100%, 1028px)) / 2);
 }
 
 .sf-legal-totop {
-  margin-top: 28px !important;
+  margin-top: 34px !important;
 }
 
 .sf-pro-guidelines {
@@ -6221,11 +6240,11 @@
   .m-drawer::after {
     content: "";
     position: absolute;
-    right: -76px;
-    top: 40px;
-    width: 300px;
-    height: 300px;
-    background: url("/assets/solidfind-logo.svg") center / contain no-repeat;
+    left: 10px;
+    right: 10px;
+    top: 86px;
+    height: min(52vw, 240px);
+    background: url("/assets/solidfind-short-2.svg") center / contain no-repeat;
     filter: brightness(0) invert(1);
     opacity: .1;
     pointer-events: none;
@@ -6342,6 +6361,106 @@
   .m-drawer-legal a {
     color: #fff;
     text-decoration: none;
+  }
+}
+
+@media (max-width: 1107px) {
+  .sf-article-wrap > .sf-about-back {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 639px) {
+  .sf-article {
+    overflow-x: hidden;
+  }
+
+  .sf-article-hero {
+    min-height: 335px;
+    border-radius: 0;
+    padding: 22px 24px 34px;
+  }
+
+  .sf-article-hero .sf-about-hero-bar {
+    margin-bottom: 56px;
+  }
+
+  .sf-article-hero-copy {
+    padding: 36px 0 0;
+  }
+
+  .sf-article-hero-copy h1 {
+    max-width: 12ch;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.05;
+  }
+
+  .sf-article-hero-copy p {
+    max-width: 32ch;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .sf-article-wrap {
+    margin: 0;
+    padding: 24px 24px 42px;
+  }
+
+  .sf-article-wrap > .sf-about-back {
+    margin: 0 0 18px;
+  }
+
+  .sf-article-grid {
+    display: block;
+    width: 100%;
+    padding-top: 0;
+  }
+
+  .sf-article-meta {
+    display: none;
+  }
+
+  .sf-article-col {
+    max-width: none;
+  }
+
+  .sf-article-p {
+    font-size: 17px;
+    line-height: 1.56;
+  }
+
+  .sf-article-intro {
+    font-size: 18px;
+    line-height: 1.55;
+  }
+
+  .sf-article-h2 {
+    margin: 34px 0 14px;
+    font-size: 22px;
+    line-height: 1.22;
+  }
+
+  .sf-article-fig {
+    margin: 26px 0;
+    border-radius: 12px;
+  }
+
+  .sf-article-fig figcaption {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .sf-article-quote {
+    margin: 28px 0;
+  }
+
+  .sf-article-quote p:first-child {
+    font-size: 18px;
+  }
+
+  .sf-ad-banner {
+    margin-top: 34px;
   }
 }
 

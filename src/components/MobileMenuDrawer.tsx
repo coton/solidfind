@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { AuthModal } from "./AuthModal";
 import { useSiteLanguage } from "./LanguageProvider";
 
 const sections = [
@@ -39,21 +40,33 @@ const sections = [
 
 export function MobileMenuButton() {
   const [open, setOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const openBusinessSignup = () => {
+    setOpen(false);
+    setAuthModalOpen(true);
+  };
 
   return (
     <>
       <button type="button" className="m-iconbtn sf-static-menu-btn" aria-label="Menu" aria-expanded={open} onClick={() => setOpen(true)}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
       </button>
-      {open && <MobileMenuDrawer onClose={() => setOpen(false)} />}
+      {open && <MobileMenuDrawer onClose={() => setOpen(false)} onListServices={openBusinessSignup} />}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode="register"
+        initialAccountType="company"
+      />
     </>
   );
 }
 
-function MobileMenuDrawer({ onClose }: { onClose: () => void }) {
+function MobileMenuDrawer({ onClose, onListServices }: { onClose: () => void; onListServices: () => void }) {
   const [openSection, setOpenSection] = useState("cat");
   const { language, setLanguage } = useSiteLanguage();
   const toggleLanguage = () => setLanguage(language === "en" ? "id" : "en");
+  const isBusinessSignupLink = (item: { label: string; href: string }) => item.href === "/register-business";
 
   return (
     <div className="m-overlay">
@@ -84,7 +97,11 @@ function MobileMenuDrawer({ onClose }: { onClose: () => void }) {
               {openSection === section.id && (
                 <div className="m-acc-body">
                   {section.items.map((item) => (
-                    <Link key={item.label} href={item.href} onClick={onClose}>{item.label}</Link>
+                    isBusinessSignupLink(item) ? (
+                      <button key={item.label} type="button" onClick={onListServices}>{item.label}</button>
+                    ) : (
+                      <Link key={item.label} href={item.href} onClick={onClose}>{item.label}</Link>
+                    )
                   ))}
                 </div>
               )}
@@ -93,7 +110,7 @@ function MobileMenuDrawer({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="m-drawer-foot">
-          <Link className="m-btn m-btn-pri m-btn-block" href="/register-business" onClick={onClose}>List your services</Link>
+          <button className="m-btn m-btn-pri m-btn-block" type="button" onClick={onListServices}>List your services</button>
           <Link className="m-btn m-btn-ghost m-btn-block" href="/dashboard" onClick={onClose}>Log in</Link>
         </div>
         <div className="m-drawer-divide" />

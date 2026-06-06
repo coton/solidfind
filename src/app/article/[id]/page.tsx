@@ -6,10 +6,12 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
+import { AuthModal } from "@/components/AuthModal";
 import { MobileMenuButton } from "@/components/MobileMenuDrawer";
 import { useSiteLanguage } from "@/components/LanguageProvider";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 type ArticleLanguage = "en" | "id";
 
@@ -47,11 +49,23 @@ function localizedBlock(block: ArticleBlock, language: ArticleLanguage): Article
   };
 }
 
+function hasIndonesianArticleCopy(article: { titleId?: string; subtitleId?: string; contentBlocks?: ArticleBlock[] }) {
+  if (article.titleId?.trim() || article.subtitleId?.trim()) return true;
+  return (article.contentBlocks ?? []).some((block) => (
+    block.textId?.trim() ||
+    block.headingId?.trim() ||
+    block.imageCaptionId?.trim() ||
+    block.quoteId?.trim() ||
+    block.quoteAuthorId?.trim()
+  ));
+}
+
 export default function ArticlePage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { language } = useSiteLanguage();
+  const { language, setLanguage } = useSiteLanguage();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const id = params?.id as string;
   const fromCategory = searchParams?.get("from");
 
@@ -86,7 +100,9 @@ export default function ArticlePage() {
   }
 
   const handleShare = async () => {
-    const shareTitle = localizedText(language, article.title, (article as any).titleId);
+    const articleHasIndonesianCopy = hasIndonesianArticleCopy(article as any);
+    const articleLanguage = articleHasIndonesianCopy ? language : "en";
+    const shareTitle = localizedText(articleLanguage, article.title, (article as any).titleId);
     if (navigator.share) {
       await navigator.share({ title: shareTitle, url: window.location.href });
     } else {
@@ -94,18 +110,27 @@ export default function ArticlePage() {
     }
   };
 
+  const articleHasIndonesianCopy = hasIndonesianArticleCopy(article as any);
+  const articleLanguage = articleHasIndonesianCopy ? language : "en";
   const displayArticle = {
-    title: localizedText(language, article.title, (article as any).titleId),
-    subtitle: localizedText(language, article.subtitle, (article as any).subtitleId),
+    title: localizedText(articleLanguage, article.title, (article as any).titleId),
+    subtitle: localizedText(articleLanguage, article.subtitle, (article as any).subtitleId),
     coverImageId: article.coverImageId,
     coverImageUrl: article.coverImageUrl,
   };
-  const localizedBlocks = (article.contentBlocks as ArticleBlock[]).map((block) => localizedBlock(block, language));
+  const localizedBlocks = (article.contentBlocks as ArticleBlock[]).map((block) => localizedBlock(block, articleLanguage));
+  const handleListServices = () => setAuthModalOpen(true);
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <main className="sf-about sf-article" data-screen-label="Article">
-        <ArticleHero article={displayArticle} />
+        <ArticleHero
+          article={displayArticle}
+          language={articleLanguage}
+          showLanguageToggle={articleHasIndonesianCopy}
+          onToggleLanguage={() => setLanguage(articleLanguage === "en" ? "id" : "en")}
+          onListServices={handleListServices}
+        />
         <div className="sf-article-wrap">
           <Link className="sf-about-back" href={fromCategory ? `/dashboard/${fromCategory}` : "/"}>← Back</Link>
           <div className="sf-article-grid">
@@ -154,12 +179,30 @@ export default function ArticlePage() {
         </div>
       </main>
 
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode="register"
+        initialAccountType="company"
+      />
       <Footer />
     </div>
   );
 }
 
-function ArticleHero({ article }: { article: { title: string; subtitle?: string; coverImageId?: Id<"_storage">; coverImageUrl?: string } }) {
+function ArticleHero({
+  article,
+  language,
+  showLanguageToggle,
+  onToggleLanguage,
+  onListServices,
+}: {
+  article: { title: string; subtitle?: string; coverImageId?: Id<"_storage">; coverImageUrl?: string };
+  language: ArticleLanguage;
+  showLanguageToggle: boolean;
+  onToggleLanguage: () => void;
+  onListServices: () => void;
+}) {
   const url = useQuery(api.files.getUrl, article.coverImageId ? { storageId: article.coverImageId } : "skip");
   const displayUrl = url ?? article.coverImageUrl ?? "/assets/company-cover-fallback.jpg";
 
@@ -172,10 +215,16 @@ function ArticleHero({ article }: { article: { title: string; subtitle?: string;
           <span className="sf-brand-id sf-about-hero-id">.id</span>
         </Link>
         <div className="sf-shell-actions">
+          {showLanguageToggle && (
+            <button type="button" className="sf-lang" onClick={onToggleLanguage} aria-label={`Switch language to ${language === "en" ? "Indonesian" : "English"}`}>
+              <span className={language === "en" ? "on" : ""}>EN</span>
+              <span className={language === "id" ? "on" : ""}>ID</span>
+            </button>
+          )}
           <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
           </Link>
-          <Link className="sf-btn sf-btn-pri sf-static-list-btn" href="/register-business">List your services</Link>
+          <button type="button" className="sf-btn sf-btn-pri sf-static-list-btn" onClick={onListServices}>List your services</button>
           <MobileMenuButton />
         </div>
       </div>

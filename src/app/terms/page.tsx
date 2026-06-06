@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { Footer } from "@/components/Footer";
+import { AuthModal } from "@/components/AuthModal";
 import { MobileMenuButton } from "@/components/MobileMenuDrawer";
 import { api } from "../../../convex/_generated/api";
 import {
@@ -48,6 +49,7 @@ function sanitizeReturnPath(value: string | null) {
 export default function TermsPage() {
   const searchParams = useSearchParams();
   const [proTermsModalView, setProTermsModalView] = useState<Exclude<TermsView, "main"> | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const requestedView = searchParams.get("view");
   const view: TermsView =
     requestedView === "pro-en" || requestedView === "pro-id" ? requestedView : "main";
@@ -128,7 +130,7 @@ export default function TermsPage() {
               <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
               </Link>
-              <Link className="sf-btn sf-btn-pri sf-static-list-btn" href="/register-business">List your services</Link>
+              <button type="button" className="sf-btn sf-btn-pri sf-static-list-btn" onClick={() => setAuthModalOpen(true)}>List your services</button>
               <MobileMenuButton />
             </div>
           </div>
@@ -264,6 +266,12 @@ export default function TermsPage() {
         </div>
       )}
 
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode="register"
+        initialAccountType="company"
+      />
       <Footer />
     </div>
   );

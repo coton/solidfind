@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ReactNode, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AuthModal } from "@/components/AuthModal";
 import { MobileMenuButton } from "@/components/MobileMenuDrawer";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -167,6 +168,7 @@ export default function AboutPage() {
     }
   };
   const toggleLanguage = () => setLanguage((current) => current === "en" ? "id" : "en");
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -186,7 +188,7 @@ export default function AboutPage() {
               <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
               </Link>
-              <Link className="sf-btn sf-btn-pri sf-static-list-btn" href="/register-business">List your services</Link>
+              <button type="button" className="sf-btn sf-btn-pri sf-static-list-btn" onClick={() => setAuthModalOpen(true)}>List your services</button>
               <MobileMenuButton />
             </div>
           </div>
@@ -247,10 +249,10 @@ export default function AboutPage() {
                 <b>Start browsing listings</b>
                 <span>Find professionals across Bali →</span>
               </Link>
-              <Link className="sf-about-jump-btn" href="/register-business">
+              <button className="sf-about-jump-btn" type="button" onClick={() => setAuthModalOpen(true)}>
                 <b>List your services</b>
                 <span>Create a company profile →</span>
-              </Link>
+              </button>
               <button className="sf-about-jump-btn" type="button" onClick={handleShare}>
                 <b>Share SolidFind</b>
                 <span>Copy or send this page →</span>
@@ -260,6 +262,12 @@ export default function AboutPage() {
         </div>
       </main>
 
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode="register"
+        initialAccountType="company"
+      />
       <Footer />
     </div>
   );

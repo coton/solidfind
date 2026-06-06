@@ -8,6 +8,7 @@ import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
+import { AuthModal } from "@/components/AuthModal";
 import { WriteReviewModal } from "@/components/WriteReviewModal";
 import { ThankYouModal } from "@/components/ThankYouModal";
 import { useProEnabled } from "@/hooks/useProEnabled";
@@ -394,6 +395,7 @@ export default function ProfilePageClient() {
   const proEnabled = useProEnabled();
   const reviewsEnabled = useReviewsEnabled();
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCopiedToast, setShowCopiedToast] = useState(false);
@@ -565,7 +567,7 @@ export default function ProfilePageClient() {
   const handleToggleSave = async () => {
     if (!currentUser || !validId || !company) {
       if (!currentUser) {
-        router.push("/sign-in");
+        setAuthModalOpen(true);
       }
       return;
     }
@@ -1156,6 +1158,12 @@ export default function ProfilePageClient() {
           userId={currentUser?._id}
         />
       )}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode="login"
+        initialAccountType="individual"
+      />
 
       {/* Image Viewer Modal */}
       {showImageViewer && currentImage && (
