@@ -99,3 +99,18 @@ export const isSaved = query({
     return existing !== null;
   },
 });
+
+export const countForCompanySince = query({
+  args: {
+    companyId: v.id("companies"),
+    since: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const saved = await ctx.db
+      .query("savedListings")
+      .withIndex("by_companyId", (q) => q.eq("companyId", args.companyId))
+      .collect();
+
+    return saved.filter((item) => item.savedAt >= args.since).length;
+  },
+});

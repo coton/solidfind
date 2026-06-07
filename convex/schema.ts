@@ -33,6 +33,8 @@ export default defineSchema({
     teamSize: v.optional(v.number()),
     averageProjectMin: v.optional(v.number()),
     averageProjectMax: v.optional(v.number()),
+    projectBudgetMin: v.optional(v.number()),
+    projectBudgetMax: v.optional(v.number()),
     projectSize: v.optional(v.string()), // solo, family, shared
     imageUrl: v.optional(v.string()),
     bookmarkCount: v.optional(v.number()),
@@ -114,6 +116,7 @@ export default defineSchema({
     category: v.string(),
     savedAt: v.number(),
   })
+    .index("by_companyId", ["companyId"])
     .index("by_userId", ["userId"])
     .index("by_userId_companyId", ["userId", "companyId"])
     .index("by_userId_companyId_category", ["userId", "companyId", "category"]),

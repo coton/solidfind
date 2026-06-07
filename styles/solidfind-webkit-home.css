@@ -2709,18 +2709,28 @@
 
 .sf-completion-list li {
   position: relative;
-  padding-left: 18px;
+  min-height: 20px;
+  padding-left: 28px;
 }
 
 .sf-completion-list li::before {
   content: "";
   position: absolute;
-  top: .55em;
+  top: 50%;
   left: 0;
-  width: 7px;
-  height: 7px;
+  display: flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  border: 1.5px solid var(--sf-stone-400);
   border-radius: 50%;
-  background: var(--sf-stone-400);
+  background: #fff;
+  color: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .sf-completion-list li.done {
@@ -2728,7 +2738,10 @@
 }
 
 .sf-completion-list li.done::before {
+  content: "✓";
+  border-color: var(--sf-orange);
   background: var(--sf-orange);
+  color: #fff;
 }
 
 .sf-card-btns {
@@ -2743,6 +2756,8 @@
 
 .sf-dash-card-stat {
   order: 3;
+  display: flex;
+  flex-direction: column;
   min-height: 230px;
 }
 
@@ -2774,7 +2789,7 @@
 
 .sf-stat-trend {
   margin-top: auto;
-  padding-top: 44px;
+  padding-top: 0;
   color: var(--sf-fg-3);
   font-size: 13px;
 }
@@ -2850,7 +2865,7 @@
 .sf-dash-side-insights {
   border: 1px solid var(--sf-border-1);
   border-radius: 14px;
-  background: #fff;
+  background: transparent;
   padding: 22px;
 }
 
@@ -3279,12 +3294,14 @@
 .sf-edit {
   width: 100%;
   margin: 0;
-  padding: 0 0 48px;
+  padding: 88px 0 48px;
 }
 
 .sf-edit-bar {
-  position: sticky;
+  position: fixed;
   top: 68px;
+  right: 0;
+  left: 0;
   z-index: 35;
   display: flex;
   align-items: center;
@@ -3778,10 +3795,10 @@
 }
 
 .sf-edit-budget {
-  border: 0;
-  border-radius: 0;
+  border: 1px solid var(--sf-border-1);
+  border-radius: 14px;
   background: transparent;
-  padding: 0;
+  padding: 24px 28px 28px;
 }
 
 .sf-range {
@@ -3821,14 +3838,14 @@
 
 .sf-range-track {
   position: relative;
-  height: 30px;
+  height: 36px;
 }
 
 .sf-range-rail,
 .sf-range-fill {
   position: absolute;
   top: 50%;
-  height: 4px;
+  height: 5px;
   transform: translateY(-50%);
   border-radius: 999px;
 }
@@ -3840,14 +3857,14 @@
 }
 
 .sf-range-fill {
-  background: var(--sf-orange);
+  background: var(--sf-grad-orange);
 }
 
 .sf-range-track input[type="range"] {
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 30px;
+  height: 36px;
   margin: 0;
   appearance: none;
   -webkit-appearance: none;
@@ -3865,8 +3882,8 @@
 }
 
 .sf-range-track input[type="range"]::-webkit-slider-thumb {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   border: 2px solid var(--sf-orange);
   border-radius: 50%;
   background: #fff;
@@ -3878,8 +3895,8 @@
 }
 
 .sf-range-track input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   border: 2px solid var(--sf-orange);
   border-radius: 50%;
   background: #fff;
@@ -4017,10 +4034,13 @@
 @media (max-width: 880px) {
   .sf-edit {
     margin: 0;
-    padding: 0;
+    padding: 78px 0 0;
   }
 
   .sf-edit-bar {
+    top: 62px;
+    right: 0;
+    left: 0;
     padding: 12px 20px;
     margin-bottom: 0;
     background: #fff;
@@ -6497,10 +6517,18 @@
 }
 
 .sf-pro-guidelines {
-  width: min(100%, 1180px);
+  box-sizing: border-box;
+  width: 100%;
   max-width: 1180px;
   margin: 0 auto;
   padding: 30px var(--sf-gutter) 58px;
+}
+
+@media (min-width: 881px) {
+  .sf-pro-guidelines {
+    padding-right: 40px;
+    padding-left: 40px;
+  }
 }
 
 .sf-pro-guide-hero {

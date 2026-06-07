@@ -115,6 +115,7 @@ export default function CompanyDashboardPage() {
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
   const [proCheckoutError, setProCheckoutError] = useState("");
   const [redirected, setRedirected] = useState(false);
+  const [bookmarkWeekStart] = useState(() => Date.now() - 7 * 24 * 60 * 60 * 1000);
   const router = useRouter();
   const searchParams = useSearchParams();
   const shouldOpenProModal = searchParams.get("pro") === "1";
@@ -165,6 +166,10 @@ export default function CompanyDashboardPage() {
   const company = useQuery(
     api.companies.getByOwner,
     currentUser?._id ? { ownerId: currentUser._id } : "skip"
+  );
+  const bookmarkedThisWeek = useQuery(
+    api.savedListings.countForCompanySince,
+    company?._id ? { companyId: company._id, since: bookmarkWeekStart } : "skip"
   );
 
   const reviews = useQuery(
@@ -256,7 +261,7 @@ export default function CompanyDashboardPage() {
     accountType: isPro ? "PRO" : "FREE",
     stats: {
       bookmarked: company?.bookmarkCount ?? 0,
-      bookmarkedThisWeek: 18,
+      bookmarkedThisWeek: bookmarkedThisWeek ?? 0,
       viewsLastMonth,
       mostSearchedLocation: "KARANGASEM",
     },
@@ -412,25 +417,29 @@ export default function CompanyDashboardPage() {
               </section>
             )}
 
-            {reviewsEnabled && dashboardReviews.length > 0 && (
+            {reviewsEnabled && (
               <section>
                 <div className="m-dash-reviews-head">
                   <h2 className="m-h2">{t("Latest reviews")}</h2>
                   {company?._id && data.reviewCount > 0 && <Link href={buildCompanyReviewsPath(company)}>{t("All")} {data.reviewCount} →</Link>}
                 </div>
                 <div className="m-review-list">
-                  {dashboardReviews.slice(0, 3).map((review, index) => (
-                    <div className={`m-review ${review.isNew ? "new" : ""}`} key={`${review.userName}-${index}`}>
-                      <div className="m-review-top">
-                        <span className="stars">{Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={i} size={12} fill={i < review.rating ? "#f14110" : "none"} color={i < review.rating ? "#f14110" : "#d8d8d8"} />
-                        ))}</span>
-                        <span className="m-review-when">{review.context}</span>
+                  {dashboardReviews.length > 0 ? (
+                    dashboardReviews.slice(0, 3).map((review, index) => (
+                      <div className={`m-review ${review.isNew ? "new" : ""}`} key={`${review.userName}-${index}`}>
+                        <div className="m-review-top">
+                          <span className="stars">{Array.from({ length: 5 }).map((_, i) => (
+                            <Star key={i} size={12} fill={i < review.rating ? "#f14110" : "none"} color={i < review.rating ? "#f14110" : "#d8d8d8"} />
+                          ))}</span>
+                          <span className="m-review-when">{review.context}</span>
+                        </div>
+                        <p>"{review.content}"</p>
+                        <div className="m-review-by">{review.userName}</div>
                       </div>
-                      <p>"{review.content}"</p>
-                      <div className="m-review-by">{review.userName}</div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <div className="m-review"><p>{t("No reviews yet.")}</p></div>
+                  )}
                 </div>
               </section>
             )}
@@ -489,25 +498,29 @@ export default function CompanyDashboardPage() {
                 )}
               </div>
 
-              {reviewsEnabled && dashboardReviews.length > 0 && (
+              {reviewsEnabled && (
                 <section className="sf-dash-reviews">
                   <div className="sf-dash-reviews-head">
                     <h2 className="sf-h2-static">{t("Latest reviews")}</h2>
                     {company?._id && data.reviewCount > 0 && <Link className="sf-btn sf-btn-lg sf-btn-ghost" href={buildCompanyReviewsPath(company)}>{t("See all")} {data.reviewCount} {t("reviews")} →</Link>}
                   </div>
                   <div className="sf-reviews-grid">
-                    {dashboardReviews.slice(0, 4).map((review, index) => (
-                      <div className={`sf-review ${review.isNew ? "is-new" : ""}`} key={`${review.userName}-${index}`}>
-                        <div className="sf-review-top">
-                          <span className="stars">{Array.from({ length: 5 }).map((_, i) => (
-                            <Star key={i} size={13} fill={i < review.rating ? "#f14110" : "none"} color={i < review.rating ? "#f14110" : "#d8d8d8"} />
-                          ))}</span>
-                          <span className="sf-review-when">{review.context}</span>
+                    {dashboardReviews.length > 0 ? (
+                      dashboardReviews.slice(0, 4).map((review, index) => (
+                        <div className={`sf-review ${review.isNew ? "is-new" : ""}`} key={`${review.userName}-${index}`}>
+                          <div className="sf-review-top">
+                            <span className="stars">{Array.from({ length: 5 }).map((_, i) => (
+                              <Star key={i} size={13} fill={i < review.rating ? "#f14110" : "none"} color={i < review.rating ? "#f14110" : "#d8d8d8"} />
+                            ))}</span>
+                            <span className="sf-review-when">{review.context}</span>
+                          </div>
+                          <p>"{review.content}"</p>
+                          <div className="sf-review-by">{review.userName}</div>
                         </div>
-                        <p>"{review.content}"</p>
-                        <div className="sf-review-by">{review.userName}</div>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <div className="sf-review"><p>{t("No reviews yet.")}</p><div className="sf-review-by">{t("Review system enabled")}</div></div>
+                    )}
                   </div>
                 </section>
               )}

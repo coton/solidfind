@@ -19,6 +19,7 @@ import { Star, X, Upload, Lock, Check, ChevronDown, Mail, Phone, Globe, Instagra
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { calculateProfileCompletionScore, getProfileCompletionStatus } from "@/lib/profile-completion.mjs";
+import { PROJECT_BUDGET_TIERS_PLATFORM_KEY, parseProjectBudgetTiers } from "@/lib/project-budget-tiers.mjs";
 
 type SetupOAuthStrategy = Extract<OAuthStrategy, "oauth_google">;
 type ServiceOption = { id: string; label: string };
@@ -35,8 +36,6 @@ const categorySelectOptions: { id: CompanyCategoryId; label: string }[] = [
 ];
 
 const languageOptions = ["Bahasa", "English", "Mandarin", "Japanese", "French", "Dutch"];
-const budgetSteps = [50, 100, 150, 250, 400, 600, 800, 1200, 2000, 3000];
-
 const projectSizeOptions = [
   { id: "any", label: "ANY SIZE" },
   { id: "solo", label: "SOLO/COUPLE (1-2)" },
@@ -211,16 +210,6 @@ function LinkedinGlyph() {
   );
 }
 
-function formatBudgetValue(value: number) {
-  if (value >= 1000) {
-    const formatted = Number.isInteger(value / 1000)
-      ? String(value / 1000)
-      : String(value / 1000).replace(".", ",");
-    return `IDR ${formatted} M`;
-  }
-  return `IDR ${value} jt`;
-}
-
 function CompletionLine({ complete, children }: { complete: boolean; children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-2">
@@ -369,6 +358,11 @@ export default function EditProfilePage() {
   };
 
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
+  const projectBudgetTiersSetting = useQuery(api.platformSettings.get, { key: PROJECT_BUDGET_TIERS_PLATFORM_KEY });
+  const projectBudgetTiers = useMemo(
+    () => parseProjectBudgetTiers(projectBudgetTiersSetting ?? undefined),
+    [projectBudgetTiersSetting]
+  );
   const visibleCategoryOptions = useMemo(() => {
     if (!pageConfigs || pageConfigs.length === 0) {
       return categorySelectOptions.filter((category) => category.id === "construction" || category.id === "renovation");
@@ -418,8 +412,8 @@ export default function EditProfilePage() {
   const [projectsNumber, setProjectsNumber] = useState("");
   const [teamSize, setTeamSize] = useState("");
   const [foundedYear, setFoundedYear] = useState("");
-  const [budgetMinIndex, setBudgetMinIndex] = useState(3);
-  const [budgetMaxIndex, setBudgetMaxIndex] = useState(5);
+  const [budgetMinIndex, setBudgetMinIndex] = useState(9);
+  const [budgetMaxIndex, setBudgetMaxIndex] = useState(10);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["Bahasa", "English"]);
 
   // Toggles
@@ -555,6 +549,18 @@ export default function EditProfilePage() {
   const logoUrl = useStorageUrl(logoId);
   const logoPreviewUrl = logoUrl ?? company?.imageUrl;
   const totalProjectImages = projectImageUrls.length + projectImageIds.length;
+  const findBudgetTierIndex = (rawValue: unknown, fallbackIndex: number) => {
+    const value = Number(rawValue);
+    if (!Number.isFinite(value)) return Math.min(fallbackIndex, projectBudgetTiers.length - 1);
+    const idrValue = value < 100_000 ? value * 1_000_000 : value;
+    const exact = projectBudgetTiers.findIndex((tier) => tier.value === idrValue);
+    if (exact >= 0) return exact;
+    const nearest = projectBudgetTiers.reduce((bestIndex, tier, index) => {
+      const best = projectBudgetTiers[bestIndex];
+      return Math.abs(tier.value - idrValue) < Math.abs(best.value - idrValue) ? index : bestIndex;
+    }, 0);
+    return nearest;
+  };
   const profileCompletionItems = {
     identity: companyName.trim().length >= 2 && selectedLocations.length > 0 && description.trim().length > 0,
     contact: Boolean(phone.trim() || whatsapp.trim()),
@@ -639,17 +645,17 @@ export default function EditProfilePage() {
       setProjectImageIds(company.projectImageIds ?? []);
       setProjectImageUrls(company.projectImageUrls ?? []);
       setFoundedYear(company.since?.toString() ?? "");
-      const nextBudgetMinIndex = budgetSteps.findIndex((value) => value === company.averageProjectMin);
-      const nextBudgetMaxIndex = budgetSteps.findIndex((value) => value === company.averageProjectMax);
-      setBudgetMinIndex(nextBudgetMinIndex >= 0 ? nextBudgetMinIndex : 3);
-      setBudgetMaxIndex(nextBudgetMaxIndex >= 0 ? nextBudgetMaxIndex : 5);
+      const nextBudgetMinIndex = findBudgetTierIndex((company as any).projectBudgetMin ?? company.averageProjectMin, 9);
+      const nextBudgetMaxIndex = findBudgetTierIndex((company as any).projectBudgetMax ?? company.averageProjectMax, 10);
+      setBudgetMinIndex(Math.min(nextBudgetMinIndex, nextBudgetMaxIndex));
+      setBudgetMaxIndex(Math.max(nextBudgetMinIndex, nextBudgetMaxIndex));
       const languages = Array.isArray(company.languagesSpoken) && company.languagesSpoken.length > 0
         ? company.languagesSpoken.filter((language: string) => languageOptions.includes(language))
         : ["Bahasa", "English"];
       setSelectedLanguages(languages.length > 0 ? languages : ["Bahasa", "English"]);
       setIsDirty(false);
     }
-  }, [company]);
+  }, [company, projectBudgetTiers]);
 
   useEffect(() => {
     if (visibleCategoryIds.length === 0 || visibleCategoryIds.includes(primaryCategory)) return;
@@ -759,13 +765,13 @@ export default function EditProfilePage() {
   };
 
   const updateBudgetMin = (index: number) => {
-    const nextIndex = Math.min(index, budgetMaxIndex);
+    const nextIndex = Math.min(Math.max(index, 0), budgetMaxIndex);
     setBudgetMinIndex(nextIndex);
     setIsDirty(true);
   };
 
   const updateBudgetMax = (index: number) => {
-    const nextIndex = Math.max(index, budgetMinIndex);
+    const nextIndex = Math.max(Math.min(index, projectBudgetTiers.length - 1), budgetMinIndex);
     setBudgetMaxIndex(nextIndex);
     setIsDirty(true);
   };
@@ -986,8 +992,8 @@ export default function EditProfilePage() {
           address: normalizedAddress || undefined,
           projects: projectsNumber ? parseInt(projectsNumber) : undefined,
           teamSize: teamSize ? parseInt(teamSize) : undefined,
-          averageProjectMin: budgetSteps[budgetMinIndex],
-          averageProjectMax: budgetSteps[budgetMaxIndex],
+          projectBudgetMin: projectBudgetTiers[budgetMinIndex]?.value,
+          projectBudgetMax: projectBudgetTiers[budgetMaxIndex]?.value,
           phone: phone || undefined,
           email: email || undefined,
           website: website || undefined,
@@ -1025,8 +1031,8 @@ export default function EditProfilePage() {
           isPro: false,
           projects: projectsNumber ? parseInt(projectsNumber) : undefined,
           teamSize: teamSize ? parseInt(teamSize) : undefined,
-          averageProjectMin: budgetSteps[budgetMinIndex],
-          averageProjectMax: budgetSteps[budgetMaxIndex],
+          projectBudgetMin: projectBudgetTiers[budgetMinIndex]?.value,
+          projectBudgetMax: projectBudgetTiers[budgetMaxIndex]?.value,
           phone: phone || undefined,
           email: email || undefined,
           website: website || undefined,
@@ -1548,18 +1554,18 @@ export default function EditProfilePage() {
                 </div>
               </div>
 
-              <span className="sf-edit-sublabel sf-tag-mono sf-budget-label">Average project value</span>
+              <span className="sf-edit-sublabel sf-tag-mono sf-budget-label">Typical project scale</span>
               <div className="sf-edit-budget">
                 <div className="sf-range">
                   <div className="sf-range-vals">
-                    <div><span className="sf-range-cap">Entry</span><b>{formatBudgetValue(budgetSteps[budgetMinIndex])}</b></div>
-                    <div className="r"><span className="sf-range-cap">Exit</span><b>{formatBudgetValue(budgetSteps[budgetMaxIndex])}</b></div>
+                    <div><span className="sf-range-cap">Entry</span><b>{projectBudgetTiers[budgetMinIndex]?.label}</b></div>
+                    <div className="r"><span className="sf-range-cap">Exit</span><b>{projectBudgetTiers[budgetMaxIndex]?.label}</b></div>
                   </div>
                   <div className="sf-range-track">
                     <div className="sf-range-rail" />
-                    <div className="sf-range-fill" style={{ left: `${(budgetMinIndex / (budgetSteps.length - 1)) * 100}%`, right: `${100 - (budgetMaxIndex / (budgetSteps.length - 1)) * 100}%` }} />
-                    <input type="range" min="0" max={budgetSteps.length - 1} step="1" value={budgetMinIndex} onChange={(e) => updateBudgetMin(Number(e.target.value))} aria-label="Minimum budget" />
-                    <input type="range" min="0" max={budgetSteps.length - 1} step="1" value={budgetMaxIndex} onChange={(e) => updateBudgetMax(Number(e.target.value))} aria-label="Maximum budget" />
+                    <div className="sf-range-fill" style={{ left: `${(budgetMinIndex / (projectBudgetTiers.length - 1)) * 100}%`, right: `${100 - (budgetMaxIndex / (projectBudgetTiers.length - 1)) * 100}%` }} />
+                    <input type="range" min="0" max={projectBudgetTiers.length - 1} step="1" value={budgetMinIndex} onChange={(e) => updateBudgetMin(Number(e.target.value))} aria-label="Minimum budget" />
+                    <input type="range" min="0" max={projectBudgetTiers.length - 1} step="1" value={budgetMaxIndex} onChange={(e) => updateBudgetMax(Number(e.target.value))} aria-label="Maximum budget" />
                   </div>
                 </div>
               </div>

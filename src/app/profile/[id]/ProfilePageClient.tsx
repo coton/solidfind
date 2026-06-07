@@ -18,6 +18,7 @@ import { Star } from "lucide-react";
 import { starFillColor, starColor } from "@/lib/starColors";
 import { buildCompanyProfilePath, buildCompanyReviewsPath } from '@/lib/company-profile-url.mjs';
 import { buildCategoryOptionLabelMap, expandProfileProjectSizes, formatProfileCategoryValues } from "@/lib/category-display.mjs";
+import { formatProjectBudgetRange } from "@/lib/project-budget-tiers.mjs";
 
 function toCapitalizedCase(value: string): string {
   return value
@@ -35,6 +36,12 @@ function capitalizedJoin(arr: string[]): string {
 
 function uniqueValues(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean)));
+}
+
+function legacyBudgetToIdr(value: unknown) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue) || numberValue <= 0) return undefined;
+  return numberValue < 100_000 ? numberValue * 1_000_000 : numberValue;
 }
 
 function getCompanyInitials(companyName: string): string {
@@ -693,6 +700,10 @@ export default function ProfilePageClient() {
   const showProfileReviews = reviewsEnabled && (company.reviewCount ?? 0) > 0;
   const accountLabel = proEnabled ? (company.isPro ? t("Pro Account") : t("Free account")) : null;
   const foundedYear = company.since ?? new Date(company.createdAt).getFullYear();
+  const projectBudgetLabel = formatProjectBudgetRange(
+    (company as any).projectBudgetMin ?? legacyBudgetToIdr((company as any).averageProjectMin),
+    (company as any).projectBudgetMax ?? legacyBudgetToIdr((company as any).averageProjectMax),
+  ) || "—";
   const servicesForDetail = workCategoryServices.length > 0
     ? workCategoryServices
     : [{ label: toCapitalizedCase(company.category || "services"), value: toCapitalizedCase(company.subcategory || "general") }];
@@ -836,7 +847,7 @@ export default function ProfilePageClient() {
             <dt>{t("Projects")}</dt><dd>{company.projects != null ? `${company.projects}+ ${t("completed", "selesai")}` : "—"}</dd>
             <dt>{t("Team size")}</dt><dd>{company.teamSize != null ? `${company.teamSize}+ ${t("people", "orang")}` : "—"}</dd>
             <dt>{t("Founded")}</dt><dd>{foundedYear}</dd>
-            <dt>{t("Avg. project")}</dt><dd>IDR 250–600 jt</dd>
+            <dt>{t("Avg. project")}</dt><dd>{projectBudgetLabel}</dd>
             <dt>{t("Languages")}</dt><dd>Bahasa, English</dd>
           </dl>
         </section>
@@ -1079,7 +1090,7 @@ export default function ProfilePageClient() {
                 <dt>{t("Projects")}</dt><dd>{company.projects != null ? `${company.projects}+ ${t("completed", "selesai")}` : "—"}</dd>
                 <dt>{t("Team size")}</dt><dd>{company.teamSize != null ? `${company.teamSize}+ ${t("people", "orang")}` : "—"}</dd>
                 <dt>{t("Founded")}</dt><dd>{foundedYear}</dd>
-                <dt>{t("Avg. project")}</dt><dd>IDR 250–600 jt</dd>
+                <dt>{t("Avg. project")}</dt><dd>{projectBudgetLabel}</dd>
                 <dt>{t("Languages")}</dt><dd>Bahasa, English</dd>
               </dl>
               <hr />

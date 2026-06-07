@@ -10,6 +10,7 @@ import {
   TERMS_ID_TEXT_PLATFORM_SETTING_KEY,
   TERMS_TEXT_PLATFORM_SETTING_KEY,
 } from "../src/lib/terms-content.mjs";
+import { DEFAULT_PROJECT_BUDGET_TIERS, PROJECT_BUDGET_TIERS_PLATFORM_KEY } from "../src/lib/project-budget-tiers.mjs";
 
 export const get = query({
   args: { key: v.string() },
@@ -89,6 +90,7 @@ export const seedDefaults = internalMutation({
       monthly_price_standard: "650000",
       yearly_price_standard: "7000000",
       pricing_phase: "launch",
+      [PROJECT_BUDGET_TIERS_PLATFORM_KEY]: JSON.stringify(DEFAULT_PROJECT_BUDGET_TIERS),
       [TERMS_TEXT_PLATFORM_SETTING_KEY]: DEFAULT_TERMS_TEXT,
       [TERMS_ID_TEXT_PLATFORM_SETTING_KEY]: DEFAULT_TERMS_ID_TEXT,
       [PRO_TERMS_EN_PLATFORM_SETTING_KEY]: DEFAULT_PRO_TERMS_EN_TEXT,
