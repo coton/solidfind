@@ -19,6 +19,7 @@ export default defineSchema({
     ownerId: v.id("users"),
     name: v.string(),
     slug: v.optional(v.string()),
+    roleDiscipline: v.optional(v.string()),
     description: v.optional(v.string()),
     category: v.string(), // construction, renovation, architecture, interior, real-estate
     subcategory: v.optional(v.string()),
@@ -30,6 +31,8 @@ export default defineSchema({
     reviewCount: v.optional(v.number()),
     projects: v.optional(v.number()),
     teamSize: v.optional(v.number()),
+    averageProjectMin: v.optional(v.number()),
+    averageProjectMax: v.optional(v.number()),
     projectSize: v.optional(v.string()), // solo, family, shared
     imageUrl: v.optional(v.string()),
     bookmarkCount: v.optional(v.number()),
@@ -41,6 +44,7 @@ export default defineSchema({
     facebook: v.optional(v.string()),
     linkedin: v.optional(v.string()),
     instagram: v.optional(v.string()),
+    languagesSpoken: v.optional(v.array(v.string())),
     projectSizes: v.optional(v.array(v.string())),
     constructionTypes: v.optional(v.array(v.string())),
     constructionLocations: v.optional(v.array(v.string())),

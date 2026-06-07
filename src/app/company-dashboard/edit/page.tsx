@@ -15,7 +15,7 @@ import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 import { COMPANY_ADDRESS_VALIDATION_MESSAGE, isLikelyCompanyAddress, normalizeCompanyAddress } from "@/lib/company-address-validation.mjs";
 import { MIN_COMPANY_SINCE_YEAR, getMaxCompanySinceYear, isValidCompanySinceYear, normalizeCompanySinceYearInput } from "@/lib/company-since-year-validation.mjs";
 import { isValidEmail, isValidPhone, isValidSocialProfile, isValidWebsite, isValidWhatsApp } from "@/lib/company-contact-validation.mjs";
-import { Star, X, Upload, Lock, Check, ChevronDown } from "lucide-react";
+import { Star, X, Upload, Lock, Check, ChevronDown, Mail, Phone, MessageCircle, Globe, Instagram, Linkedin } from "lucide-react";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { calculateProfileCompletionScore, getProfileCompletionStatus } from "@/lib/profile-completion.mjs";
@@ -24,6 +24,18 @@ type SetupOAuthStrategy = Extract<OAuthStrategy, "oauth_google">;
 type ServiceOption = { id: string; label: string };
 const completeHouseChildren = ["living", "kitchen", "bathroom", "bedroom", "electricity", "plumbing"];
 const categoryPriority = ["construction", "renovation", "architecture", "interior", "real-estate"] as const;
+type CompanyCategoryId = (typeof categoryPriority)[number];
+
+const categorySelectOptions: { id: CompanyCategoryId; label: string }[] = [
+  { id: "construction", label: "Construction" },
+  { id: "renovation", label: "Renovation" },
+  { id: "architecture", label: "Architecture" },
+  { id: "interior", label: "Interior" },
+  { id: "real-estate", label: "Real Estate" },
+];
+
+const languageOptions = ["Bahasa", "English", "Mandarin", "Japanese", "French", "Dutch"];
+const budgetSteps = [50, 100, 150, 250, 400, 600, 800, 1200, 2000, 3000];
 
 const projectSizeOptions = [
   { id: "any", label: "ANY SIZE" },
@@ -165,6 +177,16 @@ function ExternalImagePreview({ src, alt }: { src: string; alt: string }) {
 
 function RequiredStar() {
   return <span className="text-[#f14110]">*</span>;
+}
+
+function formatBudgetValue(value: number) {
+  if (value >= 1000) {
+    const formatted = Number.isInteger(value / 1000)
+      ? String(value / 1000)
+      : String(value / 1000).replace(".", ",");
+    return `IDR ${formatted} M`;
+  }
+  return `IDR ${value} jt`;
 }
 
 function CompletionLine({ complete, children }: { complete: boolean; children: React.ReactNode }) {
@@ -343,6 +365,8 @@ export default function EditProfilePage() {
 
   // Form state
   const [companyName, setCompanyName] = useState("");
+  const [roleDiscipline, setRoleDiscipline] = useState("");
+  const [primaryCategory, setPrimaryCategory] = useState<CompanyCategoryId>("construction");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -355,6 +379,9 @@ export default function EditProfilePage() {
   const [projectsNumber, setProjectsNumber] = useState("");
   const [teamSize, setTeamSize] = useState("");
   const [foundedYear, setFoundedYear] = useState("");
+  const [budgetMinIndex, setBudgetMinIndex] = useState(3);
+  const [budgetMaxIndex, setBudgetMaxIndex] = useState(5);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["Bahasa", "English"]);
 
   // Toggles
   const [selectedProjectSizes, setSelectedProjectSizes] = useState<string[]>([]);
@@ -540,6 +567,8 @@ export default function EditProfilePage() {
       hydratedCompanyIdRef.current = companyKey;
 
       setCompanyName(company.name ?? "");
+      setRoleDiscipline(company.roleDiscipline ?? "");
+      setPrimaryCategory(categoryPriority.includes(company.category as CompanyCategoryId) ? company.category as CompanyCategoryId : "construction");
       setAddress(company.address ?? "");
       setPhone(company.phone ?? "");
       setEmail(company.email ?? "");
@@ -571,6 +600,14 @@ export default function EditProfilePage() {
       setProjectImageIds(company.projectImageIds ?? []);
       setProjectImageUrls(company.projectImageUrls ?? []);
       setFoundedYear(company.since?.toString() ?? "");
+      const nextBudgetMinIndex = budgetSteps.findIndex((value) => value === company.averageProjectMin);
+      const nextBudgetMaxIndex = budgetSteps.findIndex((value) => value === company.averageProjectMax);
+      setBudgetMinIndex(nextBudgetMinIndex >= 0 ? nextBudgetMinIndex : 3);
+      setBudgetMaxIndex(nextBudgetMaxIndex >= 0 ? nextBudgetMaxIndex : 5);
+      const languages = Array.isArray(company.languagesSpoken) && company.languagesSpoken.length > 0
+        ? company.languagesSpoken.filter((language: string) => languageOptions.includes(language))
+        : ["Bahasa", "English"];
+      setSelectedLanguages(languages.length > 0 ? languages : ["Bahasa", "English"]);
       setIsDirty(false);
     }
   }, [company]);
@@ -651,6 +688,42 @@ export default function EditProfilePage() {
       next = ["bali"];
     }
     setSelectedLocations(next);
+  };
+
+  const setCategoryEnabledById = (categoryId: CompanyCategoryId, enabled: boolean) => {
+    if (categoryId === "construction") setConstructionEnabled(enabled);
+    if (categoryId === "renovation") setRenovationEnabled(enabled);
+    if (categoryId === "architecture") setArchitectureEnabled(enabled);
+    if (categoryId === "interior") setInteriorEnabled(enabled);
+    if (categoryId === "real-estate") setRealEstateEnabled(enabled);
+  };
+
+  const handlePrimaryCategoryChange = (categoryId: CompanyCategoryId) => {
+    setPrimaryCategory(categoryId);
+    setCategoryEnabledById(categoryId, true);
+    setIsDirty(true);
+  };
+
+  const toggleLanguage = (language: string) => {
+    setSelectedLanguages((current) => {
+      if (current.includes(language)) {
+        return current.length <= 1 ? current : current.filter((item) => item !== language);
+      }
+      return [...current, language];
+    });
+    setIsDirty(true);
+  };
+
+  const updateBudgetMin = (index: number) => {
+    const nextIndex = Math.min(index, budgetMaxIndex);
+    setBudgetMinIndex(nextIndex);
+    setIsDirty(true);
+  };
+
+  const updateBudgetMax = (index: number) => {
+    const nextIndex = Math.max(index, budgetMinIndex);
+    setBudgetMaxIndex(nextIndex);
+    setIsDirty(true);
   };
 
   const toggleCategoryServiceMatrix = (
@@ -850,23 +923,27 @@ export default function EditProfilePage() {
       const savedArchitecture = architectureEnabled ? normalizeAllSelection(selectedArchitecture, architectureServiceOptions) : [];
       const savedInterior = interiorEnabled ? normalizeAllSelection(selectedInterior, interiorServiceOptions) : [];
       const savedRealEstate = realEstateEnabled ? normalizeAllSelection(selectedRealEstate, realEstateServiceOptions) : [];
-      const primaryCategory = getPrimaryActiveCategory({
+      const inferredPrimaryCategory = getPrimaryActiveCategory({
         construction: savedConstruction,
         renovation: savedRenovation,
         architecture: savedArchitecture,
         interior: savedInterior,
         "real-estate": savedRealEstate,
       });
+      const savedPrimaryCategory = primaryCategory || inferredPrimaryCategory;
       if (company) {
         await updateCompany({
           id: company._id,
           name: companyName || undefined,
-          category: primaryCategory,
+          roleDiscipline: roleDiscipline || undefined,
+          category: savedPrimaryCategory,
           description: description || undefined,
           location: selectedLocations.join(",") || undefined,
           address: normalizedAddress || undefined,
           projects: projectsNumber ? parseInt(projectsNumber) : undefined,
           teamSize: teamSize ? parseInt(teamSize) : undefined,
+          averageProjectMin: budgetSteps[budgetMinIndex],
+          averageProjectMax: budgetSteps[budgetMaxIndex],
           phone: phone || undefined,
           email: email || undefined,
           website: website || undefined,
@@ -874,6 +951,7 @@ export default function EditProfilePage() {
           facebook: facebook || undefined,
           linkedin: linkedin || undefined,
           instagram: instagram || undefined,
+          languagesSpoken: selectedLanguages,
           projectSizes: selectedProjectSizes,
           constructionTypes: savedConstruction,
           constructionLocations: selectedLocations,
@@ -895,17 +973,24 @@ export default function EditProfilePage() {
         await createCompany({
           ownerId: currentUser._id,
           name: companyName || currentUser.companyName || "My Company",
+          roleDiscipline: roleDiscipline || undefined,
           description: description || undefined,
-          category: primaryCategory,
+          category: savedPrimaryCategory,
           location: selectedLocations[0] || "bali",
           address: normalizedAddress || undefined,
           isPro: false,
           projects: projectsNumber ? parseInt(projectsNumber) : undefined,
           teamSize: teamSize ? parseInt(teamSize) : undefined,
+          averageProjectMin: budgetSteps[budgetMinIndex],
+          averageProjectMax: budgetSteps[budgetMaxIndex],
           phone: phone || undefined,
           email: email || undefined,
           website: website || undefined,
           whatsapp: whatsapp || undefined,
+          facebook: facebook || undefined,
+          linkedin: linkedin || undefined,
+          instagram: instagram || undefined,
+          languagesSpoken: selectedLanguages,
           projectSizes: selectedProjectSizes,
           constructionTypes: savedConstruction,
           constructionLocations: selectedLocations,
@@ -1319,300 +1404,149 @@ export default function EditProfilePage() {
           </div>
         </section>
 
-        {/* Action Buttons */}
-        <div className="sf-edit-section sf-edit-inline-actions space-y-3">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setShowDeleteModal(true)} className="sf-edit-delete" type="button">
-              Delete profile
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving || !canSave}
-              className="sf-btn sf-btn-lg sf-btn-pri ml-auto"
-            >
-              {saving ? "Saving..." : "Save changes →"}
-            </button>
+        <section className="sf-edit-section" onChangeCapture={() => setIsDirty(true)}>
+          <span className="sf-tag-mono">Basics</span>
+          <div className="sf-edit-grid3 sf-edit-basics-grid">
+            <label className="sf-field">
+              <span>Company name <RequiredStar /></span>
+              <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} maxLength={50} />
+            </label>
+            <label className="sf-field">
+              <span>Role / discipline</span>
+              <input type="text" value={roleDiscipline} onChange={(e) => setRoleDiscipline(e.target.value)} placeholder="Architecture studio" />
+            </label>
+            <label className="sf-field">
+              <span>Primary category <RequiredStar /></span>
+              <select value={primaryCategory} onChange={(e) => handlePrimaryCategoryChange(e.target.value as CompanyCategoryId)}>
+                {categorySelectOptions.map((category) => (
+                  <option key={category.id} value={category.id}>{category.label}</option>
+                ))}
+              </select>
+            </label>
           </div>
-          {!canSave && (
-            <div className="ml-auto w-full text-right">
-              <p className="text-[9px] text-[#f14110] font-medium tracking-[0.18px] whitespace-pre-line text-right">
-                {bottomHintText}
-              </p>
-            </div>
-          )}
-          {saveError && canSave && (
-            <p className="text-[10px] text-[#F14110] font-medium tracking-[0.2px] text-right">
-              {saveError}
-            </p>
-          )}
-        </div>
 
-        {/* Form Grid */}
-        <section className="sf-edit-section sf-edit-2col" onChangeCapture={() => setIsDirty(true)}>
-          {/* Left Column */}
-          <div className="space-y-4">
-            {/* Logo Upload */}
-            <div className="sf-edit-panel sf-edit-logo-panel">
-              <span className="sf-tag-mono">Company logo</span>
-              <div className="sf-edit-logo-row mt-4">
-                <button
-                  type="button"
-                  onClick={() => logoInputRef.current?.click()}
-                  className="sf-edit-logo"
-                  aria-label="Upload company logo"
-                >
-                  {logoPreviewUrl ? (
-                    logoId ? (
-                      <Image src={logoPreviewUrl} alt="Company logo" fill className="object-cover" />
-                    ) : (
-                      <ExternalImagePreview src={logoPreviewUrl} alt="Company logo" />
-                    )
-                  ) : (
-                    (companyName || company?.name || "?").trim().charAt(0).toUpperCase()
-                  )}
-                  {logoUploading && (
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  )}
-                </button>
-                <div className="sf-edit-logo-copy">
-                  <p className="sf-edit-logo-hint">Optional — we'll use your initial if you don't upload one. Square image, min 240x240px. Shown on your profile and listing card.</p>
-                  <div className="sf-edit-logo-btns">
-                    <button type="button" className="sf-btn sf-btn-ghost" onClick={() => logoInputRef.current?.click()}>Upload logo</button>
+          <div className="sf-edit-2col sf-edit-details-grid">
+            <div>
+              <span className="sf-edit-sublabel sf-tag-mono">Contact channels</span>
+              <div className="sf-edit-socials">
+                <label className={`sf-social-field ${invalidEmail ? "is-invalid" : ""}`}>
+                  <span className="sf-social-field-ico"><Mail size={18} /></span>
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Email" />
+                  <span className="req sf-social-req">*</span>
+                </label>
+                <label className={`sf-social-field ${invalidPhone ? "is-invalid" : ""}`}>
+                  <span className="sf-social-field-ico"><Phone size={18} /></span>
+                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} aria-label="Phone" />
+                  <span className="req sf-social-req">*</span>
+                </label>
+                <label className={`sf-social-field ${invalidWhatsapp ? "is-invalid" : ""}`}>
+                  <span className="sf-social-field-ico"><MessageCircle size={18} /></span>
+                  <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} aria-label="WhatsApp" />
+                  <span className="req sf-social-req">*</span>
+                </label>
+                <label className={`sf-social-field ${invalidWebsite ? "is-invalid" : ""}`}>
+                  <span className="sf-social-field-ico"><Globe size={18} /></span>
+                  <input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="website URL" aria-label="Website" />
+                </label>
+                <label className={`sf-social-field ${invalidFacebook ? "is-invalid" : ""}`}>
+                  <span className="sf-social-field-ico sf-social-letter">f</span>
+                  <input type="text" value={facebook} onChange={(e) => setFacebook(e.target.value)} placeholder="facebook.com/handle" aria-label="Facebook" />
+                </label>
+                <label className={`sf-social-field ${invalidInstagram ? "is-invalid" : ""}`}>
+                  <span className="sf-social-field-ico"><Instagram size={18} /></span>
+                  <input type="text" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="instagram.com/handle" aria-label="Instagram" />
+                </label>
+                <label className={`sf-social-field ${invalidLinkedin ? "is-invalid" : ""}`}>
+                  <span className="sf-social-field-ico"><Linkedin size={18} /></span>
+                  <input type="text" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} placeholder="company name" aria-label="LinkedIn" />
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <span className="sf-edit-sublabel sf-tag-mono">Company details</span>
+              <div className="sf-edit-details">
+                <div className="sf-edit-grid2">
+                  <label className="sf-field">
+                    <span>Head-office region</span>
+                    <select value={selectedLocations[0] ?? "bali"} onChange={(e) => setSelectedLocations([e.target.value])}>
+                      {locationOptions.map((location) => (
+                        <option key={location.id} value={location.id}>{location.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="sf-field">
+                    <span>Address <RequiredStar /></span>
+                    <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} aria-invalid={invalidAddress} />
+                  </label>
+                </div>
+                <div className="sf-edit-grid3">
+                  <label className="sf-field">
+                    <span>Projects <RequiredStar /></span>
+                    <input type="number" value={projectsNumber} onChange={(e) => setProjectsNumber(e.target.value)} min={0} />
+                  </label>
+                  <label className="sf-field">
+                    <span>Team size <RequiredStar /></span>
+                    <input type="number" value={teamSize} onChange={(e) => setTeamSize(e.target.value)} min={0} />
+                  </label>
+                  <label className="sf-field">
+                    <span>Founded</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={foundedYear}
+                      onChange={(e) => setFoundedYear(normalizeCompanySinceYearInput(e.target.value))}
+                      minLength={4}
+                      maxLength={4}
+                      aria-invalid={invalidFoundedYear}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <span className="sf-edit-sublabel sf-tag-mono sf-budget-label">Average project value</span>
+              <div className="sf-edit-budget">
+                <div className="sf-range">
+                  <div className="sf-range-vals">
+                    <div><span className="sf-range-cap">Entry</span><b>{formatBudgetValue(budgetSteps[budgetMinIndex])}</b></div>
+                    <div className="r"><span className="sf-range-cap">Exit</span><b>{formatBudgetValue(budgetSteps[budgetMaxIndex])}</b></div>
+                  </div>
+                  <div className="sf-range-track">
+                    <div className="sf-range-rail" />
+                    <div className="sf-range-fill" style={{ left: `${(budgetMinIndex / (budgetSteps.length - 1)) * 100}%`, right: `${100 - (budgetMaxIndex / (budgetSteps.length - 1)) * 100}%` }} />
+                    <input type="range" min="0" max={budgetSteps.length - 1} step="1" value={budgetMinIndex} onChange={(e) => updateBudgetMin(Number(e.target.value))} aria-label="Minimum budget" />
+                    <input type="range" min="0" max={budgetSteps.length - 1} step="1" value={budgetMaxIndex} onChange={(e) => updateBudgetMax(Number(e.target.value))} aria-label="Maximum budget" />
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* Company Name */}
-            <div className="sf-edit-panel">
-              <span className="sf-tag-mono">Basics</span>
-              <div className="mt-4 space-y-4">
-            <div className="sf-edit-field">
-              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                Company Name / Nama Perusahaan <span className="text-[#f14110]">(*)</span>
-              </label>
-              <input
-                type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="(50 Letters max / Maksimal 50 huruf)"
-                maxLength={50}
-                className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
-              />
-            </div>
-            </div>
-
-            {/* Address */}
-            <div>
-              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                Address / Alamat <span className="text-[#f14110]">(*)</span>
-              </label>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => {
-                  setAddress(e.target.value);
-                  setIsDirty(true);
-                }}
-                placeholder="Jl. Raya Seminyak No.17, Badung, Bali"
-                aria-invalid={invalidAddress}
-                className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidAddress ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
-              />
-              {invalidAddress && (
-                <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">
-                  {COMPANY_ADDRESS_VALIDATION_MESSAGE}
-                </p>
-              )}
-            </div>
-
-            {/* Phone & Email */}
-            <div className="sf-edit-grid2">
-              <div>
-                <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Phone / Telepon <span className="text-[#f14110]">(*)</span>
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+62 812 0000 0000"
-                  aria-invalid={invalidPhone}
-                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidPhone ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
-                />
-                {invalidPhone && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular phone number, with or without country code.</p>}
-              </div>
-              <div>
-                <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  E-mail <span className="text-[#f14110]">(*)</span>
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  aria-invalid={invalidEmail}
-                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidEmail ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
-                />
-                {invalidEmail && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular email address.</p>}
-              </div>
-            </div>
-
-            {/* Website & WhatsApp */}
-            <div className="sf-edit-grid2">
-              <div>
-                <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Website
-                </label>
-                <input
-                  type="url"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                  placeholder="https://example.com"
-                  aria-invalid={invalidWebsite}
-                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidWebsite ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
-                />
-                {invalidWebsite && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular website URL.</p>}
-              </div>
-              <div>
-                <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Whatsapp <span className="text-[#f14110]">(*)</span>
-                </label>
-                <input
-                  type="tel"
-                  value={whatsapp}
-                  onChange={(e) => setWhatsapp(e.target.value)}
-                  placeholder="6281200000000"
-                  aria-invalid={invalidWhatsapp}
-                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidWhatsapp ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
-                />
-                {invalidWhatsapp && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use country code without +, followed by the phone number.</p>}
-              </div>
-            </div>
-
-            {/* Facebook & LinkedIn */}
-            <div className="sf-edit-grid2">
-              <div>
-                <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Facebook
-                </label>
-                <input
-                  type="url"
-                  value={facebook}
-                  onChange={(e) => setFacebook(e.target.value)}
-                  aria-invalid={invalidFacebook}
-                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidFacebook ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
-                />
-                {invalidFacebook && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular Facebook URL or handle.</p>}
-              </div>
-              <div>
-                <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  LinkedIn
-                </label>
-                <input
-                  type="url"
-                  value={linkedin}
-                  onChange={(e) => setLinkedin(e.target.value)}
-                  aria-invalid={invalidLinkedin}
-                  className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidLinkedin ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
-                />
-                {invalidLinkedin && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular LinkedIn URL or handle.</p>}
-              </div>
-            </div>
-
-            {/* Instagram */}
-            <div>
-              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                Instagram
-              </label>
-              <input
-                type="text"
-                value={instagram}
-                onChange={(e) => setInstagram(e.target.value)}
-                placeholder="@username or https://instagram.com/username"
-                aria-invalid={invalidInstagram}
-                className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] placeholder:text-[#333]/40 outline-none focus:border-[#f14110] transition-colors ${invalidInstagram ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
-              />
-              {invalidInstagram && <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">Use a regular Instagram URL or handle.</p>}
-            </div>
-              </div>
-
           </div>
+        </section>
 
-          {/* Right Column */}
-          <div className="space-y-4">
-            {/* Description */}
-            <div className="sf-edit-panel">
-              <span className="sf-tag-mono">Description</span>
-              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                Company introduction as well as description of your project range / Pengenalan perusahaan serta deskripsi jangkauan proyek Anda <span className="text-[#f14110]">(*)</span>
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={6}
-                className="sf-edit-textarea"
-              />
+        <section className="sf-edit-section">
+          <div className="sf-edit-2col sf-edit-desc">
+            <div>
+              <span className="sf-tag-mono">Description <RequiredStar /></span>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={7} className="sf-edit-textarea" />
               <div className="sf-edit-hint">{description.length} characters · appears on your public profile</div>
             </div>
-
-            {/* Projects & Team */}
-            <div className="sf-edit-panel">
-              <span className="sf-tag-mono">Company details</span>
-            <div className="sf-edit-grid3 mt-4">
-              <div>
-                <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Project number / Nomor proyek <span className="text-[#f14110]">(*)</span>
-                </label>
-                <input
-                  type="number"
-                  value={projectsNumber}
-                  onChange={(e) => setProjectsNumber(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                  Team size / Ukuran tim <span className="text-[#f14110]">(*)</span>
-                </label>
-                <input
-                  type="number"
-                  value={teamSize}
-                  onChange={(e) => setTeamSize(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors"
-                />
-              </div>
             <div>
-              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-1">
-                Founded year / Tahun berdiri
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]{4}"
-                value={foundedYear}
-                onChange={(e) => {
-                  setFoundedYear(normalizeCompanySinceYearInput(e.target.value));
-                  setIsDirty(true);
-                }}
-                placeholder="e.g. 2015"
-                minLength={4}
-                maxLength={4}
-                aria-invalid={invalidFoundedYear}
-                className={`w-full h-10 px-3 bg-white border rounded-[6px] text-[11px] text-[#333] outline-none focus:border-[#f14110] transition-colors ${invalidFoundedYear ? 'border-[#f14110]' : 'border-[#e4e4e4]'}`}
-              />
-              {invalidFoundedYear && (
-                <p className="mt-1 text-[9px] leading-[13px] text-[#f14110]">
-                  Enter 4 digits from {MIN_COMPANY_SINCE_YEAR} to {maxCompanySinceYear}.
-                </p>
-              )}
+              <span className="sf-tag-mono">Languages spoken</span>
+              <div className="sf-langchips">
+                {languageOptions.map((language) => {
+                  const active = selectedLanguages.includes(language);
+                  return (
+                    <button type="button" key={language} className={`sf-langchip ${active ? "on" : ""}`} onClick={() => toggleLanguage(language)}>
+                      {active && <span className="sf-langchip-tick">✓</span>}{language}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            </div>
-            </div>
+          </div>
+        </section>
 
-            {/* Project Pictures Upload */}
+        <section className="sf-edit-section">
             <div className="sf-edit-panel">
               <div className="flex items-baseline justify-between gap-4">
                 <span className="sf-tag-mono">Photos & videos</span>
@@ -1686,7 +1620,6 @@ export default function EditProfilePage() {
                 </p>
               )}
             </div>
-          </div>
         </section>
 
 
