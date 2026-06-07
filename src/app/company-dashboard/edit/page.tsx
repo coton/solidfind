@@ -15,7 +15,7 @@ import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 import { COMPANY_ADDRESS_VALIDATION_MESSAGE, isLikelyCompanyAddress, normalizeCompanyAddress } from "@/lib/company-address-validation.mjs";
 import { MIN_COMPANY_SINCE_YEAR, getMaxCompanySinceYear, isValidCompanySinceYear, normalizeCompanySinceYearInput } from "@/lib/company-since-year-validation.mjs";
 import { isValidEmail, isValidPhone, isValidSocialProfile, isValidWebsite, isValidWhatsApp } from "@/lib/company-contact-validation.mjs";
-import { Star, X, Upload, Lock, Check, ChevronDown, Mail, Phone, MessageCircle, Globe, Instagram, Linkedin } from "lucide-react";
+import { Star, X, Upload, Lock, Check, ChevronDown, Mail, Phone, Globe, Instagram } from "lucide-react";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { calculateProfileCompletionScore, getProfileCompletionStatus } from "@/lib/profile-completion.mjs";
@@ -127,6 +127,18 @@ function normalizeAllSelection(selected: string[], options: ServiceOption[]) {
   return selected.filter((id) => options.some((option) => option.id === id));
 }
 
+function resolveCategorySelection(enabled: boolean, selected: string[], options: ServiceOption[]) {
+  if (!enabled) return [];
+  const normalized = normalizeAllSelection(selected, options);
+  if (normalized.length > 0) return normalized;
+  const allId = getAllOptionId(options);
+  return allId ? [allId] : options[0]?.id ? [options[0].id] : [];
+}
+
+function hasEnabledCategorySelection(enabled: boolean, selected: string[], options: ServiceOption[]) {
+  return resolveCategorySelection(enabled, selected, options).length > 0;
+}
+
 function getPrimaryActiveCategory(categories: Record<(typeof categoryPriority)[number], string[]>) {
   return categoryPriority.find((category) => categories[category].length > 0) ?? "construction";
 }
@@ -177,6 +189,26 @@ function ExternalImagePreview({ src, alt }: { src: string; alt: string }) {
 
 function RequiredStar() {
   return <span className="text-[#f14110]">*</span>;
+}
+
+function WhatsappGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+      <path d="M12 2a10 10 0 0 0-8.49 15.28L2 22l4.86-1.43A10 10 0 1 0 12 2Zm0 1.9a8.1 8.1 0 0 1 6.86 12.43 8.1 8.1 0 0 1-10.27 2.9l-.33-.16-2.86.84.88-2.73-.18-.34A8.1 8.1 0 0 1 12 3.9Zm-3.2 4.36c-.2 0-.52.07-.8.39-.28.31-1.05 1.03-1.05 2.5 0 1.48 1.08 2.91 1.23 3.11.15.2 2.08 3.34 5.15 4.55 2.55 1 3.07.8 3.62.75.56-.05 1.8-.73 2.05-1.44.25-.7.25-1.31.18-1.44-.08-.13-.28-.2-.58-.36-.3-.15-1.8-.88-2.07-.98-.28-.1-.48-.15-.68.15-.2.3-.78.98-.95 1.18-.18.2-.35.22-.65.08-.3-.15-1.27-.47-2.42-1.49-.9-.8-1.5-1.78-1.68-2.08-.17-.3-.02-.47.13-.62.13-.13.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.68-1.64-.93-2.25-.24-.58-.49-.5-.68-.51Z" />
+    </svg>
+  );
+}
+
+function LinkedinGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="3.5" />
+      <path d="M8 10v6" />
+      <path d="M8 7.2v.1" />
+      <path d="M12 16v-3.2c0-1.4.8-2.3 2.1-2.3s2.1.9 2.1 2.5v3" />
+      <path d="M12 10.7V16" />
+    </svg>
+  );
 }
 
 function formatBudgetValue(value: number) {
@@ -337,7 +369,14 @@ export default function EditProfilePage() {
   };
 
   const pageConfigs = useQuery(api.pageConfigs.listVisible);
-  const isCategoryVisible = (catId: string) => pageConfigs?.some(p => p.categoryId === catId) ?? false;
+  const visibleCategoryOptions = useMemo(() => {
+    if (!pageConfigs || pageConfigs.length === 0) {
+      return categorySelectOptions.filter((category) => category.id === "construction" || category.id === "renovation");
+    }
+    return categorySelectOptions.filter((category) => pageConfigs.some((page) => page.categoryId === category.id));
+  }, [pageConfigs]);
+  const visibleCategoryIds = useMemo(() => visibleCategoryOptions.map((category) => category.id), [visibleCategoryOptions]);
+  const isCategoryVisible = (catId: string) => visibleCategoryIds.includes(catId as CompanyCategoryId);
   const getCategoryServiceOptions = useMemo(() => {
     return (categoryId: string, fallback: ServiceOption[]) => {
       const dynamicOptions = pageConfigs
@@ -434,11 +473,11 @@ export default function EditProfilePage() {
   } | null>(null);
 
   // Mandatory fields validation
-  const hasCategory = (constructionEnabled && selectedConstruction.length > 0)
-    || (renovationEnabled && selectedRenovation.length > 0)
-    || (architectureEnabled && selectedArchitecture.length > 0)
-    || (interiorEnabled && selectedInterior.length > 0)
-    || (realEstateEnabled && selectedRealEstate.length > 0);
+  const hasCategory = hasEnabledCategorySelection(constructionEnabled, selectedConstruction, constructionServiceOptions)
+    || hasEnabledCategorySelection(renovationEnabled, selectedRenovation, renovationServiceOptions)
+    || hasEnabledCategorySelection(architectureEnabled, selectedArchitecture, architectureServiceOptions)
+    || hasEnabledCategorySelection(interiorEnabled, selectedInterior, interiorServiceOptions)
+    || hasEnabledCategorySelection(realEstateEnabled, selectedRealEstate, realEstateServiceOptions);
   const missingProjectSize = selectedProjectSizes.length === 0;
   const missingLocation = selectedLocations.length === 0;
   const missingDescription = !description.trim();
@@ -529,11 +568,11 @@ export default function EditProfilePage() {
     projectMedia: totalProjectImages > 0,
   };
   const activeCategories = [
-    constructionEnabled && selectedConstruction.length > 0 ? "construction" : null,
-    renovationEnabled && selectedRenovation.length > 0 ? "renovation" : null,
-    architectureEnabled && selectedArchitecture.length > 0 ? "architecture" : null,
-    interiorEnabled && selectedInterior.length > 0 ? "interior" : null,
-    realEstateEnabled && selectedRealEstate.length > 0 ? "real-estate" : null,
+    hasEnabledCategorySelection(constructionEnabled, selectedConstruction, constructionServiceOptions) ? "construction" : null,
+    hasEnabledCategorySelection(renovationEnabled, selectedRenovation, renovationServiceOptions) ? "renovation" : null,
+    hasEnabledCategorySelection(architectureEnabled, selectedArchitecture, architectureServiceOptions) ? "architecture" : null,
+    hasEnabledCategorySelection(interiorEnabled, selectedInterior, interiorServiceOptions) ? "interior" : null,
+    hasEnabledCategorySelection(realEstateEnabled, selectedRealEstate, realEstateServiceOptions) ? "real-estate" : null,
   ].filter(Boolean) as string[];
   const profileCompletionScore = calculateProfileCompletionScore(
     {
@@ -611,6 +650,11 @@ export default function EditProfilePage() {
       setIsDirty(false);
     }
   }, [company]);
+
+  useEffect(() => {
+    if (visibleCategoryIds.length === 0 || visibleCategoryIds.includes(primaryCategory)) return;
+    setPrimaryCategory(visibleCategoryIds[0]);
+  }, [primaryCategory, visibleCategoryIds]);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -918,11 +962,11 @@ export default function EditProfilePage() {
 
     setSaving(true);
     try {
-      const savedConstruction = constructionEnabled ? normalizeAllSelection(selectedConstruction, constructionServiceOptions) : [];
-      const savedRenovation = renovationEnabled ? normalizeAllSelection(selectedRenovation, renovationServiceOptions) : [];
-      const savedArchitecture = architectureEnabled ? normalizeAllSelection(selectedArchitecture, architectureServiceOptions) : [];
-      const savedInterior = interiorEnabled ? normalizeAllSelection(selectedInterior, interiorServiceOptions) : [];
-      const savedRealEstate = realEstateEnabled ? normalizeAllSelection(selectedRealEstate, realEstateServiceOptions) : [];
+      const savedConstruction = resolveCategorySelection(constructionEnabled, selectedConstruction, constructionServiceOptions);
+      const savedRenovation = resolveCategorySelection(renovationEnabled, selectedRenovation, renovationServiceOptions);
+      const savedArchitecture = resolveCategorySelection(architectureEnabled, selectedArchitecture, architectureServiceOptions);
+      const savedInterior = resolveCategorySelection(interiorEnabled, selectedInterior, interiorServiceOptions);
+      const savedRealEstate = resolveCategorySelection(realEstateEnabled, selectedRealEstate, realEstateServiceOptions);
       const inferredPrimaryCategory = getPrimaryActiveCategory({
         construction: savedConstruction,
         renovation: savedRenovation,
@@ -930,7 +974,7 @@ export default function EditProfilePage() {
         interior: savedInterior,
         "real-estate": savedRealEstate,
       });
-      const savedPrimaryCategory = primaryCategory || inferredPrimaryCategory;
+      const savedPrimaryCategory = visibleCategoryIds.includes(primaryCategory) ? primaryCategory : inferredPrimaryCategory;
       if (company) {
         await updateCompany({
           id: company._id,
@@ -1413,12 +1457,12 @@ export default function EditProfilePage() {
             </label>
             <label className="sf-field">
               <span>Role / discipline</span>
-              <input type="text" value={roleDiscipline} onChange={(e) => setRoleDiscipline(e.target.value)} placeholder="Architecture studio" />
+              <input type="text" value={roleDiscipline} onChange={(e) => setRoleDiscipline(e.target.value)} placeholder="Kontraktor" />
             </label>
             <label className="sf-field">
               <span>Primary category <RequiredStar /></span>
               <select value={primaryCategory} onChange={(e) => handlePrimaryCategoryChange(e.target.value as CompanyCategoryId)}>
-                {categorySelectOptions.map((category) => (
+                {visibleCategoryOptions.map((category) => (
                   <option key={category.id} value={category.id}>{category.label}</option>
                 ))}
               </select>
@@ -1440,7 +1484,7 @@ export default function EditProfilePage() {
                   <span className="req sf-social-req">*</span>
                 </label>
                 <label className={`sf-social-field ${invalidWhatsapp ? "is-invalid" : ""}`}>
-                  <span className="sf-social-field-ico"><MessageCircle size={18} /></span>
+                  <span className="sf-social-field-ico"><WhatsappGlyph /></span>
                   <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} aria-label="WhatsApp" />
                   <span className="req sf-social-req">*</span>
                 </label>
@@ -1457,7 +1501,7 @@ export default function EditProfilePage() {
                   <input type="text" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="instagram.com/handle" aria-label="Instagram" />
                 </label>
                 <label className={`sf-social-field ${invalidLinkedin ? "is-invalid" : ""}`}>
-                  <span className="sf-social-field-ico"><Linkedin size={18} /></span>
+                  <span className="sf-social-field-ico"><LinkedinGlyph /></span>
                   <input type="text" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} placeholder="company name" aria-label="LinkedIn" />
                 </label>
               </div>
@@ -1669,7 +1713,7 @@ export default function EditProfilePage() {
           </div>
 
           <div className="sf-matrix-cats">
-            {renderCategoryMatrix({
+            {isCategoryVisible("construction") && renderCategoryMatrix({
               id: "construction",
               title: "Construction",
               enabled: constructionEnabled,
@@ -1678,7 +1722,7 @@ export default function EditProfilePage() {
               setSelected: setSelectedConstruction,
               options: constructionServiceOptions,
             })}
-            {renderCategoryMatrix({
+            {isCategoryVisible("renovation") && renderCategoryMatrix({
               id: "renovation",
               title: "Renovation",
               enabled: renovationEnabled,
@@ -2074,28 +2118,17 @@ export default function EditProfilePage() {
       )}
 
       {pendingNavigationHref && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/40" onClick={cancelPendingNavigation} />
-          <div className="relative w-full max-w-[360px] rounded-[6px] bg-white p-6 text-center shadow-lg">
-            <h3 className="mb-3 text-[18px] font-bold tracking-[0.36px] text-[#333]">Unsaved changes</h3>
-            <p className="mb-6 text-[12px] leading-[19px] tracking-[0.24px] text-[#333]/60">
-              You have unsaved changes on this profile. Leave without saving?
-            </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <button
-                type="button"
-                onClick={cancelPendingNavigation}
-                className="flex h-10 min-w-[130px] items-center justify-center rounded-full border border-[#333] px-6 text-[11px] font-medium tracking-[0.22px] text-[#333] transition-colors hover:border-[#f14110] hover:text-[#f14110]"
-              >
-                Stay
-              </button>
-              <button
-                type="button"
-                onClick={confirmPendingNavigation}
-                className="flex h-10 min-w-[130px] items-center justify-center rounded-full bg-[#f14110] px-6 text-[11px] font-medium tracking-[0.22px] text-white transition-colors hover:bg-[#d93a0e]"
-              >
-                Leave
-              </button>
+        <div className="sf-modal-scrim open" onClick={cancelPendingNavigation}>
+          <div className="sf-modal sf-modal-confirm sf-modal-unsaved" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="sf-modal-x" onClick={cancelPendingNavigation} aria-label="Close">×</button>
+            <div className="sf-modal-head">
+              <span className="sf-tag-mono">Unsaved changes</span>
+              <h2>Leave this page?</h2>
+              <p>You have unsaved changes on this profile. Leave without saving?</p>
+            </div>
+            <div className="sf-modal-actions">
+              <button type="button" onClick={cancelPendingNavigation} className="sf-btn sf-btn-lg sf-btn-ghost">Stay</button>
+              <button type="button" onClick={confirmPendingNavigation} className="sf-btn sf-btn-lg sf-btn-pri">Leave →</button>
             </div>
           </div>
         </div>

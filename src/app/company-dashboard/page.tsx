@@ -256,6 +256,7 @@ export default function CompanyDashboardPage() {
     accountType: isPro ? "PRO" : "FREE",
     stats: {
       bookmarked: company?.bookmarkCount ?? 0,
+      bookmarkedThisWeek: 18,
       viewsLastMonth,
       mostSearchedLocation: "KARANGASEM",
     },
@@ -389,6 +390,7 @@ export default function CompanyDashboardPage() {
                 <span className="m-eyebrow">{t("Saved by clients")}</span>
                 <div className="m-stat-num">{data.stats.bookmarked}</div>
                 <div className="m-stat-label">{t("times bookmarked")}</div>
+                <div className="sf-stat-trend"><span>▲</span> {data.stats.bookmarkedThisWeek} {t("this week")}</div>
               </section>
               {isPro && proEnabled && (
                 <section className="m-card">
@@ -474,6 +476,7 @@ export default function CompanyDashboardPage() {
                   <span className="sf-tag-mono">{t("Saved by clients")}</span>
                   <div className="sf-stat-num">{data.stats.bookmarked}</div>
                   <div className="sf-stat-label">{t("times your company was bookmarked")}</div>
+                  <div className="sf-stat-trend"><span>▲</span> {data.stats.bookmarkedThisWeek} {t("this week")}</div>
                 </section>
 
                 {!isPro && proEnabled && (
@@ -511,7 +514,7 @@ export default function CompanyDashboardPage() {
             </div>
 
             {isPro && proEnabled && (
-              <aside className="sf-dash-side">
+              <aside className="sf-dash-side sf-dash-side-insights">
                 <div className="sf-dash-side-head">
                   <h2 className="sf-h2-static">{t("Pro insights")}</h2>
                   <span className="sf-pro-pill">{t("Pro")}</span>
