@@ -357,26 +357,20 @@ test('company dashboard pro modal reads platform pricing and starts Midtrans che
 
   assert.match(
     source,
-    /formatProPrice\(yearlyPrice, "yearly"\)/,
-    'Expected the Pro modal to abbreviate yearly pricing'
+    /ProSubscriptionModal[\s\S]*monthlyAmount=\{parseRupiahAmount\(monthlyPrice\)\}[\s\S]*yearlyAmount=\{parseRupiahAmount\(yearlyPrice\)\}/,
+    'Expected the dashboard to use the shared WebKit Pro modal with admin pricing'
   );
 
   assert.match(
     source,
-    /href="\/terms\?view=pro-en&from=%2Fcompany-dashboard%3Fpro%3D1"[\s\S]*Terms of Services[\s\S]*href="\/terms\?view=pro-id&from=%2Fcompany-dashboard%3Fpro%3D1"[\s\S]*Ketentuan penggunaan/,
-    'Expected the Pro modal to abbreviate yearly pricing and redirect to both Pro Terms versions'
-  );
-
-  assert.match(
-    source,
-    /!proTermsView && <div className="absolute top-0 left-0 w-\[150px\] h-\[150px\] overflow-hidden">/,
-    'Expected the launch discount ribbon to hide while Pro Terms are open'
+    /onBillingCycleChange=\{setBillingPlan\}[\s\S]*onBuy=\{handleBuyPro\}/,
+    'Expected the shared Pro modal to update billing plan and call the checkout handler'
   );
 
   assert.match(
     source,
     /proTermsView \? "max-w-\[540px\]" : "max-w-\[440px\]"/,
-    'Expected only the Pro Terms modal view to use the wider 540px layout'
+    'Expected the Pro Terms modal view to keep its wider 540px layout'
   );
 
   assert.match(
@@ -385,10 +379,11 @@ test('company dashboard pro modal reads platform pricing and starts Midtrans che
     'Expected the Pro Terms modal view to expose an EN/ID language switch'
   );
 
+  const proModalSource = read('src/components/ProSubscriptionModal.tsx');
   assert.match(
-    source,
-    /max-w-\[440px\][\s\S]*max-w-\[260px\] space-y-3[\s\S]*text-\[22px\] font-bold leading-\[26px\][\s\S]*formatProPrice\(yearlyPrice, "yearly"\)/,
-    'Expected the Pro modal to be narrower and stack smaller pricing rows vertically'
+    proModalSource,
+    /formatRupiahCompact\(yearlyAmount\)[\s\S]*Pro Terms of Service/,
+    'Expected the shared WebKit Pro modal to abbreviate yearly pricing and link to Pro Terms'
   );
 });
 

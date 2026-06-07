@@ -15,7 +15,7 @@ import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 import { COMPANY_ADDRESS_VALIDATION_MESSAGE, isLikelyCompanyAddress, normalizeCompanyAddress } from "@/lib/company-address-validation.mjs";
 import { MIN_COMPANY_SINCE_YEAR, getMaxCompanySinceYear, isValidCompanySinceYear, normalizeCompanySinceYearInput } from "@/lib/company-since-year-validation.mjs";
 import { isValidEmail, isValidPhone, isValidSocialProfile, isValidWebsite, isValidWhatsApp } from "@/lib/company-contact-validation.mjs";
-import { Star, X, Upload, Lock, Check, ChevronDown, Mail, Phone, Globe, Instagram } from "lucide-react";
+import { Star, X, Upload, Lock, Check, ChevronDown, Phone, Globe, Instagram } from "lucide-react";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { calculateProfileCompletionScore, getProfileCompletionStatus } from "@/lib/profile-completion.mjs";
@@ -193,7 +193,16 @@ function RequiredStar() {
 function WhatsappGlyph() {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-      <path d="M12 2a10 10 0 0 0-8.49 15.28L2 22l4.86-1.43A10 10 0 1 0 12 2Zm0 1.9a8.1 8.1 0 0 1 6.86 12.43 8.1 8.1 0 0 1-10.27 2.9l-.33-.16-2.86.84.88-2.73-.18-.34A8.1 8.1 0 0 1 12 3.9Zm-3.2 4.36c-.2 0-.52.07-.8.39-.28.31-1.05 1.03-1.05 2.5 0 1.48 1.08 2.91 1.23 3.11.15.2 2.08 3.34 5.15 4.55 2.55 1 3.07.8 3.62.75.56-.05 1.8-.73 2.05-1.44.25-.7.25-1.31.18-1.44-.08-.13-.28-.2-.58-.36-.3-.15-1.8-.88-2.07-.98-.28-.1-.48-.15-.68.15-.2.3-.78.98-.95 1.18-.18.2-.35.22-.65.08-.3-.15-1.27-.47-2.42-1.49-.9-.8-1.5-1.78-1.68-2.08-.17-.3-.02-.47.13-.62.13-.13.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.68-1.64-.93-2.25-.24-.58-.49-.5-.68-.51Z" />
+      <path d="M12 2a10 10 0 0 0-8.6 15.05L2 22l5.07-1.33A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3 .79.8-2.93-.2-.31A8.2 8.2 0 1 1 12 20.2Zm4.5-6.13c-.25-.13-1.46-.72-1.69-.8-.23-.08-.39-.13-.56.13-.16.25-.64.8-.78.97-.14.16-.29.18-.54.06a6.73 6.73 0 0 1-1.98-1.22 7.4 7.4 0 0 1-1.37-1.7c-.14-.25 0-.38.11-.5.11-.12.25-.29.37-.43.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.4-.41-.56-.42h-.48c-.16 0-.43.06-.65.31-.23.25-.86.84-.86 2.05s.88 2.38 1 2.54c.13.17 1.74 2.65 4.2 3.72.59.25 1.05.4 1.4.52.6.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.2-.58.2-1.07.14-1.18-.06-.1-.22-.16-.47-.28Z" />
+    </svg>
+  );
+}
+
+function EmailGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="m4 7 8 6 8-6" />
     </svg>
   );
 }
@@ -202,10 +211,10 @@ function LinkedinGlyph() {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="3" y="3" width="18" height="18" rx="3.5" />
-      <path d="M8 10v6" />
-      <path d="M8 7.2v.1" />
-      <path d="M12 16v-3.2c0-1.4.8-2.3 2.1-2.3s2.1.9 2.1 2.5v3" />
-      <path d="M12 10.7V16" />
+      <path d="M8 11v6" />
+      <path d="M8 8.2v.1" />
+      <path d="M12 17v-6" />
+      <path d="M12 13.8c0-1.7 1-2.9 2.5-2.9 1.6 0 2.5 1.1 2.5 3V17" />
     </svg>
   );
 }
@@ -1480,7 +1489,7 @@ export default function EditProfilePage() {
               <span className="sf-edit-sublabel sf-tag-mono">Contact channels</span>
               <div className="sf-edit-socials">
                 <label className={`sf-social-field ${invalidEmail ? "is-invalid" : ""}`}>
-                  <span className="sf-social-field-ico"><Mail size={18} /></span>
+                  <span className="sf-social-field-ico"><EmailGlyph /></span>
                   <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Email" />
                   <span className="req sf-social-req">*</span>
                 </label>
@@ -1602,13 +1611,6 @@ export default function EditProfilePage() {
                 <span className="sf-tag-mono">Photos & videos</span>
                 <span className="sf-tag-mono">{totalProjectImages} / {maxImages} used</span>
               </div>
-              <label className="block text-[10px] text-[#333]/70 tracking-[0.2px] mb-2">
-                {company?.isPro && proEnabled ? (
-                  <>Upload project pictures or videos<br />Unggah gambar proyek atau Video</>
-                ) : (
-                  <>Upload project pictures /<br />Unggah gambar proyek <span className="text-[#f14110]">(*)</span></>
-                )}
-              </label>
               <div className="sf-edit-gallery">
                 {Array(totalSlots).fill(null).map((_, index) => {
                   const imgUrl = projectImageUrls[index];
@@ -1662,13 +1664,6 @@ export default function EditProfilePage() {
                   );
                 })}
               </div>
-              {!company?.isPro && proEnabled && (
-                <p className="text-[8px] text-[#333]/50 mt-2 tracking-[0.16px]">
-                  *4 pictures for Free account / 12 pictures or video with PRO
-                  <br />
-                  *4 gambar untuk akun gratis / 12 gambar atau video dengan akun PRO
-                </p>
-              )}
             </div>
         </section>
 

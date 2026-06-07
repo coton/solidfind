@@ -149,14 +149,14 @@
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: 40px;
   width: min(calc(100% - (var(--sf-gutter) * 2)), 1220px);
-  margin: 20px auto 56px;
+  margin: 20px var(--sf-gutter) 56px;
 }
 
 .sf-legal-body {
   grid-template-columns: minmax(0, 1fr) 240px;
   gap: 48px;
   width: min(calc(100% - (var(--sf-gutter) * 2)), 1098px);
-  margin: 22px auto 56px;
+  margin: 22px var(--sf-gutter) 56px;
 }
 
 .sf-about-main,
@@ -356,7 +356,16 @@
 
 .sf-legal-section ul {
   margin: 8px 0 0;
-  padding-left: 22px;
+  padding-left: 30px;
+  list-style: disc;
+}
+
+.sf-legal-section li {
+  padding-left: 4px;
+}
+
+.sf-legal-p.is-intro {
+  font-weight: 700;
 }
 
 .sf-legal-totop {
@@ -366,7 +375,7 @@
 .sf-article-wrap {
   max-width: none;
   margin: 0 0 56px;
-  padding: 22px 40px 0;
+  padding: 22px var(--sf-gutter) 0;
 }
 
 .sf-article-grid {
@@ -376,7 +385,7 @@
   column-gap: 48px;
   align-items: start;
   padding-top: 8px;
-  margin: 0;
+  margin-left: 0;
 }
 
 .sf-article-meta {
@@ -1172,6 +1181,24 @@
   color: var(--sf-orange);
   font-weight: 700;
   text-decoration: none;
+}
+
+.sf-pro-sub-error,
+.sf-adspace-contact {
+  margin: 18px 0 0;
+  color: var(--sf-orange);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.sf-adspace-modal {
+  width: min(100%, 560px);
+}
+
+.sf-adspace-list {
+  gap: 18px;
+  margin-bottom: 24px;
 }
 
 .sf-del-chips {
@@ -3299,12 +3326,12 @@
 .sf-edit {
   width: 100%;
   margin: 0;
-  padding: 88px 0 48px;
+  padding: 138px 0 48px;
 }
 
 .sf-edit-bar {
   position: fixed;
-  top: 68px;
+  top: 104px;
   right: 0;
   left: 0;
   z-index: 35;
@@ -3463,6 +3490,10 @@
   margin-right: auto;
   margin-left: auto;
   padding-top: 28px;
+}
+
+.sf-matrix::after {
+  display: none;
 }
 
 .sf-matrix > .sf-tag-mono {
@@ -3882,6 +3913,7 @@
 }
 
 .sf-range-track input[type="range"]::-webkit-slider-runnable-track {
+  height: 5px;
   border: 0;
   background: transparent;
 }
@@ -3889,6 +3921,7 @@
 .sf-range-track input[type="range"]::-webkit-slider-thumb {
   width: 24px;
   height: 24px;
+  margin-top: -10px;
   border: 2px solid var(--sf-orange);
   border-radius: 50%;
   background: #fff;
@@ -3908,6 +3941,10 @@
   box-shadow: 0 1px 3px rgba(0,0,0,.12);
   cursor: pointer;
   pointer-events: auto;
+}
+
+.sf-range-track input[type="range"]::-moz-focus-outer {
+  border: 0;
 }
 
 .sf-edit-details {
@@ -4039,11 +4076,11 @@
 @media (max-width: 880px) {
   .sf-edit {
     margin: 0;
-    padding: 78px 0 0;
+    padding: 100px 0 0;
   }
 
   .sf-edit-bar {
-    top: 62px;
+    top: 76px;
     right: 0;
     left: 0;
     padding: 12px 20px;
@@ -6334,7 +6371,7 @@
   gap: 40px;
   width: min(calc(100% - (var(--sf-gutter) * 2)), 1220px);
   max-width: 1220px;
-  margin: 20px auto 56px;
+  margin: 20px var(--sf-gutter) 56px;
   padding: 0;
 }
 
@@ -6343,7 +6380,7 @@
   gap: 48px;
   width: min(calc(100% - (var(--sf-gutter) * 2)), 1098px);
   max-width: 1098px;
-  margin: 22px auto 56px;
+  margin: 22px var(--sf-gutter) 56px;
   padding: 0;
 }
 
@@ -6359,14 +6396,14 @@
 .sf-article-wrap {
   max-width: none;
   margin: 0 0 56px;
-  padding: 22px 40px 0;
+  padding: 22px var(--sf-gutter) 0;
 }
 
 .sf-article-grid {
   width: min(100%, 1028px);
   grid-template-columns: 220px minmax(0, 760px);
   column-gap: 48px;
-  margin: 0;
+  margin-left: max(0px, calc(var(--sf-gutter) - 56px));
   padding-top: 8px;
 }
 

@@ -126,6 +126,7 @@ export const uiTranslationsId: Record<string, string> = {
   "Priority placement, profile analytics, up to 12 photos and ad placements across the platform.": "Penempatan prioritas, analitik profil, hingga 12 foto, dan penempatan iklan di seluruh platform.",
   "Upgrade to Pro →": "Tingkatkan ke Pro →",
   "Latest reviews": "Ulasan terbaru",
+  "Your reputation is being built. One project at a time.": "Reputasi Anda sedang dibangun. Satu proyek demi satu proyek.",
   "New": "Baru",
   "Pro insights": "Wawasan Pro",
   "Profile views · [Month]": "Tampilan profil · [Month]",

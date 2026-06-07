@@ -10,6 +10,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { DashboardHeroMedia } from "@/components/DashboardHeroMedia";
 import { useSiteLanguage } from "@/components/LanguageProvider";
+import { ProSubscriptionModal, parseRupiahAmount } from "@/components/ProSubscriptionModal";
 import { buildCompanyProfilePath, buildCompanyReviewsPath } from "@/lib/company-profile-url.mjs";
 import { starColor } from "@/lib/starColors";
 import { ArrowLeft, Star } from "lucide-react";
@@ -517,7 +518,7 @@ export default function CompanyDashboardPage() {
                         </div>
                       ))
                     ) : (
-                      <div className="sf-review"><p>{t("No reviews yet.")}</p><div className="sf-review-by">{t("Review system enabled")}</div></div>
+                      <div className="sf-review"><p>{t("No reviews yet.")}</p><div className="sf-review-by">{t("Your reputation is being built. One project at a time.")}</div></div>
                     )}
                   </div>
                 </section>
@@ -597,79 +598,37 @@ export default function CompanyDashboardPage() {
 
       {/* AD Space Modal - POPUP-04-BuyAd */}
       {showAdModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowAdModal(false)} />
-          <div className="relative bg-white w-full max-w-[500px] rounded-[6px] p-10">
-            <button
-              onClick={() => setShowAdModal(false)}
-              className="absolute top-4 right-4 text-[#333]/50 hover:text-[#333]"
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
+        <div className="sf-modal-scrim open" onClick={() => setShowAdModal(false)}>
+          <div className="sf-modal sf-adspace-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="sf-modal-x" onClick={() => setShowAdModal(false)} aria-label="Close">×</button>
+            <span className="sf-tag-mono sf-pro-sub-k">Advertising</span>
+            <h2>Ad space</h2>
+            <p className="sf-pro-sub-lead">Place sponsored visibility across category pages and search results.</p>
 
-            <h3 className="text-[28px] font-bold text-[#333] text-center mb-2">AD SPACE</h3>
-            <p className="text-[12px] text-[#333]/50 text-center mb-8">
-              Ad placements on SolidFind
-              <br />
-              Penempatan iklan di SolidFind
-            </p>
-
-            <div className="space-y-5 mb-8">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full border-2 border-[#f14110] flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                    <path d="M1 5L4.5 8.5L11 1" stroke="#f14110" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+            <div className="sf-pro-sub-list sf-adspace-list">
+              {[
+                "Reach a highly targeted audience",
+                "Increase visibility at key decision moments",
+                "Simple and cost-effective exposure",
+              ].map((item) => (
+                <div className="sf-pro-sub-benefit" key={item}>
+                  <span className="sf-pro-sub-check">✓</span>
+                  <div><h3>{item}</h3></div>
                 </div>
-                <div>
-                  <p className="text-[13px] font-semibold text-[#333]">Reach a highly targeted audience</p>
-                  <p className="text-[12px] text-[#333]/70">Jangkau audiens yang tepat.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full border-2 border-[#f14110] flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                    <path d="M1 5L4.5 8.5L11 1" stroke="#f14110" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold text-[#333]">Increased visibility at key decision moments</p>
-                  <p className="text-[12px] text-[#333]/70">Tingkatkan visibilitas pada momen penting pengambilan keputusan.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full border-2 border-[#f14110] flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                    <path d="M1 5L4.5 8.5L11 1" stroke="#f14110" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold text-[#333]">Simple and cost-effective exposure</p>
-                  <p className="text-[12px] text-[#333]/70">Eksposur yang sederhana dan hemat biaya.</p>
-                </div>
-              </div>
+              ))}
             </div>
 
-            <p className="text-[11px] text-[#333]/70 text-center mb-6 leading-[18px]">
-              Your placement appears on category pages and search results — clearly visible to people actively looking for professionals. Iklan Anda akan tampil di halaman kategori dan hasil pencarian - di hadapan pengguna yang sedang aktif mencari tenaga profesional.
+            <p className="sf-pro-sub-note">
+              Your placement appears on category pages and search results, clearly visible to people actively looking for professionals.
             </p>
 
-            <p className="text-[12px] text-[#f14110] text-center mb-4">
-              Contact us to know more about the pricing options.
-              <br />
-              Hubungi kami untuk mengetahui pilihan harga yang tersedia.
-            </p>
+            <p className="sf-adspace-contact">Contact us to know more about the pricing options.</p>
 
             <a
               href={`mailto:getadspace@solidfind.id?subject=${encodeURIComponent(`"${company?.name || 'Company'}" wants ad space`)}&body=${encodeURIComponent(`Company: ${company?.name || 'N/A'}\nEmail: ${company?.email || clerkUser?.emailAddresses?.[0]?.emailAddress || 'N/A'}\nDate: ${new Date().toLocaleString('en-GB', { timeZone: 'Asia/Jakarta' })}`)}`}
-              className="mx-auto block h-10 rounded-full border border-[#f14110] text-[#f14110] text-[12px] font-medium tracking-[0.24px] hover:bg-[#f14110] hover:text-white transition-colors text-center leading-[40px]"
-              style={{ width: '140px' }}
+              className="sf-btn sf-btn-pri sf-pro-buy"
             >
-              Get in touch
+              Get in touch →
             </a>
           </div>
         </div>
@@ -702,8 +661,21 @@ export default function CompanyDashboardPage() {
         </div>
       )}
 
-      {/* PRO Features Modal - POPUP-03-BuyPro */}
-      {(showProModal || shouldOpenProModal) && (
+      {(showProModal || shouldOpenProModal) && !proTermsView && (
+        <ProSubscriptionModal
+          billingCycle={billingPlan}
+          monthlyAmount={parseRupiahAmount(monthlyPrice)}
+          yearlyAmount={parseRupiahAmount(yearlyPrice)}
+          isSubmitting={isCreatingCheckout}
+          error={proCheckoutError}
+          onBillingCycleChange={setBillingPlan}
+          onBuy={handleBuyPro}
+          onClose={closeProModal}
+        />
+      )}
+
+      {/* PRO Terms Modal */}
+      {(showProModal || shouldOpenProModal) && proTermsView && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-[10px] py-4 sm:px-4">
           <div className="absolute inset-0 bg-black/50" onClick={closeProModal} />
           <div className={`relative bg-white w-full ${proTermsView ? "max-w-[540px]" : "max-w-[440px]"} max-h-[calc(100vh-20px)] rounded-[6px] p-6 sm:p-8 overflow-y-auto overflow-x-hidden`}>

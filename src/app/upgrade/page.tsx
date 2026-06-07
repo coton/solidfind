@@ -7,34 +7,12 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { api } from "../../../convex/_generated/api";
 import { useSiteLanguage } from "@/components/LanguageProvider";
+import { ProSubscriptionModal, parseRupiahAmount } from "@/components/ProSubscriptionModal";
 
 const PRICE_DEFAULTS = {
   launch: { monthly: "450000", yearly: "5000000" },
   standard: { monthly: "650000", yearly: "7000000" },
 };
-
-const proBenefits = [
-  {
-    title: "Priority placement in search",
-    description: "Your listing ranks above non-Pro companies within your category, so clients see you sooner when searching your area.",
-  },
-  {
-    title: "Visibility analytics",
-    description: "A dashboard of profile views, where viewers found you, and the regions driving the most interest.",
-  },
-  {
-    title: "Up to 12 photos or videos",
-    description: "Show four times more work than a free account: full projects, walkthroughs, and detail shots.",
-  },
-  {
-    title: "Ad placements across the platform",
-    description: "Eligible for sponsored slots on category pages and search results, subject to available inventory.",
-  },
-  {
-    title: "AI-ready profile formatting",
-    description: "Structured fields optimized for AI-assisted search, so your studio surfaces in the right results.",
-  },
-];
 
 const guidelines = [
   {
@@ -68,9 +46,8 @@ export default function UpgradePage() {
   const pricingPhase = platformMap.get("pricing_phase") === "standard" ? "standard" : "launch";
   const monthlyPrice = platformMap.get(`monthly_price_${pricingPhase}`) ?? PRICE_DEFAULTS[pricingPhase].monthly;
   const yearlyPrice = platformMap.get(`yearly_price_${pricingPhase}`) ?? PRICE_DEFAULTS[pricingPhase].yearly;
-  const monthlyAmount = parseRupiah(monthlyPrice);
-  const yearlyAmount = parseRupiah(yearlyPrice);
-  const yearlySavings = Math.max(0, monthlyAmount * 12 - yearlyAmount);
+  const monthlyAmount = parseRupiahAmount(monthlyPrice);
+  const yearlyAmount = parseRupiahAmount(yearlyPrice);
   const suffix = language === "id" ? "Id" : "";
   const proTitle = platformMap.get(`proGuidelinesTitle${suffix}`)?.trim() || "More visibility.\nSame standards.";
   const proIntro = platformMap.get(`proGuidelinesIntro${suffix}`)?.trim()
@@ -109,86 +86,16 @@ export default function UpgradePage() {
       <Footer />
 
       {showProModal && (
-        <div className="sf-modal-scrim open" onClick={() => setShowProModal(false)}>
-          <div className="sf-modal sf-pro-sub-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-            <button type="button" className="sf-modal-x" onClick={() => setShowProModal(false)} aria-label="Close">×</button>
-            <span className="sf-tag-mono sf-pro-sub-k">Pro subscription</span>
-            <h2>Get Pro</h2>
-            <p className="sf-pro-sub-lead">Everything in a free profile, plus the visibility tools companies use to be found and chosen.</p>
-
-            <div className="sf-pro-sub-list">
-              {proBenefits.map((feature) => (
-                <div className="sf-pro-sub-benefit" key={feature.title}>
-                  <span className="sf-pro-sub-check">✓</span>
-                  <div>
-                    <h3>{feature.title}</h3>
-                    <p>{feature.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <span className="sf-tag-mono sf-pro-sub-plan-k">Choose your plan</span>
-            <div className="sf-pro-plan-grid">
-              <button
-                type="button"
-                className={`sf-pro-plan ${billingCycle === "monthly" ? "on" : ""}`}
-                onClick={() => setBillingCycle("monthly")}
-              >
-                <span className="sf-pro-plan-top">
-                  <b>Monthly</b>
-                  <span className="sf-pro-switch" aria-hidden="true"><i /></span>
-                </span>
-                <strong>{formatRupiah(monthlyAmount)}</strong>
-                <span>per month</span>
-                <small>Billed every month</small>
-              </button>
-              <button
-                type="button"
-                className={`sf-pro-plan ${billingCycle === "yearly" ? "on" : ""}`}
-                onClick={() => setBillingCycle("yearly")}
-              >
-                <span className="sf-pro-plan-top">
-                  <b>Yearly</b>
-                  <span className="sf-pro-switch" aria-hidden="true"><i /></span>
-                </span>
-                <strong>{formatRupiahCompact(yearlyAmount)}</strong>
-                <span>per year</span>
-                {yearlySavings > 0 && <small className="save">Save {formatRupiah(yearlySavings)} a year</small>}
-              </button>
-            </div>
-
-            <button type="button" className="sf-btn sf-btn-pri sf-pro-buy">
-              Buy now →
-            </button>
-            <p className="sf-pro-sub-note">
-              Secure payment via Midtrans. By subscribing you agree to the <Link href="/terms?doc=pro">Pro Terms of Service</Link>.
-            </p>
-          </div>
-        </div>
+        <ProSubscriptionModal
+          billingCycle={billingCycle}
+          monthlyAmount={monthlyAmount}
+          yearlyAmount={yearlyAmount}
+          onBillingCycleChange={setBillingCycle}
+          onClose={() => setShowProModal(false)}
+        />
       )}
     </div>
   );
-}
-
-function parseRupiah(value: string | null | undefined) {
-  const amount = Number.parseInt(String(value ?? "0").replace(/[^\d]/g, ""), 10);
-  return Number.isFinite(amount) ? amount : 0;
-}
-
-function formatRupiah(amount: number) {
-  return `Rp ${new Intl.NumberFormat("id-ID").format(amount)}`;
-}
-
-function formatRupiahCompact(amount: number) {
-  if (amount >= 1_000_000) {
-    const millions = amount / 1_000_000;
-    const formatted = Number.isInteger(millions)
-      ? String(millions)
-      : millions.toLocaleString("id-ID", { maximumFractionDigits: 1 });
-    return `Rp ${formatted}jt`;
-  }
-  return formatRupiah(amount);
 }
 
 function parseGuidelines(value: string | undefined, fallback: typeof guidelines) {

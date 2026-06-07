@@ -111,6 +111,16 @@ export default function TermsPage() {
           id: `/terms?view=pro-id${fromSuffix}`,
         };
   const nextLanguage: TermsLanguage = language === "en" ? "id" : "en";
+  const isHiddenLegalTitle = (section: (typeof sections)[number], sectionIndex: number) => (
+    sectionIndex === 0 &&
+    (normalizeHeading(section.title) === normalizedLegalHeading ||
+      normalizeHeading(section.title).includes(normalizedLegalHeading) ||
+      normalizeHeading(section.title).includes("terms & conditions") ||
+      normalizeHeading(section.title).includes("syarat & ketentuan"))
+  );
+  const visibleTocSections = sections
+    .map((section, sectionIndex) => ({ section, sectionIndex }))
+    .filter(({ section, sectionIndex }) => !isHiddenLegalTitle(section, sectionIndex));
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -153,18 +163,18 @@ export default function TermsPage() {
           <div className="sf-legal-content">
             <div className="sf-doc-panel on">
               {sections.map((section, sectionIndex) => {
-                const shouldHideTitle =
-                  sectionIndex === 0 &&
-                  (normalizeHeading(section.title) === normalizedLegalHeading ||
-                    normalizeHeading(section.title).includes(normalizedLegalHeading) ||
-                    normalizeHeading(section.title).includes("terms & conditions") ||
-                    normalizeHeading(section.title).includes("syarat & ketentuan"));
+                const shouldHideTitle = isHiddenLegalTitle(section, sectionIndex);
+                const visibleNumber = sections
+                  .slice(0, sectionIndex + 1)
+                  .filter((candidate, candidateIndex) => {
+                    return !isHiddenLegalTitle(candidate, candidateIndex);
+                  }).length;
 
                 return (
                   <section className="sf-legal-section" id={`legal-${sectionIndex + 1}`} key={section.title}>
                     {!shouldHideTitle && (
                       <h3 className="sf-legal-h2">
-                        <span className="sf-legal-n">{sectionIndex + 1}</span>{section.title}
+                        <span className="sf-legal-n">{visibleNumber}</span>{section.title}
                       </h3>
                     )}
 
@@ -180,7 +190,7 @@ export default function TermsPage() {
                       }
 
                       return (
-                        <p key={`${section.title}-${index}`} className="sf-legal-p">
+                        <p key={`${section.title}-${index}`} className={`sf-legal-p ${index === 0 ? "is-intro" : ""}`}>
                           {block.content}
                         </p>
                       );
@@ -195,8 +205,8 @@ export default function TermsPage() {
           <aside className="sf-legal-toc">
             <span className="sf-tag-mono">On this page</span>
             <nav>
-              {sections.slice(0, 12).map((section, index) => (
-                <a href={`#legal-${index + 1}`} key={`${section.title}-toc`}>
+              {visibleTocSections.slice(0, 12).map(({ section, sectionIndex }, index) => (
+                <a href={`#legal-${sectionIndex + 1}`} key={`${section.title}-toc`}>
                   <span>{index + 1}</span>{section.title}
                 </a>
               ))}
