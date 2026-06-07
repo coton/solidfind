@@ -115,7 +115,6 @@ export default function CompanyDashboardPage() {
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
   const [proCheckoutError, setProCheckoutError] = useState("");
   const [redirected, setRedirected] = useState(false);
-  const [bookmarkWeekStart] = useState(() => Date.now() - 7 * 24 * 60 * 60 * 1000);
   const router = useRouter();
   const searchParams = useSearchParams();
   const shouldOpenProModal = searchParams.get("pro") === "1";
@@ -167,11 +166,6 @@ export default function CompanyDashboardPage() {
     api.companies.getByOwner,
     currentUser?._id ? { ownerId: currentUser._id } : "skip"
   );
-  const bookmarkedThisWeek = useQuery(
-    api.savedListings.countForCompanySince,
-    company?._id ? { companyId: company._id, since: bookmarkWeekStart } : "skip"
-  );
-
   const reviews = useQuery(
     api.reviews.listByCompany,
     company?._id ? { companyId: company._id } : "skip"
@@ -261,7 +255,7 @@ export default function CompanyDashboardPage() {
     accountType: isPro ? "PRO" : "FREE",
     stats: {
       bookmarked: company?.bookmarkCount ?? 0,
-      bookmarkedThisWeek: bookmarkedThisWeek ?? 0,
+      bookmarkedThisWeek: 0,
       viewsLastMonth,
       mostSearchedLocation: "KARANGASEM",
     },
@@ -395,7 +389,9 @@ export default function CompanyDashboardPage() {
                 <span className="m-eyebrow">{t("Saved by clients")}</span>
                 <div className="m-stat-num">{data.stats.bookmarked}</div>
                 <div className="m-stat-label">{t("times bookmarked")}</div>
-                <div className="sf-stat-trend"><span>▲</span> {data.stats.bookmarkedThisWeek} {t("this week")}</div>
+                {data.stats.bookmarkedThisWeek > 0 && (
+                  <div className="sf-stat-trend"><span>▲</span> {data.stats.bookmarkedThisWeek} {t("this week")}</div>
+                )}
               </section>
               {isPro && proEnabled && (
                 <section className="m-card">
@@ -485,7 +481,9 @@ export default function CompanyDashboardPage() {
                   <span className="sf-tag-mono">{t("Saved by clients")}</span>
                   <div className="sf-stat-num">{data.stats.bookmarked}</div>
                   <div className="sf-stat-label">{t("times your company was bookmarked")}</div>
-                  <div className="sf-stat-trend"><span>▲</span> {data.stats.bookmarkedThisWeek} {t("this week")}</div>
+                  {data.stats.bookmarkedThisWeek > 0 && (
+                    <div className="sf-stat-trend"><span>▲</span> {data.stats.bookmarkedThisWeek} {t("this week")}</div>
+                  )}
                 </section>
 
                 {!isPro && proEnabled && (

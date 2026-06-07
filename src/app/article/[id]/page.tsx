@@ -103,11 +103,30 @@ export default function ArticlePage() {
     const articleHasIndonesianCopy = hasIndonesianArticleCopy(article as any);
     const articleLanguage = articleHasIndonesianCopy ? language : "en";
     const shareTitle = localizedText(articleLanguage, article.title, (article as any).titleId);
-    if (navigator.share) {
-      await navigator.share({ title: shareTitle, url: window.location.href });
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
+    const shareUrl = window.location.href;
+    const shouldUseNativeShare =
+      window.matchMedia("(max-width: 767px)").matches ||
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (shouldUseNativeShare && navigator.share) {
+      await navigator.share({ title: shareTitle, url: shareUrl });
+      return;
     }
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareUrl);
+      return;
+    }
+
+    const input = document.createElement("input");
+    input.value = shareUrl;
+    input.setAttribute("readonly", "");
+    input.style.position = "fixed";
+    input.style.opacity = "0";
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand("copy");
+    document.body.removeChild(input);
   };
 
   const articleHasIndonesianCopy = hasIndonesianArticleCopy(article as any);
