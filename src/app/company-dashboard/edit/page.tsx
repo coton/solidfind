@@ -1360,9 +1360,9 @@ export default function EditProfilePage() {
               <button
                 type="button"
                 onClick={() => requestNavigation("/company-dashboard")}
-                className="sf-btn sf-btn-lg sf-btn-ghost"
+                className="sf-btn sf-btn-lg sf-btn-ghost sf-edit-cancel-top"
               >
-                ← Dashboard
+                Cancel
               </button>
             )}
             <button
@@ -1371,7 +1371,8 @@ export default function EditProfilePage() {
               disabled={saving || !canSave}
               className="sf-btn sf-btn-lg sf-btn-pri"
             >
-              {saving ? "Saving..." : "Save changes →"}
+              <span className="sf-edit-save-full">{saving ? "Saving..." : "Save changes →"}</span>
+              <span className="sf-edit-save-short">{saving ? "Saving..." : "Save"}</span>
             </button>
           </div>
         </div>
@@ -1802,11 +1803,20 @@ export default function EditProfilePage() {
 
         {/* Bottom Save */}
         <div className="sf-edit-foot">
-          <div>
+          <div className="sf-edit-foot-left">
             {bottomHintIsWarning && bottomHintText && (
               <p className="sf-edit-missing whitespace-pre-line">
                 {bottomHintText}
               </p>
+            )}
+            {company && (
+              <button
+                type="button"
+                className="sf-edit-delete"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete profile
+              </button>
             )}
           </div>
           <div className="sf-edit-foot-save">
@@ -1821,6 +1831,15 @@ export default function EditProfilePage() {
             >
               {saving ? "Saving..." : "Save changes →"}
             </button>
+            {company && !isFirstCompanyConnection && (
+              <button
+                type="button"
+                onClick={() => requestNavigation("/company-dashboard")}
+                className="sf-btn sf-btn-lg sf-btn-ghost sf-edit-mobile-dashboard"
+              >
+                ← Dashboard
+              </button>
+            )}
           </div>
         </div>
       </main>
