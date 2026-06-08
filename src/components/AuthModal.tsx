@@ -28,77 +28,6 @@ interface AuthModalProps {
   onAuthSuccess?: (accountType: AccountType) => void;
 }
 
-// Pill toggle switch component
-// Toggle sized to match the filter dropdown toggles (24×12px, 8×8px thumb)
-function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onChange}
-      style={{
-        width: '24px',
-        height: '12px',
-        borderRadius: '6px',
-        background: checked ? 'linear-gradient(to left, #F14110, #E9A28E)' : 'rgba(51,51,51,0.25)',
-        position: 'relative',
-        border: 'none',
-        cursor: 'pointer',
-        transition: 'background 0.2s ease',
-        flexShrink: 0,
-      }}
-    >
-      <div style={{
-        width: '8px',
-        height: '8px',
-        borderRadius: '50%',
-        backgroundColor: 'white',
-        position: 'absolute',
-        top: '2px',
-        left: checked ? '14px' : '2px',
-        transition: 'left 0.2s ease',
-      }} />
-    </button>
-  );
-}
-
-function SocialButton({ label, icon, onClick, disabled }: {
-  label: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-  disabled?: boolean;
-}) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        width: '100%',
-        height: '38px',
-        borderRadius: '6px',
-        border: '1px solid #E4E4E4',
-        backgroundColor: hovered ? '#F0F0F0' : 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        transition: 'background-color 0.15s ease',
-        fontSize: '12px',
-        fontWeight: 500,
-        color: '#333',
-        opacity: disabled ? 0.6 : 1,
-      }}
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
-
 function GoogleIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24">
@@ -146,9 +75,6 @@ export function AuthModal({
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
-  const [submitHovered, setSubmitHovered] = useState(false);
-  const [secureSignInHovered, setSecureSignInHovered] = useState(false);
-
   // Clerk flow states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -519,27 +445,20 @@ export function AuthModal({
         <button
           type="button"
           onClick={() => { setPendingVerification(false); setError(""); }}
-          style={{ position: 'absolute', top: '18px', left: '28px', background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: '11px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', zIndex: 1 }}
+          className="sf-modal-back"
         >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-            <path d="M6.5 1.5L3 5L6.5 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Back
+          ← Back
         </button>
 
-        <div style={{ width: '100%', maxWidth: '320px', margin: '0 auto', paddingTop: '28px' }}>
-          <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
-            VERIFY EMAIL
-          </h2>
+        <div className="sf-modal-head sf-auth-step-head">
+          <span className="sf-tag-mono">Check your email</span>
+          <h2>Verify email</h2>
+          <p>We sent a verification code to <b>{email}</b>.</p>
+        </div>
 
-          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', lineHeight: 1.5, marginBottom: '20px', marginTop: 0 }}>
-            We sent a verification code to<br /><strong style={{ color: '#333', fontSize: '13px' }}>{email}</strong>
-          </p>
-
-          <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-              Verification Code
-            </label>
+        <div className="sf-modal-form">
+          <label className="sf-field">
+            <span>Verification code</span>
             <input
               type="text"
               inputMode="numeric"
@@ -548,61 +467,19 @@ export function AuthModal({
               value={verificationCode}
               onChange={(e) => setVerificationCode(sanitizeVerificationCode(e.target.value))}
               placeholder="Enter 6-digit code"
-              style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '4px' }}
+              className="sf-code-input"
             />
-          </div>
+          </label>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '28px', marginBottom: '12px' }}>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={handleVerifyEmail}
-              onMouseEnter={() => setSubmitHovered(true)}
-              onMouseLeave={() => setSubmitHovered(false)}
-              style={{
-                width: '145px',
-                height: '40px',
-                borderRadius: '20px',
-                border: submitHovered ? 'none' : '1px solid #F14110',
-                background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
-                color: submitHovered ? 'white' : '#F14110',
-                fontSize: '13px',
-                fontWeight: 600,
-                letterSpacing: '0.5px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s ease',
-                opacity: isLoading ? 0.6 : 1,
-              }}
-            >
-              {isLoading ? "Verifying..." : "Verify"}
-            </button>
-          </div>
+          <button type="button" disabled={isLoading} onClick={handleVerifyEmail} className="sf-btn sf-btn-pri sf-btn-lg sf-auth-email-btn">
+            {isLoading ? "Verifying..." : "Verify"}
+          </button>
 
-          <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={handleResendVerificationCode}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                color: '#F14110',
-                fontSize: '10px',
-                fontWeight: 600,
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                opacity: isLoading ? 0.6 : 1,
-              }}
-            >
-              {isLoading ? 'Sending...' : 'Request a new code'}
-            </button>
-          </div>
+          <button type="button" disabled={isLoading} onClick={handleResendVerificationCode} className="sf-modal-link sf-link-button sf-auth-inline-link">
+            {isLoading ? 'Sending...' : 'Request a new code'}
+          </button>
 
-          {error && (
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ color: '#F14110', fontSize: '10px', margin: '2px 0' }}>*{error}</p>
-            </div>
-          )}
+          {error && <p className="sf-auth-note">*{error}</p>}
         </div>
       </>
     );
@@ -615,28 +492,20 @@ export function AuthModal({
         <button
           type="button"
           onClick={() => { setPendingReset(false); setError(""); setVerificationCode(""); setNewPassword(""); }}
-          style={{ position: 'absolute', top: '18px', left: '28px', background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: '11px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', zIndex: 1 }}
+          className="sf-modal-back"
         >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-            <path d="M6.5 1.5L3 5L6.5 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Back
+          ← Back
         </button>
 
-        <div style={{ width: '100%', maxWidth: '320px', margin: '0 auto', paddingTop: '28px' }}>
-          <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
-            RESET PASSWORD
-          </h2>
+        <div className="sf-modal-head sf-auth-step-head">
+          <span className="sf-tag-mono">Password reset</span>
+          <h2>Reset password</h2>
+          <p>Enter the code sent to <b>{email}</b> and choose a new password.</p>
+        </div>
 
-          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
-            Enter the code sent to<br /><strong style={{ color: '#333' }}>{email}</strong><br />and your new password.
-          </p>
-
-          <form onSubmit={handleResetPassword}>
-            <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-                Verification Code
-              </label>
+        <form onSubmit={handleResetPassword} className="sf-modal-form">
+            <label className="sf-field">
+              <span>Verification code</span>
               <input
                 type="text"
                 inputMode="numeric"
@@ -646,75 +515,30 @@ export function AuthModal({
                 onChange={(e) => setVerificationCode(sanitizeVerificationCode(e.target.value))}
                 placeholder="Enter 6-digit code"
                 required
-                style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '4px' }}
+                className="sf-code-input"
               />
-            </div>
+            </label>
 
-            <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-                New Password
-              </label>
+            <label className="sf-field">
+              <span>New password</span>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
-                style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
               />
-            </div>
+            </label>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '28px', marginBottom: '12px' }}>
-              <button
-                type="submit"
-                disabled={isLoading}
-                onMouseEnter={() => setSubmitHovered(true)}
-                onMouseLeave={() => setSubmitHovered(false)}
-                style={{
-                  width: '145px',
-                  height: '40px',
-                  borderRadius: '20px',
-                  border: submitHovered ? 'none' : '1px solid #F14110',
-                  background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
-                  color: submitHovered ? 'white' : '#F14110',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  letterSpacing: '0.5px',
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s ease',
-                  opacity: isLoading ? 0.6 : 1,
-                }}
-              >
-                {isLoading ? "Resetting..." : "Reset Password"}
-              </button>
-            </div>
-          </form>
-
-          <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={handleResendResetCode}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                color: '#F14110',
-                fontSize: '10px',
-                fontWeight: 600,
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                opacity: isLoading ? 0.6 : 1,
-              }}
-            >
-              {isLoading ? 'Sending...' : 'Request a new code'}
+            <button type="submit" disabled={isLoading} className="sf-btn sf-btn-pri sf-btn-lg sf-auth-email-btn">
+              {isLoading ? "Resetting..." : "Reset password"}
             </button>
-          </div>
+        </form>
 
-          {error && (
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ color: '#F14110', fontSize: '10px', margin: '2px 0' }}>*{error}</p>
-            </div>
-          )}
-        </div>
+        <button type="button" disabled={isLoading} onClick={handleResendResetCode} className="sf-modal-link sf-link-button sf-auth-inline-link">
+          {isLoading ? 'Sending...' : 'Request a new code'}
+        </button>
+
+        {error && <p className="sf-auth-note">*{error}</p>}
       </>
     );
   }
@@ -803,204 +627,112 @@ export function AuthModal({
       <button
         type="button"
         onClick={() => { setStep("method"); setError(""); }}
-        style={{ position: 'absolute', top: '18px', left: '28px', background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: '11px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', zIndex: 1 }}
+        className="sf-modal-back"
       >
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-          <path d="M6.5 1.5L3 5L6.5 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        Back
+        ← Back
       </button>
 
-      <div style={{ width: '100%', maxWidth: '320px', margin: '0 auto', paddingTop: '28px' }}>
-        <h2 style={{ textAlign: 'center', fontSize: '18px', fontWeight: 600, color: '#333', letterSpacing: '0.36px', fontFamily: 'var(--font-sora), sans-serif', marginBottom: '6px', marginTop: 0 }}>
-          {mode === "login" ? t("LOGIN", "MASUK") : t("CREATE AN ACCOUNT", "BUAT AKUN")}
-        </h2>
-
-        <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', lineHeight: 1.5, marginBottom: '12px', marginTop: 0 }}>
-          {mode === "register" ? (
-            <>Continue with your email address.<br />Lanjutkan dengan alamat email Anda.</>
-          ) : (
-            <>Sign in with your email and password.<br />Masuk dengan email dan kata sandi Anda.</>
-          )}
+      <div className="sf-modal-head sf-auth-step-head">
+        <span className="sf-tag-mono">{mode === "login" ? t("Welcome back") : t("Get started")}</span>
+        <h2>{mode === "login" ? t("Log in", "Masuk") : t("Create an account", "Buat akun")}</h2>
+        <p>
+          {mode === "register"
+            ? t("Continue with your email address.", "Lanjutkan dengan alamat email Anda.")
+            : t("Sign in with your email and password.", "Masuk dengan email dan kata sandi Anda.")}
         </p>
+      </div>
 
-        <form onSubmit={mode === "login" ? handleSignIn : handleSignUp} style={{ marginBottom: 0 }}>
+        <form onSubmit={mode === "login" ? handleSignIn : handleSignUp} className="sf-modal-form">
 
         {/* Clerk CAPTCHA widget container (required for bot protection in Custom Flows) */}
         {mode === "register" && <div id="clerk-captcha" />}
 
         {/* E-mail */}
-        <div style={{ marginBottom: '14px' }}>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-            E-mail <span style={{ color: '#F14110' }}>(*)</span>
-          </label>
+        <label className="sf-field">
+          <span>E-mail (*)</span>
           <input
             type="email"
             value={email}
             onChange={(e) => { setEmail(e.target.value); setNeedsSecureSignIn(false); setNeedsPasswordReset(false); }}
             required
-            style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
           />
-        </div>
+        </label>
 
         {/* Account type toggles (register only) — shown in step 2 only if coming back to change */}
         {mode === "register" && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 500, color: '#333', letterSpacing: '0.22px', fontFamily: 'var(--font-sora), sans-serif' }}>COMPANY</span>
-                <Toggle
-                  checked={accountType === "company"}
-                  onChange={() => setAccountType("company")}
-                />
+          <div className="sf-su-opts sf-su-opts-compact">
+            <button type="button" className={`sf-su-opt ${accountType === "company" ? "on" : ""}`} onClick={() => setAccountType("company")}>
+              <div className="sf-su-opt-top">
+                <span className="sf-su-opt-title">Company</span>
+                <span className={`sf-switch ${accountType === "company" ? "on" : ""}`} aria-hidden="true"><span className="sf-switch-knob" /></span>
               </div>
-              <p style={{ fontSize: '10px', color: '#999', margin: 0, lineHeight: 1.4 }}>
-                Create a profile page/<br />Buat halaman
-              </p>
-            </div>
+              <span className="sf-su-opt-sub">Create a profile page</span>
+            </button>
 
-            <div style={{ textAlign: 'left', marginLeft: 'auto' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 500, color: '#333', letterSpacing: '0.22px', fontFamily: 'var(--font-sora), sans-serif' }}>INDIVIDUAL</span>
-                <Toggle
-                  checked={accountType === "individual"}
-                  onChange={() => setAccountType("individual")}
-                />
+            <button type="button" className={`sf-su-opt ${accountType === "individual" ? "on" : ""}`} onClick={() => setAccountType("individual")}>
+              <div className="sf-su-opt-top">
+                <span className="sf-su-opt-title">Individual</span>
+                <span className={`sf-switch ${accountType === "individual" ? "on" : ""}`} aria-hidden="true"><span className="sf-switch-knob" /></span>
               </div>
-              <p style={{ fontSize: '10px', color: '#999', margin: 0, lineHeight: 1.4 }}>
-                Save listings/<br />Simpan listing
-              </p>
-            </div>
+              <span className="sf-su-opt-sub">Save listings</span>
+            </button>
           </div>
         )}
 
         {/* Name or Company Name (register only) */}
         {mode === "register" && (
-          <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-              {accountType === "company" ? "Company Name" : "Name"} <span style={{ color: '#F14110' }}>(*)</span>
-            </label>
+          <label className="sf-field">
+            <span>{accountType === "company" ? "Company name" : "Name"} (*)</span>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
             />
-          </div>
+          </label>
         )}
 
         {/* Password */}
-        <div style={{ marginBottom: '14px' }}>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#333', marginBottom: '5px', letterSpacing: '0.22px' }}>
-            Password <span style={{ color: '#F14110' }}>(*)</span>
-          </label>
+        <label className="sf-field">
+          <span>Password (*)</span>
           <input
             type="password"
             value={password}
             onChange={(e) => { setPassword(e.target.value); setNeedsSecureSignIn(false); setNeedsPasswordReset(false); }}
             required
-            style={{ width: '100%', height: '38px', backgroundColor: 'white', border: '1px solid #E4E4E4', borderRadius: '6px', padding: '0 10px', fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box' }}
           />
-        </div>
+        </label>
 
         {/* Subscribe to newsletter (register only) */}
         {mode === "register" && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '9px' }}>
-            <span style={{ fontSize: '11px', color: '#333', letterSpacing: '0.22px' }}>Subscribe to the newsletter</span>
-            <Toggle
-              checked={subscribeNewsletter}
-              onChange={() => setSubscribeNewsletter(!subscribeNewsletter)}
-            />
-          </div>
+          <button type="button" className={`sf-su-news ${subscribeNewsletter ? "on" : ""}`} onClick={() => setSubscribeNewsletter(!subscribeNewsletter)}>
+            <span>Subscribe to the newsletter</span>
+            <span className={`sf-switch ${subscribeNewsletter ? "on" : ""}`} aria-hidden="true"><span className="sf-switch-knob" /></span>
+          </button>
         )}
 
         {!needsSecureSignIn && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: mode === 'login' ? '28px' : '14px', marginBottom: '12px' }}>
-            <button
-              type="submit"
-              disabled={isLoading}
-              onMouseEnter={() => setSubmitHovered(true)}
-              onMouseLeave={() => setSubmitHovered(false)}
-              style={{
-                width: '145px',
-                height: '40px',
-                borderRadius: '20px',
-                border: submitHovered ? 'none' : '1px solid #F14110',
-                background: submitHovered ? 'linear-gradient(to right, #E9A28E, #F14110)' : 'transparent',
-                color: submitHovered ? 'white' : '#F14110',
-                fontSize: '13px',
-                fontWeight: 600,
-                letterSpacing: '0.5px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s ease',
-                opacity: isLoading ? 0.6 : 1,
-              }}
-            >
+            <button type="submit" disabled={isLoading} className="sf-btn sf-btn-pri sf-btn-lg sf-auth-email-btn">
               {isLoading
                 ? t("Loading...", "Memuat...")
                 : mode === "login" ? t("Login", "Masuk") : t("Register", "Daftar")
               }
             </button>
-          </div>
         )}
 
         {/* Error message — right below button for visibility */}
-        {error && (
-          <div style={{ textAlign: 'center', marginBottom: '8px' }}>
-            <p style={{ color: '#F14110', fontSize: '11px', fontWeight: 500, margin: '4px 0' }}>*{error}</p>
-          </div>
-        )}
+        {error && <p className="sf-auth-note">*{error}</p>}
 
         {mode === "login" && needsPasswordReset && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              disabled={isLoading}
-              style={{
-                minWidth: '170px',
-                height: '38px',
-                borderRadius: '19px',
-                border: '1px solid #F14110',
-                background: 'transparent',
-                color: '#F14110',
-                fontSize: '12px',
-                fontWeight: 600,
-                letterSpacing: '0.24px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                opacity: isLoading ? 0.6 : 1,
-              }}
-            >
+            <button type="button" onClick={handleForgotPassword} disabled={isLoading} className="sf-btn sf-btn-ghost sf-auth-email-btn">
               Reset password
             </button>
-          </div>
         )}
 
         {needsSecureSignIn && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-            <button
-              type="button"
-              onClick={handleSecureSignIn}
-              onMouseEnter={() => setSecureSignInHovered(true)}
-              onMouseLeave={() => setSecureSignInHovered(false)}
-              style={{
-                minWidth: '180px',
-                height: '40px',
-                borderRadius: '20px',
-                border: `1px solid ${secureSignInHovered ? '#F14110' : '#333'}`,
-                background: 'transparent',
-                color: secureSignInHovered ? '#F14110' : '#333',
-                fontSize: '12px',
-                fontWeight: 600,
-                letterSpacing: '0.24px',
-                cursor: 'pointer',
-                transition: 'border-color 0.2s ease, color 0.2s ease',
-              }}
-            >
+            <button type="button" onClick={handleSecureSignIn} className="sf-btn sf-btn-ghost sf-auth-email-btn">
               Continue secure sign in
             </button>
-          </div>
         )}
 
         {/* Forgot password (login only) */}
@@ -1009,26 +741,22 @@ export function AuthModal({
             type="button"
             onClick={handleForgotPassword}
             disabled={isLoading}
-            style={{ display: 'block', width: '100%', textAlign: 'center', fontSize: '11px', color: '#F14110', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', marginBottom: '8px' }}
+            className="sf-modal-link sf-link-button sf-auth-inline-link"
           >
-            Forgot Password
+            Forgot password
           </button>
         )}
 
         {/* Switch mode */}
         {mode === "login" && (
-          <p style={{ textAlign: 'center', fontSize: '10px', color: '#999', margin: 0 }}>
-            Don&apos;t have an account?
-            <br />
-            Tidak punya akun?
-            <br />
-            <button onClick={() => { setMode("register"); setError(""); }} style={{ color: '#F14110', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.22px', marginTop: '4px', textDecoration: 'underline' }}>
+          <p className="sf-modal-foot">
+            Don&apos;t have an account?{" "}
+            <button type="button" onClick={() => { setMode("register"); setError(""); }} className="sf-modal-link sf-link-button">
               Sign up!
             </button>
           </p>
         )}
       </form>
-      </div>
     </>
   );
 }

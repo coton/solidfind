@@ -2,18 +2,27 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { DashboardHeroMedia } from "@/components/DashboardHeroMedia";
+import { AdBanner } from "@/components/AdBanner";
 import { ListingCard } from "@/components/cards";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
+import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
-const DASHBOARD_CATEGORY_PAGE_SIZE = 4;
+const DASHBOARD_CATEGORY_PAGE_SIZE = 5;
+const categoryNumbers: Record<string, string> = {
+  construction: "01",
+  renovation: "02",
+  architecture: "03",
+  interior: "04",
+  "real-estate": "05",
+};
+
 const savedListingSortOptions = [
   { value: "az", label: "Sort by: A > Z" },
   { value: "recent", label: "Sort by: Recent" },
@@ -57,6 +66,7 @@ export default function DashboardPage() {
   const [sortDropdownOpen, setSortDropdownOpen] = useState<string | null>(null);
   const [deleteState, setDeleteState] = useState<"confirm" | "success" | "failure" | null>(null);
   const [deleteError, setDeleteError] = useState("");
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
   const router = useRouter();
   const { user: clerkUser } = useUser();
@@ -94,6 +104,10 @@ export default function DashboardPage() {
   const savedListings = useQuery(
     api.savedListings.listByUser,
     currentUser?._id ? { userId: currentUser._id } : "skip"
+  );
+  const userReviews = useQuery(
+    api.reviews.listByUser,
+    currentUser?._id && reviewsEnabled ? { userId: currentUser._id } : "skip"
   );
 
   const user = {
@@ -154,136 +168,159 @@ export default function DashboardPage() {
 
   // Only show categories that have at least one bookmark
   const visibleCategories = listingsByCategory.filter((cat) => cat.listings.length > 0);
+  const totalSavedCount = visibleCategories.reduce((sum, cat) => sum + cat.listings.length, 0);
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
-      <header className="sf-userhdr">
-        <Link href="/" className="sf-shell-brand">
-          <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} className="h-[18px] w-auto" />
-          <span className="sf-brand-id sf-about-hero-id">.id</span>
-        </Link>
-        <div className="sf-shell-actions">
-          {reviewsEnabled && (
-            <Link href="/reviews" className="sf-btn sf-btn-ghost">Your testimonials</Link>
-          )}
-          <button type="button" className="sf-btn sf-btn-pri" onClick={handleSignOut}>Log out</button>
-        </div>
-      </header>
+      <Header />
 
       <main className="sf-userdash-main flex-grow w-full">
         <div className="sf-user-intro">
             <div>
-              <span className="sf-tag-mono">Hello</span>
+              <span className="sf-tag-mono">Individual account · {user.email}</span>
               <h1>{user.name}</h1>
               <p className="sf-about-contact">
-                Find your list of saved profiles here. Add or remove profiles by clicking the bookmark icon.
+                Everything you've saved while planning, in one place. Pick up where you left off, compare companies and revisit the reviews you've written.
               </p>
             </div>
 
             <div className="sf-user-email">
-              <p>{user.email}</p>
+              {reviewsEnabled && (
+                <Link href="/reviews" className="sf-user-testimonials">Your testimonials</Link>
+              )}
+              <button type="button" className="sf-btn sf-btn-pri" onClick={handleSignOut}>Log out</button>
               <button type="button" className="sf-user-delete" onClick={() => setDeleteState("confirm")}>
                 Delete account
               </button>
             </div>
         </div>
 
-        <DashboardHeroMedia className="mb-8" priority />
-
-        <div className="sf-saved-head">
-          <div className="sf-saved-count">
-            <b>{visibleCategories.reduce((sum, cat) => sum + cat.listings.length, 0)}</b>
-            <span>Saved listings</span>
-          </div>
-        </div>
-
-        {/* Bookmark sections — dynamic per category */}
-        {visibleCategories.map((cat) => {
-          const sortVal = sortByCategory[cat.id] ?? "recent";
-          const sortedListings = sortSavedListings(cat.listings, sortVal);
-          const desktopListings = sortedListings.slice(0, DASHBOARD_CATEGORY_PAGE_SIZE);
-
-          return (
-            <section key={cat.id} className="sf-saved-group">
-              <div className="sf-saved-group-head">
-                <div>
-                  <h2>{cat.label}</h2>
-                  <span className="sf-saved-count">
-                    <span>
-                    {cat.listings.length.toString().padStart(2, '0')} Listings Saved
-                  </span>
-                  </span>
+        <div className="sf-userdash-layout">
+          <div className="sf-userdash-content">
+            <div className="sf-saved-head">
+              <div>
+                <h2>Saved companies</h2>
+                <div className="sf-saved-count">
+                  <b>{totalSavedCount}</b>
+                  <span>saved across {visibleCategories.length} categories</span>
                 </div>
-                  {cat.listings.length > 0 && (
-                    <div className="relative">
-                      <button
-                        onClick={() => setSortDropdownOpen(sortDropdownOpen === cat.id ? null : cat.id)}
-                        className="flex items-center gap-2 text-right text-[11px] text-[#333]/70 tracking-[0.22px]"
-                      >
-                        Sort by: <span className="text-[#f14110] font-medium">{sortVal === 'az' ? 'A > Z' : 'Recent'}</span>
-                        <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M1 1L4 4L7 1" stroke="#f14110" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                      {sortDropdownOpen === cat.id && (
-                        <>
-                          <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
-                          <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
-                            {savedListingSortOptions.map((option) => (
-                              <button
-                                key={option.value}
-                                onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: option.value })); setSortDropdownOpen(null); }}
-                                className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === option.value ? 'text-[#f14110]' : 'text-[#333]'}`}
-                              >
-                                {option.label.replace("Sort by: ", "")}
-                              </button>
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
               </div>
+            </div>
 
-              {cat.listings.length > 0 ? (
-                <>
-                  <div className="sm:hidden overflow-x-auto overscroll-x-contain scrollbar-hide -mx-4 px-4">
-                    <div className="flex gap-5 pb-2">
-                      {sortedListings.map((listing) => (
-                        <div key={listing.id} className="flex-shrink-0">
-                          <ListingCard {...listing} proEnabled={proEnabled} categoryContext={cat.id} returnToDashboard />
-                        </div>
-                      ))}
+            {visibleCategories.map((cat) => {
+              const sortVal = sortByCategory[cat.id] ?? "recent";
+              const sortedListings = sortSavedListings(cat.listings, sortVal);
+              const isExpanded = !!expandedCategories[cat.id];
+              const shownListings = isExpanded ? sortedListings : sortedListings.slice(0, DASHBOARD_CATEGORY_PAGE_SIZE);
+
+              return (
+                <section key={cat.id} className="sf-saved-group">
+                  <div className="sf-saved-group-head">
+                    <div className="sf-saved-titleline">
+                      <h2><span>{categoryNumbers[cat.id] ?? "01"}</span>{cat.label}</h2>
+                      <span className="sf-saved-chip">{cat.listings.length} saved</span>
                     </div>
+                    {cat.listings.length > 0 && (
+                      <div className="relative">
+                        <button
+                          onClick={() => setSortDropdownOpen(sortDropdownOpen === cat.id ? null : cat.id)}
+                          className="sf-saved-sort"
+                        >
+                          Sort by <b>{sortVal === 'az' ? 'A > Z' : 'Recent'}</b>⌄
+                        </button>
+                        {sortDropdownOpen === cat.id && (
+                          <>
+                            <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
+                            <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
+                              {savedListingSortOptions.map((option) => (
+                                <button
+                                  key={option.value}
+                                  onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: option.value })); setSortDropdownOpen(null); }}
+                                  className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === option.value ? 'text-[#f14110]' : 'text-[#333]'}`}
+                                >
+                                  {option.label.replace("Sort by: ", "")}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="hidden sm:grid sf-saved-grid">
-                    {desktopListings.map((listing) => (
-                      <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} categoryContext={cat.id} returnToDashboard />
-                    ))}
-                  </div>
-                  {cat.listings.length > 4 && (
-                    <div className="hidden sm:flex items-center justify-end mt-4">
-                      <Link
-                        href={`/dashboard/${cat.id}`}
-                        className="h-[32px] px-5 rounded-full border border-[#333] text-[#333] text-[11px] font-medium tracking-[0.22px] hover:border-[#f14110] hover:text-[#f14110] transition-colors flex items-center justify-center"
-                      >
-                        See all
-                      </Link>
-                    </div>
+                  {cat.listings.length > 0 ? (
+                    <>
+                      <div className="sf-saved-grid">
+                        {shownListings.map((listing) => (
+                          <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} categoryContext={cat.id} returnToDashboard />
+                        ))}
+                      </div>
+                      {cat.listings.length > DASHBOARD_CATEGORY_PAGE_SIZE && (
+                        <button
+                          type="button"
+                          className="sf-saved-more"
+                          onClick={() => setExpandedCategories((prev) => ({ ...prev, [cat.id]: !isExpanded }))}
+                        >
+                          {isExpanded ? "Show less" : `See all ${cat.listings.length} ${cat.label.toLowerCase()}`} →
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <p className="sf-saved-empty">No saved {cat.label.toLowerCase()} listings yet. Start bookmarking company profiles you would be interested to work with.</p>
                   )}
-                </>
+                </section>
+              );
+            })}
+
+            {visibleCategories.length === 0 && (
+              <div className="sf-saved-empty">
+                No saved listings yet. Start bookmarking company profiles you would be interested to work with.
+              </div>
+            )}
+
+            <section className="sf-user-search-cta">
+              <div>
+                <h2>Looking for something else?</h2>
+                <p>Browse all construction, renovation, architecture, interior and real estate companies across Bali.</p>
+              </div>
+              <Link href="/" className="sf-btn sf-btn-ghost">Browse companies →</Link>
+            </section>
+          </div>
+
+          <aside className="sf-userdash-side">
+            <section className="sf-user-reviews-card">
+              <div className="sf-user-reviews-head">
+                <h2>Your reviews</h2>
+                <span>{userReviews?.length ?? 0}</span>
+              </div>
+              <p className="sf-tag-mono">Latest reviews you've posted</p>
+              {userReviews && userReviews.length > 0 ? (
+                <div className="sf-user-review-list">
+                  {userReviews.slice(0, 3).map((review) => (
+                    <Link key={review._id} href={buildCompanyProfilePath({ _id: review.companyId, name: review.companyName })} className="sf-user-review-item">
+                      <div>
+                        <b>{review.companyName}</b>
+                        <span>{"★".repeat(Math.round(review.rating))}</span>
+                      </div>
+                      <p>&quot;{review.content}&quot;</p>
+                      <small>View company →</small>
+                    </Link>
+                  ))}
+                </div>
               ) : (
-                <p className="sf-saved-empty">No saved {cat.label.toLowerCase()} listings yet. Start bookmarking company profiles you would be interested to work with.</p>
+                <p className="sf-user-review-empty">No reviews yet. Your reputation starts with the first project you share.</p>
+              )}
+              {userReviews && userReviews.length > 3 && (
+                <Link href="/reviews" className="sf-user-reviews-all">See all {userReviews.length} reviews →</Link>
               )}
             </section>
-          );
-        })}
-        {visibleCategories.length === 0 && (
-          <div className="sf-saved-empty">
-            No saved listings yet. Start bookmarking company profiles you would be interested to work with.
-          </div>
-        )}
+            <AdBanner placeholderWhenEmpty />
+          </aside>
+        </div>
+
+        <div className="sf-userdash-mobile-media">
+          <AdBanner mobilePlaceholder placeholderWhenEmpty />
+        </div>
       </main>
 
       <Footer />

@@ -8,6 +8,7 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { WelcomeCard, FeaturedCard, ListingCard } from "@/components/cards";
 import { Pagination } from "@/components/Pagination";
+import { AdBanner } from "@/components/AdBanner";
 import { ListingCardSkeleton } from "@/components/ui/ListingCardSkeleton";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
@@ -314,6 +315,9 @@ function HomeContent() {
                   totalPages={totalPages}
                   onPageChange={handlePageChange}
                 />
+              </div>
+              <div className="sf-mobile-results-ad">
+                <AdBanner mobilePlaceholder placeholderWhenEmpty />
               </div>
             </div>
 

@@ -194,7 +194,7 @@ export default function ArticlePage() {
             </div>
           </div>
           <div className="sf-ad sf-ad-banner">
-            <AdBanner alt="Advertisement" />
+            <AdBanner alt="Advertisement" mobilePlaceholder placeholderWhenEmpty />
           </div>
         </div>
       </main>

@@ -9,9 +9,9 @@ import { resolveMediaSetting } from "@/lib/platform-settings.mjs";
 interface AdBannerProps {
   imageSrc?: string;
   alt?: string;
+  mobilePlaceholder?: boolean;
+  placeholderWhenEmpty?: boolean;
 }
-
-const MOBILE_VIDEO_FALLBACK_IMAGE = "/images/ad-kini-resort.png";
 
 /**
  * Horizontal ad banner — 700×150px at full size.
@@ -19,18 +19,31 @@ const MOBILE_VIDEO_FALLBACK_IMAGE = "/images/ad-kini-resort.png";
  * (aspect-ratio: 700/150 keeps height relative to width).
  * Only shows if an ad image is uploaded via admin panel.
  */
-export function AdBanner({ imageSrc: propImageSrc, alt = "Advertisement" }: AdBannerProps) {
+export function AdBanner({
+  imageSrc: propImageSrc,
+  alt = "Advertisement",
+  mobilePlaceholder = false,
+  placeholderWhenEmpty = false,
+}: AdBannerProps) {
   // Fetch ad media from platform settings
   const horizontalAdValue = useQuery(api.platformSettings.get, { key: "adHorizontal" });
   const horizontalAdState = resolveMediaSetting(horizontalAdValue, { url: "", type: "image" });
   const displayUrl = horizontalAdState.media.url || propImageSrc;
   const displayType = propImageSrc && !horizontalAdState.media.url ? "image" : horizontalAdState.media.type;
 
-  // Don't show ad space if no ad media is uploaded
-  if (!displayUrl) return null;
+  if (!displayUrl && !placeholderWhenEmpty && !mobilePlaceholder) return null;
+
+  const placeholder = (
+    <div className="sf-ad-video-mobile-fallback" role="img" aria-label={alt}>
+      <span>Sponsored</span>
+      <b>Your studio here</b>
+      <small>Advertise on SolidFind →</small>
+    </div>
+  );
 
   return (
     <div
+      className="sf-ad-banner"
       style={{
         position: "relative",
         width: "100%",
@@ -42,28 +55,31 @@ export function AdBanner({ imageSrc: propImageSrc, alt = "Advertisement" }: AdBa
         backgroundColor: "#d8d8d8",
       }}
     >
-      {displayType === "video" ? (
+      {mobilePlaceholder && displayUrl && (
+        <div className="sm:hidden">{placeholder}</div>
+      )}
+      {!displayUrl ? (
+        placeholder
+      ) : displayType === "video" ? (
         <>
-          <Image
-            src={MOBILE_VIDEO_FALLBACK_IMAGE}
-            alt={alt}
-            fill
-            sizes="100vw"
-            className="object-cover sm:hidden"
-          />
+          {!mobilePlaceholder && (
+            <div className="sm:hidden">{placeholder}</div>
+          )}
           <div className="hidden h-full w-full sm:block">
             <AutoplayBannerVideo src={displayUrl} />
           </div>
         </>
       ) : (
-        <Image
-          src={displayUrl}
-          alt={alt}
-          fill
-          sizes="(max-width: 700px) 100vw, 700px"
-          style={{ objectFit: "cover" }}
-          unoptimized={displayUrl.startsWith("data:")}
-        />
+        <div className={mobilePlaceholder ? "relative hidden h-full w-full sm:block" : "relative h-full w-full"}>
+          <Image
+            src={displayUrl}
+            alt={alt}
+            fill
+            sizes="(max-width: 700px) 100vw, 700px"
+            style={{ objectFit: "cover" }}
+            unoptimized={displayUrl.startsWith("data:")}
+          />
+        </div>
       )}
     </div>
   );
