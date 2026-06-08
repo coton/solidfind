@@ -2,6 +2,7 @@ export const PROJECT_BUDGET_TIERS_PLATFORM_KEY = "project_budget_tiers";
 
 export const DEFAULT_PROJECT_BUDGET_TIERS = [
   { value: 150_000, label: "< Rp 250rb" },
+  { value: 250_000, label: "Rp 250rb" },
   { value: 500_000, label: "Rp 500rb - 1jt" },
   { value: 1_000_000, label: "Rp 1jt - 2,5jt" },
   { value: 2_500_000, label: "Rp 2,5jt - 5jt" },
@@ -40,6 +41,10 @@ export function parseProjectBudgetTiers(value) {
         : tier
       )
       .filter((tier) => Number.isFinite(tier.value) && tier.value > 0 && tier.label);
+    if (normalized.some((tier) => tier.value === 150_000) && !normalized.some((tier) => tier.value === 250_000)) {
+      const firstIndex = normalized.findIndex((tier) => tier.value === 150_000);
+      normalized.splice(firstIndex + 1, 0, { value: 250_000, label: "Rp 250rb", openTop: false });
+    }
     return normalized.length >= 2 ? normalized : DEFAULT_PROJECT_BUDGET_TIERS;
   } catch {
     return DEFAULT_PROJECT_BUDGET_TIERS;

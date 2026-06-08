@@ -3403,8 +3403,9 @@
 
 .sf-edit-cover-strip {
   position: relative;
+  margin-top: -18px;
   margin-bottom: 0;
-  padding: 2px max(40px, calc((100% - 1680px) / 2)) 28px;
+  padding: 0 max(40px, calc((100% - 1680px) / 2)) 28px;
   border-bottom: 0;
 }
 
@@ -3875,6 +3876,7 @@
 .sf-range-track {
   position: relative;
   height: 36px;
+  overflow: visible;
 }
 
 .sf-range-rail,
@@ -3896,15 +3898,32 @@
   background: linear-gradient(90deg, var(--sf-orange) 0%, var(--sf-peach-300) 100%);
 }
 
+.sf-range-dot {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--sf-orange);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
 .sf-range-track input[type="range"] {
   position: absolute;
   inset: 0;
+  z-index: 3;
   width: 100%;
   height: 36px;
   margin: 0;
+  opacity: 0;
   appearance: none;
   -webkit-appearance: none;
   background: transparent;
+  cursor: pointer;
   pointer-events: none;
 }
 
@@ -3913,7 +3932,7 @@
 }
 
 .sf-range-track input[type="range"]::-webkit-slider-runnable-track {
-  height: 5px;
+  height: 36px;
   border: 0;
   background: transparent;
 }
@@ -3921,11 +3940,11 @@
 .sf-range-track input[type="range"]::-webkit-slider-thumb {
   width: 24px;
   height: 24px;
-  margin-top: -9.5px;
-  border: 2px solid var(--sf-orange);
+  margin-top: 0;
+  border: 0;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
   pointer-events: auto;
   appearance: none;
@@ -3935,10 +3954,10 @@
 .sf-range-track input[type="range"]::-moz-range-thumb {
   width: 24px;
   height: 24px;
-  border: 2px solid var(--sf-orange);
+  border: 0;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
   pointer-events: auto;
 }
@@ -6557,7 +6576,7 @@
 
 .sf-article-wrap > .sf-about-back {
   display: inline-flex;
-  margin: 0 0 18px calc((100% - min(100%, 1028px)) / 2);
+  margin: 0 0 18px;
 }
 
 .sf-legal-totop {
@@ -6566,16 +6585,16 @@
 
 .sf-pro-guidelines {
   box-sizing: border-box;
-  width: 100%;
+  width: min(calc(100% - (var(--sf-gutter) * 2)), 1220px);
   max-width: 1180px;
-  margin: 0 auto;
-  padding: 30px var(--sf-gutter) 58px;
+  margin: 0 var(--sf-gutter);
+  padding: 30px 0 58px;
 }
 
 @media (min-width: 881px) {
   .sf-pro-guidelines {
-    padding-right: 40px;
-    padding-left: 40px;
+    padding-right: 0;
+    padding-left: 0;
   }
 }
 

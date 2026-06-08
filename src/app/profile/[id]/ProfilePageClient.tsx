@@ -708,6 +708,9 @@ export default function ProfilePageClient() {
     ? workCategoryServices
     : [{ label: toCapitalizedCase(company.category || "services"), value: toCapitalizedCase(company.subcategory || "general") }];
   const projectSizeValue = profileMetaServices.find((item) => item.label === "PROJECT SIZE")?.value || "-";
+  const languagesValue = Array.isArray((company as any).languagesSpoken) && (company as any).languagesSpoken.length > 0
+    ? (company as any).languagesSpoken.join(", ")
+    : "Bahasa, English";
   const socialLinks = [
     company.email ? { key: "email" as const, label: "Email", href: `mailto:${company.email}` } : null,
     company.whatsapp ? { key: "whatsapp" as const, label: "WhatsApp", href: `https://wa.me/${formatWhatsApp(company.whatsapp)}` } : null,
@@ -848,7 +851,7 @@ export default function ProfilePageClient() {
             <dt>{t("Team size")}</dt><dd>{company.teamSize != null ? `${company.teamSize}+ ${t("people", "orang")}` : "—"}</dd>
             <dt>{t("Founded")}</dt><dd>{foundedYear}</dd>
             <dt>{t("Avg. project")}</dt><dd>{projectBudgetLabel}</dd>
-            <dt>{t("Languages")}</dt><dd>Bahasa, English</dd>
+            <dt>{t("Languages")}</dt><dd>{languagesValue}</dd>
           </dl>
         </section>
 
@@ -1091,7 +1094,7 @@ export default function ProfilePageClient() {
                 <dt>{t("Team size")}</dt><dd>{company.teamSize != null ? `${company.teamSize}+ ${t("people", "orang")}` : "—"}</dd>
                 <dt>{t("Founded")}</dt><dd>{foundedYear}</dd>
                 <dt>{t("Avg. project")}</dt><dd>{projectBudgetLabel}</dd>
-                <dt>{t("Languages")}</dt><dd>Bahasa, English</dd>
+                <dt>{t("Languages")}</dt><dd>{languagesValue}</dd>
               </dl>
               <hr />
               {currentUser?.accountType !== "company" && (

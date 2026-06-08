@@ -332,6 +332,13 @@ function isConvexExtraFieldError(error: unknown, field: string) {
   return error instanceof Error && error.message.includes(`extra field \`${field}\``);
 }
 
+function getBudgetEndpointLabel(label: string | undefined, side: "min" | "max") {
+  if (!label) return "";
+  const parts = label.split(" - ").map((part) => part.trim()).filter(Boolean);
+  if (parts.length <= 1) return label;
+  return side === "min" ? parts[0] : parts[parts.length - 1];
+}
+
 export default function EditProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -504,7 +511,7 @@ export default function EditProfilePage() {
   const hasInvalidContactField = invalidPhone || invalidEmail || invalidWebsite || invalidWhatsapp || invalidFacebook || invalidLinkedin || invalidInstagram;
 
   // Determine the bottom hint text and whether it's a warning (orange)
-  let bottomHintText = "*Select at least 1 category before saving\n*Pilih setidaknya 1 kategori sebelum menyimpan";
+  let bottomHintText = "";
   let bottomHintIsWarning = false;
 
   if (!hasCategory) {
@@ -795,6 +802,8 @@ export default function EditProfilePage() {
     left: `calc(${(budgetMinProgress * 100).toFixed(4)}% + ${(12 - 24 * budgetMinProgress).toFixed(2)}px)`,
     right: `calc(${((1 - budgetMaxProgress) * 100).toFixed(4)}% + ${(24 * budgetMaxProgress - 12).toFixed(2)}px)`,
   };
+  const budgetMinDotStyle = { left: `calc(${(budgetMinProgress * 100).toFixed(4)}% + ${(12 - 24 * budgetMinProgress).toFixed(2)}px)` };
+  const budgetMaxDotStyle = { left: `calc(${(budgetMaxProgress * 100).toFixed(4)}% + ${(12 - 24 * budgetMaxProgress).toFixed(2)}px)` };
 
   const toggleCategoryServiceMatrix = (
     options: ServiceOption[],
@@ -1592,12 +1601,14 @@ export default function EditProfilePage() {
               <div className="sf-edit-budget">
                 <div className="sf-range">
                   <div className="sf-range-vals">
-                    <div><span className="sf-range-cap">Entry</span><b>{projectBudgetTiers[budgetMinIndex]?.label}</b></div>
-                    <div className="r"><span className="sf-range-cap">Exit</span><b>{projectBudgetTiers[budgetMaxIndex]?.label}</b></div>
+                    <div><span className="sf-range-cap">Entry</span><b>{getBudgetEndpointLabel(projectBudgetTiers[budgetMinIndex]?.label, "min")}</b></div>
+                    <div className="r"><span className="sf-range-cap">Exit</span><b>{getBudgetEndpointLabel(projectBudgetTiers[budgetMaxIndex]?.label, "max")}</b></div>
                   </div>
                   <div className="sf-range-track">
                     <div className="sf-range-rail" />
                     <div className="sf-range-fill" style={budgetFillStyle} />
+                    <span className="sf-range-dot" style={budgetMinDotStyle} aria-hidden="true" />
+                    <span className="sf-range-dot" style={budgetMaxDotStyle} aria-hidden="true" />
                     <input type="range" min="0" max={projectBudgetTiers.length - 1} step="1" value={budgetMinIndex} onChange={(e) => updateBudgetMin(Number(e.target.value))} aria-label="Minimum budget" />
                     <input type="range" min="0" max={projectBudgetTiers.length - 1} step="1" value={budgetMaxIndex} onChange={(e) => updateBudgetMax(Number(e.target.value))} aria-label="Maximum budget" />
                   </div>
@@ -1790,9 +1801,11 @@ export default function EditProfilePage() {
         {/* Bottom Save */}
         <div className="sf-edit-foot">
           <div>
-            <p className={`sf-edit-missing whitespace-pre-line ${bottomHintIsWarning ? '' : 'text-[#333]/50'}`}>
-              {bottomHintText}
-            </p>
+            {bottomHintIsWarning && bottomHintText && (
+              <p className="sf-edit-missing whitespace-pre-line">
+                {bottomHintText}
+              </p>
+            )}
           </div>
           <div className="sf-edit-foot-save">
             {saveError && (
