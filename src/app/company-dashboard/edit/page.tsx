@@ -1815,7 +1815,7 @@ export default function EditProfilePage() {
                 className="sf-edit-delete"
                 onClick={() => setShowDeleteModal(true)}
               >
-                Delete profile
+                Delete account
               </button>
             )}
           </div>

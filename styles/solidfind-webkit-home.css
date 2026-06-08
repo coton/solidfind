@@ -4142,10 +4142,13 @@
   background: none;
   color: var(--sf-stone-600);
   cursor: pointer;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 8px 4px;
+  font-family: var(--sf-font-mono), JetBrainsMono, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  padding: 8px 0;
+  text-decoration: underline;
+  text-transform: uppercase;
 }
 
 .sf-edit-delete:hover {
@@ -4274,7 +4277,6 @@
   .sf-edit-delete {
     align-self: center;
     color: var(--sf-danger);
-    font-size: 14px;
   }
 
   .sf-edit-missing {
@@ -7696,6 +7698,114 @@
   margin-top: 0;
 }
 
+/* Individual dashboard refinements from the WebKit reference. */
+.sf-userdash-main {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sf-userdash-main .sf-user-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  max-width: none;
+}
+
+.sf-userdash-main .sf-user-email {
+  justify-self: end;
+  margin-left: 0;
+}
+
+.sf-userdash-main .sf-user-delete {
+  color: var(--sf-fg-3);
+  font-family: var(--sf-font-mono), JetBrainsMono, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  line-height: 1.15;
+  text-align: right;
+  text-decoration: underline;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sf-userdash-main .sf-userdash-layout {
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 28px;
+}
+
+.sf-userdash-main .sf-saved-head {
+  align-items: baseline;
+  margin-top: 34px;
+}
+
+.sf-userdash-main .sf-saved-count {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.sf-userdash-main .sf-saved-count b {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.sf-userdash-main .sf-saved-count span {
+  font-size: 10px;
+}
+
+.sf-userdash-main .sf-saved-group {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.sf-userdash-main .sf-saved-group-head {
+  display: block;
+}
+
+.sf-userdash-main .sf-saved-titleline {
+  align-items: center;
+}
+
+.sf-userdash-main .sf-saved-titleline h2 {
+  text-transform: none;
+}
+
+.sf-userdash-main .sf-saved-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.sf-userdash-main .sf-saved-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.sf-userdash-main .sf-userdash-side {
+  width: 380px;
+}
+
+.sf-userdash-main .sf-user-reviews-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.sf-userdash-main .sf-userdash-side .sf-ad-banner {
+  width: 100%;
+  max-width: none;
+}
+
+.sf-userdash-main .sf-user-search-cta .sf-btn {
+  color: var(--sf-orange);
+}
+
 @media (max-width: 639px) {
   .m-dash-two {
     grid-template-columns: 1fr;
@@ -7703,5 +7813,51 @@
 
   .m-dashboard .m-card {
     width: 100%;
+  }
+
+  .sf-userdash-main {
+    width: 100%;
+    max-width: none;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .sf-userdash-main .sf-user-intro {
+    display: block;
+  }
+
+  .sf-userdash-main .sf-user-email {
+    align-items: flex-start;
+    margin-top: 16px;
+  }
+
+  .sf-userdash-main .sf-userdash-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sf-userdash-main .sf-userdash-side {
+    width: 100%;
+  }
+
+  .sf-userdash-main .sf-saved-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sf-userdash-main .sf-saved-count {
+    margin-left: 0;
+  }
+
+  .sf-userdash-main .sf-saved-titleline {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sf-userdash-main .sf-saved-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }

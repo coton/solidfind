@@ -131,7 +131,7 @@ export default function DashboardCategoryPage() {
       architectureLocations: s.company!.architectureLocations ?? [],
       interiorLocations: s.company!.interiorLocations ?? [],
       realEstateLocations: s.company!.realEstateLocations ?? [],
-      isPro: s.company!.isPro,
+      isPro: s.company!.isPro === true,
       isSaved: true,
       imageUrl: s.company!.imageUrl,
       logoId: s.company!.logoId,

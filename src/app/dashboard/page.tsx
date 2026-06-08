@@ -61,6 +61,11 @@ function sortSavedListings(listings: SavedListingCard[], sortBy: string) {
   });
 }
 
+function formatCategoryTitle(label: string) {
+  const normalized = label.replace(/^\d+\.\s*/, "").trim().toLowerCase();
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
 export default function DashboardPage() {
   const [sortByCategory, setSortByCategory] = useState<Record<string, SavedListingSort>>({});
   const [sortDropdownOpen, setSortDropdownOpen] = useState<string | null>(null);
@@ -158,7 +163,7 @@ export default function DashboardPage() {
         architectureLocations: s.company!.architectureLocations ?? [],
         interiorLocations: s.company!.interiorLocations ?? [],
         realEstateLocations: s.company!.realEstateLocations ?? [],
-        isPro: s.company!.isPro,
+        isPro: s.company!.isPro === true,
         isSaved: true,
         imageUrl: s.company!.imageUrl,
         logoId: s.company!.logoId,
@@ -185,10 +190,6 @@ export default function DashboardPage() {
             </div>
 
             <div className="sf-user-email">
-              {reviewsEnabled && (
-                <Link href="/reviews" className="sf-user-testimonials">Your testimonials</Link>
-              )}
-              <button type="button" className="sf-btn sf-btn-pri" onClick={handleSignOut}>Log out</button>
               <button type="button" className="sf-user-delete" onClick={() => setDeleteState("confirm")}>
                 Delete account
               </button>
@@ -198,12 +199,10 @@ export default function DashboardPage() {
         <div className="sf-userdash-layout">
           <div className="sf-userdash-content">
             <div className="sf-saved-head">
-              <div>
-                <h2>Saved companies</h2>
-                <div className="sf-saved-count">
-                  <b>{totalSavedCount}</b>
-                  <span>saved across {visibleCategories.length} categories</span>
-                </div>
+              <h2>Saved companies</h2>
+              <div className="sf-saved-count">
+                <b>{totalSavedCount}</b>
+                <span>saved across {visibleCategories.length} categories</span>
               </div>
             </div>
 
@@ -217,35 +216,37 @@ export default function DashboardPage() {
                 <section key={cat.id} className="sf-saved-group">
                   <div className="sf-saved-group-head">
                     <div className="sf-saved-titleline">
-                      <h2><span>{categoryNumbers[cat.id] ?? "01"}</span>{cat.label}</h2>
-                      <span className="sf-saved-chip">{cat.listings.length} saved</span>
+                      <h2><span>{categoryNumbers[cat.id] ?? "01"}</span>{formatCategoryTitle(cat.label)}</h2>
+                      {cat.listings.length > 0 && (
+                        <div className="sf-saved-actions">
+                          <div className="relative">
+                            <button
+                              onClick={() => setSortDropdownOpen(sortDropdownOpen === cat.id ? null : cat.id)}
+                              className="sf-saved-sort"
+                            >
+                              Sort by <b>{sortVal === 'az' ? 'A > Z' : 'Recent'}</b>⌄
+                            </button>
+                            {sortDropdownOpen === cat.id && (
+                              <>
+                                <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
+                                <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
+                                  {savedListingSortOptions.map((option) => (
+                                    <button
+                                      key={option.value}
+                                      onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: option.value })); setSortDropdownOpen(null); }}
+                                      className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === option.value ? 'text-[#f14110]' : 'text-[#333]'}`}
+                                    >
+                                      {option.label.replace("Sort by: ", "")}
+                                    </button>
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                          <span className="sf-saved-chip">{cat.listings.length} saved</span>
+                        </div>
+                      )}
                     </div>
-                    {cat.listings.length > 0 && (
-                      <div className="relative">
-                        <button
-                          onClick={() => setSortDropdownOpen(sortDropdownOpen === cat.id ? null : cat.id)}
-                          className="sf-saved-sort"
-                        >
-                          Sort by <b>{sortVal === 'az' ? 'A > Z' : 'Recent'}</b>⌄
-                        </button>
-                        {sortDropdownOpen === cat.id && (
-                          <>
-                            <div className="fixed inset-0 z-40" onClick={() => setSortDropdownOpen(null)} />
-                            <div className="absolute top-full right-0 mt-1 bg-white rounded-[6px] shadow-lg z-50 py-2 min-w-[120px]">
-                              {savedListingSortOptions.map((option) => (
-                                <button
-                                  key={option.value}
-                                  onClick={() => { setSortByCategory(prev => ({ ...prev, [cat.id]: option.value })); setSortDropdownOpen(null); }}
-                                  className={`w-full text-left px-4 py-2 text-[11px] tracking-[0.22px] hover:bg-[#f8f8f8] ${sortVal === option.value ? 'text-[#f14110]' : 'text-[#333]'}`}
-                                >
-                                  {option.label.replace("Sort by: ", "")}
-                                </button>
-                              ))}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   {cat.listings.length > 0 ? (
@@ -261,7 +262,7 @@ export default function DashboardPage() {
                           className="sf-saved-more"
                           onClick={() => setExpandedCategories((prev) => ({ ...prev, [cat.id]: !isExpanded }))}
                         >
-                          {isExpanded ? "Show less" : `See all ${cat.listings.length} ${cat.label.toLowerCase()}`} →
+                          {isExpanded ? "Show less" : `See all ${cat.listings.length} ${formatCategoryTitle(cat.label).toLowerCase()}`} →
                         </button>
                       )}
                     </>
