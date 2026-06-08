@@ -7,6 +7,8 @@ import { useQuery } from "convex/react";
 import { Footer } from "@/components/Footer";
 import { AuthModal } from "@/components/AuthModal";
 import { MobileMenuButton } from "@/components/MobileMenuDrawer";
+import { AccountIconLink } from "@/components/AccountIcon";
+import { LinkedText } from "@/components/LinkedText";
 import { api } from "../../../convex/_generated/api";
 import {
   DEFAULT_PRO_TERMS_EN_TEXT,
@@ -137,9 +139,7 @@ export default function TermsPage() {
                 <span className={language === "en" ? "on" : ""}>EN</span>
                 <span className={language === "id" ? "on" : ""}>ID</span>
               </Link>
-              <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-              </Link>
+              <AccountIconLink href="/dashboard" />
               <button type="button" className="sf-btn sf-btn-pri sf-static-list-btn" onClick={() => setAuthModalOpen(true)}>List your services</button>
               <MobileMenuButton />
             </div>
@@ -183,7 +183,7 @@ export default function TermsPage() {
                         return (
                           <ul key={`${section.title}-${index}`} className="space-y-0.5 pl-8 ml-2 mb-1">
                             {block.items.map((item) => (
-                              <li key={item}>{item}</li>
+                              <li key={item}><LinkedText text={item} /></li>
                             ))}
                           </ul>
                         );
@@ -191,7 +191,7 @@ export default function TermsPage() {
 
                       return (
                         <p key={`${section.title}-${index}`} className={`sf-legal-p ${index === 0 ? "is-intro" : ""}`}>
-                          {block.content}
+                          <LinkedText text={block.content} />
                         </p>
                       );
                     })}
@@ -253,8 +253,8 @@ export default function TermsPage() {
                             <ul key={`${section.title}-${index}`} className="space-y-0.5 pl-8 ml-2 mb-1">
                               {block.items.map((item) => (
                                 <li key={item} className="flex items-start gap-2 leading-[15px]">
-                                  <span className="text-[#333]">•</span>
-                                  <span>{item}</span>
+                                  <span className="text-[#f14110]">•</span>
+                                  <span><LinkedText text={item} /></span>
                                 </li>
                               ))}
                             </ul>

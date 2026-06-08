@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { SignedIn, SignedOut, useClerk } from "@clerk/nextjs";
 import { AuthModal } from "@/components/AuthModal";
+import { AccountGlyph, AccountIconLink } from "@/components/AccountIcon";
 import { useSiteLanguage } from "@/components/LanguageProvider";
 import { SortDropdown } from "@/components/SortDropdown";
 import { useQuery } from "convex/react";
@@ -847,12 +848,12 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             <span className="m-topbar-sp" />
             <SignedIn>
               <Link href={userType === "company" ? "/company-dashboard" : "/dashboard"} className="m-iconbtn" aria-label="Dashboard">
-                <Image src="/images/icon-account.svg" alt="" width={20} height={20} />
+                <AccountGlyph />
               </Link>
             </SignedIn>
             <SignedOut>
               <button type="button" className="m-iconbtn" aria-label="Account" onClick={() => openAuthModal("individual", "login")}>
-                <Image src="/images/icon-account.svg" alt="" width={20} height={20} />
+                <AccountGlyph />
               </button>
             </SignedOut>
             <button type="button" className="m-iconbtn" aria-label="Menu" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)}>
@@ -971,13 +972,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             </button>
             <SignedIn>
               {/* Account icon (mobile + desktop) */}
-              <Link
-                href={userType === "company" ? "/company-dashboard" : "/dashboard"}
-                className="sf-icon-btn"
-                title="Dashboard"
-              >
-                <Image src="/images/icon-account.svg" alt="Dashboard" width={19} height={20} />
-              </Link>
+              <AccountIconLink href={userType === "company" ? "/company-dashboard" : "/dashboard"} label="Dashboard" title="Dashboard" />
               {/* Log out button */}
               {userType === "company" ? (
                 <button
@@ -1003,7 +998,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                 onClick={() => openAuthModal("individual", "login")}
                 className="sf-icon-btn sf-account-btn"
               >
-                <Image src="/images/icon-account.svg" alt="Account" width={19} height={20} />
+                <AccountGlyph />
               </button>
               {/* List your business → opens REGISTER modal, company pre-selected */}
               <button

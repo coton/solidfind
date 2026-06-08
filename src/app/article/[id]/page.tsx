@@ -9,6 +9,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { AuthModal } from "@/components/AuthModal";
 import { MobileMenuButton } from "@/components/MobileMenuDrawer";
 import { useSiteLanguage } from "@/components/LanguageProvider";
+import { AccountIconLink } from "@/components/AccountIcon";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -240,9 +241,7 @@ function ArticleHero({
               <span className={language === "id" ? "on" : ""}>ID</span>
             </button>
           )}
-          <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          </Link>
+          <AccountIconLink href="/dashboard" />
           <button type="button" className="sf-btn sf-btn-pri sf-static-list-btn" onClick={onListServices}>List your services</button>
           <MobileMenuButton />
         </div>

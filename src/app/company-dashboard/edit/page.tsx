@@ -898,21 +898,23 @@ export default function EditProfilePage() {
           <h4>{title}</h4>
           {renderMatrixSwitch(enabled)}
         </button>
-        <div className={`sf-mx-catbody ${enabled ? "" : "is-off"}`}>
-          {options.map((service) => {
-            const isAll = service.id === allId;
-            const isCompleteChild = id === "renovation" && completeHouseChildren.includes(service.id);
-            const disabled = !enabled || (allActive && !isAll) || (completeActive && isCompleteChild);
-            return renderMatrixRow({
-              id: service.id,
-              label: service.label,
-              active: normalizedSelected.includes(service.id),
-              disabled,
-              master: isAll,
-              onClick: () => toggleCategoryServiceMatrix(options, selected, setSelected, service.id),
-            });
-          })}
-        </div>
+        {enabled && (
+          <div className="sf-mx-catbody">
+            {options.map((service) => {
+              const isAll = service.id === allId;
+              const isCompleteChild = id === "renovation" && completeHouseChildren.includes(service.id);
+              const disabled = (allActive && !isAll) || (completeActive && isCompleteChild);
+              return renderMatrixRow({
+                id: service.id,
+                label: service.label,
+                active: normalizedSelected.includes(service.id),
+                disabled,
+                master: isAll,
+                onClick: () => toggleCategoryServiceMatrix(options, selected, setSelected, service.id),
+              });
+            })}
+          </div>
+        )}
       </article>
     );
   };
@@ -1319,7 +1321,7 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
+    <div className="sf-edit-shell min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
 
       {/* Hidden file inputs */}

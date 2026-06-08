@@ -199,6 +199,34 @@
   margin: 0 0 15px;
 }
 
+.sf-about-list {
+  margin: 8px 0 15px;
+  padding-left: 30px;
+  list-style: disc;
+}
+
+.sf-about-list li {
+  padding-left: 4px;
+}
+
+.sf-about-list li::marker,
+.sf-legal-section li::marker {
+  color: var(--sf-orange);
+}
+
+.sf-mail-link,
+.sf-about-prose a[href^="mailto:"],
+.sf-legal-section a[href^="mailto:"] {
+  color: var(--sf-orange);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sf-about-bottom-ad {
+  width: min(calc(100% - (var(--sf-gutter) * 2)), 700px);
+  margin: 0 auto 64px;
+}
+
 .sf-about-cards,
 .sf-about-side {
   display: flex;
@@ -3619,7 +3647,7 @@
 }
 
 .sf-mx-cat:not(.on) .sf-mx-catbody {
-  pointer-events: none;
+  display: none;
 }
 
 .sf-edit-2col {
@@ -4093,13 +4121,17 @@
 }
 
 @media (max-width: 880px) {
+  .sf-edit-shell > header {
+    display: none;
+  }
+
   .sf-edit {
     margin: 0;
-    padding: 100px 0 0;
+    padding: 0;
   }
 
   .sf-edit-bar {
-    top: 76px;
+    top: 0;
     right: 0;
     left: 0;
     padding: 12px 20px;

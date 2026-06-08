@@ -7,6 +7,9 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AuthModal } from "@/components/AuthModal";
 import { MobileMenuButton } from "@/components/MobileMenuDrawer";
+import { AccountIconLink } from "@/components/AccountIcon";
+import { LinkedText } from "@/components/LinkedText";
+import { AdBanner } from "@/components/AdBanner";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import {
@@ -32,7 +35,7 @@ function renderBoldTextLine(line: string) {
       return <strong key={`${segment}-${index}`} className="font-semibold text-[#333]">{segment.slice(2, -2)}</strong>;
     }
 
-    return <span key={`${segment}-${index}`}>{segment}</span>;
+    return <LinkedText key={`${segment}-${index}`} text={segment} />;
   });
 }
 
@@ -50,13 +53,11 @@ function renderFormattedParagraphs(text: string, className: string) {
   const renderBulletList = (items: string[], key: string) => {
     if (items.length === 0) return null;
     return (
-      <div key={key} className="space-y-0.5">
+      <ul key={key} className="sf-about-list">
         {items.map((item, itemIndex) => (
-          <p key={`${key}-${itemIndex}`} className={`${className} pl-8`}>
-            • {renderBoldTextLine(item)}
-          </p>
+          <li key={`${key}-${itemIndex}`} className={className}>{renderBoldTextLine(item)}</li>
         ))}
-      </div>
+      </ul>
     );
   };
 
@@ -185,9 +186,7 @@ export default function AboutPage() {
                 <span className={language === "en" ? "on" : ""}>EN</span>
                 <span className={language === "id" ? "on" : ""}>ID</span>
               </button>
-              <Link className="sf-icon-btn" aria-label="Account" href="/dashboard">
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-              </Link>
+              <AccountIconLink href="/dashboard" />
               <button type="button" className="sf-btn sf-btn-pri sf-static-list-btn" onClick={() => setAuthModalOpen(true)}>List your services</button>
               <MobileMenuButton />
             </div>
@@ -259,6 +258,10 @@ export default function AboutPage() {
               </button>
             </div>
           </aside>
+        </div>
+
+        <div className="sf-about-bottom-ad">
+          <AdBanner />
         </div>
       </main>
 
