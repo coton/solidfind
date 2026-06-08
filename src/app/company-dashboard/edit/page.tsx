@@ -328,6 +328,10 @@ function SetupBackButton({
   );
 }
 
+function isConvexExtraFieldError(error: unknown, field: string) {
+  return error instanceof Error && error.message.includes(`extra field \`${field}\``);
+}
+
 export default function EditProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -784,6 +788,13 @@ export default function EditProfilePage() {
     setBudgetMaxIndex(nextIndex);
     setIsDirty(true);
   };
+  const budgetStepCount = Math.max(1, projectBudgetTiers.length - 1);
+  const budgetMinProgress = budgetMinIndex / budgetStepCount;
+  const budgetMaxProgress = budgetMaxIndex / budgetStepCount;
+  const budgetFillStyle = {
+    left: `calc(${(budgetMinProgress * 100).toFixed(4)}% + ${(12 - 24 * budgetMinProgress).toFixed(2)}px)`,
+    right: `calc(${((1 - budgetMaxProgress) * 100).toFixed(4)}% + ${(24 * budgetMaxProgress - 12).toFixed(2)}px)`,
+  };
 
   const toggleCategoryServiceMatrix = (
     options: ServiceOption[],
@@ -991,7 +1002,7 @@ export default function EditProfilePage() {
       });
       const savedPrimaryCategory = visibleCategoryIds.includes(primaryCategory) ? primaryCategory : inferredPrimaryCategory;
       if (company) {
-        await updateCompany({
+        const updatePayload = {
           id: company._id,
           name: companyName || undefined,
           roleDiscipline: roleDiscipline || undefined,
@@ -1027,9 +1038,16 @@ export default function EditProfilePage() {
           projectImageUrls,
           isReviewed: true,
           since: foundedYear ? parseInt(foundedYear) : undefined,
-        });
+        };
+        try {
+          await updateCompany(updatePayload);
+        } catch (error) {
+          if (!isConvexExtraFieldError(error, "languagesSpoken")) throw error;
+          const { languagesSpoken: _languagesSpoken, ...retryPayload } = updatePayload;
+          await updateCompany(retryPayload);
+        }
       } else {
-        await createCompany({
+        const createPayload = {
           ownerId: currentUser._id,
           name: companyName || currentUser.companyName || "My Company",
           roleDiscipline: roleDiscipline || undefined,
@@ -1066,7 +1084,14 @@ export default function EditProfilePage() {
           projectImageUrls,
           isReviewed: true,
           since: foundedYear ? parseInt(foundedYear) : undefined,
-        });
+        };
+        try {
+          await createCompany(createPayload);
+        } catch (error) {
+          if (!isConvexExtraFieldError(error, "languagesSpoken")) throw error;
+          const { languagesSpoken: _languagesSpoken, ...retryPayload } = createPayload;
+          await createCompany(retryPayload);
+        }
       }
       setIsDirty(false);
     } catch (error) {
@@ -1572,7 +1597,7 @@ export default function EditProfilePage() {
                   </div>
                   <div className="sf-range-track">
                     <div className="sf-range-rail" />
-                    <div className="sf-range-fill" style={{ left: `${(budgetMinIndex / (projectBudgetTiers.length - 1)) * 100}%`, right: `${100 - (budgetMaxIndex / (projectBudgetTiers.length - 1)) * 100}%` }} />
+                    <div className="sf-range-fill" style={budgetFillStyle} />
                     <input type="range" min="0" max={projectBudgetTiers.length - 1} step="1" value={budgetMinIndex} onChange={(e) => updateBudgetMin(Number(e.target.value))} aria-label="Minimum budget" />
                     <input type="range" min="0" max={projectBudgetTiers.length - 1} step="1" value={budgetMaxIndex} onChange={(e) => updateBudgetMax(Number(e.target.value))} aria-label="Maximum budget" />
                   </div>
