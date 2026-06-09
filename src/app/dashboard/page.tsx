@@ -184,7 +184,7 @@ export default function DashboardPage() {
             <div>
               <span className="sf-tag-mono sf-user-account-line">Individual account · <span>{user.email}</span></span>
               <h1>Hi {user.name},</h1>
-              <p className="sf-about-contact">
+              <p className="sf-dash-sub">
                 Everything you've saved while planning, in one place. Pick up where you left off, compare companies and revisit the reviews you've written.
               </p>
             </div>

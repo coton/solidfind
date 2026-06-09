@@ -5,18 +5,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAuthStatusMessage, getVerificationErrorMessage, isVerificationCodeComplete, sanitizeVerificationCode } from "@/lib/auth-verification.mjs";
 import { sanitizeNextPath } from "@/lib/magic-link-login.mjs";
+import { useSiteLanguage } from "@/components/LanguageProvider";
 
 export default function SecureSignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signIn, setActive, isLoaded } = useSignIn();
+  const { t } = useSiteLanguage();
   const identifier = searchParams.get("identifier")?.trim() || "";
   const nextPath = useMemo(() => sanitizeNextPath(searchParams.get("next")) || "/auth-complete", [searchParams]);
+  const language = searchParams.get("lang") === "id" ? "id" : "en";
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [isBusy, setIsBusy] = useState(false);
-  const [submitHovered, setSubmitHovered] = useState(false);
-  const [resendHovered, setResendHovered] = useState(false);
   const hasPrepared = useRef(false);
 
   const emailFactor = useMemo(() => {
@@ -31,12 +32,20 @@ export default function SecureSignInPage() {
     const signInStatus = signIn.status as string | null;
 
     if (signInStatus !== "needs_second_factor" && signInStatus !== "needs_client_trust") {
-      setError("Please start secure sign in from the login pop-up.\nMulai secure sign in dari pop-up login.");
+      setError(
+        language === "id"
+          ? "Mulai secure sign in dari pop-up login."
+          : "Please start secure sign in from the login pop-up."
+      );
       return;
     }
 
     if (!emailFactor) {
-      setError("This secure sign in method is not available for this account.\nMetode secure sign in ini tidak tersedia untuk akun ini.");
+      setError(
+        language === "id"
+          ? "Metode secure sign in ini tidak tersedia untuk akun ini."
+          : "This secure sign in method is not available for this account."
+      );
       return;
     }
 
@@ -48,19 +57,25 @@ export default function SecureSignInPage() {
       hasPrepared.current = false;
       setError(
         getVerificationErrorMessage(clerkError, {
-          fallbackMessage: "Unable to send the secure sign-in code. Please try again.",
-          expiredMessage: "This code expired. Please request a new one below.",
+          fallbackMessage:
+            language === "id"
+              ? "Tidak dapat mengirim kode secure sign in. Silakan coba lagi."
+              : "Unable to send the secure sign-in code. Please try again.",
+          expiredMessage:
+            language === "id"
+              ? "Kode ini kedaluwarsa. Silakan minta kode baru di bawah."
+              : "This code expired. Please request a new one below.",
         })
       );
     });
-  }, [emailFactor, isLoaded, signIn]);
+  }, [emailFactor, isLoaded, language, signIn]);
 
   const handleSubmit = async () => {
     if (!signIn || !setActive) return;
 
     const normalizedCode = sanitizeVerificationCode(code);
     if (!isVerificationCodeComplete(normalizedCode)) {
-      setError("Please enter the 6-digit verification code.");
+      setError(language === "id" ? "Masukkan kode verifikasi 6 digit." : "Please enter the 6-digit verification code.");
       return;
     }
 
@@ -80,14 +95,21 @@ export default function SecureSignInPage() {
 
       setError(
         getAuthStatusMessage(result.status, {
-          fallbackMessage: "Secure sign in needs another step before it can continue.",
+          fallbackMessage:
+            language === "id"
+              ? "Secure sign in memerlukan langkah tambahan sebelum dapat dilanjutkan."
+              : "Secure sign in needs another step before it can continue.",
         })
       );
     } catch (clerkError) {
       setError(
         getVerificationErrorMessage(clerkError, {
-          fallbackMessage: "Invalid verification code.",
-          expiredMessage: "This code expired. Please request a new one below.",
+          fallbackMessage:
+            language === "id" ? "Kode verifikasi tidak valid." : "Invalid verification code.",
+          expiredMessage:
+            language === "id"
+              ? "Kode ini kedaluwarsa. Silakan minta kode baru di bawah."
+              : "This code expired. Please request a new one below.",
         })
       );
     } finally {
@@ -108,8 +130,14 @@ export default function SecureSignInPage() {
     } catch (clerkError) {
       setError(
         getVerificationErrorMessage(clerkError, {
-          fallbackMessage: "Failed to resend the secure sign-in code.",
-          expiredMessage: "Your previous code expired. A fresh code could not be sent yet. Please try again.",
+          fallbackMessage:
+            language === "id"
+              ? "Gagal mengirim ulang kode secure sign in."
+              : "Failed to resend the secure sign-in code.",
+          expiredMessage:
+            language === "id"
+              ? "Kode sebelumnya kedaluwarsa. Kode baru belum bisa dikirim. Silakan coba lagi."
+              : "Your previous code expired. A fresh code could not be sent yet. Please try again.",
         })
       );
     } finally {
@@ -117,83 +145,69 @@ export default function SecureSignInPage() {
     }
   };
 
+  const handleOtherOptions = () => {
+    const params = new URLSearchParams();
+    params.set("next", nextPath);
+    router.replace(`/sign-in?${params.toString()}`);
+  };
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f8f8f8] px-4 py-10">
-      <div className="w-full max-w-[420px]">
-        <div className="mb-5 text-center">
-          <h1 className="text-[24px] font-semibold tracking-[0.48px] text-[#333]">
-            Secure sign in
-          </h1>
-          <p className="mt-2 text-[10px] leading-[16px] text-[#999]">
-            Complete the extra verification step to access your SolidFind account.
-            <br />
-            Selesaikan langkah verifikasi tambahan untuk mengakses akun SolidFind Anda.
-          </p>
-        </div>
+    <main className="min-h-screen bg-[#f8f8f8]">
+      <div className="sf-modal-scrim open">
+        <div className="sf-modal sf-auth-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+          <button type="button" className="sf-modal-x" onClick={handleOtherOptions} aria-label="Close">×</button>
+          <div className="sf-modal-head sf-auth-step-head">
+            <span className="sf-tag-mono">{t("Welcome back", "Selamat datang kembali")}</span>
+            <h2>{t("Secure sign in", "Secure sign in")}</h2>
+            <p>{t("Complete the extra verification step to access your SolidFind account.", "Selesaikan langkah verifikasi tambahan untuk mengakses akun SolidFind Anda.")}</p>
+          </div>
 
-        <div className="rounded-[6px] bg-[#f8f8f8] px-7 py-8">
-          <h2 className="text-center text-[18px] font-semibold tracking-[0.36px] text-[#333]">
-            CHECK YOUR EMAIL
-          </h2>
-          <p className="mt-2 text-center text-[10px] leading-[15px] text-[#999]">
-            Enter the verification code sent to
-            <br />
-            <strong className="text-[13px] font-medium text-[#333]">{safeIdentifier || "your email"}</strong>
-          </p>
-
-          <div className="mt-6">
-            <label className="mb-[5px] block text-[11px] font-medium tracking-[0.22px] text-[#333]">
-              Verification Code
+          <form
+            className="sf-modal-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleSubmit();
+            }}
+          >
+            <label className="sf-field">
+              <span>{t("Verification Code", "Kode verifikasi")}</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                value={code}
+                onChange={(event) => setCode(sanitizeVerificationCode(event.target.value))}
+                placeholder={t("Enter 6-digit code", "Masukkan 6 digit kode")}
+                className="sf-code-input"
+              />
             </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              value={code}
-              onChange={(event) => setCode(sanitizeVerificationCode(event.target.value))}
-              placeholder="Enter 6-digit code"
-              className="h-[38px] w-full rounded-[6px] border border-[#e4e4e4] bg-white px-2.5 text-center text-[12px] tracking-[4px] text-[#333] outline-none"
-            />
-          </div>
 
-          {error && (
-            <p className="mt-3 whitespace-pre-line text-center text-[10px] leading-[15px] text-[#f14110]">
-              *{error}
+            <p className="sf-auth-note" style={{ marginTop: -8, marginBottom: 0 }}>
+              {t("We sent the code to", "Kami mengirim kode ke")} <b>{safeIdentifier || t("your email", "email Anda")}</b>
             </p>
-          )}
 
-          <div className="mt-7 flex justify-center">
-            <button
-              type="button"
-              disabled={isBusy || !isLoaded}
-              onClick={handleSubmit}
-              onMouseEnter={() => setSubmitHovered(true)}
-              onMouseLeave={() => setSubmitHovered(false)}
-              className="h-10 w-[145px] rounded-full text-[13px] font-semibold tracking-[0.5px] transition-all disabled:cursor-not-allowed disabled:opacity-60"
-              style={{
-                border: submitHovered ? "none" : "1px solid #F14110",
-                background: submitHovered ? "linear-gradient(to right, #E9A28E, #F14110)" : "transparent",
-                color: submitHovered ? "white" : "#F14110",
-              }}
-            >
-              {isBusy ? "Verifying..." : "Continue"}
+            {error && <p className="sf-auth-note">*{error}</p>}
+
+            <button type="submit" disabled={isBusy || !isLoaded} className="sf-btn sf-btn-pri sf-btn-lg sf-auth-email-btn">
+              {isBusy ? t("Verifying...", "Memverifikasi...") : t("Continue", "Lanjutkan")}
             </button>
-          </div>
 
-          <div className="mt-3 text-center">
             <button
               type="button"
               disabled={isBusy || !emailFactor}
               onClick={handleResend}
-              onMouseEnter={() => setResendHovered(true)}
-              onMouseLeave={() => setResendHovered(false)}
-              className="bg-transparent text-[10px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ color: resendHovered ? "#333" : "#F14110" }}
+              className="sf-modal-link sf-link-button sf-auth-inline-link"
             >
-              Request a new code
+              {t("Request a new code", "Minta kode baru")}
             </button>
-          </div>
+
+            <p className="sf-modal-foot sf-auth-alt-foot">
+              <button type="button" onClick={handleOtherOptions} className="sf-modal-link sf-link-button">
+                ← {t("Other options", "Opsi lain")}
+              </button>
+            </p>
+          </form>
         </div>
       </div>
     </main>

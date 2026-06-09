@@ -6438,10 +6438,10 @@
 }
 
 .sf-pro-sub-modal {
-  width: min(100%, 520px);
-  max-height: min(82vh, 920px);
-  overflow-y: auto;
-  padding: 28px;
+  width: min(100%, 760px);
+  max-height: min(92vh, 980px);
+  overflow-y: visible;
+  padding: 30px 32px 28px;
 }
 
 .sf-pro-sub-modal h2 {
@@ -6497,6 +6497,25 @@
 .sf-pro-buy {
   min-height: 50px;
   font-size: 15px;
+}
+
+.sf-pro-sub-note {
+  margin-top: 14px !important;
+  color: var(--sf-fg-3);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.sf-pro-sub-note a {
+  color: var(--sf-orange);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.sf-pro-sub-note a:hover {
+  text-decoration: underline;
 }
 
 .sf-about-body {
@@ -6850,19 +6869,20 @@
 }
 
 .sf-pro-sub-modal {
-  width: min(100%, 520px);
-  max-height: min(82vh, 920px);
-  padding: 28px;
+  width: min(100%, 760px);
+  max-height: min(94vh, 980px);
+  overflow-y: visible;
+  padding: 34px 34px 28px;
 }
 
 .sf-pro-sub-modal h2 {
-  font-size: 32px;
+  font-size: 30px;
 }
 
 .sf-pro-sub-lead {
-  max-width: 44ch;
-  font-size: 15px;
-  line-height: 1.45;
+  max-width: 46ch;
+  font-size: 17px;
+  line-height: 1.42;
 }
 
 .sf-pro-sub-benefit h3 {
@@ -6875,8 +6895,8 @@
 }
 
 .sf-pro-plan {
-  min-height: 112px;
-  padding: 14px;
+  min-height: 104px;
+  padding: 12px 14px;
 }
 
 .sf-pro-plan b {
@@ -6884,13 +6904,13 @@
 }
 
 .sf-pro-plan strong {
-  margin-top: 12px;
-  font-size: 22px;
+  margin-top: 10px;
+  font-size: 20px;
 }
 
 .sf-pro-plan span,
 .sf-pro-plan small {
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
 .sf-pro-switch {
@@ -6912,6 +6932,25 @@
 .sf-pro-sub-note {
   font-size: 12px;
   line-height: 1.45;
+}
+
+.sf-pro-sub-modal .sf-pro-sub-note {
+  margin-top: 14px;
+  color: var(--sf-fg-3);
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.sf-pro-sub-modal .sf-pro-sub-note a {
+  color: var(--sf-orange);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.sf-pro-sub-modal .sf-pro-sub-note a:hover {
+  text-decoration: underline;
 }
 
 .sf-results-meta {
@@ -7206,8 +7245,14 @@
 }
 
 .sf-auth-step-head {
-  padding-top: 28px;
-  text-align: center;
+  padding-top: 0;
+  text-align: left;
+}
+
+.sf-auth-step-head h2,
+.sf-auth-step-head p,
+.sf-auth-step-head .sf-tag-mono {
+  text-align: left;
 }
 
 .sf-auth-step-head p b {
@@ -7227,6 +7272,23 @@
   align-self: center;
   margin: 0 auto;
   font-size: 12px;
+}
+
+.sf-auth-modal .sf-auth-inline-link {
+  align-self: flex-start;
+  margin: 0;
+  text-align: left;
+}
+
+.sf-auth-alt-foot {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 4px;
+  padding-top: 12px;
+}
+
+.sf-auth-modal .sf-auth-note {
+  text-align: left;
 }
 
 .sf-mobile-results-ad {
@@ -7714,8 +7776,11 @@
 
 /* Individual dashboard refinements from the WebKit reference. */
 .sf-userdash-main {
-  margin-left: auto;
-  margin-right: auto;
+  box-sizing: border-box;
+  width: min(calc(100% - (var(--sf-gutter) * 2)), var(--sf-content));
+  max-width: var(--sf-content);
+  margin: 0 auto;
+  padding: 34px 0 64px;
 }
 
 .sf-userdash-main .sf-user-intro {
@@ -7783,6 +7848,7 @@
 
 .sf-userdash-main .sf-saved-titleline h2 {
   text-transform: none;
+  font-size: 30px;
 }
 
 .sf-userdash-main .sf-saved-actions {
@@ -7811,13 +7877,25 @@
   padding: 22px;
 }
 
+.sf-userdash-main .sf-user-review-item {
+  background: #fff;
+}
+
 .sf-userdash-main .sf-userdash-side .sf-ad-banner {
   width: 300px;
   max-width: 300px;
+  aspect-ratio: 300 / 188 !important;
 }
 
 .sf-user-account-line span {
   color: var(--sf-orange);
+}
+
+.sf-userdash-main .sf-dash-sub {
+  max-width: 66ch;
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 .sf-userdash-main .sf-user-search-cta .sf-btn {

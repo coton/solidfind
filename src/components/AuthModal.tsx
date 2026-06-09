@@ -205,6 +205,7 @@ export function AuthModal({
       params.set("identifier", trimmedEmail);
     }
     params.set("next", accountType === "company" ? "/company-dashboard" : "/dashboard");
+    params.set("lang", document.documentElement.lang === "id" ? "id" : "en");
     onClose();
     router.push(`/secure-sign-in?${params.toString()}`);
   };
@@ -623,15 +624,6 @@ export function AuthModal({
   // ── Step 2: Email/password form ──
   return modalShell(
     <>
-      {/* Back to method selection */}
-      <button
-        type="button"
-        onClick={() => { setStep("method"); setError(""); }}
-        className="sf-modal-back"
-      >
-        ← Back
-      </button>
-
       <div className="sf-modal-head sf-auth-step-head">
         <span className="sf-tag-mono">{mode === "login" ? t("Welcome back") : t("Get started")}</span>
         <h2>{mode === "login" ? t("Log in", "Masuk") : t("Create an account", "Buat akun")}</h2>
@@ -749,10 +741,13 @@ export function AuthModal({
 
         {/* Switch mode */}
         {mode === "login" && (
-          <p className="sf-modal-foot">
-            Don&apos;t have an account?{" "}
-            <button type="button" onClick={() => { setMode("register"); setError(""); }} className="sf-modal-link sf-link-button">
-              Sign up!
+          <p className="sf-modal-foot sf-auth-alt-foot">
+            <button
+              type="button"
+              onClick={() => { setStep("method"); setError(""); }}
+              className="sf-modal-link sf-link-button"
+            >
+              ← Other options
             </button>
           </p>
         )}

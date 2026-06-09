@@ -124,7 +124,8 @@ export function ProSubscriptionModal({
           {isSubmitting ? "Creating link..." : "Buy now →"}
         </button>
         <p className="sf-pro-sub-note">
-          Secure payment via Midtrans. By subscribing you agree to the <Link href="/terms?doc=pro">Pro Terms of Service</Link>.
+          Secure payment via Midtrans. By subscribing you agree to the{" "}
+          <Link href="/terms?doc=pro">Pro Terms of Service</Link>.
         </p>
       </div>
     </div>
