@@ -11,6 +11,7 @@ interface AdBannerProps {
   alt?: string;
   mobilePlaceholder?: boolean;
   placeholderWhenEmpty?: boolean;
+  variant?: "horizontal" | "rectangle";
 }
 
 /**
@@ -24,6 +25,7 @@ export function AdBanner({
   alt = "Advertisement",
   mobilePlaceholder = false,
   placeholderWhenEmpty = false,
+  variant = "horizontal",
 }: AdBannerProps) {
   // Fetch ad media from platform settings
   const horizontalAdValue = useQuery(api.platformSettings.get, { key: "adHorizontal" });
@@ -32,6 +34,7 @@ export function AdBanner({
   const displayType = propImageSrc && !horizontalAdState.media.url ? "image" : horizontalAdState.media.type;
 
   if (!displayUrl && !placeholderWhenEmpty && !mobilePlaceholder) return null;
+  const isRectangle = variant === "rectangle";
 
   const placeholder = (
     <div className="sf-ad-video-mobile-fallback" role="img" aria-label={alt}>
@@ -47,8 +50,8 @@ export function AdBanner({
       style={{
         position: "relative",
         width: "100%",
-        maxWidth: "700px",
-        aspectRatio: "700 / 150",
+        maxWidth: isRectangle ? "300px" : "700px",
+        aspectRatio: isRectangle ? "300 / 250" : "700 / 150",
         margin: "0 auto",
         borderRadius: "10px",
         overflow: "hidden",
@@ -75,7 +78,7 @@ export function AdBanner({
             src={displayUrl}
             alt={alt}
             fill
-            sizes="(max-width: 700px) 100vw, 700px"
+            sizes={isRectangle ? "300px" : "(max-width: 700px) 100vw, 700px"}
             style={{ objectFit: "cover" }}
             unoptimized={displayUrl.startsWith("data:")}
           />

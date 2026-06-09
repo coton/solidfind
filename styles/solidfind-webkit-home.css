@@ -2634,8 +2634,22 @@
 }
 
 .sf-dash-intro {
-  max-width: 780px;
+  max-width: none;
   margin-bottom: 30px;
+}
+
+.sf-dash-intro-head {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.sf-dash-intro-email {
+  color: var(--sf-orange);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .sf-dash-hi {
@@ -6939,8 +6953,8 @@
 
 /* Individual dashboard WebKit pass */
 .sf-userdash-main {
-  width: min(calc(100% - (var(--sf-gutter) * 2)), 1220px);
-  max-width: 1220px;
+  width: min(calc(100% - (var(--sf-gutter) * 2)), 1348px);
+  max-width: 1348px;
   margin: 0 var(--sf-gutter);
   padding: 34px 0 64px;
 }
@@ -7729,7 +7743,7 @@
 }
 
 .sf-userdash-main .sf-userdash-layout {
-  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-columns: minmax(0, 1fr) 300px;
   gap: 28px;
 }
 
@@ -7744,8 +7758,8 @@
 }
 
 .sf-userdash-main .sf-saved-count b {
-  font-size: 18px;
-  line-height: 1;
+  font-size: 10px;
+  line-height: inherit;
 }
 
 .sf-userdash-main .sf-saved-count span {
@@ -7786,20 +7800,24 @@
 }
 
 .sf-userdash-main .sf-userdash-side {
-  width: 380px;
+  width: 300px;
 }
 
 .sf-userdash-main .sf-user-reviews-card {
-  border: 0;
-  border-radius: 0;
+  border: 1px solid var(--sf-border-1);
+  border-radius: 12px;
   background: transparent;
   box-shadow: none;
-  padding: 0;
+  padding: 22px;
 }
 
 .sf-userdash-main .sf-userdash-side .sf-ad-banner {
-  width: 100%;
-  max-width: none;
+  width: 300px;
+  max-width: 300px;
+}
+
+.sf-user-account-line span {
+  color: var(--sf-orange);
 }
 
 .sf-userdash-main .sf-user-search-cta .sf-btn {

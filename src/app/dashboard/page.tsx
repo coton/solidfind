@@ -182,8 +182,8 @@ export default function DashboardPage() {
       <main className="sf-userdash-main flex-grow w-full">
         <div className="sf-user-intro">
             <div>
-              <span className="sf-tag-mono">Individual account · {user.email}</span>
-              <h1>{user.name}</h1>
+              <span className="sf-tag-mono sf-user-account-line">Individual account · <span>{user.email}</span></span>
+              <h1>Hi {user.name},</h1>
               <p className="sf-about-contact">
                 Everything you've saved while planning, in one place. Pick up where you left off, compare companies and revisit the reviews you've written.
               </p>
@@ -315,7 +315,7 @@ export default function DashboardPage() {
                 <Link href="/reviews" className="sf-user-reviews-all">See all {userReviews.length} reviews →</Link>
               )}
             </section>
-            <AdBanner placeholderWhenEmpty />
+            <AdBanner placeholderWhenEmpty variant="rectangle" />
           </aside>
         </div>
 

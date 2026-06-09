@@ -445,7 +445,10 @@ export default function CompanyDashboardPage() {
 
         <div className="sf-dash-desktop hidden sm:block">
           <div className="sf-dash-intro">
-            <span className="sf-tag-mono">{t("Company dashboard")} · <span className={isPro && proEnabled ? "sf-eyebrow-pro" : ""}>{isPro && proEnabled ? t("Pro Account") : t("Free account")}</span></span>
+            <div className="sf-dash-intro-head">
+              <span className="sf-tag-mono">{t("Company dashboard")} · <span className={isPro && proEnabled ? "sf-eyebrow-pro" : ""}>{isPro && proEnabled ? t("Pro Account") : t("Free account")}</span></span>
+              <span className="sf-tag-mono sf-dash-intro-email">{company?.email || currentUser?.email || clerkUser?.primaryEmailAddress?.emailAddress || ""}</span>
+            </div>
             <h1 className="sf-dash-hi">{t("Welcome back, [name].").replace("[name]", data.name)}</h1>
             <p className="sf-dash-sub">{isPro && proEnabled ? t("Here's how your profile is performing on SolidFind this month. Your Pro Account ranks you above free listings and unlocks the insights below.") : t("You're listed on SolidFind. Complete your profile to make a strong impression — upgrade to Pro to unlock visibility insights.")}</p>
           </div>
