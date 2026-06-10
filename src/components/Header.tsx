@@ -821,7 +821,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   return (
     <>
     {!hideMobileProfileHeader && !isCompanyEditPage && (
-      <div className="sf-mobile-webkit-head sm:hidden">
+      <div className="sf-mobile-webkit-head">
         {useMobileCompactHeader ? (
           <div className="sf-mini-header sf-mini-header-dashboard is-visible">
             <Link href="/" className="sf-mini-brand" onClick={() => setMobileMenuOpen(false)}>

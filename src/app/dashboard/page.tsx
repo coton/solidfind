@@ -305,24 +305,27 @@ export default function DashboardPage() {
 
           <aside className="sf-userdash-side">
             <section className="sf-user-reviews-card">
-              <button
-                type="button"
-                className="sf-user-reviews-head sf-user-reviews-toggle sm:hidden"
-                onClick={() => setMobileReviewsOpen((open) => !open)}
-                aria-expanded={mobileReviewsOpen}
-              >
-                <h2>Your reviews</h2>
-                <span>{userReviews?.length ?? 0}</span>
-              </button>
-              <div className="hidden sm:flex sf-user-reviews-head">
-                <h2>Your reviews</h2>
-                <span>{userReviews?.length ?? 0}</span>
-              </div>
-              <div className={`${isMobile && !mobileReviewsOpen ? "hidden" : "block"}`}>
+              {isMobile ? (
+                <button
+                  type="button"
+                  className="sf-user-reviews-head sf-user-reviews-toggle"
+                  onClick={() => setMobileReviewsOpen((open) => !open)}
+                  aria-expanded={mobileReviewsOpen}
+                >
+                  <h2>Your reviews</h2>
+                  <span>{userReviews?.length ?? 0}</span>
+                </button>
+              ) : (
+                <div className="sf-user-reviews-head">
+                  <h2>Your reviews</h2>
+                  <span>{userReviews?.length ?? 0}</span>
+                </div>
+              )}
+              <div className={isMobile && !mobileReviewsOpen ? "hidden" : "block"}>
                 <p className="sf-tag-mono">Latest reviews you've posted</p>
                 {userReviews && userReviews.length > 0 ? (
                   <div className="sf-user-review-list">
-                    {userReviews.slice(0, 3).map((review) => (
+                    {(isMobile ? userReviews : userReviews.slice(0, 3)).map((review) => (
                       <Link key={review._id} href={buildCompanyProfilePath({ _id: review.companyId, name: review.companyName })} className="sf-user-review-item">
                         <div>
                           <b>{review.companyName}</b>
@@ -336,7 +339,7 @@ export default function DashboardPage() {
                 ) : (
                   <p className="sf-user-review-empty">No reviews yet. Your reputation starts with the first project you share.</p>
                 )}
-                {userReviews && userReviews.length > 3 && (
+                {!isMobile && userReviews && userReviews.length > 3 && (
                   <Link href="/reviews" className="sf-user-reviews-all">See all {userReviews.length} reviews →</Link>
                 )}
               </div>

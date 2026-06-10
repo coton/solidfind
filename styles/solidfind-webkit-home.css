@@ -7807,7 +7807,7 @@
   box-sizing: border-box;
   width: min(calc(100% - (var(--sf-gutter) * 2)), 1348px);
   max-width: 1348px;
-  margin: 0 var(--sf-gutter);
+  margin: 0 auto;
   padding: 34px 0 64px;
   overflow-x: clip;
 }
@@ -7896,6 +7896,7 @@
 
 .sf-userdash-main .sf-userdash-side {
   width: 300px;
+  min-width: 0;
 }
 
 .sf-userdash-main .sf-user-reviews-card {
@@ -7934,6 +7935,7 @@
 }
 
 .sf-userdash-main .sf-user-reviews-toggle {
+  display: none;
   width: 100%;
   border: 0;
   background: transparent;
@@ -7998,6 +8000,10 @@ body {
   color: var(--sf-orange);
 }
 
+.sf-mobile-webkit-head {
+  display: none;
+}
+
 .sf-mini-header-dashboard {
   min-height: 72px;
   padding-top: 13px;
@@ -8017,6 +8023,10 @@ body {
 }
 
 @media (max-width: 639px) {
+  .sf-mobile-webkit-head {
+    display: block;
+  }
+
   .m-dash-two {
     grid-template-columns: 1fr;
   }
@@ -8026,11 +8036,12 @@ body {
   }
 
   .sf-userdash-main {
-    width: 100%;
+    width: calc(100vw - 48px);
     max-width: none;
-    padding-left: 24px;
-    padding-right: 24px;
-    overflow-x: clip;
+    margin: 0 auto;
+    padding-left: 0;
+    padding-right: 0;
+    overflow-x: hidden;
   }
 
   .sf-userdash-main .sf-user-intro {
@@ -8049,9 +8060,11 @@ body {
 
   .sf-userdash-main .sf-userdash-side {
     width: 100%;
+    min-width: 0;
   }
 
   .sf-userdash-main .sf-user-reviews-toggle {
+    display: flex;
     margin-bottom: 0;
   }
 
@@ -8069,15 +8082,23 @@ body {
     align-items: flex-start;
     flex-direction: column;
     gap: 8px;
+    min-width: 0;
   }
 
   .sf-userdash-main .sf-saved-titleline h2 {
     font-size: 28px;
+    min-width: 0;
   }
 
   .sf-userdash-main .sf-saved-actions {
     width: 100%;
+    min-width: 0;
     justify-content: space-between;
+  }
+
+  .sf-userdash-main .sf-saved-sort,
+  .sf-userdash-main .sf-saved-chip {
+    flex-shrink: 1;
   }
 
   .sf-userdash-main .sf-userdash-side .sf-ad-banner {
