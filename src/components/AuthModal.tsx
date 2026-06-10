@@ -651,7 +651,7 @@ export function AuthModal({
 
         {/* E-mail */}
         <label className="sf-field">
-          <span>E-mail (*)</span>
+          <span>E-mail <span className="text-[#f14110]">*</span></span>
           <input
             type="email"
             value={email}
@@ -684,7 +684,7 @@ export function AuthModal({
         {/* Name or Company Name (register only) */}
         {mode === "register" && (
           <label className="sf-field">
-            <span>{accountType === "company" ? "Company name" : "Name"} (*)</span>
+            <span>{accountType === "company" ? "Company name" : "Name"} <span className="text-[#f14110]">*</span></span>
             <input
               type="text"
               value={name}
@@ -696,7 +696,7 @@ export function AuthModal({
 
         {/* Password */}
         <label className="sf-field">
-          <span>Password (*)</span>
+          <span>Password <span className="text-[#f14110]">*</span></span>
           <input
             type="password"
             value={password}

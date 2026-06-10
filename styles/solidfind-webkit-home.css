@@ -7805,8 +7805,8 @@
 /* Individual dashboard refinements from the WebKit reference. */
 .sf-userdash-main {
   box-sizing: border-box;
-  width: min(calc(100% - (var(--sf-gutter) * 2)), 1348px);
-  max-width: 1348px;
+  width: min(calc(100% - (var(--sf-gutter) * 2)), var(--sf-content));
+  max-width: none;
   margin: 0 auto;
   padding: 34px 0 64px;
   overflow-x: clip;
@@ -7896,6 +7896,7 @@
 
 .sf-userdash-main .sf-userdash-side {
   width: 300px;
+  max-width: 300px;
   min-width: 0;
 }
 
@@ -7935,7 +7936,7 @@
 }
 
 .sf-userdash-main .sf-user-reviews-toggle {
-  display: none;
+  display: none !important;
   width: 100%;
   border: 0;
   background: transparent;
@@ -8036,12 +8037,11 @@ body {
   }
 
   .sf-userdash-main {
-    width: calc(100vw - 48px);
+    width: auto;
     max-width: none;
-    margin: 0 auto;
-    padding-left: 0;
-    padding-right: 0;
-    overflow-x: hidden;
+    margin: 0 24px;
+    padding: 0 0 48px;
+    overflow-x: clip;
   }
 
   .sf-userdash-main .sf-user-intro {
@@ -8060,12 +8060,22 @@ body {
 
   .sf-userdash-main .sf-userdash-side {
     width: 100%;
+    max-width: 100%;
     min-width: 0;
   }
 
   .sf-userdash-main .sf-user-reviews-toggle {
-    display: flex;
+    display: flex !important;
     margin-bottom: 0;
+  }
+
+  .sf-userdash-main .sf-userdash-content,
+  .sf-userdash-main .sf-userdash-side,
+  .sf-userdash-main .sf-saved-group,
+  .sf-userdash-main .sf-user-search-cta,
+  .sf-userdash-main .sf-user-reviews-card {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .sf-userdash-main .sf-saved-head {

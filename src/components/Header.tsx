@@ -820,7 +820,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   return (
     <>
-    {!hideMobileProfileHeader && !isCompanyEditPage && (
+    {!hideMobileProfileHeader && !isCompanyEditPage && !useMobileCompactHeader && (
       <div className="sf-mobile-webkit-head">
         {useMobileCompactHeader ? (
           <div className="sf-mini-header sf-mini-header-dashboard is-visible">

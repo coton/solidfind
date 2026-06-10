@@ -9,6 +9,7 @@ import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
+import { DashboardMobileHeader } from "@/components/DashboardMobileHeader";
 import { ListingCard } from "@/components/cards";
 import { useProEnabled } from "@/hooks/useProEnabled";
 import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
@@ -189,8 +190,9 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
       <Header />
+      <DashboardMobileHeader dashboardHref="/dashboard" onSignOut={handleSignOut} />
 
-      <main className="sf-userdash-main flex-grow w-full">
+      <main className="sf-userdash-main flex-grow w-full pt-[94px] sm:pt-0">
         <div className="sf-user-intro">
             <div>
               <span className="sf-tag-mono sf-user-account-line">Individual account · <span>{user.email}</span></span>
@@ -298,9 +300,6 @@ export default function DashboardPage() {
               <Link href="/" className="sf-btn sf-btn-ghost">Browse companies →</Link>
             </section>
 
-            <button type="button" className="sf-user-delete sf-user-delete-mobile sm:hidden" onClick={() => setDeleteState("confirm")}>
-              Delete account
-            </button>
           </div>
 
           <aside className="sf-userdash-side">
@@ -344,6 +343,13 @@ export default function DashboardPage() {
                 )}
               </div>
             </section>
+            <button
+              type="button"
+              className="sf-user-delete sf-user-delete-mobile sm:hidden"
+              onClick={() => setDeleteState("confirm")}
+            >
+              Delete your account
+            </button>
             <AdBanner placeholderWhenEmpty variant="rectangle" />
           </aside>
         </div>
