@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSiteLanguage } from "@/components/LanguageProvider";
 import { starColor } from "@/lib/starColors";
@@ -59,10 +60,15 @@ export function ListingCard({
   onBookmark,
 }: ListingCardProps) {
   const { t } = useSiteLanguage();
+  const [showCopiedToast, setShowCopiedToast] = useState(false);
   const coverUrl = "/assets/company-cover-fallback.jpg";
   const showReviews = reviewsEnabled;
   const shouldShowRating = showReviews && reviewCount > 0;
   const shouldShowReviewCount = reviewCount > 0;
+  const profilePath = buildCompanyProfilePath(
+    { _id: id, name },
+    { ...(categoryContext ? { from: categoryContext } : {}), ...(returnToDashboard ? { returnTo: "dashboard" } : {}) }
+  );
   const reviewLabel = reviewCount === 1 ? `1 ${t("review", "ulasan")}` : `${reviewCount} ${t("reviews", "ulasan")}`;
   const serviceLocations = getServiceLocations({
     category: categoryContext ?? category,
@@ -79,12 +85,39 @@ export function ListingCard({
     primaryLocation,
   ].filter(Boolean).join(" · ");
 
+  useEffect(() => {
+    if (!showCopiedToast) return;
+    const timeout = window.setTimeout(() => setShowCopiedToast(false), 3000);
+    return () => window.clearTimeout(timeout);
+  }, [showCopiedToast]);
+
+  const handleShare = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const shareUrl = typeof window !== "undefined" ? `${window.location.origin}${profilePath}` : profilePath;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else if (navigator.share) {
+        await navigator.share({ title: name, url: shareUrl });
+      }
+      setShowCopiedToast(true);
+    } catch {
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: name, url: shareUrl });
+        } catch {
+          // noop
+        }
+      }
+    }
+  };
+
   return (
+    <>
     <Link
-      href={buildCompanyProfilePath(
-        { _id: id, name },
-        { ...(categoryContext ? { from: categoryContext } : {}), ...(returnToDashboard ? { returnTo: "dashboard" } : {}) }
-      )}
+      href={profilePath}
       className="block min-w-0"
     >
       <article className={`sf-pro-card sf-desktop-card ${isFeatured ? "sf-pro-card-featured" : ""}`}>
@@ -102,10 +135,7 @@ export function ListingCard({
             <button
               className="sf-pro-iconbtn"
               aria-label={`Share ${name}`}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
+              onClick={handleShare}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
                 <circle cx="18" cy="5" r="3" />
@@ -179,6 +209,12 @@ export function ListingCard({
         </div>
       </article>
     </Link>
+    {showCopiedToast && (
+      <div className="sf-copy-toast" role="status" aria-live="polite">
+        <span className="sf-tag-mono">LINK COPIED</span>
+      </div>
+    )}
+    </>
   );
 }
 

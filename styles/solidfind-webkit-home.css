@@ -6437,6 +6437,15 @@
   padding-top: 24px;
 }
 
+.sf-auth-modal .sf-modal-foot {
+  margin: 0;
+  padding-top: 18px;
+}
+
+.sf-auth-modal .sf-auth-alt-foot {
+  margin-top: 0;
+}
+
 .sf-pro-sub-modal {
   width: min(100%, 760px);
   max-height: min(92vh, 980px);
@@ -6516,6 +6525,25 @@
 
 .sf-pro-sub-note a:hover {
   text-decoration: underline;
+}
+
+.sf-pro-sub-modal {
+  width: min(100%, 820px);
+  max-height: min(92vh, 900px);
+  overflow-y: visible;
+}
+
+.sf-pro-sub-modal .sf-pro-sub-note {
+  margin-top: 12px;
+  color: var(--sf-fg-3);
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.sf-pro-sub-modal .sf-pro-sub-note a {
+  color: var(--sf-orange);
+  font-weight: 500;
 }
 
 .sf-about-body {
@@ -7777,10 +7805,11 @@
 /* Individual dashboard refinements from the WebKit reference. */
 .sf-userdash-main {
   box-sizing: border-box;
-  width: min(calc(100% - (var(--sf-gutter) * 2)), var(--sf-content));
-  max-width: var(--sf-content);
-  margin: 0 auto;
+  width: min(calc(100% - (var(--sf-gutter) * 2)), 1348px);
+  max-width: 1348px;
+  margin: 0 var(--sf-gutter);
   padding: 34px 0 64px;
+  overflow-x: clip;
 }
 
 .sf-userdash-main .sf-user-intro {
@@ -7848,7 +7877,7 @@
 
 .sf-userdash-main .sf-saved-titleline h2 {
   text-transform: none;
-  font-size: 30px;
+  font-size: 28px;
 }
 
 .sf-userdash-main .sf-saved-actions {
@@ -7874,6 +7903,8 @@
   border-radius: 12px;
   background: transparent;
   box-shadow: none;
+  width: 300px;
+  max-width: 300px;
   padding: 22px;
 }
 
@@ -7884,7 +7915,7 @@
 .sf-userdash-main .sf-userdash-side .sf-ad-banner {
   width: 300px;
   max-width: 300px;
-  aspect-ratio: 300 / 188 !important;
+  aspect-ratio: 300 / 141 !important;
 }
 
 .sf-user-account-line span {
@@ -7894,12 +7925,95 @@
 .sf-userdash-main .sf-dash-sub {
   max-width: 66ch;
   margin-top: 12px;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
 .sf-userdash-main .sf-user-search-cta .sf-btn {
   color: var(--sf-orange);
+}
+
+.sf-userdash-main .sf-user-reviews-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+}
+
+.sf-userdash-main .sf-user-reviews-toggle:hover h2,
+.sf-userdash-main .sf-user-reviews-toggle:hover span {
+  color: var(--sf-orange);
+}
+
+.sf-userdash-main .sf-user-search-cta {
+  width: 100%;
+  max-width: 816px;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}
+
+.sf-copy-toast {
+  position: absolute;
+  top: 56px;
+  right: 18px;
+  z-index: 7;
+  border: 1px solid var(--sf-border-1);
+  border-radius: 12px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 16px 38px rgba(35,31,32,.14);
+  padding: 12px 16px;
+  pointer-events: none;
+}
+
+.sf-copy-toast .sf-tag-mono {
+  color: var(--sf-orange);
+}
+
+.sf-auth-forgot {
+  color: var(--sf-fg-3);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sf-auth-forgot:hover {
+  color: var(--sf-orange);
+}
+
+.sf-auth-other {
+  text-decoration: none !important;
+}
+
+.sf-auth-other:hover {
+  color: var(--sf-orange);
+}
+
+.sf-mini-header-dashboard {
+  min-height: 72px;
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+
+.sf-mini-header-dashboard .sf-mini-actions {
+  margin-left: auto;
+}
+
+.sf-mini-logout {
+  min-height: 42px;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 14px;
+  line-height: 1;
 }
 
 @media (max-width: 639px) {
@@ -7916,6 +8030,7 @@
     max-width: none;
     padding-left: 24px;
     padding-right: 24px;
+    overflow-x: clip;
   }
 
   .sf-userdash-main .sf-user-intro {
@@ -7936,6 +8051,10 @@
     width: 100%;
   }
 
+  .sf-userdash-main .sf-user-reviews-toggle {
+    margin-bottom: 0;
+  }
+
   .sf-userdash-main .sf-saved-head {
     align-items: flex-start;
     flex-direction: column;
@@ -7952,8 +8071,38 @@
     gap: 8px;
   }
 
+  .sf-userdash-main .sf-saved-titleline h2 {
+    font-size: 28px;
+  }
+
   .sf-userdash-main .sf-saved-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .sf-userdash-main .sf-userdash-side .sf-ad-banner {
+    width: 100%;
+    max-width: none;
+    aspect-ratio: 300 / 141 !important;
+  }
+
+  .sf-user-delete-mobile {
+    display: inline-flex;
+    margin: 20px 0 0;
+    border: 0;
+    background: transparent;
+    color: var(--sf-fg-3);
+    font-family: var(--sf-font-mono), JetBrainsMono, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    line-height: 1.15;
+    padding: 0;
+    text-decoration: underline;
+    text-transform: uppercase;
+  }
+
+  .sf-user-delete-mobile:hover {
+    color: var(--sf-orange);
   }
 }

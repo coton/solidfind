@@ -203,7 +203,7 @@ export default function SecureSignInPage() {
             </button>
 
             <p className="sf-modal-foot sf-auth-alt-foot">
-              <button type="button" onClick={handleOtherOptions} className="sf-modal-link sf-link-button">
+              <button type="button" onClick={handleOtherOptions} className="sf-modal-link sf-link-button sf-auth-other">
                 ← {t("Other options", "Opsi lain")}
               </button>
             </p>

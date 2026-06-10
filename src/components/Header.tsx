@@ -366,6 +366,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     setAuthModalOpen(true);
   };
 
+  const isCompanyEditPage = pathname.startsWith("/company-dashboard/edit");
   const isDashboardPage = pathname.startsWith("/dashboard") || pathname.startsWith("/company-dashboard");
   const isCompanyDashboardPage = pathname.startsWith("/company-dashboard");
   const rootNonProfilePages = new Set(["/", "/about", "/admin", "/auth-complete", "/coming-soon", "/register-business", "/reviews", "/sso-callback", "/terms", "/upgrade"]);
@@ -385,8 +386,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     : isProfilePage
       ? (fromCategory || null)
       : (searchParams.get("category") ?? "construction");
-  const useMobileCompactHeader = isDashboardPage;
-  const useTopBarOnlyHeader = isCompanyDashboardPage;
+  const useMobileCompactHeader = isDashboardPage && !isCompanyEditPage;
+  const useTopBarOnlyHeader = isCompanyDashboardPage && !useMobileCompactHeader;
   const homepageSubcategories = getEffectiveSubcategoryFilters(parseSubcategoryParam(searchParams.get("subcategory") || undefined));
   const proOnly = searchParams.get("pro") === "1";
   const sortParam = searchParams.get("sort") || "latest";
@@ -819,8 +820,34 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   return (
     <>
-    {!useTopBarOnlyHeader && !useMobileCompactHeader && !hideMobileProfileHeader && (
+    {!hideMobileProfileHeader && !isCompanyEditPage && (
       <div className="sf-mobile-webkit-head sm:hidden">
+        {useMobileCompactHeader ? (
+          <div className="sf-mini-header sf-mini-header-dashboard is-visible">
+            <Link href="/" className="sf-mini-brand" onClick={() => setMobileMenuOpen(false)}>
+              <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} className="h-[20px] w-auto" />
+            </Link>
+            <div className="sf-mini-actions">
+              <SignedIn>
+                <AccountIconLink href={userType === "company" ? "/company-dashboard" : "/dashboard"} label="Dashboard" title="Dashboard" className="sf-icon-btn" />
+                <button type="button" className="sf-btn sf-btn-pri sf-mini-logout" onClick={handleSignOut}>
+                  {t("Log out", "Keluar")}
+                </button>
+              </SignedIn>
+              <SignedOut>
+                <button
+                  type="button"
+                  onClick={() => openAuthModal("individual", "login")}
+                  className="sf-icon-btn sf-account-btn"
+                  aria-label="Account"
+                >
+                  <AccountGlyph />
+                </button>
+              </SignedOut>
+            </div>
+          </div>
+        ) : (
+          <>
         <div className={`sf-mini-header ${showMobileMiniHeader ? "is-visible" : ""}`}>
           <Link href="/" className="sf-mini-brand" onClick={() => setMobileMenuOpen(false)}>
             <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} className="h-[20px] w-auto" />
@@ -926,10 +953,12 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             </div>
           </div>
         )}
+          </>
+        )}
       </div>
     )}
 
-    <header className={`${useTopBarOnlyHeader ? "sticky top-0" : "relative"} z-40 bg-[#f8f8f8] ${!useTopBarOnlyHeader && !useMobileCompactHeader ? "hidden sm:block" : ""} ${hideMobileProfileHeader ? "hidden sm:block" : ""}`}>
+    <header className={`${useTopBarOnlyHeader ? "sticky top-0" : "relative"} z-40 bg-[#f8f8f8] ${useMobileCompactHeader || !useTopBarOnlyHeader ? "hidden sm:block" : ""} ${hideMobileProfileHeader ? "hidden sm:block" : ""}`}>
       <div className={`sf-shell ${useTopBarOnlyHeader || useMobileCompactHeader ? "sf-shell-compact" : ""}`}>
       <div className="sf-shell-bg" aria-hidden="true" />
       {headerMedia.url ? (

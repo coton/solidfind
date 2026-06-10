@@ -51,10 +51,14 @@ export function calculateProfileCompletionScore(profile, isPro) {
 
   if (profile.hasLogo) score += 5;
 
+  const photoCount = Number(profile.projectPhotoCount ?? 0);
   if (isPro) {
-    const photoCount = Number(profile.projectPhotoCount ?? 0);
     if (photoCount >= 4) score += 10;
     else if (photoCount >= 1) score += 5;
+  } else if (photoCount >= 4) {
+    score += 8;
+  } else if (photoCount >= 1) {
+    score += 4;
   }
 
   if (profile.isReviewed === true) score += 5;

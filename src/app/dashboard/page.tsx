@@ -15,6 +15,7 @@ import { useReviewsEnabled } from "@/hooks/useReviewsEnabled";
 import { buildCompanyProfilePath } from "@/lib/company-profile-url.mjs";
 
 const DASHBOARD_CATEGORY_PAGE_SIZE = 5;
+const DASHBOARD_CATEGORY_PAGE_SIZE_MOBILE = 2;
 const categoryNumbers: Record<string, string> = {
   construction: "01",
   renovation: "02",
@@ -72,6 +73,8 @@ export default function DashboardPage() {
   const [deleteState, setDeleteState] = useState<"confirm" | "success" | "failure" | null>(null);
   const [deleteError, setDeleteError] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileReviewsOpen, setMobileReviewsOpen] = useState(false);
 
   const router = useRouter();
   const { user: clerkUser } = useUser();
@@ -105,6 +108,13 @@ export default function DashboardPage() {
       setDeleteState("failure");
     }
   };
+
+  useEffect(() => {
+    const syncMobile = () => setIsMobile(window.innerWidth < 640);
+    syncMobile();
+    window.addEventListener("resize", syncMobile);
+    return () => window.removeEventListener("resize", syncMobile);
+  }, []);
 
   const savedListings = useQuery(
     api.savedListings.listByUser,
@@ -174,6 +184,7 @@ export default function DashboardPage() {
   // Only show categories that have at least one bookmark
   const visibleCategories = listingsByCategory.filter((cat) => cat.listings.length > 0);
   const totalSavedCount = visibleCategories.reduce((sum, cat) => sum + cat.listings.length, 0);
+  const dashboardPageSize = isMobile ? DASHBOARD_CATEGORY_PAGE_SIZE_MOBILE : DASHBOARD_CATEGORY_PAGE_SIZE;
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex flex-col">
@@ -189,7 +200,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="sf-user-email">
+            <div className="sf-user-email hidden sm:flex">
               <button type="button" className="sf-user-delete" onClick={() => setDeleteState("confirm")}>
                 Delete account
               </button>
@@ -210,7 +221,7 @@ export default function DashboardPage() {
               const sortVal = sortByCategory[cat.id] ?? "recent";
               const sortedListings = sortSavedListings(cat.listings, sortVal);
               const isExpanded = !!expandedCategories[cat.id];
-              const shownListings = isExpanded ? sortedListings : sortedListings.slice(0, DASHBOARD_CATEGORY_PAGE_SIZE);
+              const shownListings = isExpanded ? sortedListings : sortedListings.slice(0, dashboardPageSize);
 
               return (
                 <section key={cat.id} className="sf-saved-group">
@@ -256,7 +267,7 @@ export default function DashboardPage() {
                           <ListingCard key={listing.id} {...listing} proEnabled={proEnabled} categoryContext={cat.id} returnToDashboard />
                         ))}
                       </div>
-                      {cat.listings.length > DASHBOARD_CATEGORY_PAGE_SIZE && (
+                      {cat.listings.length > dashboardPageSize && (
                         <button
                           type="button"
                           className="sf-saved-more"
@@ -286,34 +297,49 @@ export default function DashboardPage() {
               </div>
               <Link href="/" className="sf-btn sf-btn-ghost">Browse companies →</Link>
             </section>
+
+            <button type="button" className="sf-user-delete sf-user-delete-mobile sm:hidden" onClick={() => setDeleteState("confirm")}>
+              Delete account
+            </button>
           </div>
 
           <aside className="sf-userdash-side">
             <section className="sf-user-reviews-card">
-              <div className="sf-user-reviews-head">
+              <button
+                type="button"
+                className="sf-user-reviews-head sf-user-reviews-toggle sm:hidden"
+                onClick={() => setMobileReviewsOpen((open) => !open)}
+                aria-expanded={mobileReviewsOpen}
+              >
+                <h2>Your reviews</h2>
+                <span>{userReviews?.length ?? 0}</span>
+              </button>
+              <div className="hidden sm:flex sf-user-reviews-head">
                 <h2>Your reviews</h2>
                 <span>{userReviews?.length ?? 0}</span>
               </div>
-              <p className="sf-tag-mono">Latest reviews you've posted</p>
-              {userReviews && userReviews.length > 0 ? (
-                <div className="sf-user-review-list">
-                  {userReviews.slice(0, 3).map((review) => (
-                    <Link key={review._id} href={buildCompanyProfilePath({ _id: review.companyId, name: review.companyName })} className="sf-user-review-item">
-                      <div>
-                        <b>{review.companyName}</b>
-                        <span>{"★".repeat(Math.round(review.rating))}</span>
-                      </div>
-                      <p>&quot;{review.content}&quot;</p>
-                      <small>View company →</small>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <p className="sf-user-review-empty">No reviews yet. Your reputation starts with the first project you share.</p>
-              )}
-              {userReviews && userReviews.length > 3 && (
-                <Link href="/reviews" className="sf-user-reviews-all">See all {userReviews.length} reviews →</Link>
-              )}
+              <div className={`${isMobile && !mobileReviewsOpen ? "hidden" : "block"}`}>
+                <p className="sf-tag-mono">Latest reviews you've posted</p>
+                {userReviews && userReviews.length > 0 ? (
+                  <div className="sf-user-review-list">
+                    {userReviews.slice(0, 3).map((review) => (
+                      <Link key={review._id} href={buildCompanyProfilePath({ _id: review.companyId, name: review.companyName })} className="sf-user-review-item">
+                        <div>
+                          <b>{review.companyName}</b>
+                          <span>{"★".repeat(Math.round(review.rating))}</span>
+                        </div>
+                        <p>&quot;{review.content}&quot;</p>
+                        <small>View company →</small>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="sf-user-review-empty">No reviews yet. Your reputation starts with the first project you share.</p>
+                )}
+                {userReviews && userReviews.length > 3 && (
+                  <Link href="/reviews" className="sf-user-reviews-all">See all {userReviews.length} reviews →</Link>
+                )}
+              </div>
             </section>
             <AdBanner placeholderWhenEmpty variant="rectangle" />
           </aside>

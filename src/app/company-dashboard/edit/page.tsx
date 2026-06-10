@@ -474,6 +474,7 @@ export default function EditProfilePage() {
   const [setupVerificationSent, setSetupVerificationSent] = useState(false);
   const [setupVerificationSending, setSetupVerificationSending] = useState(false);
   const [setupVerificationSubmitting, setSetupVerificationSubmitting] = useState(false);
+  const [uiLanguage, setUiLanguage] = useState<"en" | "id">("en");
   const createExternalAccount = useReverification((params: {
     strategy: SetupOAuthStrategy;
     redirectUrl: string;
@@ -485,6 +486,15 @@ export default function EditProfilePage() {
     prepareVerification: (params: { strategy: "email_code" }) => Promise<unknown>;
     attemptVerification: (params: { code: string }) => Promise<{ verification?: { status?: string | null } | null }>;
   } | null>(null);
+
+  useEffect(() => {
+    const syncLanguage = () => {
+      setUiLanguage(document.documentElement.lang === "id" ? "id" : "en");
+    };
+    syncLanguage();
+    window.addEventListener("languagechange", syncLanguage as EventListener);
+    return () => window.removeEventListener("languagechange", syncLanguage as EventListener);
+  }, []);
 
   // Mandatory fields validation
   const hasCategory = hasEnabledCategorySelection(constructionEnabled, selectedConstruction, constructionServiceOptions)
@@ -515,35 +525,48 @@ export default function EditProfilePage() {
   let bottomHintIsWarning = false;
 
   if (!hasCategory) {
-    // Category missing — keep the repeated warning consistently orange
-    bottomHintText = "*Select at least 1 category before saving\n*Pilih setidaknya 1 kategori sebelum menyimpan";
+    bottomHintText = uiLanguage === "id"
+      ? "*Pilih setidaknya 1 kategori sebelum menyimpan"
+      : "*Select at least 1 category before saving";
     bottomHintIsWarning = true;
   } else if (missingLocation && !missingProjectSize) {
-    bottomHintText = "*Location needs to be activated\n*Lokasi perlu diaktifkan";
+    bottomHintText = uiLanguage === "id" ? "*Lokasi perlu diaktifkan" : "*Location needs to be activated";
     bottomHintIsWarning = true;
   } else if (missingProjectSize && !missingLocation) {
-    bottomHintText = "*Project size needs to be selected\n*Ukuran proyek perlu dipilih";
+    bottomHintText = uiLanguage === "id" ? "*Ukuran proyek perlu dipilih" : "*Project size needs to be selected";
     bottomHintIsWarning = true;
   } else if (missingProjectSize && missingLocation) {
-    bottomHintText = "*Project size and Location need to be selected\n*Ukuran proyek dan Lokasi perlu dipilih";
+    bottomHintText = uiLanguage === "id"
+      ? "*Ukuran proyek dan lokasi perlu dipilih"
+      : "*Project size and location need to be selected";
     bottomHintIsWarning = true;
   } else if (missingDescription) {
-    bottomHintText = "*Company description is required\n*Deskripsi perusahaan wajib diisi";
+    bottomHintText = uiLanguage === "id" ? "*Deskripsi perusahaan wajib diisi" : "*Company description is required";
     bottomHintIsWarning = true;
   } else if (missingEmail) {
-    bottomHintText = "*Company email is required\n*Email perusahaan wajib diisi";
+    bottomHintText = uiLanguage === "id" ? "*Email perusahaan wajib diisi" : "*Company email is required";
     bottomHintIsWarning = true;
   } else if (missingAddress) {
-    bottomHintText = "*Company address is required\n*Alamat perusahaan wajib diisi";
+    bottomHintText = uiLanguage === "id" ? "*Alamat perusahaan wajib diisi" : "*Company address is required";
     bottomHintIsWarning = true;
   } else if (invalidAddress) {
-    bottomHintText = `*${COMPANY_ADDRESS_VALIDATION_MESSAGE}\n*Masukkan alamat yang valid`;
+    bottomHintText = uiLanguage === "id" ? "*Masukkan alamat yang valid" : `*${COMPANY_ADDRESS_VALIDATION_MESSAGE}`;
     bottomHintIsWarning = true;
   } else if (invalidFoundedYear) {
-    bottomHintText = `*Founded year must be 4 digits from ${MIN_COMPANY_SINCE_YEAR} to ${maxCompanySinceYear}\n*Tahun berdiri harus 4 angka dari ${MIN_COMPANY_SINCE_YEAR} sampai ${maxCompanySinceYear}`;
+    bottomHintText = uiLanguage === "id"
+      ? `*Tahun berdiri harus 4 angka dari ${MIN_COMPANY_SINCE_YEAR} sampai ${maxCompanySinceYear}`
+      : `*Founded year must be 4 digits from ${MIN_COMPANY_SINCE_YEAR} to ${maxCompanySinceYear}`;
     bottomHintIsWarning = true;
   } else if (hasInvalidContactField) {
-    bottomHintText = "*Please check contact and social fields format\n*Mohon periksa format kontak dan media sosial";
+    if (invalidWhatsapp && whatsapp.trim().startsWith("+")) {
+      bottomHintText = uiLanguage === "id"
+        ? "*Hapus tanda + dari nomor WhatsApp"
+        : "*Remove the + from the WhatsApp number";
+    } else {
+      bottomHintText = uiLanguage === "id"
+        ? "*Mohon periksa format kontak dan media sosial"
+        : "*Please check contact and social fields format";
+    }
     bottomHintIsWarning = true;
   }
 
@@ -1362,7 +1385,7 @@ export default function EditProfilePage() {
                 onClick={() => requestNavigation("/company-dashboard")}
                 className="sf-btn sf-btn-lg sf-btn-ghost sf-edit-cancel-top"
               >
-                Cancel
+                Dashboard
               </button>
             )}
             <button

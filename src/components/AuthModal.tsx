@@ -480,6 +480,16 @@ export function AuthModal({
             {isLoading ? 'Sending...' : 'Request a new code'}
           </button>
 
+          <p className="sf-modal-foot sf-auth-alt-foot">
+            <button
+              type="button"
+              onClick={() => { setPendingVerification(false); setError(""); }}
+              className="sf-modal-link sf-link-button sf-auth-other"
+            >
+              ← Back
+            </button>
+          </p>
+
           {error && <p className="sf-auth-note">*{error}</p>}
         </div>
       </>
@@ -728,12 +738,12 @@ export function AuthModal({
         )}
 
         {/* Forgot password (login only) */}
-        {mode === "login" && (
+        {mode === "login" && !needsSecureSignIn && (
           <button
             type="button"
             onClick={handleForgotPassword}
             disabled={isLoading}
-            className="sf-modal-link sf-link-button sf-auth-inline-link"
+            className="sf-modal-link sf-link-button sf-auth-inline-link sf-auth-forgot"
           >
             Forgot password
           </button>
@@ -745,7 +755,7 @@ export function AuthModal({
             <button
               type="button"
               onClick={() => { setStep("method"); setError(""); }}
-              className="sf-modal-link sf-link-button"
+              className="sf-modal-link sf-link-button sf-auth-other"
             >
               ← Other options
             </button>
