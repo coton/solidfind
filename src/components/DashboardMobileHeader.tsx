@@ -26,6 +26,7 @@ export function DashboardMobileHeader({
             height={20}
             className="h-[20px] w-auto"
           />
+          <span className="sf-brand-id">.id</span>
         </Link>
         <div className="sf-mini-actions">
           <AccountIconLink

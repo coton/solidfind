@@ -28,6 +28,54 @@ import {
 } from "@/lib/category-filter.mjs";
 import { expandRenovationTypes } from "@/lib/category-display.mjs";
 
+const pageConfigFallbackTranslationsId: Record<string, string> = {
+  "01. Construction": "01. Konstruksi",
+  "02. Renovation": "02. Renovasi",
+  "03. Architecture": "03. Arsitektur",
+  "04. Interior": "04. Interior",
+  "05. Real Estate": "05. Properti",
+  "Find construction professionals for residential, commercial and hospitality projects.": "Temukan profesional konstruksi untuk proyek residensial, komersial, dan perhotelan.",
+  "Find renovation professionals for complete upgrades, targeted improvements, and structural works.": "Temukan profesional renovasi untuk peningkatan menyeluruh, perbaikan terarah, dan pekerjaan struktural.",
+  "Find architecture studios for concept design, planning, and project development.": "Temukan studio arsitektur untuk desain konsep, perencanaan, dan pengembangan proyek.",
+  "Find interior professionals for space planning, styling, furnitures and full interior projects.": "Temukan profesional interior untuk perencanaan ruang, styling, furnitur, dan proyek interior lengkap.",
+  "Find real estate professionals for property acquisition, sales, and investment opportunities.": "Temukan profesional properti untuk akuisisi properti, penjualan, dan peluang investasi.",
+  "PROJECT SIZE": "UKURAN PROYEK",
+  "CATEGORIES": "KATEGORI",
+  "LOCATION": "LOKASI",
+  "ANY SIZE": "SEMUA UKURAN",
+  "SOLO / COUPLE (1-2)": "SOLO / PASANGAN (1-2)",
+  "FAMILY / CO-HOSTING (3-6)": "KELUARGA / CO-HOSTING (3-6)",
+  "SHARED / COMMUNITY (7+)": "BERSAMA / KOMUNITAS (7+)",
+  "ALL TYPES": "SEMUA JENIS",
+  "EVERY RENOVATIONS": "SEMUA RENOVASI",
+  "RESIDENTIAL": "RESIDENSIAL",
+  "COMMERCIAL": "KOMERSIAL",
+  "HOSPITALITY": "PERHOTELAN",
+  "COMPLETE HOUSE": "RUMAH LENGKAP",
+  "LIVING ROOM": "RUANG TAMU",
+  "KITCHEN": "DAPUR",
+  "BATHROOM": "KAMAR MANDI",
+  "BEDROOM": "KAMAR TIDUR",
+  "AIRCON": "AC",
+  "ELECTRICITY": "LISTRIK",
+  "PLUMBING": "PIPA / SANITASI",
+  "ROOFING": "ATAP",
+  "WATERPROOFING": "ANTI BOCOR",
+  "POOL": "KOLAM RENANG",
+  "MOLD TREATMENT": "PENANGANAN JAMUR",
+  "TILING": "PEMASANGAN KERAMIK",
+  "PAINTING": "PENGECATAN",
+  "FENCING": "PAGAR",
+  "RENOVATIONS & EXTENSIONS": "RENOVASI & PERLUASAN",
+  "SUSTAINABLE / ECO-ARCHI.": "BERKELANJUTAN / ECO-ARCHI.",
+  "FURNITURES": "FURNITUR",
+  "LIGHTING": "PENCAHAYAAN",
+  "STYLING & DECORATION": "STYLING & DEKORASI",
+  "LAND & DEVELOPMENT PLOTS": "TANAH & KAVLING",
+  "PROPERTY MANAGEMENT": "MANAJEMEN PROPERTI",
+  "LEGAL & NOTARY SERVICES": "LAYANAN HUKUM & NOTARIS",
+};
+
 function getCompanyCategoryTypes(company: any, category: string) {
   if (category === "renovation") return expandRenovationTypes(company.renovationTypes ?? []);
   if (category === "architecture") return company.architectureTypes ?? [];
@@ -295,8 +343,13 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   // pageConfigs is undefined while loading, [] if loaded but empty
   const pageConfigsLoaded = pageConfigs !== undefined;
-  const pickLocalized = (english?: string, indonesian?: string) =>
-    language === "id" && indonesian?.trim() ? indonesian : (english ?? "");
+  const pickLocalized = (english?: string, indonesian?: string) => {
+    if (language === "id") {
+      if (indonesian?.trim()) return indonesian;
+      if (english && pageConfigFallbackTranslationsId[english]) return pageConfigFallbackTranslationsId[english];
+    }
+    return english ?? "";
+  };
   const localizeFilterOptions = (filters: typeof pageConfigs extends undefined ? never : NonNullable<typeof pageConfigs>[number]["filters"]) =>
     filters.map((filter) => ({
       ...filter,

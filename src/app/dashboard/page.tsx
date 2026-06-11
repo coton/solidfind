@@ -218,6 +218,7 @@ export default function DashboardPage() {
                 <span>saved across {visibleCategories.length} categories</span>
               </div>
             </div>
+            <div className="sf-userdash-divider" aria-hidden="true" />
 
             {visibleCategories.map((cat) => {
               const sortVal = sortByCategory[cat.id] ?? "recent";
@@ -292,6 +293,7 @@ export default function DashboardPage() {
               </div>
             )}
 
+            <div className="sf-userdash-divider" aria-hidden="true" />
             <section className="sf-user-search-cta">
               <div>
                 <h2>Looking for something else?</h2>

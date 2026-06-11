@@ -194,6 +194,15 @@ export default function CompanyDashboardPage() {
     company?._id ? { companyId: company._id } : "skip"
   ) ?? 0;
 
+  const fallbackGreetingName =
+    clerkUser?.firstName?.trim() ||
+    clerkUser?.fullName?.trim() ||
+    "";
+  const greetingName = company?.name?.trim() || fallbackGreetingName;
+  const greetingText = greetingName
+    ? t("Welcome back, [name].").replace("[name]", greetingName)
+    : t("Welcome back.");
+
   const isPro = company?.isPro ?? false;
   const activeCategories = company
     ? [
@@ -253,7 +262,7 @@ export default function CompanyDashboardPage() {
   }
 
   const data = {
-    name: company?.name ?? "Company Name",
+    name: greetingName,
     accountType: isPro ? "PRO" : "FREE",
     stats: {
       bookmarked: company?.bookmarkCount ?? 0,
@@ -344,7 +353,7 @@ export default function CompanyDashboardPage() {
         <div className="m-dashboard sm:hidden">
           <div className="m-pad" style={{ paddingTop: 18, paddingBottom: 6 }}>
             <span className="m-eyebrow">{t("Company dashboard")} · <span style={{ color: isPro && proEnabled ? "var(--sf-orange)" : "var(--sf-stone-500)" }}>{isPro && proEnabled ? t("Pro Account") : t("Free account")}</span></span>
-            <h1 className="m-dash-hi">{t("Welcome back, [name].").replace("[name]", data.name)}</h1>
+            <h1 className="m-dash-hi">{greetingText}</h1>
             <p className="m-dash-sub">{isPro && proEnabled ? t("Here's how your profile is performing on SolidFind this month. Your Pro Account ranks you above free listings and unlocks the insights below.") : t("You're listed on SolidFind. Complete your profile and upgrade to Pro to get more visibility.")}</p>
           </div>
 
@@ -451,7 +460,7 @@ export default function CompanyDashboardPage() {
               <span className="sf-tag-mono">{t("Company dashboard")} · <span className={isPro && proEnabled ? "sf-eyebrow-pro" : ""}>{isPro && proEnabled ? t("Pro Account") : t("Free account")}</span></span>
               <span className="sf-tag-mono sf-dash-intro-email">{company?.email || currentUser?.email || clerkUser?.primaryEmailAddress?.emailAddress || ""}</span>
             </div>
-            <h1 className="sf-dash-hi">{t("Welcome back, [name].").replace("[name]", data.name)}</h1>
+            <h1 className="sf-dash-hi">{greetingText}</h1>
             <p className="sf-dash-sub">{isPro && proEnabled ? t("Here's how your profile is performing on SolidFind this month. Your Pro Account ranks you above free listings and unlocks the insights below.") : t("You're listed on SolidFind. Complete your profile to make a strong impression — upgrade to Pro to unlock visibility insights.")}</p>
           </div>
 

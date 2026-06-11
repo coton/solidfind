@@ -22,6 +22,19 @@ const fallbackCategories = [
   { id: "real-estate", label: "Real Estate" },
 ];
 
+const footerCategoryFallbackTranslationsId: Record<string, string> = {
+  "Construction": "Konstruksi",
+  "Renovation": "Renovasi",
+  "Architecture": "Arsitektur",
+  "Interior": "Interior",
+  "Real Estate": "Properti",
+  "01. Construction": "01. Konstruksi",
+  "02. Renovation": "02. Renovasi",
+  "03. Architecture": "03. Arsitektur",
+  "04. Interior": "04. Interior",
+  "05. Real Estate": "05. Properti",
+};
+
 export function Footer() {
   const router = useRouter();
   const pathname = usePathname();
@@ -42,8 +55,13 @@ export function Footer() {
   const { language, setLanguage, t } = useSiteLanguage();
   const userType = (user?.publicMetadata?.accountType as string) || "individual";
   const isCompanyUser = userType === "company";
-  const labelFor = (english?: string, indonesian?: string) =>
-    language === "id" && indonesian?.trim() ? indonesian : (english ?? "");
+  const labelFor = (english?: string, indonesian?: string) => {
+    if (language === "id") {
+      if (indonesian?.trim()) return indonesian;
+      if (english && footerCategoryFallbackTranslationsId[english]) return footerCategoryFallbackTranslationsId[english];
+    }
+    return english ?? "";
+  };
   const categories = pageConfigs?.length
     ? pageConfigs.map((category) => ({ id: category.categoryId, label: labelFor(category.label, (category as any).labelId).replace(/^\d+\.\s*/, "") }))
     : fallbackCategories;

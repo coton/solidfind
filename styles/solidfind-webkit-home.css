@@ -7867,6 +7867,13 @@
   padding: 0;
 }
 
+.sf-userdash-divider {
+  width: 100%;
+  height: 1px;
+  margin: 0 0 28px;
+  background: var(--sf-border-1);
+}
+
 .sf-userdash-main .sf-saved-group-head {
   display: block;
 }
@@ -8015,6 +8022,17 @@ body {
   margin-left: auto;
 }
 
+.sf-mini-header-dashboard .sf-mini-brand {
+  align-items: baseline;
+  gap: 1px;
+}
+
+.sf-mini-header-dashboard .sf-mini-brand .sf-brand-id {
+  color: rgba(255,255,255,.62);
+  font-size: 15px;
+  line-height: 1;
+}
+
 .sf-mini-logout {
   min-height: 42px;
   border-radius: 10px;
@@ -8046,6 +8064,7 @@ body {
 
   .sf-userdash-main .sf-user-intro {
     display: block;
+    padding-top: 18px;
   }
 
   .sf-userdash-main .sf-user-email {
@@ -8115,6 +8134,10 @@ body {
     width: 100%;
     max-width: none;
     aspect-ratio: 300 / 141 !important;
+  }
+
+  .sf-userdash-divider {
+    margin-bottom: 24px;
   }
 
   .sf-user-delete-mobile {

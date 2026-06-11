@@ -31,10 +31,6 @@ interface ContentBlock {
   videoStorageId?: Id<"_storage">;
 }
 
-function getArticleText(enValue: string | undefined, idValue: string | undefined, language: ArticleLanguage) {
-  return language === "id" ? (idValue ?? "") : (enValue ?? "");
-}
-
 function getBlockText(block: ContentBlock, field: LocalizedBlockField, language: ArticleLanguage) {
   const key = language === "id" ? `${field}Id` : field;
   return (block as unknown as Record<string, string | undefined>)[key] ?? "";
@@ -57,7 +53,6 @@ export default function EditFeaturedArticle() {
   const [titleId, setTitleId] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [subtitleId, setSubtitleId] = useState("");
-  const [editorLanguage, setEditorLanguage] = useState<ArticleLanguage>("en");
   const [category, setCategory] = useState<string[]>([]);
   const [visible, setVisible] = useState(true);
   const [coverImageId, setCoverImageId] = useState<Id<"_storage"> | undefined>();
@@ -133,8 +128,8 @@ export default function EditFeaturedArticle() {
     setContentBlocks(contentBlocks.map((b, i) => i === index ? { ...b, ...patch } : b));
   };
 
-  const updateLocalizedBlock = (index: number, field: LocalizedBlockField, value: string) => {
-    const key = editorLanguage === "id" ? `${field}Id` : field;
+  const updateLocalizedBlock = (index: number, field: LocalizedBlockField, language: ArticleLanguage, value: string) => {
+    const key = language === "id" ? `${field}Id` : field;
     updateBlock(index, { [key]: value } as Partial<ContentBlock>);
   };
 
@@ -183,11 +178,6 @@ export default function EditFeaturedArticle() {
     );
   }
 
-  const activeTitle = getArticleText(title, titleId, editorLanguage);
-  const activeSubtitle = getArticleText(subtitle, subtitleId, editorLanguage);
-  const updateActiveTitle = (value: string) => editorLanguage === "id" ? setTitleId(value) : setTitle(value);
-  const updateActiveSubtitle = (value: string) => editorLanguage === "id" ? setSubtitleId(value) : setSubtitle(value);
-
   return (
     <div>
       {/* Header */}
@@ -220,40 +210,29 @@ export default function EditFeaturedArticle() {
         <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-6">
           <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#e4e4e4]">
             <h2 className="text-[13px] font-semibold text-[#333] flex-1">Content</h2>
-            <div className="flex rounded-full border border-[#e4e4e4] bg-[#f8f8f8] p-0.5">
-              {(["en", "id"] as ArticleLanguage[]).map((language) => (
-                <button
-                  key={language}
-                  type="button"
-                  onClick={() => setEditorLanguage(language)}
-                  className={`h-7 rounded-full px-3 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors ${
-                    editorLanguage === language ? "bg-[#333] text-white" : "text-[#333]/45 hover:text-[#333]"
-                  }`}
-                >
-                  {language}
-                </button>
-              ))}
-            </div>
           </div>
           <p className="mb-4 text-[11px] leading-[1.5] text-[#333]/45">
-            EN and ID share the same article structure, media, categories and visibility. Switch language to edit the translated text fields only.
+            EN and ID share the same article structure, media, categories and visibility. Fill both columns here and the website will show the correct version based on the active language toggle.
           </p>
           <div className="space-y-4">
-            {[
-              { label: `Title (${editorLanguage.toUpperCase()})`, value: activeTitle, setter: updateActiveTitle, placeholder: "Article title" },
-              { label: `Subtitle (${editorLanguage.toUpperCase()})`, value: activeSubtitle, setter: updateActiveSubtitle, placeholder: "Short description" },
-            ].map(({ label, value, setter, placeholder }) => (
-              <div key={label}>
-                <label className="block text-[11px] font-medium text-[#333]/70 mb-1">{label}</label>
-                <input
-                  type="text"
-                  value={value}
-                  onChange={(e) => setter(e.target.value)}
-                  placeholder={placeholder}
-                  className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors"
-                />
-              </div>
-            ))}
+            <LocalizedInputPair
+              label="Title"
+              en={title}
+              id={titleId}
+              onEn={setTitle}
+              onId={setTitleId}
+              placeholderEn="Article title"
+              placeholderId="Judul artikel"
+            />
+            <LocalizedInputPair
+              label="Subtitle"
+              en={subtitle}
+              id={subtitleId}
+              onEn={setSubtitle}
+              onId={setSubtitleId}
+              placeholderEn="Short description"
+              placeholderId="Deskripsi singkat"
+            />
             <div>
               <label className="block text-[11px] font-medium text-[#333]/70 mb-1">Categories (select all that apply)</label>
               <div className="space-y-2">
@@ -331,9 +310,6 @@ export default function EditFeaturedArticle() {
       <div className="bg-white rounded-[8px] border border-[#e4e4e4] p-6">
         <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#e4e4e4]">
           <h2 className="text-[13px] font-semibold text-[#333] flex-1">Content Blocks</h2>
-          <span className="rounded-full bg-[#f5f5f5] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#333]/55">
-            Editing {editorLanguage.toUpperCase()}
-          </span>
         </div>
 
         {contentBlocks.length === 0 && (
@@ -358,22 +334,28 @@ export default function EditFeaturedArticle() {
               </div>
 
               {block.type === "heading" && (
-                <input
-                  type="text"
-                  value={getBlockText(block, "heading", editorLanguage)}
-                  onChange={(e) => updateLocalizedBlock(index, "heading", e.target.value)}
-                  placeholder={`Heading text (${editorLanguage.toUpperCase()})`}
-                  className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[13px] font-semibold text-[#333] outline-none focus:border-[#333] transition-colors"
+                <LocalizedInputPair
+                  label="Heading"
+                  en={getBlockText(block, "heading", "en")}
+                  id={getBlockText(block, "heading", "id")}
+                  onEn={(value) => updateLocalizedBlock(index, "heading", "en", value)}
+                  onId={(value) => updateLocalizedBlock(index, "heading", "id", value)}
+                  placeholderEn="Heading text"
+                  placeholderId="Teks heading"
+                  inputClassName="text-[13px] font-semibold"
                 />
               )}
 
               {block.type === "text" && (
-                <textarea
-                  value={getBlockText(block, "text", editorLanguage)}
-                  onChange={(e) => updateLocalizedBlock(index, "text", e.target.value)}
-                  placeholder={`Paragraph text (${editorLanguage.toUpperCase()})...`}
+                <LocalizedTextareaPair
+                  label="Paragraph"
+                  en={getBlockText(block, "text", "en")}
+                  id={getBlockText(block, "text", "id")}
+                  onEn={(value) => updateLocalizedBlock(index, "text", "en", value)}
+                  onId={(value) => updateLocalizedBlock(index, "text", "id", value)}
+                  placeholderEn="Paragraph text..."
+                  placeholderId="Teks paragraf..."
                   rows={4}
-                  className="w-full px-3 py-2 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] outline-none focus:border-[#333] transition-colors resize-y"
                 />
               )}
 
@@ -393,12 +375,15 @@ export default function EditFeaturedArticle() {
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => handleBlockImageUpload(index, e)} />
                     </label>
                   </div>
-                  <input
-                    type="text"
-                    value={getBlockText(block, "imageCaption", editorLanguage)}
-                    onChange={(e) => updateLocalizedBlock(index, "imageCaption", e.target.value)}
-                    placeholder={`Caption (${editorLanguage.toUpperCase()}, optional)`}
-                    className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333]/70 outline-none focus:border-[#333] transition-colors"
+                  <LocalizedInputPair
+                    label="Caption"
+                    en={getBlockText(block, "imageCaption", "en")}
+                    id={getBlockText(block, "imageCaption", "id")}
+                    onEn={(value) => updateLocalizedBlock(index, "imageCaption", "en", value)}
+                    onId={(value) => updateLocalizedBlock(index, "imageCaption", "id", value)}
+                    placeholderEn="Caption (optional)"
+                    placeholderId="Caption / keterangan (opsional)"
+                    inputClassName="text-[11px] text-[#333]/70"
                   />
                   <BlockImagePreview imageId={block.imageId} imageUrl={block.imageUrl} />
                 </div>
@@ -406,19 +391,26 @@ export default function EditFeaturedArticle() {
 
               {block.type === "quote" && (
                 <div className="space-y-2">
-                  <textarea
-                    value={getBlockText(block, "quote", editorLanguage)}
-                    onChange={(e) => updateLocalizedBlock(index, "quote", e.target.value)}
-                    placeholder={`Quote text (${editorLanguage.toUpperCase()})...`}
+                  <LocalizedTextareaPair
+                    label="Quote"
+                    en={getBlockText(block, "quote", "en")}
+                    id={getBlockText(block, "quote", "id")}
+                    onEn={(value) => updateLocalizedBlock(index, "quote", "en", value)}
+                    onId={(value) => updateLocalizedBlock(index, "quote", "id", value)}
+                    placeholderEn="Quote text..."
+                    placeholderId="Teks kutipan..."
                     rows={2}
-                    className="w-full px-3 py-2 border border-[#e4e4e4] rounded-[6px] text-[12px] text-[#333] italic outline-none focus:border-[#333] transition-colors resize-y"
+                    textareaClassName="italic"
                   />
-                  <input
-                    type="text"
-                    value={getBlockText(block, "quoteAuthor", editorLanguage)}
-                    onChange={(e) => updateLocalizedBlock(index, "quoteAuthor", e.target.value)}
-                    placeholder={`Author name (${editorLanguage.toUpperCase()})`}
-                    className="w-full h-9 px-3 border border-[#e4e4e4] rounded-[6px] text-[11px] text-[#333]/70 outline-none focus:border-[#333] transition-colors"
+                  <LocalizedInputPair
+                    label="Author"
+                    en={getBlockText(block, "quoteAuthor", "en")}
+                    id={getBlockText(block, "quoteAuthor", "id")}
+                    onEn={(value) => updateLocalizedBlock(index, "quoteAuthor", "en", value)}
+                    onId={(value) => updateLocalizedBlock(index, "quoteAuthor", "id", value)}
+                    placeholderEn="Author name"
+                    placeholderId="Nama penulis"
+                    inputClassName="text-[11px] text-[#333]/70"
                   />
                 </div>
               )}
@@ -460,6 +452,98 @@ export default function EditFeaturedArticle() {
             </button>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function LocalizedInputPair({
+  label,
+  en,
+  id,
+  onEn,
+  onId,
+  placeholderEn,
+  placeholderId,
+  inputClassName = "text-[12px]",
+}: {
+  label: string;
+  en: string;
+  id: string;
+  onEn: (value: string) => void;
+  onId: (value: string) => void;
+  placeholderEn: string;
+  placeholderId: string;
+  inputClassName?: string;
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+      <div>
+        <label className="mb-1 block text-[11px] font-medium text-[#333]/70">{label} EN</label>
+        <input
+          type="text"
+          value={en}
+          onChange={(e) => onEn(e.target.value)}
+          placeholder={placeholderEn}
+          className={`w-full h-9 rounded-[6px] border border-[#e4e4e4] px-3 text-[#333] outline-none transition-colors focus:border-[#333] ${inputClassName}`}
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-[11px] font-medium text-[#333]/70">{label} ID</label>
+        <input
+          type="text"
+          value={id}
+          onChange={(e) => onId(e.target.value)}
+          placeholder={placeholderId}
+          className={`w-full h-9 rounded-[6px] border border-[#e4e4e4] px-3 text-[#333] outline-none transition-colors focus:border-[#333] ${inputClassName}`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function LocalizedTextareaPair({
+  label,
+  en,
+  id,
+  onEn,
+  onId,
+  placeholderEn,
+  placeholderId,
+  rows,
+  textareaClassName = "text-[12px]",
+}: {
+  label: string;
+  en: string;
+  id: string;
+  onEn: (value: string) => void;
+  onId: (value: string) => void;
+  placeholderEn: string;
+  placeholderId: string;
+  rows: number;
+  textareaClassName?: string;
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+      <div>
+        <label className="mb-1 block text-[11px] font-medium text-[#333]/70">{label} EN</label>
+        <textarea
+          value={en}
+          onChange={(e) => onEn(e.target.value)}
+          placeholder={placeholderEn}
+          rows={rows}
+          className={`w-full resize-y rounded-[6px] border border-[#e4e4e4] px-3 py-2 text-[#333] outline-none transition-colors focus:border-[#333] ${textareaClassName}`}
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-[11px] font-medium text-[#333]/70">{label} ID</label>
+        <textarea
+          value={id}
+          onChange={(e) => onId(e.target.value)}
+          placeholder={placeholderId}
+          rows={rows}
+          className={`w-full resize-y rounded-[6px] border border-[#e4e4e4] px-3 py-2 text-[#333] outline-none transition-colors focus:border-[#333] ${textareaClassName}`}
+        />
       </div>
     </div>
   );
