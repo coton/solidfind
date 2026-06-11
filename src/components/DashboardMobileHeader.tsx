@@ -24,7 +24,7 @@ export function DashboardMobileHeader({
             alt="SolidFind"
             width={136}
             height={20}
-            className="h-[20px] w-auto"
+            className="h-[18px] w-auto"
           />
           <span className="sf-brand-id">.id</span>
         </Link>

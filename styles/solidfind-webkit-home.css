@@ -8048,6 +8048,10 @@ body {
   gap: 1px;
 }
 
+.sf-mini-header-dashboard .sf-mini-brand img {
+  filter: brightness(0) invert(1);
+}
+
 .sf-mini-header-dashboard .sf-mini-brand .sf-brand-id {
   color: rgba(255,255,255,.62);
   font-size: 15px;
@@ -8079,7 +8083,7 @@ body {
     width: auto;
     max-width: none;
     margin: 0 24px;
-    padding: calc(132px + env(safe-area-inset-top, 0px)) 0 48px;
+    padding: calc(118px + env(safe-area-inset-top, 0px)) 0 48px;
     overflow-x: clip;
   }
 
@@ -8089,7 +8093,7 @@ body {
   }
 
   .sf-dash {
-    padding-top: calc(118px + env(safe-area-inset-top, 0px));
+    padding-top: calc(108px + env(safe-area-inset-top, 0px));
     padding-bottom: 48px;
     overscroll-behavior-y: none;
   }
@@ -8099,7 +8103,7 @@ body {
   }
 
   .m-dashboard > .m-pad:first-child {
-    padding-top: 38px !important;
+    padding-top: 30px !important;
   }
 
   .sf-userdash-main .sf-user-email {
@@ -8178,6 +8182,9 @@ body {
 
   .sf-user-delete-mobile {
     display: inline-flex;
+    width: fit-content;
+    max-width: max-content;
+    align-self: flex-start;
     margin: 20px 0 0;
     border: 0;
     background: transparent;
@@ -8190,6 +8197,10 @@ body {
     padding: 0;
     text-decoration: underline;
     text-transform: uppercase;
+  }
+
+  .sf-user-delete-mobile span {
+    display: inline;
   }
 
   .sf-user-delete-mobile:hover {

@@ -350,7 +350,7 @@ export default function DashboardPage() {
               className="sf-user-delete sf-user-delete-mobile sm:hidden"
               onClick={() => setDeleteState("confirm")}
             >
-              Delete your account
+              <span>Delete your account</span>
             </button>
             <AdBanner placeholderWhenEmpty variant="rectangle" />
           </aside>
@@ -414,8 +414,8 @@ function DeleteAccountWebKitModal({ email, onClose, onDelete }: { email: string;
           <textarea className="sf-edit-textarea" rows={3} placeholder="Tell us what we could have done better..." />
         </div>
         <div className="sf-confirm-actions">
-          <button className="sf-btn sf-btn-lg sf-btn-ghost" type="button" onClick={onClose}>Keep account</button>
-          <button className="sf-btn sf-btn-lg sf-btn-danger" type="button" onClick={onDelete}>Delete permanently</button>
+          <button className="sf-btn sf-btn-ghost" type="button" onClick={onClose}>Keep account</button>
+          <button className="sf-btn sf-btn-danger" type="button" onClick={onDelete}>Delete permanently</button>
         </div>
       </div>
     </div>
