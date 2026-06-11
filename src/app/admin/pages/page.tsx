@@ -22,6 +22,17 @@ type PageConfig = {
 
 const GLOBAL_FILTER_IDS = new Set(["project-size", "location"]);
 
+function cloneFilters(filters: Filter[]) {
+  return JSON.parse(JSON.stringify(filters)) as Filter[];
+}
+
+function splitFilters(filters: Filter[]) {
+  return {
+    global: filters.filter((filter) => GLOBAL_FILTER_IDS.has(filter.id)),
+    category: filters.filter((filter) => !GLOBAL_FILTER_IDS.has(filter.id)),
+  };
+}
+
 export default function AdminPagesPage() {
   const pages = useQuery(api.pageConfigs.list);
   const upsert = useMutation(api.pageConfigs.upsert);
@@ -59,23 +70,24 @@ export default function AdminPagesPage() {
   const displayedFilterIndexes = selectedGlobal
     ? globalEditFilters.map((filter, index) => ({ filter, index }))
     : categoryFilterIndexes;
-  const defaultGlobalFilters = pages?.[0]?.filters.filter((filter) => GLOBAL_FILTER_IDS.has(filter.id)) ?? [];
+  const defaultGlobalFilters = pages?.[0] ? splitFilters(pages[0].filters).global : [];
 
   const selectGlobalFilters = () => {
     setSelectedGlobal(true);
     setSelectedId(null);
-    setGlobalEditFilters(JSON.parse(JSON.stringify(defaultGlobalFilters)));
+    setGlobalEditFilters(cloneFilters(defaultGlobalFilters));
     setDirty(false);
   };
 
   const selectPage = (page: PageConfig) => {
+    const { category } = splitFilters(page.filters);
     setSelectedGlobal(false);
     setSelectedId(page._id);
     setEditLabel(page.label);
     setEditLabelId(page.labelId ?? "");
     setEditSubtitle(page.subtitle);
     setEditSubtitleId(page.subtitleId ?? "");
-    setEditFilters(JSON.parse(JSON.stringify(page.filters)));
+    setEditFilters(cloneFilters(category));
     setDirty(false);
   };
 
@@ -110,7 +122,7 @@ export default function AdminPagesPage() {
       subtitleId: editSubtitleId,
       visible: selectedPage.visible,
       sortOrder: selectedPage.sortOrder,
-      filters: editFilters,
+      filters: [...defaultGlobalFilters, ...editFilters],
     });
     setDirty(false);
     setSaving(false);

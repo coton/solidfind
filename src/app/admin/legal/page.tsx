@@ -14,11 +14,14 @@ import {
   TERMS_ID_TEXT_PLATFORM_SETTING_KEY,
   TERMS_TEXT_PLATFORM_SETTING_KEY,
 } from "@/lib/terms-content.mjs";
+import { getDefaultProGuidelines, parseProGuidelinesItems } from "@/lib/pro-guidelines-content.mjs";
 
-type LegalDocument = "terms" | "proTerms";
+type LegalDocument = "terms" | "proTerms" | "proGuidelines";
+type LegalTextDocument = Exclude<LegalDocument, "proGuidelines">;
 type LegalLanguage = "en" | "id";
+type GuidelineCard = { title: string; body: string };
 
-const LEGAL_DOCUMENTS: Record<LegalDocument, {
+const LEGAL_DOCUMENTS: Record<LegalTextDocument, {
   label: string;
   description: string;
   keys: Record<LegalLanguage, string>;
@@ -75,7 +78,7 @@ function parseTermsPreview(text: string) {
   });
 }
 
-function LegalUploader({ documentId, language }: { documentId: LegalDocument; language: LegalLanguage }) {
+function LegalUploader({ documentId, language }: { documentId: LegalTextDocument; language: LegalLanguage }) {
   const config = LEGAL_DOCUMENTS[documentId];
   const title = `${config.label} ${language.toUpperCase()}`;
   const settingKey = config.keys[language];
@@ -172,13 +175,14 @@ function ProGuidelinesEditor({ language }: { language: LegalLanguage }) {
   const titleKey = `proGuidelinesTitle${suffix}`;
   const introKey = `proGuidelinesIntro${suffix}`;
   const itemsKey = `proGuidelinesItems${suffix}`;
+  const defaults = getDefaultProGuidelines(language);
   const titleValue = useQuery(api.platformSettings.get, { key: titleKey });
   const introValue = useQuery(api.platformSettings.get, { key: introKey });
   const itemsValue = useQuery(api.platformSettings.get, { key: itemsKey });
   const setPlatformSetting = useMutation(api.platformSettings.set);
   const [title, setTitle] = useState("");
   const [intro, setIntro] = useState("");
-  const [items, setItems] = useState("");
+  const [cards, setCards] = useState<GuidelineCard[]>(defaults.items);
   const [saved, setSaved] = useState(false);
   const hydrated = useRef(false);
 
@@ -189,33 +193,42 @@ function ProGuidelinesEditor({ language }: { language: LegalLanguage }) {
   useEffect(() => {
     if (hydrated.current || titleValue === undefined || introValue === undefined || itemsValue === undefined) return;
     hydrated.current = true;
-    setTitle(titleValue ?? "");
-    setIntro(introValue ?? "");
-    setItems(itemsValue ?? "");
-  }, [introValue, itemsValue, language, titleValue]);
+    setTitle(titleValue?.trim() || defaults.title);
+    setIntro(introValue?.trim() || defaults.intro);
+    setCards(parseProGuidelinesItems(itemsValue, defaults.items));
+  }, [defaults.intro, defaults.items, defaults.title, introValue, itemsValue, language, titleValue]);
+
+  const updateCard = (index: number, field: keyof GuidelineCard, value: string) => {
+    setCards((current) => current.map((card, currentIndex) => (
+      currentIndex === index ? { ...card, [field]: value } : card
+    )));
+  };
 
   const save = async () => {
     await Promise.all([
-      setPlatformSetting({ key: titleKey, value: title, updatedBy: "admin" }),
-      setPlatformSetting({ key: introKey, value: intro, updatedBy: "admin" }),
-      setPlatformSetting({ key: itemsKey, value: items, updatedBy: "admin" }),
+      setPlatformSetting({ key: titleKey, value: title.trim() || defaults.title, updatedBy: "admin" }),
+      setPlatformSetting({ key: introKey, value: intro.trim() || defaults.intro, updatedBy: "admin" }),
+      setPlatformSetting({ key: itemsKey, value: JSON.stringify(cards.map((card) => ({
+        title: card.title.trim(),
+        body: card.body.trim(),
+      }))), updatedBy: "admin" }),
     ]);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
   return (
-    <SectionCard title={`Pro Guidelines visible copy ${language.toUpperCase()}`}>
+    <SectionCard title={`Pro Guidelines ${language.toUpperCase()}`}>
       <p className="mb-3 text-[10px] text-[#333]/50">
-        These fields control the public Pro Guidelines page. Leave fields empty to use the built-in WebKit defaults.
+        These fields control the public Pro Guidelines page. The structure matches the live page: hero title, intro copy, and five detail cards.
       </p>
       <label className="mb-3 block">
         <span className="mb-1 block text-[11px] font-medium text-[#333]/70">Hero title</span>
-        <input
+        <textarea
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder="More visibility.\nSame standards."
-          className="h-9 w-full max-w-[700px] rounded-[6px] border border-[#e4e4e4] bg-white px-3 text-[12px] text-[#333] outline-none transition-colors focus:border-[#333]"
+          rows={2}
+          className="w-full max-w-[700px] resize-y rounded-[6px] border border-[#e4e4e4] bg-white px-3 py-2 text-[12px] text-[#333] outline-none transition-colors focus:border-[#333]"
         />
       </label>
       <label className="mb-3 block">
@@ -227,18 +240,30 @@ function ProGuidelinesEditor({ language }: { language: LegalLanguage }) {
           className="w-full max-w-[700px] resize-y rounded-[6px] border border-[#e4e4e4] bg-white px-3 py-2 text-[12px] text-[#333] outline-none transition-colors focus:border-[#333]"
         />
       </label>
-      <label className="mb-3 block">
-        <span className="mb-1 block text-[11px] font-medium text-[#333]/70">Guideline items JSON</span>
-        <p className="mb-1 text-[10px] text-[#333]/40">
-          Format: [{`{"title":"Profile accuracy","body":"Keep your public details accurate."}`}]
-        </p>
-        <textarea
-          value={items}
-          onChange={(event) => setItems(event.target.value)}
-          rows={8}
-          className="w-full max-w-[700px] resize-y rounded-[6px] border border-[#e4e4e4] bg-white px-3 py-2 font-mono text-[11px] text-[#333] outline-none transition-colors focus:border-[#333]"
-        />
-      </label>
+      <div className="grid gap-3">
+        {cards.map((card, index) => (
+          <div key={`${language}-${index}`} className="rounded-[6px] border border-[#e4e4e4] p-4">
+            <p className="mb-3 text-[11px] font-semibold text-[#333]/70">Detail card {index + 1}</p>
+            <label className="mb-3 block">
+              <span className="mb-1 block text-[11px] font-medium text-[#333]/70">Card title</span>
+              <input
+                value={card.title}
+                onChange={(event) => updateCard(index, "title", event.target.value)}
+                className="h-9 w-full max-w-[700px] rounded-[6px] border border-[#e4e4e4] bg-white px-3 text-[12px] text-[#333] outline-none transition-colors focus:border-[#333]"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[11px] font-medium text-[#333]/70">Card description</span>
+              <textarea
+                value={card.body}
+                onChange={(event) => updateCard(index, "body", event.target.value)}
+                rows={3}
+                className="w-full max-w-[700px] resize-y rounded-[6px] border border-[#e4e4e4] bg-white px-3 py-2 text-[12px] text-[#333] outline-none transition-colors focus:border-[#333]"
+              />
+            </label>
+          </div>
+        ))}
+      </div>
       <button type="button" onClick={save} className="h-9 rounded-[6px] bg-[#333] px-4 text-[11px] font-medium text-white hover:bg-[#111]">
         {saved ? "✓ Saved!" : "Save Pro Guidelines"}
       </button>
@@ -249,25 +274,25 @@ function ProGuidelinesEditor({ language }: { language: LegalLanguage }) {
 export default function AdminLegalPage() {
   const [documentId, setDocumentId] = useState<LegalDocument>("terms");
   const [language, setLanguage] = useState<LegalLanguage>("en");
-  const activeDocument = LEGAL_DOCUMENTS[documentId];
+  const activeDocument = documentId === "proGuidelines" ? null : LEGAL_DOCUMENTS[documentId];
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-[24px] font-bold text-[#333] tracking-[0.48px]">Legal</h1>
-        <p className="text-[11px] text-[#333]/50 mt-1">Manage public Terms & Conditions and PRO Terms of Services.</p>
+        <p className="text-[11px] text-[#333]/50 mt-1">Manage public Terms, Pro subscription terms, and the Pro Guidelines page in both languages.</p>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="flex overflow-hidden rounded-full border border-[#333]/15 text-[11px] font-semibold tracking-[0.22px] text-[#333]/50">
-          {(Object.keys(LEGAL_DOCUMENTS) as LegalDocument[]).map((item) => (
+          {(["terms", "proTerms", "proGuidelines"] as LegalDocument[]).map((item) => (
             <button
               key={item}
               type="button"
               onClick={() => setDocumentId(item)}
               className={`px-4 py-2 transition-colors ${documentId === item ? "bg-[#333] text-white" : "hover:text-[#333]"}`}
             >
-              {LEGAL_DOCUMENTS[item].label}
+              {item === "proGuidelines" ? "Pro Guidelines" : LEGAL_DOCUMENTS[item].label}
             </button>
           ))}
         </div>
@@ -285,9 +310,14 @@ export default function AdminLegalPage() {
         </div>
       </div>
 
-      <p className="mb-4 text-[11px] text-[#333]/50">{activeDocument.description}</p>
-      <LegalUploader documentId={documentId} language={language} />
-      <ProGuidelinesEditor language={language} />
+      <p className="mb-4 text-[11px] text-[#333]/50">
+        {documentId === "proGuidelines"
+          ? "Edit the hero title, intro text, and five visible detail cards for the public Pro Guidelines page."
+          : activeDocument!.description}
+      </p>
+      {documentId === "proGuidelines"
+        ? <ProGuidelinesEditor language={language} />
+        : <LegalUploader documentId={documentId} language={language} />}
     </div>
   );
 }
