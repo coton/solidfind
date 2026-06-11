@@ -42,7 +42,7 @@ export function resolveTextSetting(value, fallback = "") {
   const trimmed = typeof value === "string" ? value.trim() : "";
   return {
     isLoading: false,
-    value: trimmed || fallback,
+    value: normalizeReviewedIndonesianText(trimmed || fallback),
   };
 }
 
@@ -84,3 +84,4 @@ export function normalizeContactHref(value, fallback = "mailto:hello@solidfind.i
 
   return trimmed;
 }
+import { normalizeReviewedIndonesianText } from "@/lib/reviewed-indonesian-copy.mjs";

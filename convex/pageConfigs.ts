@@ -1,11 +1,49 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+function normalizeReviewedIndonesianText(value: string | undefined) {
+  if (!value) return value;
+  const reviewedCopyMap = new Map<string, string>([
+    [
+      "Temukan profesional interior untuk perencanaan ruang, styling, furnitur, dan proyek interior penuh.",
+      "Temukan profesional interior untuk perencanaan ruang, styling, furnitur, dan proyek interior lengkap.",
+    ],
+    ["Rumah lengkap", "Seluruh Rumah"],
+    ["RUMAH LENGKAP", "SELURUH RUMAH"],
+  ]);
+  return reviewedCopyMap.get(value) ?? value;
+}
+
+function normalizePageConfig<T extends {
+  labelId?: string;
+  subtitleId?: string;
+  filters: Array<{
+    id: string;
+    title: string;
+    titleId?: string;
+    options: Array<{ id: string; label: string; labelId?: string }>;
+  }>;
+}>(config: T): T {
+  return {
+    ...config,
+    labelId: normalizeReviewedIndonesianText(config.labelId),
+    subtitleId: normalizeReviewedIndonesianText(config.subtitleId),
+    filters: config.filters.map((filter) => ({
+      ...filter,
+      titleId: normalizeReviewedIndonesianText(filter.titleId),
+      options: filter.options.map((option) => ({
+        ...option,
+        labelId: normalizeReviewedIndonesianText(option.labelId),
+      })),
+    })),
+  };
+}
+
 export const list = query({
   args: {},
   handler: async (ctx) => {
     const configs = await ctx.db.query("pageConfigs").withIndex("by_sortOrder").collect();
-    return configs.sort((a, b) => a.sortOrder - b.sortOrder);
+    return configs.sort((a, b) => a.sortOrder - b.sortOrder).map(normalizePageConfig);
   },
 });
 
@@ -13,17 +51,18 @@ export const listVisible = query({
   args: {},
   handler: async (ctx) => {
     const configs = await ctx.db.query("pageConfigs").withIndex("by_sortOrder").collect();
-    return configs.filter((c) => c.visible).sort((a, b) => a.sortOrder - b.sortOrder);
+    return configs.filter((c) => c.visible).sort((a, b) => a.sortOrder - b.sortOrder).map(normalizePageConfig);
   },
 });
 
 export const getByCategory = query({
   args: { categoryId: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const config = await ctx.db
       .query("pageConfigs")
       .withIndex("by_categoryId", (q) => q.eq("categoryId", args.categoryId))
       .first();
+    return config ? normalizePageConfig(config) : null;
   },
 });
 

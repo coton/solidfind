@@ -6,6 +6,7 @@ import { useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { uploadFile as uploadFileToStorage } from "@/lib/uploadFile";
+import { normalizeReviewedIndonesianText } from "@/lib/reviewed-indonesian-copy.mjs";
 
 type AboutLanguage = "en" | "id";
 type AboutFields = {
@@ -188,12 +189,12 @@ export default function AdminAboutPage() {
         contact: aboutContact ?? "",
       },
       id: {
-        tagline: aboutTaglineId ?? "",
-        description: aboutDescriptionId ?? "",
-        individual: aboutIndividualId ?? "",
-        freeCompany: aboutFreeCompanyId ?? "",
-        proCompany: aboutProCompanyId ?? "",
-        contact: aboutContactId ?? "",
+        tagline: normalizeReviewedIndonesianText(aboutTaglineId ?? ""),
+        description: normalizeReviewedIndonesianText(aboutDescriptionId ?? ""),
+        individual: normalizeReviewedIndonesianText(aboutIndividualId ?? ""),
+        freeCompany: normalizeReviewedIndonesianText(aboutFreeCompanyId ?? ""),
+        proCompany: normalizeReviewedIndonesianText(aboutProCompanyId ?? ""),
+        contact: normalizeReviewedIndonesianText(aboutContactId ?? ""),
       },
       email: aboutEmail ?? "",
       headerImageUrl: aboutProfilePicture ?? "",
