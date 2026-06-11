@@ -902,8 +902,11 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
         ) : (
           <>
         <div className={`sf-mini-header ${showMobileMiniHeader ? "is-visible" : ""}`}>
-          <Link href="/" className="sf-mini-brand" onClick={() => setMobileMenuOpen(false)}>
-            <Image src="/assets/solidfind-logo.svg" alt="SolidFind" width={136} height={20} className="h-[20px] w-auto" />
+          <Link href="/" className="sf-mini-brand sf-mini-brand-search" aria-label="Back to home" onClick={() => setMobileMenuOpen(false)}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
           </Link>
           <div className="sf-mini-actions">
             <button type="button" className="sf-icon-btn" aria-label="Search" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
