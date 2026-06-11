@@ -192,7 +192,7 @@ export default function DashboardPage() {
       <Header />
       <DashboardMobileHeader dashboardHref="/dashboard" onSignOut={handleSignOut} />
 
-      <main className="sf-userdash-main flex-grow w-full pt-[94px] sm:pt-0">
+      <main className="sf-userdash-main flex-grow w-full pt-[116px] sm:pt-0">
         <div className="sf-user-intro">
             <div>
               <span className="sf-tag-mono sf-user-account-line">Individual account · <span>{user.email}</span></span>

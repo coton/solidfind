@@ -349,7 +349,7 @@ export default function CompanyDashboardPage() {
       <Header />
       <DashboardMobileHeader dashboardHref="/company-dashboard" onSignOut={handleSignOut} logoutLabel={t("Log out")} />
 
-      <main className="sf-dash flex-grow pt-[94px] sm:pt-0" data-screen-label="Company dashboard">
+      <main className="sf-dash flex-grow pt-[108px] sm:pt-0" data-screen-label="Company dashboard">
         <div className="m-dashboard sm:hidden">
           <div className="m-pad" style={{ paddingTop: 18, paddingBottom: 6 }}>
             <span className="m-eyebrow">{t("Company dashboard")} · <span style={{ color: isPro && proEnabled ? "var(--sf-orange)" : "var(--sf-stone-500)" }}>{isPro && proEnabled ? t("Pro Account") : t("Free account")}</span></span>
