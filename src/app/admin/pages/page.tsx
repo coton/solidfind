@@ -34,7 +34,7 @@ function splitFilters(filters: Filter[]) {
 }
 
 export default function AdminPagesPage() {
-  const adminPageConfigs = useQuery(api.pageConfigs.listForAdmin);
+  const pages = useQuery(api.pageConfigs.list);
   const upsert = useMutation(api.pageConfigs.upsert);
   const updateVisibility = useMutation(api.pageConfigs.updateVisibility);
   const addPageMut = useMutation(api.pageConfigs.addPage);
@@ -63,7 +63,6 @@ export default function AdminPagesPage() {
   // Delete confirmation
   const [deleteConfirmId, setDeleteConfirmId] = useState<Id<"pageConfigs"> | null>(null);
 
-  const pages = adminPageConfigs?.pages;
   const selectedPage = pages?.find((p) => p._id === selectedId);
   const categoryFilterIndexes = editFilters
     .map((filter, index) => ({ filter, index }))
@@ -71,7 +70,7 @@ export default function AdminPagesPage() {
   const displayedFilterIndexes = selectedGlobal
     ? globalEditFilters.map((filter, index) => ({ filter, index }))
     : categoryFilterIndexes;
-  const defaultGlobalFilters = adminPageConfigs?.globalFilters ?? [];
+  const defaultGlobalFilters = pages?.map((page) => splitFilters(page.filters).global).find((filters) => filters.length > 0) ?? [];
 
   const selectGlobalFilters = () => {
     setSelectedGlobal(true);
@@ -265,7 +264,7 @@ export default function AdminPagesPage() {
     setDirty(true);
   };
 
-  if (adminPageConfigs === undefined || pages === undefined) {
+  if (pages === undefined) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-6 h-6 border-2 border-[#333] border-t-transparent rounded-full animate-spin" />
