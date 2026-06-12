@@ -22,14 +22,22 @@ type PageConfig = {
 
 const GLOBAL_FILTER_IDS = new Set(["project-size", "location"]);
 
+function normalizeFilterId(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, "-");
+}
+
+function isGlobalFilter(filterId: string) {
+  return GLOBAL_FILTER_IDS.has(normalizeFilterId(filterId));
+}
+
 function cloneFilters(filters: Filter[]) {
   return JSON.parse(JSON.stringify(filters)) as Filter[];
 }
 
 function splitFilters(filters: Filter[]) {
   return {
-    global: filters.filter((filter) => GLOBAL_FILTER_IDS.has(filter.id)),
-    category: filters.filter((filter) => !GLOBAL_FILTER_IDS.has(filter.id)),
+    global: filters.filter((filter) => isGlobalFilter(filter.id)),
+    category: filters.filter((filter) => !isGlobalFilter(filter.id)),
   };
 }
 
@@ -66,7 +74,7 @@ export default function AdminPagesPage() {
   const selectedPage = pages?.find((p) => p._id === selectedId);
   const categoryFilterIndexes = editFilters
     .map((filter, index) => ({ filter, index }))
-    .filter(({ filter }) => !GLOBAL_FILTER_IDS.has(filter.id));
+    .filter(({ filter }) => !isGlobalFilter(filter.id));
   const displayedFilterIndexes = selectedGlobal
     ? globalEditFilters.map((filter, index) => ({ filter, index }))
     : categoryFilterIndexes;
@@ -94,7 +102,7 @@ export default function AdminPagesPage() {
     if (selectedGlobal && pages) {
       setSaving(true);
       await Promise.all(pages.map((page) => {
-        const categoryFilters = page.filters.filter((filter) => !GLOBAL_FILTER_IDS.has(filter.id));
+        const categoryFilters = page.filters.filter((filter) => !isGlobalFilter(filter.id));
         return upsert({
           categoryId: page.categoryId,
           label: page.label,
