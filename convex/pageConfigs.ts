@@ -1,6 +1,8 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+const GLOBAL_FILTER_IDS = new Set(["project-size", "location"]);
+
 function normalizeReviewedIndonesianText(value: string | undefined) {
   if (!value) return value;
   const reviewedCopyMap = new Map<string, string>([
@@ -39,11 +41,46 @@ function normalizePageConfig<T extends {
   };
 }
 
+function splitFilters<T extends {
+  id: string;
+  title: string;
+  titleId?: string;
+  options: Array<{ id: string; label: string; labelId?: string }>;
+}>(filters: T[]) {
+  return {
+    global: filters.filter((filter) => GLOBAL_FILTER_IDS.has(filter.id)),
+    category: filters.filter((filter) => !GLOBAL_FILTER_IDS.has(filter.id)),
+  };
+}
+
+function getDefaultGlobalFilters() {
+  return splitFilters(defaultConfigs[0]?.filters ?? []).global;
+}
+
 export const list = query({
   args: {},
   handler: async (ctx) => {
     const configs = await ctx.db.query("pageConfigs").withIndex("by_sortOrder").collect();
     return configs.sort((a, b) => a.sortOrder - b.sortOrder).map(normalizePageConfig);
+  },
+});
+
+export const listForAdmin = query({
+  args: {},
+  handler: async (ctx) => {
+    const configs = await ctx.db.query("pageConfigs").withIndex("by_sortOrder").collect();
+    const sorted = configs.sort((a, b) => a.sortOrder - b.sortOrder).map(normalizePageConfig);
+    const globalFilters =
+      sorted.map((config) => splitFilters(config.filters).global).find((filters) => filters.length > 0)
+      ?? getDefaultGlobalFilters();
+
+    return {
+      globalFilters,
+      pages: sorted.map((config) => ({
+        ...config,
+        filters: splitFilters(config.filters).category,
+      })),
+    };
   },
 });
 
@@ -238,23 +275,6 @@ const defaultConfigs = [
           { id: "fencing", label: "FENCING", labelId: "PAGAR" },
         ],
       },
-      {
-        id: "location",
-        title: "LOCATION",
-        titleId: "LOKASI",
-        options: [
-          { id: "bali", label: "BALI", labelId: "BALI" },
-          { id: "badung", label: "BADUNG", labelId: "BADUNG" },
-          { id: "denpasar", label: "DENPASAR", labelId: "DENPASAR" },
-          { id: "tabanan", label: "TABANAN", labelId: "TABANAN" },
-          { id: "gianyar", label: "GIANYAR", labelId: "GIANYAR" },
-          { id: "klungkung", label: "KLUNGKUNG", labelId: "KLUNGKUNG" },
-          { id: "karangasem", label: "KARANGASEM", labelId: "KARANGASEM" },
-          { id: "bangli", label: "BANGLI", labelId: "BANGLI" },
-          { id: "buleleng", label: "BULELENG", labelId: "BULELENG" },
-          { id: "jembrana", label: "JEMBRANA", labelId: "JEMBRANA" },
-        ],
-      },
     ],
   },
   {
@@ -287,23 +307,6 @@ const defaultConfigs = [
           { id: "commercial", label: "COMMERCIAL", labelId: "KOMERSIAL" },
           { id: "renovations-extensions", label: "RENOVATIONS & EXTENSIONS", labelId: "RENOVASI & PERLUASAN" },
           { id: "sustainable-eco", label: "SUSTAINABLE / ECO-ARCHI.", labelId: "BERKELANJUTAN / ECO-ARCHI." },
-        ],
-      },
-      {
-        id: "location",
-        title: "LOCATION",
-        titleId: "LOKASI",
-        options: [
-          { id: "bali", label: "BALI", labelId: "BALI" },
-          { id: "badung", label: "BADUNG", labelId: "BADUNG" },
-          { id: "denpasar", label: "DENPASAR", labelId: "DENPASAR" },
-          { id: "tabanan", label: "TABANAN", labelId: "TABANAN" },
-          { id: "gianyar", label: "GIANYAR", labelId: "GIANYAR" },
-          { id: "klungkung", label: "KLUNGKUNG", labelId: "KLUNGKUNG" },
-          { id: "karangasem", label: "KARANGASEM", labelId: "KARANGASEM" },
-          { id: "bangli", label: "BANGLI", labelId: "BANGLI" },
-          { id: "buleleng", label: "BULELENG", labelId: "BULELENG" },
-          { id: "jembrana", label: "JEMBRANA", labelId: "JEMBRANA" },
         ],
       },
     ],
@@ -342,23 +345,6 @@ const defaultConfigs = [
           { id: "styling-decoration", label: "STYLING & DECORATION", labelId: "STYLING & DEKORASI" },
         ],
       },
-      {
-        id: "location",
-        title: "LOCATION",
-        titleId: "LOKASI",
-        options: [
-          { id: "bali", label: "BALI", labelId: "BALI" },
-          { id: "badung", label: "BADUNG", labelId: "BADUNG" },
-          { id: "denpasar", label: "DENPASAR", labelId: "DENPASAR" },
-          { id: "tabanan", label: "TABANAN", labelId: "TABANAN" },
-          { id: "gianyar", label: "GIANYAR", labelId: "GIANYAR" },
-          { id: "klungkung", label: "KLUNGKUNG", labelId: "KLUNGKUNG" },
-          { id: "karangasem", label: "KARANGASEM", labelId: "KARANGASEM" },
-          { id: "bangli", label: "BANGLI", labelId: "BANGLI" },
-          { id: "buleleng", label: "BULELENG", labelId: "BULELENG" },
-          { id: "jembrana", label: "JEMBRANA", labelId: "JEMBRANA" },
-        ],
-      },
     ],
   },
   {
@@ -392,23 +378,6 @@ const defaultConfigs = [
           { id: "land-development", label: "LAND & DEVELOPMENT PLOTS", labelId: "TANAH & KAVLING" },
           { id: "property-management", label: "PROPERTY MANAGEMENT", labelId: "MANAJEMEN PROPERTI" },
           { id: "legal-notary", label: "LEGAL & NOTARY SERVICES", labelId: "LAYANAN HUKUM & NOTARIS" },
-        ],
-      },
-      {
-        id: "location",
-        title: "LOCATION",
-        titleId: "LOKASI",
-        options: [
-          { id: "bali", label: "BALI", labelId: "BALI" },
-          { id: "badung", label: "BADUNG", labelId: "BADUNG" },
-          { id: "denpasar", label: "DENPASAR", labelId: "DENPASAR" },
-          { id: "tabanan", label: "TABANAN", labelId: "TABANAN" },
-          { id: "gianyar", label: "GIANYAR", labelId: "GIANYAR" },
-          { id: "klungkung", label: "KLUNGKUNG", labelId: "KLUNGKUNG" },
-          { id: "karangasem", label: "KARANGASEM", labelId: "KARANGASEM" },
-          { id: "bangli", label: "BANGLI", labelId: "BANGLI" },
-          { id: "buleleng", label: "BULELENG", labelId: "BULELENG" },
-          { id: "jembrana", label: "JEMBRANA", labelId: "JEMBRANA" },
         ],
       },
     ],
