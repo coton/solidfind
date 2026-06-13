@@ -168,6 +168,10 @@ const realEstateCategories = [
   { id: "legal-notary", label: "LEGAL & NOTARY SERVICES" },
 ];
 
+function normalizeFilterId(value?: string | null) {
+  return String(value ?? "").trim().toLowerCase().replace(/\s+/g, "-");
+}
+
 const locationOptions = [
   { id: "bali", label: "BALI" },
   { id: "badung", label: "BADUNG" },
@@ -382,6 +386,20 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     const map: Record<string, typeof pageConfigs[0]["filters"]> = {};
     for (const p of pageConfigs) {
       map[p.categoryId] = localizeFilterOptions(p.filters);
+    }
+    return map;
+  }, [language, pageConfigs, pageConfigsLoaded]);
+
+  const globalFilterOptionsMap = useMemo(() => {
+    if (!pageConfigsLoaded || pageConfigs.length === 0) return null;
+    const map = new Map<string, NonNullable<typeof pageConfigs>[number]["filters"][number]["options"]>();
+    for (const page of pageConfigs) {
+      for (const filter of localizeFilterOptions(page.filters)) {
+        const normalizedId = normalizeFilterId(filter.id);
+        if ((normalizedId === "location" || normalizedId === "project-size") && !map.has(normalizedId)) {
+          map.set(normalizedId, filter.options);
+        }
+      }
     }
     return map;
   }, [language, pageConfigs, pageConfigsLoaded]);
@@ -610,12 +628,16 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   // Get dynamic filter options for current category
   const getDynamicFilter = useCallback((filterId: string) => {
+    const normalizedFilterId = normalizeFilterId(filterId);
     if (activeCategory && configFiltersMap && configFiltersMap[activeCategory]) {
-      const filter = configFiltersMap[activeCategory].find((f) => f.id === filterId);
+      const filter = configFiltersMap[activeCategory].find((f) => normalizeFilterId(f.id) === normalizedFilterId);
       if (filter) return filter.options;
     }
+    if (globalFilterOptionsMap?.has(normalizedFilterId)) {
+      return globalFilterOptionsMap.get(normalizedFilterId) ?? null;
+    }
     return null;
-  }, [activeCategory, configFiltersMap]);
+  }, [activeCategory, configFiltersMap, globalFilterOptionsMap]);
 
   const currentLocationOptions = getDynamicFilter("location") ?? locationOptions;
   const currentProjectSizeOptions = getDynamicFilter("project-size") ?? projectSizeOptions;
