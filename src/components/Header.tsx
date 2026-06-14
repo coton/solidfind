@@ -658,6 +658,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     if (activeCategory === "real-estate") return realEstateCategories;
     return constructionCategories;
   }, [activeCategory, getDynamicFilter]);
+  const categoryDefaultDisplayText = categoryOptions.find((option) => normalizeFilterId(option.id) === "all")?.label ?? t("All types");
 
   useEffect(() => {
     setSelectedCategories(parseSubcategoryParam(searchParams.get("subcategory"), categoryOptions));
@@ -757,8 +758,8 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     : "Construction";
   const activeSubtitle = (activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction;
   const mobileTypeDisplayText = isSubcategoryFilterActive(selectedCategories, categoryOptions)
-    ? getSubcategoryDisplayText(selectedCategories, categoryOptions)
-    : t("All types");
+    ? getSubcategoryDisplayText(selectedCategories, categoryOptions, categoryDefaultDisplayText)
+    : categoryDefaultDisplayText;
   const mobileLocationOptions = currentLocationOptions.filter((option) => option.id !== "bali");
 
   const renderMobileFilterMenu = () => {
@@ -1212,11 +1213,11 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                 width=""
                 multiSelect={true}
                 selectedValues={selectedCategories}
-                displayText={getSubcategoryDisplayText(selectedCategories, categoryOptions)}
+                displayText={getSubcategoryDisplayText(selectedCategories, categoryOptions, categoryDefaultDisplayText)}
                 isActive={isSubcategoryFilterActive(selectedCategories, categoryOptions)}
                 isOptionSelected={(optionId) => isSubcategoryOptionSelected(selectedCategories, optionId, categoryOptions)}
                 closeSignal={dropdownCloseSignal}
-                emptyDisplayText={t("All types")}
+                emptyDisplayText={categoryDefaultDisplayText}
               />
               <div className="sf-fdiv" />
 
