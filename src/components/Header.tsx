@@ -642,9 +642,20 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     }
     return null;
   }, [activeCategory, configFiltersMap, globalFilterOptionsMap]);
+  const getDynamicFilterTitle = useCallback((filterId: string, fallbackEnglish: string) => {
+    const normalizedFilterId = normalizeFilterId(filterId);
+    if (activeCategory && configFiltersMap && configFiltersMap[activeCategory]) {
+      const filter = configFiltersMap[activeCategory].find((f) => normalizeFilterId(f.id) === normalizedFilterId);
+      if (filter?.title?.trim()) return filter.title;
+    }
+    return t(fallbackEnglish).toUpperCase();
+  }, [activeCategory, configFiltersMap, t]);
 
   const currentLocationOptions = getDynamicFilter("location") ?? locationOptions;
   const currentProjectSizeOptions = getDynamicFilter("project-size") ?? projectSizeOptions;
+  const currentProjectSizeLabel = getDynamicFilterTitle("project-size", "Project size");
+  const currentCategoriesLabel = getDynamicFilterTitle("categories", "Categories");
+  const currentLocationLabel = getDynamicFilterTitle("location", "Location");
   const concreteProjectSizeIds = currentProjectSizeOptions
     .filter((option) => option.id !== "any")
     .map((option) => option.id);
@@ -1185,7 +1196,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
             <div className="sf-search-filters">
               {/* Project Size Dropdown */}
               <Dropdown
-                label="PROJECT SIZE"
+                label={currentProjectSizeLabel}
                 options={currentProjectSizeOptions}
                 value=""
                 onChange={handleProjectSizeChange}
@@ -1206,7 +1217,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
               {/* Categories Dropdown */}
               <Dropdown
-                label="CATEGORIES"
+                label={currentCategoriesLabel}
                 options={categoryOptions}
                 value=""
                 onChange={handleCategoryChange}
@@ -1223,7 +1234,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
               {/* Location Dropdown - multi-select enabled */}
               <Dropdown
-                label="LOCATION"
+                label={currentLocationLabel}
                 options={currentLocationOptions}
                 value="" // Not used in multi-select mode
                 onChange={handleLocationChange}
