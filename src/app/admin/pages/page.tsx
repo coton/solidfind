@@ -30,13 +30,23 @@ function isGlobalFilter(filterId: string) {
   return GLOBAL_FILTER_IDS.has(normalizeFilterId(filterId));
 }
 
+function dedupeGlobalFilters(filters: Filter[]) {
+  const seen = new Set<string>();
+  return filters.filter((filter) => {
+    const normalizedId = normalizeFilterId(filter.id);
+    if (!isGlobalFilter(normalizedId) || seen.has(normalizedId)) return false;
+    seen.add(normalizedId);
+    return true;
+  });
+}
+
 function cloneFilters(filters: Filter[]) {
   return JSON.parse(JSON.stringify(filters)) as Filter[];
 }
 
 function splitFilters(filters: Filter[]) {
   return {
-    global: filters.filter((filter) => isGlobalFilter(filter.id)),
+    global: dedupeGlobalFilters(filters),
     category: filters.filter((filter) => !isGlobalFilter(filter.id)),
   };
 }
@@ -78,7 +88,9 @@ export default function AdminPagesPage() {
   const displayedFilterIndexes = selectedGlobal
     ? globalEditFilters.map((filter, index) => ({ filter, index }))
     : categoryFilterIndexes;
-  const defaultGlobalFilters = pages?.map((page) => splitFilters(page.filters).global).find((filters) => filters.length > 0) ?? [];
+  const defaultGlobalFilters = dedupeGlobalFilters(
+    pages?.flatMap((page) => page.filters.filter((filter) => isGlobalFilter(filter.id))) ?? []
+  );
 
   const selectGlobalFilters = () => {
     setSelectedGlobal(true);
@@ -111,7 +123,7 @@ export default function AdminPagesPage() {
           subtitleId: page.subtitleId,
           visible: page.visible,
           sortOrder: page.sortOrder,
-          filters: [...globalEditFilters, ...categoryFilters],
+          filters: [...dedupeGlobalFilters(globalEditFilters), ...categoryFilters],
         });
       }));
       setDirty(false);
@@ -129,7 +141,7 @@ export default function AdminPagesPage() {
       subtitleId: editSubtitleId,
       visible: selectedPage.visible,
       sortOrder: selectedPage.sortOrder,
-      filters: [...defaultGlobalFilters, ...editFilters],
+      filters: [...dedupeGlobalFilters(defaultGlobalFilters), ...editFilters],
     });
     setDirty(false);
     setSaving(false);

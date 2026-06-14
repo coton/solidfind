@@ -27,6 +27,7 @@ import {
   toggleSubcategorySelection,
 } from "@/lib/category-filter.mjs";
 import { expandRenovationTypes } from "@/lib/category-display.mjs";
+import { uiTranslationsId } from "@/lib/ui-translations";
 
 const pageConfigFallbackTranslationsId: Record<string, string> = {
   "01. Construction": "01. Konstruksi",
@@ -204,6 +205,7 @@ interface DropdownProps {
   menuClassName?: string;
   isMobileCategoryDropdown?: boolean;
   closeSignal?: number;
+  emptyDisplayText?: string;
 }
 
 function Dropdown({ 
@@ -222,6 +224,7 @@ function Dropdown({
   menuClassName = '',
   isMobileCategoryDropdown = false,
   closeSignal = 0,
+  emptyDisplayText,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedOption = options.find(opt => opt.id === value);
@@ -240,7 +243,7 @@ function Dropdown({
   const getButtonText = () => {
     if (displayText) return displayText;
     if (selectedOption) return getDisplayLabel(selectedOption.label);
-    return label;
+    return emptyDisplayText ?? label;
   };
 
   // Determine if button should show active color
@@ -255,7 +258,7 @@ function Dropdown({
       >
         <span className="sf-dd-label">{label}</span>
         <span className={`sf-dd-value ${buttonIsActive ? 'is-active text-[#f14110]' : 'is-ph'}`}>
-          {getButtonText().replace(/^PROJECT SIZE$/i, "Any size").replace(/^CATEGORIES$/i, "All types").replace(/^LOCATION$/i, "Anywhere")}
+          {getButtonText()}
         </span>
       </button>
 
@@ -351,6 +354,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
     if (language === "id") {
       if (indonesian?.trim()) return indonesian;
       if (english && pageConfigFallbackTranslationsId[english]) return pageConfigFallbackTranslationsId[english];
+      if (english && uiTranslationsId[english]) return uiTranslationsId[english];
     }
     return english ?? "";
   };
@@ -681,13 +685,13 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   };
 
   const getProjectSizeDisplayText = () => {
-    if (projectSizes.length === 0) return "Any size";
+    if (projectSizes.length === 0) return t("Any size");
     if (projectSizes.includes("any")) return "ANY SIZE";
     if (projectSizes.length === 1) {
       const label = currentProjectSizeOptions.find((option) => option.id === projectSizes[0])?.label;
-      return label ? label.replace(/\s*\([^)]*\)/, '') : "Any size";
+      return label ? label.replace(/\s*\([^)]*\)/, '') : t("Any size");
     }
-    return `${projectSizes.length} sizes`;
+    return `${projectSizes.length} ${language === "id" ? "ukuran" : "sizes"}`;
   };
 
   // Handle location multi-select
@@ -723,7 +727,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
   // Get location display text
   const getLocationDisplayText = () => {
-    if (locations.length === 0) return "Anywhere";
+    if (locations.length === 0) return t("Anywhere");
 
     // Check if all regions are selected (BALI mode)
     const allRegions = currentLocationOptions.filter(opt => opt.id !== "bali").map(opt => opt.id);
@@ -731,7 +735,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
 
     if (locations.includes("bali") || hasAllRegions) return "BALI";
     if (locations.length === 1) return locations[0].toUpperCase();
-    return `${locations.length} areas`;
+    return `${locations.length} ${language === "id" ? "wilayah" : "areas"}`;
   };
 
   const isLocationActive = locations.length > 0;
@@ -754,7 +758,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
   const activeSubtitle = (activeCategory && dynamicSubtitles[activeCategory]) || (activeCategory && categorySubtitles[activeCategory]) || categorySubtitles.construction;
   const mobileTypeDisplayText = isSubcategoryFilterActive(selectedCategories, categoryOptions)
     ? getSubcategoryDisplayText(selectedCategories, categoryOptions)
-    : "All types";
+    : t("All types");
   const mobileLocationOptions = currentLocationOptions.filter((option) => option.id !== "bali");
 
   const renderMobileFilterMenu = () => {
@@ -988,15 +992,15 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
           </form>
           <div className="m-filterblock">
             <button type="button" className={`m-filterseg ${mobileOpenSegment === "Size" ? "open" : ""}`} onClick={() => setMobileOpenSegment(mobileOpenSegment === "Size" ? null : "Size")}>
-              <span className="k">Project size</span>
+              <span className="k">{t("Project size")}</span>
               <span className={`v ${projectSizes.length === 0 ? "ph" : ""}`}>{getProjectSizeDisplayText()} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
             </button>
             <button type="button" className={`m-filterseg ${mobileOpenSegment === "Type" ? "open" : ""}`} onClick={() => setMobileOpenSegment(mobileOpenSegment === "Type" ? null : "Type")}>
-              <span className="k">Categories</span>
+              <span className="k">{t("Categories")}</span>
               <span className={`v ${!isSubcategoryFilterActive(selectedCategories, categoryOptions) ? "ph" : ""}`}>{mobileTypeDisplayText} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
             </button>
             <button type="button" className={`m-filterseg ${mobileOpenSegment === "Location" ? "open" : ""}`} onClick={() => setMobileOpenSegment(mobileOpenSegment === "Location" ? null : "Location")}>
-              <span className="k">Location</span>
+              <span className="k">{t("Location")}</span>
               <span className={`v ${!isLocationActive ? "ph" : ""}`}>{getLocationDisplayText()} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
             </button>
           </div>
@@ -1195,6 +1199,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                   return !projectSizes.includes("any") && projectSizes.includes(optionId);
                 }}
                 closeSignal={dropdownCloseSignal}
+                emptyDisplayText={t("Any size")}
               />
               <div className="sf-fdiv" />
 
@@ -1211,6 +1216,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                 isActive={isSubcategoryFilterActive(selectedCategories, categoryOptions)}
                 isOptionSelected={(optionId) => isSubcategoryOptionSelected(selectedCategories, optionId, categoryOptions)}
                 closeSignal={dropdownCloseSignal}
+                emptyDisplayText={t("All types")}
               />
               <div className="sf-fdiv" />
 
@@ -1231,6 +1237,7 @@ function HeaderInner({ resultCount, sortControl, showResultsBar = false }: Heade
                   return locations.includes(optionId);
                 }}
                 closeSignal={dropdownCloseSignal}
+                emptyDisplayText={t("Anywhere")}
               />
             </div>
 
